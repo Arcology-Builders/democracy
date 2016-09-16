@@ -1,4 +1,4 @@
-var solc = require('solc');
+//var solc = require('solc');
 var fs = require('fs');
 var Web3 = require('Web3');
 var web3 = new Web3();
@@ -8,7 +8,7 @@ var endpoint = "http://52.4.63.14:8545";
 
 web3.setProvider(new web3.providers.HttpProvider(endpoint));
 
-fs.readFile("hello.solc", function(err, data) {
+fs.readFile("SearchRanker.solc", function(err, data) {
   if (err) {
     console.error(err);
     return;

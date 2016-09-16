@@ -1,0 +1,65 @@
+pragma solidity ^0.4.0;
+
+/// @title Search Against Humanity Ranking Game
+contract SearchAgainstHumanity {
+
+  enum Stages {
+    WaitingForNewGame,
+    WaitingForBounty,
+    WaitingForRankers,
+    WaitingForSearcher,
+    WaitingForDone // I think we need a separate stage to trigger the payout
+  }
+
+  modifier atStage(Stages _stage) {
+    if (stage != _stage) throw;
+    _;
+  }
+
+  modifier timedTransitions() {
+    _; // run our function first
+    if (stage == Stages.WaitingForBounty && now >= creationTime + 1 minutes) {
+      stage = Stages.WaitingForNewGame; // we reset if waiting for bounty too long
+    } else if (stage == Stages.WaitingForSearcher && now >= creationTime + 1 minutes) {
+      stage = Stages.WaitingForDone; // go ahead if searcher is taking too long
+      splitBountyEvenly();
+    }
+  } 
+
+  // The current stage is initially waiting for NewGame
+  // In a game, there are four stages.
+  // We are stateless, in that we only remember the seacher and the ranker for
+  // the current game.
+  // In the future, we may create a struct for Game to run multiple parallel games
+  Stages public stage = Stages.WaitingForNewGame;
+  uint public creationTime = now; // in epoch seconds. we use this to end a game after 1 minute.
+  uint public bounty = 0; // in wei
+  
+  struct Searcher {
+    string name;
+    address searcherAddr; // address that bounty payment comes from
+  }
+
+  // One of n ranker players in the current game
+  struct Ranker {
+    string name;
+    address rankerAddr;
+    uint listingIdChoice; // the choice of the Ranker
+  }
+
+  Searcher searcher;
+  Ranker[] rankers;
+
+  function startGame(string _searcherName, uint _bounty) atStage(Stages.WaitingForNewGame) {
+     searcher = Searcher(_searcherName, msg.sender);
+     bounty = _bounty;
+     stage = Stages.WaitingForBounty;
+     // initialize rankers here
+  }
+
+  function splitBountyEvenly() {
+    // split the bounty evenly among all rankers.
+    // if there are no rankers, return the money to searcher
+  }
+
+}
