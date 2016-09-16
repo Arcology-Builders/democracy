@@ -5,6 +5,7 @@ contract SearchAgainstHumanity {
 
   address public owner;
   bool public killed;
+  string public query;
 
   enum Stages {
     WaitingForNewGame,
@@ -82,6 +83,14 @@ contract SearchAgainstHumanity {
   function splitBountyEvenly() {
     // split the bounty evenly among all rankers.
     // if there are no rankers, return the money to searcher
+  }
+
+  function setQuery(string _query) {
+    query = _query;
+  }
+
+  function getQuery() constant returns (string retVal) {
+    return query;
   }
 
 }
