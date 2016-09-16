@@ -1,6 +1,6 @@
 //var solc = require('solc');
 var fs = require('fs');
-var Web3 = require('Web3');
+var Web3 = require('web3');
 var web3 = new Web3();
 
 //var endpoint = "http://localhost:12345";
