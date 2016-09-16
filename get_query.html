@@ -1,0 +1,40 @@
+<!doctype>
+<html>
+
+<head>
+<script type="text/javascript" src="../node_modules/bignumber.js/bignumber.min.js"></script>
+<script type="text/javascript" src="../dist/web3-light.js"></script>
+<script type="text/javascript" src="js/abi.js"></script>
+<script type="text/javascript">
+   
+    var Web3 = require('web3');
+    var web3 = new Web3();
+//    web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8555"));
+//    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8546"));
+    var content = web3.setProvider(new web3.providers.HttpProvider("http://52.4.63.14:8545"));
+    var address = "0xf902ffa2c0d3bf8abf01dff65a863cd4083b381d"
+
+    var contract = web3.eth.contract(abi);
+    var instance = contract.at(address);
+
+    function watchBalance() {
+
+        web3.eth.filter('latest').watch(function() {
+            var query = instance.getQuery();
+            document.getElementById("current").innerText = 'query: ' + query;
+        });
+    }
+
+</script>
+</head>
+<body>
+    <h1>search query</h1>
+    <button type="button" onClick="watchBalance();">start watching query</button>
+    <div></div>
+    <div id="coinbase"></div>
+    <div id="original"></div>
+    <div id="current"></div>
+    <div id="diff"></div>
+</body>
+</html>
+
