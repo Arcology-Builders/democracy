@@ -1,11 +1,18 @@
 pragma solidity ^0.4.0;
 
 contract SimpleQuery {
+  uint32 listingId;
   string query;
   function setQuery(string _query) {
     query = _query;
   }
   function getQuery() constant returns (string retVal) {
     return query;
+  }
+  function setListingId(uint32 _listingId) {
+    listingId = _listingId;
+  }
+  function getListingId() constant returns (string retVal) {
+    return listingId;
   }
 }
