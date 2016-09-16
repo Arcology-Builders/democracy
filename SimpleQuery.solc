@@ -1,7 +1,8 @@
 pragma solidity ^0.4.0;
 
 contract SimpleQuery {
-  uint32 listingId;
+  mapping (uint32 => address) rankerSubmissions;
+  uint32[] submissions;
   string query;
   function setQuery(string _query) {
     query = _query;
@@ -9,10 +10,14 @@ contract SimpleQuery {
   function getQuery() constant returns (string retVal) {
     return query;
   }
-  function setListingId(uint32 _listingId) {
-    listingId = _listingId;
+  function clearRankers() {
+    delete submissions;
+  } 
+  function submitRankerListing(uint32 _listingId) {
+    rankerSubmissions[_listingId] = msg.sender;
+    submissions.push(_listingId);
   }
-  function getListingId() constant returns (string retVal) {
-    return listingId;
+  function getSubmissions() constant returns (uint32[] retVal) {
+    return submissions;
   }
 }
