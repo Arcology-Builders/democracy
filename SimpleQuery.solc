@@ -1,9 +1,11 @@
+pragma solidity ^0.4.0;
+
 contract SimpleQuery {
   string query;
-  function setQuery(_query) {
+  function setQuery(string _query) {
     query = _query;
   }
-  function get() constant returns (string retVal) {
+  function getQuery() constant returns (string retVal) {
     return query;
   }
 }
