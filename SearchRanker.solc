@@ -3,7 +3,8 @@ pragma solidity ^0.4.0;
 /// @title Search Against Humanity Ranking Game
 contract SearchAgainstHumanity {
 
-  address owner;
+  address public owner;
+  bool public killed;
 
   enum Stages {
     WaitingForNewGame,
@@ -54,9 +55,20 @@ contract SearchAgainstHumanity {
 
   function SearchAgainstHumanity() {
     owner = msg.sender;
+    killed = false;
   }
 
+  event SearcherPostedBounty(
+    address searcher,
+    uint amount
+  );
+
+  function () {
+    SearcherPostedBounty(msg.sender, msg.value);
+  } 
+
   function kill() {
+    killed = true;
     if (msg.sender == owner) { selfdestruct(owner); }
   }
 
