@@ -41,7 +41,7 @@ contract ZcashEscrow {
     BuyIn(msg.sender, msg.value);
   }
 
-  function checkDeadline() afterDeadline returns uint {
+  function checkDeadline() afterDeadline returns (uint retVal) {
       closed = true;
       return now; // return the current time as a sanity check
   }
