@@ -15,15 +15,24 @@ contract ZcashEscrow {
   event ReturnContribution(address backer, uint amount);
   event BuyIn(address backer, uint amount);
 
-  function ZcashEscrow(uint256 _fundingGoalInEther, address _beneficiary, uint deadlineEpoch) {
+  function ZcashEscrow(uint256 _fundingGoalInEther, address _beneficiary, uint _deadlineEpoch) {
     owner = msg.sender;
     beneficiary = _beneficiary;
     amountRaised = 0;
     fundingGoal = _fundingGoalInEther * 1 ether;
+
+    // If we pass in a deadline in the past, set it to be 10 minutes from now.
+    if (now > _deadlineEpoch) {
+      deadlineEpoch = now + 10 minutes;
+    }
     closed = false;
   }
 
   modifier afterDeadline() { if (now >= deadlineEpoch) _; }
+
+  function kill() {
+    if (msg.sender == owner) { suicide(owner); }
+  }
 
   function() payable {
     if (closed) throw;
@@ -32,8 +41,9 @@ contract ZcashEscrow {
     BuyIn(msg.sender, msg.value);
   }
 
-  function checkDeadline() afterDeadline {
+  function checkDeadline() afterDeadline returns uint {
       closed = true;
+      return now; // return the current time as a sanity check
   }
 
   /* Each backer is responsible for their own safe withdrawal, because it costs gas */

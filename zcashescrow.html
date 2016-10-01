@@ -1,0 +1,47 @@
+<!doctype>
+<html>
+
+<head>
+<script type="text/javascript" src="../node_modules/bignumber.js/bignumber.min.js"></script>
+<script type="text/javascript" src="../dist/web3-light.js"></script>
+<script type="text/javascript" src="js/zcashescrow-abi.js"></script>
+<script type="text/javascript">
+   
+    var Web3 = require('web3');
+    var web3 = new Web3();
+//    web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8555"));
+//    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8546"));
+//    var content = web3.setProvider(new web3.providers.HttpProvider("http://52.4.63.14:8545"));
+    var content = web3.setProvider(new web3.providers.HttpProvider("https://eth3.augur.net"));
+    var address = "0x8cf1a92eb3c945995c89602929e63bcdcba0a096"
+
+    var contract = web3.eth.contract(abi);
+    var instance = contract.at(address);
+
+    var goalReached = instance.GoalReached();
+
+    function watchBalance() {
+
+        web3.eth.filter('latest').watch(function() {
+            document.getElementById("owner").innerText = instance.owner();
+            document.getElementById("deadline").innerText = instance.deadlineEpoch();
+            document.getElementById("goal").innerText = instance.fundingGoal();
+            document.getElementById("amount").innerText = instance.amountRaised();
+            document.getElementById("backers").innerText = instance.contributions();
+        });
+    }
+
+</script>
+</head>
+<body>
+    <h1>ZCash Escrow</h1>
+    <button type="button" onClick="watchBalance();">start watching crowdfund</button>
+    <div></div>
+    <div>Owner: </div><div id="owner"></div>
+    <div>Deadline Epoch</div><div id="deadline"></div>
+    <div>Funding Goal</div><div id="goal"></div>
+    <div>Amount Raised</div><div id="amount"></div>
+    <div>Backers</div><div id="backers"></div>
+</body>
+</html>
+
