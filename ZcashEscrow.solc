@@ -1,0 +1,53 @@
+pragma solidity ^0.4.0;
+
+contract ZcashEscrow {
+
+  address public beneficiary;
+  mapping (address => uint) public contributions;
+  uint256 public fundingGoal; // in wei
+  uint256 public amountRaised; // in wei
+  address public owner;
+  uint public deadlineEpoch;
+  bool public closed;
+
+  event GoalReached(address beneficiary, uint amountRaised);
+  event PayOut(address beneficiary, uint amountRaised);
+  event ReturnContribution(address backer, uint amount);
+  event BuyIn(address backer, uint amount);
+
+  function ZcashEscrow(uint256 _fundingGoalInEther, address _beneficiary, uint deadlineEpoch) {
+    owner = msg.sender;
+    beneficiary = _beneficiary;
+    amountRaised = 0;
+    fundingGoal = _fundingGoalInEther * 1 ether;
+    closed = false;
+  }
+
+  modifier afterDeadline() { if (now >= deadlineEpoch) _; }
+
+  function() payable {
+    if (closed) throw;
+    contributions[msg.sender] = msg.value;
+    amountRaised += msg.value;
+    BuyIn(msg.sender, msg.value);
+  }
+
+  function checkDeadline() afterDeadline {
+      closed = true;
+  }
+
+  /* Each backer is responsible for their own safe withdrawal, because it costs gas */
+  function safeWithdrawal() afterDeadline {
+    if (amountRaised < fundingGoal) {
+      uint amount = contributions[msg.sender];
+      if (msg.sender.send(amount)) {
+        ReturnContribution(msg.sender, amount);
+        contributions[msg.sender] = 0;
+      }
+    } else if (msg.sender == beneficiary) {
+      if (beneficiary.send(amountRaised)) {
+        PayOut(beneficiary, amountRaised);
+      }
+    } 
+  }
+}
