@@ -12,16 +12,24 @@
 //    web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8555"));
 //    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8546"));
     var content = web3.setProvider(new web3.providers.HttpProvider("http://52.4.63.14:8545"));
-    var address = "0xf902ffa2c0d3bf8abf01dff65a863cd4083b381d"
+    var address = "0x51b8b4851bfc675507746fb3c5d881a2068d2992"
 
     var contract = web3.eth.contract(abi);
     var instance = contract.at(address);
+    
+    function submitQuery() {
+      var query = document.getElementById("query").val;
+      instance.setQuery(query, {from: web3.eth.coinbase, gas: 70000}, function(e, data) {
+        console.error(e);
+        console.log("Data: " + JSON.stringify(data));
+      });
+    }
 
-    function watchBalance() {
+    function watchRankers() {
 
         web3.eth.filter('latest').watch(function() {
-            var query = instance.getQuery();
-            document.getElementById("current").innerText = 'query: ' + query;
+            var submissions = instance.getSubmissions();
+            document.getElementById("current").innerText = 'submissions: ' + JSON.stringify(submissions);
         });
     }
 
@@ -29,12 +37,14 @@
 </head>
 <body>
     <h1>search query</h1>
-    <button type="button" onClick="watchBalance();">start watching query</button>
+    <button type="button" onClick="watchRankers();">start watching Rankers</button>
     <div></div>
     <div id="coinbase"></div>
     <div id="original"></div>
     <div id="current"></div>
     <div id="diff"></div>
+    <input type="text" id="query" placeholder="Search Query"></input>
+    <button type="button" onCLick="submitQuery();">submit Query</button>
 </body>
 </html>
 
