@@ -14,6 +14,8 @@ var abi = JSON.parse(fs.readFileSync("contracts/ZcashEscrow.abi").toString());
 
 var instance = web3.eth.contract(abi).at(address);
 
-var result = instance.isBeforeDeadline({from: web3.eth.coinbase, gas: 70000});
-console.log("Result: " + result);
+var result = instance.blockTimestamp({from: web3.eth.coinbase, gas: 70000});
+console.log("Block Timestamp: " + result);
+var result = instance.getNow({from: web3.eth.coinbase, gas: 70000});
+console.log("Now: " + result);
 

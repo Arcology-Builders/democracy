@@ -51,7 +51,7 @@ contract ZcashEscrow {
 
   function() payable {
     if (closed || !open) throw;
-    contributions[msg.sender] = msg.value;
+    contributions[msg.sender] += msg.value; // allow multiple contributions
     amountRaised += msg.value;
     BuyIn(msg.sender, msg.value);
   }

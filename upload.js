@@ -18,7 +18,7 @@ web3.setProvider(new web3.providers.HttpProvider(endpoint));
 var code = fs.readFileSync(`contracts/${contractName}.bin`).toString();
 var abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString());
 
-web3.eth.contract(abi).new(0.01, web3.eth.coinbase, {data: code, from: web3.eth.coinbase, gas: 1000000}, function(err, contract) {
+web3.eth.contract(abi).new(0.01, web3.eth.coinbase, {data: code, from: web3.eth.coinbase, gas: 1500000}, function(err, contract) {
   if (err) {
     console.error(err);
     return;
