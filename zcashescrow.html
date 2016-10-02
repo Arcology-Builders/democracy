@@ -27,6 +27,7 @@
             document.getElementById("deadline").innerText = instance.deadlineEpoch();
             document.getElementById("goal").innerText = instance.fundingGoal();
             document.getElementById("amount").innerText = instance.amountRaised();
+            document.getElementById("beneficiaries").innerText = instance.beneficiaries();
             document.getElementById("backers").innerText = instance.contributions();
         });
     }
@@ -41,6 +42,7 @@
     <div>Deadline Epoch</div><div id="deadline"></div>
     <div>Funding Goal</div><div id="goal"></div>
     <div>Amount Raised</div><div id="amount"></div>
+    <div>Beneficiaries</div><div id="beneficiaries"></div>
     <div>Backers</div><div id="backers"></div>
 </body>
 </html>
