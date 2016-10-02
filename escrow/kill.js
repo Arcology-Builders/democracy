@@ -2,11 +2,10 @@ var fs = require('fs');
 var Web3 = require('web3');
 var web3 = new Web3();
 
-//var endpoint = "http://localhost:12345";
-var endpoint = "http://52.4.63.14:8545";
+config = require('config')
 
-// v3 Contract Address
-var address = "0xfe4a8853a3aa7c00e2cbfc1b95c1100213be20c9";
+endpoint = config.get('http_provider')
+address = config.get('contract_address')
 
 web3.setProvider(new web3.providers.HttpProvider(endpoint));
 
