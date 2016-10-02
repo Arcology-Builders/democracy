@@ -10,6 +10,7 @@ contract ZcashEscrow {
   uint public amountRaised; // in wei
   uint public splitAmount; // in wei
   address public owner;
+  uint public creationTime;
   uint public deadlineEpoch;
   bool public open; // has the funding period started
   bool public closed; // has the funding period ended
@@ -22,6 +23,7 @@ contract ZcashEscrow {
 
   function ZcashEscrow() {
     owner = msg.sender;
+    creationTime = now;
     open = false;
     closed = false;
     approved = false;
@@ -54,11 +56,14 @@ contract ZcashEscrow {
     BuyIn(msg.sender, msg.value);
   }
 
-  function checkDeadline() returns (uint retVal) {
+  function isBeforeDeadline() constant returns (bool retVal) {
+    return (now < deadlineEpoch);
+  }
+
+  function checkDeadline() {
       if (now < deadlineEpoch || !open) throw;
       closed = true;
       splitAmount = (amountRaised >= fundingGoal) ? amountRaised / beneficiaries.length : amountRaised;
-      return now; // return the current time as a sanity check
   }
 
   function getContribution() constant returns (uint retVal) {
