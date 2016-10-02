@@ -13,7 +13,7 @@
 //    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8546"));
 //    var content = web3.setProvider(new web3.providers.HttpProvider("http://52.4.63.14:8545"));
     var content = web3.setProvider(new web3.providers.HttpProvider("https://eth3.augur.net"));
-    var address = "0x8cf1a92eb3c945995c89602929e63bcdcba0a096"
+    var address = "0xfe4a8853a3aa7c00e2cbfc1b95c1100213be20c9";
 
     var contract = web3.eth.contract(abi);
     var instance = contract.at(address);
@@ -28,7 +28,10 @@
             document.getElementById("goal").innerText = instance.fundingGoal();
             document.getElementById("amount").innerText = instance.amountRaised();
             document.getElementById("beneficiaries").innerText = instance.beneficiaries();
-            document.getElementById("backers").innerText = instance.contributions();
+            document.getElementById("arbiter").innerText = instance.arbiter();
+            document.getElementById("contributions").innerText = instance.contributions();
+            document.getElementById("open").innerText = instance.open();
+            document.getElementById("closed").innerText = instance.closed();
         });
     }
 
@@ -42,8 +45,12 @@
     <div>Deadline Epoch</div><div id="deadline"></div>
     <div>Funding Goal</div><div id="goal"></div>
     <div>Amount Raised</div><div id="amount"></div>
+    <div>Contributions</div><div id="contributions"></div>
     <div>Beneficiaries</div><div id="beneficiaries"></div>
     <div>Backers</div><div id="backers"></div>
+    <div>Arbiter</div><div id="arbiter"></div>
+    <div>Open</div><div id="open"></div>
+    <div>Closed</div><div id="closed"></div>
 </body>
 </html>
 

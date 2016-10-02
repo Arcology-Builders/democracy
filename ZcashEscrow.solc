@@ -1,0 +1,89 @@
+pragma solidity ^0.4.0;
+
+contract ZcashEscrow {
+
+  address[] public beneficiaries;
+  address public arbiter;
+  mapping (address => uint) public contributions;
+  mapping (address => uint) public payouts;
+  uint public fundingGoal; // in wei
+  uint public amountRaised; // in wei
+  uint public splitAmount; // in wei
+  address public owner;
+  uint public deadlineEpoch;
+  bool public open; // has the funding period started
+  bool public closed; // has the funding period ended
+  bool public approved; // does the arbiter approve
+
+  event GoalReached(address beneficiary, uint amountRaised);
+  event PayOut(address beneficiary, uint amountRaised);
+  event ReturnContribution(address backer, uint amount);
+  event BuyIn(address backer, uint amount);
+
+  function ZcashEscrow() {
+    owner = msg.sender;
+    open = false;
+    closed = false;
+    approved = false;
+  }
+
+  function initialize(uint _fundingGoalInEther, address[] _beneficiaries, uint _deadlineEpoch, address _arbiter) {
+    if (open) throw; // we can only initialize once
+    if (_beneficiaries.length == 0) throw;
+    beneficiaries = _beneficiaries;
+    amountRaised = 0;
+    fundingGoal = _fundingGoalInEther * 1 ether;
+    arbiter = _arbiter;
+
+    // If we pass in a deadline in the past, set it to be 10 minutes from now.
+    deadlineEpoch = (now > _deadlineEpoch) ? (now + 10 minutes) : _deadlineEpoch;
+    open = true;
+  }
+
+  modifier beforeDeadline() { if (now < deadlineEpoch && open) _; }
+  modifier afterDeadline() { if (now >= deadlineEpoch && open) _; }
+
+  function kill() {
+    if (msg.sender == owner) { selfdestruct(owner); }
+  }
+
+  function() payable {
+    if (closed || !open) throw;
+    contributions[msg.sender] = msg.value;
+    amountRaised += msg.value;
+    BuyIn(msg.sender, msg.value);
+  }
+
+  function checkDeadline() afterDeadline returns (uint retVal) {
+      closed = true;
+      splitAmount = (amountRaised >= fundingGoal) ? amountRaised / beneficiaries.length : amountRaised;
+      return now; // return the current time as a sanity check
+  }
+
+  function approve() {
+    if (msg.sender == arbiter) { approved = true; }
+  }
+
+  /* Each backer is responsible for their own safe withdrawal, because it costs gas */
+  function safeWithdrawal() afterDeadline {
+    if (amountRaised < fundingGoal) {
+      uint amount = contributions[msg.sender];
+        contributions[msg.sender] = 0;
+      if (msg.sender.send(amount)) {
+        ReturnContribution(msg.sender, amount);
+      }
+    } else if (approved) {
+      for (uint i = 0; i < beneficiaries.length; i++) {
+        if (msg.sender == beneficiaries[i]) {
+          if (payouts[msg.sender] == 0) {
+            payouts[msg.sender] = splitAmount;
+            if (msg.sender.send(splitAmount)) {
+              PayOut(msg.sender, splitAmount);
+            }
+          }
+        }
+      }
+    } 
+  }
+
+}
