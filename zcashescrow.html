@@ -27,11 +27,13 @@
             document.getElementById("deadline").innerText = instance.deadlineEpoch();
             document.getElementById("goal").innerText = instance.fundingGoal();
             document.getElementById("amount").innerText = instance.amountRaised();
+            document.getElementById("split").innerText = instance.splitAmount();
             document.getElementById("beneficiaries").innerText = instance.beneficiaries();
             document.getElementById("arbiter").innerText = instance.arbiter();
             document.getElementById("contributions").innerText = instance.contributions();
             document.getElementById("open").innerText = instance.open();
             document.getElementById("closed").innerText = instance.closed();
+            document.getElementById("approved").innerText = instance.approved();
         });
     }
 
@@ -45,12 +47,14 @@
     <div>Deadline Epoch</div><div id="deadline"></div>
     <div>Funding Goal</div><div id="goal"></div>
     <div>Amount Raised</div><div id="amount"></div>
+    <div>Split Amount</div><div id="split"></div>
     <div>Contributions</div><div id="contributions"></div>
     <div>Beneficiaries</div><div id="beneficiaries"></div>
     <div>Backers</div><div id="backers"></div>
     <div>Arbiter</div><div id="arbiter"></div>
     <div>Open</div><div id="open"></div>
     <div>Closed</div><div id="closed"></div>
+    <div>Approved</div><div id="approved"></div>
 </body>
 </html>
 

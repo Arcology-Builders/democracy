@@ -40,8 +40,8 @@ contract ZcashEscrow {
     open = true;
   }
 
-  modifier beforeDeadline() { if (now < deadlineEpoch && open) _; }
-  modifier afterDeadline() { if (now >= deadlineEpoch && open) _; }
+  modifier beforeDeadline() { if ((now < deadlineEpoch) && open) _; }
+  modifier afterDeadline() { if ((now >= deadlineEpoch) && open) _; }
 
   function kill() {
     if (msg.sender == owner) { selfdestruct(owner); }
@@ -54,10 +54,15 @@ contract ZcashEscrow {
     BuyIn(msg.sender, msg.value);
   }
 
-  function checkDeadline() afterDeadline returns (uint retVal) {
+  function checkDeadline() returns (uint retVal) {
+      if (now < deadlineEpoch || !open) throw;
       closed = true;
       splitAmount = (amountRaised >= fundingGoal) ? amountRaised / beneficiaries.length : amountRaised;
       return now; // return the current time as a sanity check
+  }
+
+  function getContribution() constant returns (uint retVal) {
+    return contributions[msg.sender];
   }
 
   function approve() {
@@ -65,10 +70,11 @@ contract ZcashEscrow {
   }
 
   /* Each backer is responsible for their own safe withdrawal, because it costs gas */
-  function safeWithdrawal() afterDeadline {
+  function safeWithdrawal() {
+    if (now < deadlineEpoch || !open || !closed) throw;
     if (amountRaised < fundingGoal) {
       uint amount = contributions[msg.sender];
-        contributions[msg.sender] = 0;
+      contributions[msg.sender] = 0;
       if (msg.sender.send(amount)) {
         ReturnContribution(msg.sender, amount);
       }
