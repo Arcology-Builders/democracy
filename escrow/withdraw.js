@@ -8,6 +8,6 @@ escrow((instance, web3) => {
     instance.safeWithdrawal(
         {
             from: web3.eth.coinbase,
-            gas: 70000
+            gas: 180000
         })
 })

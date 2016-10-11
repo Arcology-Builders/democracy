@@ -7,7 +7,8 @@ func = (instance) => {
    {
        from: contract.web3.eth.coinbase,
        to: contract.address,
-       value: web3.toWei(0.1, "ether")
-   }, function(err, data) { console.err(error); console.log(data); })
+       value: web3.toWei(0.1, "ether"),
+       gas: 90000
+   }, function(err, data) { console.error(err); console.log(data); })
 }
 contract.runFunc(func)
