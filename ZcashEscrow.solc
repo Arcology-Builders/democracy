@@ -1,20 +1,35 @@
-pragma solidity ^0.4.3;
+pragma solidity ^0.4.1;
 
 contract ZcashEscrow {
 
-  address[] public beneficiaries;
-  address public arbiter;
-  mapping (address => uint) public contributions;
-  mapping (address => uint) public payouts;
-  uint public fundingGoal; // in wei
-  uint public amountRaised; // in wei
-  uint public splitAmount; // in wei
+  address public beneficiary;
+
+  // These are for Ethereum backers only
+  mapping (address => uint) public contributionsETH;
+  mapping (address => uint) public payoutsETH;
+
+  uint public fundingGoal;     // in wei
+  uint public payoutETH;       // in wei
+  uint public amountRaised;    // in wei, the total amount
+  uint public amountRaisedETH; // in wei
+  uint public amountRaisedBTC; // in wei, counting towards total goal
+
   address public owner;
+  uint    public fee;          // in wei, 1% of total amount raised
+  uint    public feeWithdrawn; // in wei
+
   uint public creationTime;
   uint public deadlineEpoch;
-  bool public open; // has the funding period started
-  bool public closed; // has the funding period ended
-  bool public approved; // does the arbiter approve
+  bool public open;            // has the funding period started, and contract initialized
+
+  struct Backer {
+    address ethAddr;
+    uint amount;
+    uint timestamp;
+    bytes32 description;
+  }
+
+  Backer[] public backer_history;
 
   event GoalReached(address beneficiary, uint amountRaised);
   event PayOut(address beneficiary, uint amountRaised);
@@ -25,42 +40,39 @@ contract ZcashEscrow {
     owner = msg.sender;
     creationTime = now;
     open = false;
-    closed = false;
-    approved = false;
   }
 
-  function initialize(uint _fundingGoalInEther, address[] _beneficiaries, uint _deadlineEpoch, address _arbiter) {
+  function initialize(uint _fundingGoalInWei, address _beneficiary, uint _deadlineEpoch) beforeDeadline {
     if (open) throw; // we can only initialize once
-    if (_beneficiaries.length == 0) throw;
-    beneficiaries = _beneficiaries;
+    beneficiary = _beneficiary;
+    payoutETH = 0;
     amountRaised = 0;
-    fundingGoal = _fundingGoalInEther * 1 ether;
-    arbiter = _arbiter;
+    amountRaisedETH = 0;
+    amountRaisedBTC = 0;
+    fee = 0;
+    feeWithdrawn = 0;
+    fundingGoal = _fundingGoalInWei;
 
     // If we pass in a deadline in the past, set it to be 10 minutes from now.
-    deadlineEpoch = (block.timestamp > _deadlineEpoch) ? (block.timestamp + 10 minutes) : _deadlineEpoch;
+    deadlineEpoch = (now > _deadlineEpoch) ? (now + 10 minutes) : _deadlineEpoch;
     open = true;
   }
 
   modifier beforeDeadline() { if ((now < deadlineEpoch) && open) _; }
   modifier afterDeadline() { if ((now >= deadlineEpoch) && open) _; }
 
-  function kill() {
-    if (msg.sender == owner) { selfdestruct(owner); }
-  }
-
   // Normal pay-in function, where msg.sender is the contributor
   function() payable beforeDeadline {
-    if (closed || !open) throw;
-    contributions[msg.sender] += msg.value; // allow multiple contributions
-    amountRaised += msg.value;
-    BuyIn(msg.sender, msg.value);
+    payIn("Ethereum Contributor");
   }
 
-  // Proxy pay-in, where msg.sender pays on behalf of someone else
-  // with a payout address tbd at time of withdrawal
-  function payIn() payable beforeDeadline {
-    if (closed || !open
+  function payIn(bytes32 description) payable beforeDeadline {
+    contributionsETH[msg.sender] += msg.value; // allow multiple contributions
+    backer_history.push(Backer({ethAddr: msg.sender, amount: msg.value, timestamp: now, description: description}));
+    amountRaised += msg.value;
+    amountRaisedETH += msg.value;
+    BuyIn(msg.sender, msg.value);
+  }
 
   function getNow() constant returns (uint retVal) {
     return now;
@@ -70,45 +82,49 @@ contract ZcashEscrow {
     return (now < deadlineEpoch);
   }
 
-  function checkDeadline() {
-      if (now < deadlineEpoch || !open) throw;
-      closed = true;
-      splitAmount = (amountRaised >= fundingGoal) ? amountRaised / beneficiaries.length : amountRaised;
-  }
-
   function getContribution() constant returns (uint retVal) {
-    return contributions[msg.sender];
+    return contributionsETH[msg.sender];
   }
 
-  function approve() {
-    if (msg.sender == arbiter) { approved = true; }
+  // The contract owner can bump the amount based on outside BTC contributions
+  function bump(uint amount, bytes32 description) beforeDeadline {
+    if (msg.sender == owner) {
+        amountRaisedBTC += amount;
+        amountRaised += amount;
+        backer_history.push(Backer({ethAddr: 0, amount: amount, timestamp: now, description: description}));
+    }
   }
 
   /* Each backer is responsible for their own safe withdrawal, because it costs gas */
-  function safeWithdrawal() {
-    if (block.timestamp < deadlineEpoch || !open || !closed) throw;
-    if (amountRaised < fundingGoal) {
-      uint amount = contributions[msg.sender];
-      contributions[msg.sender] = 0;
+  function safeWithdrawal() afterDeadline {
+    uint amount = 0;
+    if (amountRaised < fundingGoal && payoutsETH[msg.sender] == 0) {
+      // Ethereum backers can only withdraw the full amount they put in, and only once
+      amount = contributionsETH[msg.sender];
+      payoutsETH[msg.sender] += amount;
+      contributionsETH[msg.sender] = 0;
       if (msg.sender.send(amount)) {
         ReturnContribution(msg.sender, amount);
       } else {
-        contributions[msg.sender] = amount;
+        payoutsETH[msg.sender] = 0; 
+        contributionsETH[msg.sender] = amount;
       }
-    } else if (approved) {
-      for (uint i = 0; i < beneficiaries.length; i++) {
-        if (msg.sender == beneficiaries[i]) {
-          if (payouts[msg.sender] == 0) {
-            payouts[msg.sender] = splitAmount;
-            if (msg.sender.send(splitAmount)) {
-              PayOut(msg.sender, splitAmount);
-            } else {
-              payouts[msg.sender] = 0;
-            }
-          }
-        }
+    } else if (payoutETH == 0) {
+      // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
+      fee = amountRaisedETH / 100; // 1% fee, only after beneficiary has received payment
+      amount = amountRaisedETH - fee;
+      payoutETH += amount;
+      if (beneficiary.send(amount)) {
+        PayOut(beneficiary, amount);
+      } else {
+        payoutETH = 0;
       }
-    } 
+    } else if (msg.sender == owner && feeWithdrawn == 0) {
+      // only the owner can withdraw the fee and any excess funds (rounding errors)
+      feeWithdrawn += fee;
+      selfdestruct(owner);
+      PayOut(owner, fee);
+    }
   }
 
 }
