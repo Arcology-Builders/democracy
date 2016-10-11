@@ -27,8 +27,4 @@ console.log("AmountRaisedETH: " + instance.amountRaisedETH());
 console.log("AmountRaisedBTC: " + instance.amountRaisedBTC());
 console.log("Fee: " + instance.fee());
 console.log("Open: " + instance.open());
-
-var remoteTime = instance.checkDeadline({from: web3.eth.coinbase, gas: 100000})
-        //function(err, data) { console.log("Finished! " + err + data) });
-
-console.log("Remote Time: " + remoteTime);
+console.log("Remote Time: " + instance.getNow());
