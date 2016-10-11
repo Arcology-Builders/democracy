@@ -42,7 +42,8 @@ contract ZcashEscrow {
     open = false;
   }
 
-  function initialize(uint _fundingGoalInWei, address _beneficiary, uint _deadlineEpoch) beforeDeadline {
+  // We can only initialize once, but don't add beforeDeadline guard or check deadline
+  function initialize(uint _fundingGoalInWei, address _beneficiary, uint _deadlineEpoch) {
     if (open) throw; // we can only initialize once
     beneficiary = _beneficiary;
     payoutETH = 0;

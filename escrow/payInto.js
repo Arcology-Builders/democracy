@@ -19,4 +19,10 @@ var instance = web3.eth.contract(abi).at(address);
 
 console.log("Owner: " + instance.owner());
 
-web3.eth.sendTransaction({from: web3.eth.coinbase, to: address, value: web3.toWei(0.5, "ether")});
+instance.payInto("hello backer 1",
+   {
+       from: web3.eth.accounts[1],
+       to: address,
+       value: web3.toWei(0.1, "ether")
+   });
+//web3.eth.sendTransaction({from: web3.eth.accounts[1], to: address, value: web3.toWei(0.5, "ether")});

@@ -1,5 +1,5 @@
 {
-  "version": 7,
-  "contract_address": "0x40b5de19b534b8e5e4ffbfbd427d89ef633983dc",
+  "version": 8,
+  "contract_address": "0xa2ef8727e284739f837fcfd6e4237dd05b1765ab",
   "http_provider": "http://testnet.local-box.org:8545"
 }

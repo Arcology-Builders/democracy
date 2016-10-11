@@ -13,7 +13,7 @@ var abi = JSON.parse(fs.readFileSync("contracts/ZcashEscrow.abi").toString());
 
 var instance = web3.eth.contract(abi).at(address);
 
-var result = instance.initialize(1, [web3.eth.coinbase], new Date(Date.now() + 300).getTime() / 1000, web3.eth.coinbase,
+var result = instance.initialize(1, [web3.eth.coinbase], new Date(Date.now() + 600).getTime() / 1000,
     {from: web3.eth.coinbase, gas: 250000},
     function(err, data, something) {
         console.log("err: " + err);

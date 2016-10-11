@@ -18,15 +18,15 @@ var instance = web3.eth.contract(abi).at(address);
 
 console.log("Instance: " + JSON.stringify(instance));
 console.log("Owner: " + instance.owner());
-console.log("Arbiter: " + instance.arbiter());
-console.log("Beneficiaries: " + instance.beneficiaries());
+console.log("Beneficiary: " + instance.beneficiary());
+console.log("Backer History: " + instance.backer_history());
 console.log("Deadline: " + instance.deadlineEpoch());
 console.log("FundingGoal: " + instance.fundingGoal());
 console.log("AmountRaised: " + instance.amountRaised());
-console.log("SplitAmount: " + instance.splitAmount());
+console.log("AmountRaisedETH: " + instance.amountRaisedETH());
+console.log("AmountRaisedBTC: " + instance.amountRaisedBTC());
+console.log("Fee: " + instance.fee());
 console.log("Open: " + instance.open());
-console.log("Closed: " + instance.closed());
-console.log("Approved: " + instance.approved());
 
 var remoteTime = instance.checkDeadline({from: web3.eth.coinbase, gas: 100000})
         //function(err, data) { console.log("Finished! " + err + data) });
