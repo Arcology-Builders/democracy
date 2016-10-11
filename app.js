@@ -4,9 +4,9 @@ var express = require('express');
 var app = express();
 
 var solc = require('solc');
-var Web3 = require('Web3');
+var Web3 = require('web3');
 var web3 = new Web3();
-
+/*
 web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8556"));
 
 fs.readFile("hello.solc", function(err, data) {
@@ -36,7 +36,7 @@ function getBalanceString() {
   var originalBalance = web3.eth.getBalance(coinbase).toNumber();
   return "Coinbase " + coinbase + " with balance " + originalBalance;
 }
-
+*/
 app.get("/", function(req, res) {
   res.type("text/html");
   res.send("Express " + getBalanceString());
