@@ -1,13 +1,13 @@
 escrow = require('./base')
 
-address = process.argv[2]
-console.log("Withdraw From Address: " + address)
+backerAddress = process.argv[2]
+console.log("Withdraw From Address: " + backerAddress)
 
 escrow((instance, web3) => {
-    console.log("Withdraw From Address: " + web3.eth.coinbase)
+    console.log("Withdraw From Address: " + backerAddress)
     instance.safeWithdrawal(
         {
-            from: web3.eth.coinbase,
+            from: backerAddress,
             gas: 180000
         })
 })
