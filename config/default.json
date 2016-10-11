@@ -1,13 +1,11 @@
 {
-  "version": 10,
-  "contract_address": "0xf4c062c6e4498a472d0e3c705503709b43c5f601",
   "ZcashEscrow": {
     "version": 10,
-    "contractAddress":"0xf4c062c6e4498a472d0e3c705503709b43c5f601" 
+    "contractAddress":"0x3ad498210e5eb279dc0a4c25b7037b6afec31993" 
   },
   "CrowdHacker": {
     "version": 4,
-    "contractAddress": "0x69537da51dca6854465be4a5f3149326a136a3d2"
+    "contractAddress": "0x5bdb688db314c299eb868d49cde24b94487ef909"
   },
   "http_provider": "http://testnet.local-box.org:8545"
 }
