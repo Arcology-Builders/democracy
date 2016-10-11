@@ -1,20 +1,6 @@
-var fs = require('fs');
-var Web3 = require('web3');
-var web3 = new Web3();
-config = require('config')
+contract = new require('../contract')('ZcashEscrow')
 
-var contractName = "ZcashEscrow"
-console.log("Contract name: " + contractName);
-
-endpoint = config.get('http_provider')
-address = config.get('contract_address')
-
-web3.setProvider(new web3.providers.HttpProvider(endpoint));
-
-var code = fs.readFileSync(`contracts/${contractName}.bin`).toString();
-var abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString());
-
-var instance = web3.eth.contract(abi).at(address);
+var instance = contract.instance
 
 console.log("Instance: " + JSON.stringify(instance));
 console.log("Owner: " + instance.owner());

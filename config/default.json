@@ -1,7 +1,7 @@
 {
   "ZcashEscrow": {
-    "version": 10,
-    "contractAddress":"0x3ad498210e5eb279dc0a4c25b7037b6afec31993" 
+    "version": 12,
+    "contractAddress":"0xba00ddea3fa8208a53dfb35416dfdabbe3be0802" 
   },
   "CrowdHacker": {
     "version": 4,

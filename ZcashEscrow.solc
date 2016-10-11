@@ -99,7 +99,7 @@ contract ZcashEscrow {
   /* As a safeguard, if we were able to pay into account without being a contributor
      allow contract owner to clean it up. */
   function safeKill() afterDeadline {
-    if ((msg.sender == owner) && (this.balance > amountRaisedETH)) {
+    if ((msg.sender == owner) && ((this.balance >= amountRaisedETH) || (this.balance == 0))) {
       uint amount = this.balance - amountRaisedETH;
       selfdestruct(owner);
       PayOut(owner, amount);
