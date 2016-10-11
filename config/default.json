@@ -1,5 +1,6 @@
 {
-  "version": 8,
-  "contract_address": "0xa2ef8727e284739f837fcfd6e4237dd05b1765ab",
+  "version": 9,
+  "contract_address": "0xdfde86c2db805d64f8cbc649d2236d1b79de6389",
+  "hacker_address": "0x386f50fa94833bd260c5d9d4ade75073e6694eea",
   "http_provider": "http://testnet.local-box.org:8545"
 }
