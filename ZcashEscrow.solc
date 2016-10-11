@@ -59,8 +59,8 @@ contract ZcashEscrow {
     open = true;
   }
 
-  modifier beforeDeadline() { if ((now < deadlineEpoch) && open) _; }
-  modifier afterDeadline() { if ((now >= deadlineEpoch) && open) _; }
+  modifier beforeDeadline() { if ((now < deadlineEpoch) && open) _; else throw; }
+  modifier afterDeadline() { if ((now >= deadlineEpoch) && open) _; else throw; }
 
   // Normal pay-in function, where msg.sender is the contributor
   function() payable beforeDeadline {
@@ -93,6 +93,16 @@ contract ZcashEscrow {
         amountRaisedBTC += amount;
         amountRaised += amount;
         backer_history.push(Backer({ethAddr: 0, amount: amount, timestamp: now, description: description}));
+    }
+  }
+
+  /* As a safeguard, if we were able to pay into account without being a contributor
+     allow contract owner to clean it up. */
+  function safeKill() afterDeadline {
+    if ((msg.sender == owner) && (this.balance > amountRaisedETH)) {
+      uint amount = this.balance - amountRaisedETH;
+      selfdestruct(owner);
+      PayOut(owner, amount);
     }
   }
 
