@@ -103,6 +103,7 @@ contract ZcashEscrow {
       uint amount = this.balance - amountRaisedETH;
       selfdestruct(owner);
       PayOut(owner, amount);
+      open = false; // make this resettable to make testing easier
     }
   }
 
