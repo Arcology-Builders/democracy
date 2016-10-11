@@ -22,7 +22,7 @@ console.log("Victim: " + instance.victim());
 
 instance.seedThePot(
    {
-       from: hackerAddr,
-       to: crowdfundAddr,
+       from: web3.eth.coinbase,
+       to: hackerAddr,
        value: web3.toWei(0.1, "ether")
    });
