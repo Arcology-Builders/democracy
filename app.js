@@ -8,7 +8,7 @@ var Web3 = require('Web3');
 var web3 = new Web3();
 
 web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8556"));
-
+/*
 fs.readFile("hello.solc", function(err, data) {
   if (err) {
     console.error(err);
@@ -29,7 +29,7 @@ fs.readFile("hello.solc", function(err, data) {
     }
   });
 });
-
+*/
 
 function getBalanceString() {
   var coinbase = web3.eth.coinbase;
