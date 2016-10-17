@@ -44,7 +44,7 @@ contract ZcashEscrow {
 
   // We can only initialize once, but don't add beforeDeadline guard or check deadline
   function initialize(uint _fundingGoalInWei, address _beneficiary, uint _deadlineEpoch) {
-    if (open) throw; // we can only initialize once
+    if (open || msg.sender != owner) throw; // we can only initialize once
     beneficiary = _beneficiary;
     payoutETH = 0;
     amountRaised = 0;
@@ -68,11 +68,13 @@ contract ZcashEscrow {
   }
 
   function payIn(bytes32 description) payable beforeDeadline {
-    contributionsETH[msg.sender] += msg.value; // allow multiple contributions
-    backer_history.push(Backer({ethAddr: msg.sender, amount: msg.value, timestamp: now, description: description}));
-    amountRaised += msg.value;
-    amountRaisedETH += msg.value;
-    BuyIn(msg.sender, msg.value);
+    if (payoutsETH[msg.sender] == 0) { // defend against re-entrancy
+        contributionsETH[msg.sender] += msg.value; // allow multiple contributions
+        backer_history.push(Backer({ethAddr: msg.sender, amount: msg.value, timestamp: now, description: description}));
+        amountRaised += msg.value;
+        amountRaisedETH += msg.value;
+        BuyIn(msg.sender, msg.value);
+    }
   }
 
   function getNow() constant returns (uint retVal) {
@@ -99,10 +101,11 @@ contract ZcashEscrow {
   /* As a safeguard, if we were able to pay into account without being a contributor
      allow contract owner to clean it up. */
   function safeKill() afterDeadline {
-    if ((msg.sender == owner) && (this.balance > amountRaisedETH)) {
+    if ((msg.sender == owner) && ((this.balance >= amountRaisedETH) || (this.balance == 0))) {
       uint amount = this.balance - amountRaisedETH;
       selfdestruct(owner);
       PayOut(owner, amount);
+      open = false; // make this resettable to make testing easier
     }
   }
 

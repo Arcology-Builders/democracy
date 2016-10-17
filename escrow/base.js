@@ -7,7 +7,7 @@ config = require('config')
 ZcashEscrow = (instanceFunc) => {
 
   endpoint = config.get('http_provider')
-  address = config.get('contract_address')
+  address = config['ZcashEscrow']['contractAddress']
 
   web3.setProvider(new web3.providers.HttpProvider(endpoint))
 

@@ -1,13 +1,16 @@
 {
-  "version": 10,
-  "contract_address": "0x7720fe4028d76cae1ea6ff41361434326417a6aa",
+  "coinbase": "0x80aff102f5bda839483f529e5ca605b8b6b45658",
   "ZcashEscrow": {
-    "version": 10,
-    "contractAddress":"0x7720fe4028d76cae1ea6ff41361434326417a6aa" 
+    "version": 13,
+    "contractAddress":"0xae1216c076ca19592057ba5e0e4bd61119d55998" 
   },
   "CrowdHacker": {
-    "version": 2,
-    "contractAddress": "0x348ac89bd5ede1c28549d9dffcdce92bb2ae4e39"
+    "version": 5,
+    "contractAddress": "0xd829392b3a1ace6e5b0c674c8154264bf5b5433d"
+  },
+  "endpoints": {
+    "testnet": "http://testnet.local-box.org:8545",
+    "mainnet": "http://10.0.1.2:8555"
   },
   "http_provider": "http://testnet.local-box.org:8545"
 }
