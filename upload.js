@@ -33,7 +33,7 @@ abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString())
 //console.log("ABI: " + JSON.stringify(abi))
 //console.log("Code: " + code)
 
-web3.eth.contract(abi).new({data: code, from: coinbase, gas: "0x1249F0"}, function(err, contract) {
+web3.eth.contract(abi).new({data: code, from: coinbase, gas: "0x1249F0", gasPrice: "0x1312D00"}, function(err, contract) {
   if (err) {
     console.error("Error " + err);
     return;

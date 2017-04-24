@@ -10,7 +10,7 @@
   },
   "endpoints": {
     "testnet": "http://testnet.local-box.org:8545",
-    "mainnet": "http://10.0.1.2:8555"
+    "mainnet": "http://localhost:8545"
   },
   "http_provider": "http://testnet.local-box.org:8545"
 }
