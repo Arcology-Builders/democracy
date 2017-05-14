@@ -6,7 +6,7 @@
 <script type="text/javascript" src="../dist/web3-light.js"></script>
 <script type="text/javascript" src="js/zcashescrow-abi.js"></script>
 <script type="text/javascript">
-   
+
     var Web3 = require('web3');
     var web3 = new Web3();
 //    web3.setProvider(new web3.providers.HttpProvider("http://ml.toom.im:8555"));
@@ -26,14 +26,15 @@
             document.getElementById("owner").innerText = instance.owner();
             document.getElementById("deadline").innerText = instance.deadlineEpoch();
             document.getElementById("goal").innerText = instance.fundingGoal();
-            document.getElementById("amount").innerText = instance.amountRaised();
-            document.getElementById("split").innerText = instance.splitAmount();
-            document.getElementById("beneficiaries").innerText = instance.beneficiaries();
-            document.getElementById("arbiter").innerText = instance.arbiter();
-            document.getElementById("contributions").innerText = instance.contributions();
+            document.getElementById("amountRaised").innerText = instance.amountRaised()/ Math.pow(10, 18);
+            document.getElementById("amountRaisedETH").innerText = instance.amountRaisedETH() / Math.pow(10, 18);
+            document.getElementById("amountRaisedBTC").innerText = instance.amountRaisedBTC() / Math.pow(10, 18);
+            document.getElementById("payoutETH").innerText = instance.payoutETH() / Math.pow(10, 18);
+            document.getElementById("beneficiary").innerText = instance.beneficiary();
+            document.getElementById("last backer").innerText = instance.backer_history();
             document.getElementById("open").innerText = instance.open();
-            document.getElementById("closed").innerText = instance.closed();
-            document.getElementById("approved").innerText = instance.approved();
+            document.getElementById("fee").innerText = instance.fee() / Math.pow(10, 18);
+            document.getElementById("feeWithdrawn").innerText = instance.freeWithdrawn() / Math.pow(10, 18);
         });
     }
 

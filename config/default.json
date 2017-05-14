@@ -9,8 +9,8 @@
     "contractAddress": "0xd829392b3a1ace6e5b0c674c8154264bf5b5433d"
   },
   "endpoints": {
+    "testnet": "http://localhost:8546",
     "testnet": "http://testnet.local-box.org:8545",
     "mainnet": "http://localhost:8545"
-  },
-  "http_provider": "http://testnet.local-box.org:8545"
+  }
 }
