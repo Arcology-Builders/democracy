@@ -1,0 +1,66 @@
+pragma solidity ^0.4.1;
+
+// An escrow contract where you put money in, and then are
+// allowed to break it later to get the candy.
+contract PinataEscrow {
+
+  address public beneficiary;
+
+  // These are for Ethereum backers only
+  mapping (address => uint) public contributionsETH;
+  mapping (address => uint) public payoutsETH;
+
+  // This should be 1.5k USD = 5.391 ETH, according to Gemini
+  uint public fundingGoal;     // in wei
+  uint public payoutETH;       // in wei
+  uint public amountRaised;    // in wei, the total amount
+
+  address public owner;
+
+  uint public creationTime;
+  bool public filled;           // candy paid into, but not claimed
+  bool public emptied;          // candy paid into and claimed
+
+  function PinataEscrow() {
+    owner = msg.sender;
+    creationTime = now;
+    filled = false;
+    emptied = false;
+  }
+
+  // We can only initialize once
+  function initialize(uint _fundingGoalInWei, address _beneficiary) {
+    if (filled || msg.sender != owner) throw;
+    beneficiary = _beneficiary;
+    payoutETH = 0;
+    amountRaised = 0;
+    fundingGoal = _fundingGoalInWei;
+
+    filled = false;
+    emptied = false;
+  }
+
+  // Normal pay-in function, where msg.sender is the contributor
+  function() payable {
+    if (payoutsETH[msg.sender] == 0) { // defend against re-entrancy
+        contributionsETH[msg.sender] += msg.value; // allow multiple contributions
+        amountRaised += msg.value;
+    }
+  }
+
+  /* Each backer is responsible for their own safe withdrawal, because it costs gas */
+  function safeWithdrawal() {
+    uint amount = 0;
+    if (payoutETH == 0) {
+      // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
+      amount = amountRaised;
+      payoutETH += amount;
+      if (beneficiary.send(amount)) {
+        emptied = true; // beneficiary has broken pinata! and gotten candy
+      } else {
+        payoutETH = 0;
+      }
+    }
+  }
+
+}
