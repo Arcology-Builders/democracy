@@ -7,6 +7,7 @@ amountETH = process.argv[3]
 console.log("Amount in ETH: " + amountETH)
 
 escrow((instance, web3) => {
+    web3.personal.unlockAccount(fromAddr) // enter password here
     instance.payIn("Ethereum Backer 1",
         {
             from: fromAddr,

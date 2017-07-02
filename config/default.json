@@ -1,5 +1,8 @@
 {
-  "coinbase": "0x80aff102f5bda839483f529e5ca605b8b6b45658",
+  "coinbase": {
+     "mainnet": "0x80aff102f5bda839483f529e5ca605b8b6b45658",
+     "rinkeby": "0xb2e9fe08ca9a0323103883fe12c9609ed380f475"
+  },
   "ZcashEscrow": {
     "version": 13,
     "contractAddress":"0xae1216c076ca19592057ba5e0e4bd61119d55998" 
@@ -9,7 +12,8 @@
     "contractAddress": "0xd829392b3a1ace6e5b0c674c8154264bf5b5433d"
   },
   "endpoints": {
-    "testnet": "http://localhost:8546",
+    "kovan": "http://localhost:8546",
+    "rinkeby": "http://localhost:8545",
     "testnet": "http://testnet.local-box.org:8545",
     "mainnet": "http://localhost:8545"
   }

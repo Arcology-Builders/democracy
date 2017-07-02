@@ -4,30 +4,32 @@ var web3 = new Web3();
 
 config = require('config')
 
-coinbase = config['coinbase']
-console.log("Coinbase: " + coinbase)
-
 if (process.argv.length < 2) {
-    console.error("Usage: node upload.js ContractName [mainnet]");
+    console.error("Usage: node upload.js ContractName [mainnet]")
+    process.exit()
 }
 
 contractName = process.argv[2]
 console.log("Contract name: " + contractName);
 
-mainnet = process.argv[3]
-console.log("Net: " + mainnet)
+network = process.argv[3]
 
-if (mainnet === 'mainnet') {
-  console.log("Mainnet")
-  endpoint = config['endpoints']['mainnet']
+endpoint = ""
+
+if (config['endpoints'][network]) {
+  console.log("Net: " + network)
+  endpoint = config['endpoints'][network]
 } else {
-  console.log("testnet")
-  endpoint = config['endpoints']['testnet']
+  console.err("Endpoint not found for network: " + network)
+  process.exit()
 }
+
+coinbase = config['coinbase'][network]
+console.log("Coinbase: " + coinbase)
 
 web3.setProvider(new web3.providers.HttpProvider(endpoint));
 
-code = '0x' + fs.readFileSync(`contracts/${contractName}.bin`).toString()
+code = "0x" + fs.readFileSync(`contracts/${contractName}.bin`).toString()
 abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString())
 
 //console.log("ABI: " + JSON.stringify(abi))
