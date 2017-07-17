@@ -5,13 +5,14 @@
 # These can be used / donated to a faucet later.
 
 NETWORK_ID=2222
+GETH="geth --datadir /root/.ethereum-private --networkid $NETWORK_ID"
 
 if [ ! -f ~/.accountpassword ]; then
     echo `date +%s | sha256sum | base64 | head -c 32` > ~/.accountpassword
 fi
 
 if [ ! -f ~/.primaryaccount ]; then
-    geth --networkid $NETWORK_ID --password ~/.accountpassword account new > ~/.primaryaccount
+    $GETH --password ~/.accountpassword account new > ~/.primaryaccount
 fi
 
 if [ ! -f ~/.nodeidentity ]; then
@@ -23,7 +24,7 @@ fi
 ADDRESS=$(echo "0x"$(cat ~/.primaryaccount | cut -d "{" -f 2 | cut -d "}" -f 1))
 sed -i "s/<address>/$ADDRESS/" ~/CustomGenesis.json
 
-geth init ~/CustomGenesis.json
+$GETH init ~/CustomGenesis.json
 
-geth --rpc --rpcaddr "0.0.0.0" --rpccorsdomain "*" --identity "$(echo ~/.nodeidentity)" --networkid $NETWORK_ID --password ~/.accountpassword --mine --minerthreads 1 --extradata "cryptogoth"
+$GETH --rpc --rpcaddr "0.0.0.0" --rpccorsdomain "*" --identity "$(echo ~/.nodeidentity)" --networkid $NETWORK_ID --password ~/.accountpassword --mine --minerthreads 1 --extradata "cryptogoth"
 

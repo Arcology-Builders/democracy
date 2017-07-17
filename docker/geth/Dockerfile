@@ -10,6 +10,9 @@ RUN apt-get update && \
     add-apt-repository ppa:ethereum/ethereum && \
     apt-get update && \
     apt-get -y -qq install geth solc && \
+    apt-get -y -qq install net-tools && \
+    apt-get -y -qq install telnet && \
+    apt-get -y -qq install inetutils-ping && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

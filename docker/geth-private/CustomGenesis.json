@@ -8,6 +8,6 @@
     "difficulty": "200000000",
     "gasLimit": "2100000",
     "alloc": {
-        "<address>": { "balance": "400000" }
+        "<address>": { "balance": "27994547900000000000" }
     }
 }
