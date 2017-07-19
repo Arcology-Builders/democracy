@@ -8,4 +8,4 @@ RUN chmod +x /root/rinkeby.sh
 RUN chmod +x /root/rinkeby-init.sh
 RUN /root/rinkeby-init.sh light
 
-CMD /root/rinkeby.sh light
+# ENTRYPOINT /root/rinkeby.sh light

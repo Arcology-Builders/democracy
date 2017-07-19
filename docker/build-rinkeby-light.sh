@@ -8,7 +8,8 @@
 # This is the base image for the others
 DOCKERDIR=geth-rinkeby-light
 IMAGE=cryptogoth/$DOCKERDIR:latest
-cp rinkeby-light.sh $DOCKERDIR/
+cp rinkeby-init.sh $DOCKERDIR/
 cp rinkeby.sh $DOCKERDIR/ 
+cp rinkeby.json $DOCKERDIR/ 
 docker build $DOCKERDIR -t $IMAGE
 

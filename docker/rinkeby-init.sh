@@ -5,7 +5,7 @@
 # These can be used / donated to a faucet later.
 
 NETWORK_ID=4
-GETH="geth datadir=$HOME/.rinkeby --networkid $NETWORK_ID"
+GETH="geth --datadir $HOME/.rinkeby --networkid $NETWORK_ID"
 
 if [ ! -z "$1" ]
 then
@@ -13,6 +13,8 @@ then
 fi
 
 echo $1
+
+mkdir $HOME/.rinkeby
 
 $GETH ${LIGHT} init rinkeby.json
 
