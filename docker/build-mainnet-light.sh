@@ -6,6 +6,9 @@
 # docker push <image_name>:<tag>
 
 # This is the base image for the others
-docker build geth -t geth:latest
-docker build geth-private -t geth-private:latest
+DOCKERDIR=geth-light
+IMAGE=cryptogoth/$DOCKERDIR:latest
+cp geth-init.sh $DOCKERDIR/
+cp geth.sh $DOCKERDIR/ 
+docker build $DOCKERDIR -t $IMAGE
 
