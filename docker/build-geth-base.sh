@@ -3,4 +3,4 @@
 # Does not create or sync any blockchains.
 
 DOCKERDIR=geth-base
-. build.sh
+. build.sh $1
