@@ -16,7 +16,7 @@ echo $1
 
 mkdir $HOME/.rinkeby
 
-$GETH ${LIGHT} init rinkeby.json
+$GETH ${LIGHT} init $HOME/rinkeby.json
 
 if [ ! -f ~/.accountpassword ]; then
     echo `date +%s | sha256sum | base64 | head -c 32` > ~/.accountpassword

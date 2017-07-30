@@ -6,8 +6,9 @@
 # docker push <image_name>:<tag>
 
 # This is the base image for the others
-DOCKERDIR=geth-rinkeby-light
-IMAGE=cryptogoth/$DOCKERDIR:latest
+GIT_HASH=$(git log | head -n 1 | cut -f 2 -d ' ' | head -c 7)
+DOCKERDIR=geth-rinkeby
+IMAGE=cryptogoth/$DOCKERDIR:${GIT_HASH}
 cp rinkeby-init.sh $DOCKERDIR/
 cp rinkeby.sh $DOCKERDIR/ 
 cp rinkeby.json $DOCKERDIR/ 
