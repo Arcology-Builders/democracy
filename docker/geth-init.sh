@@ -8,12 +8,11 @@ GETH="geth"
 
 if [ ! -z "$1" ]
 then
-  LIGHT="--light"
+  # We only need to init geth with custom parameters like light mode or custom genesis block.
+  $GETH --light init
 fi
 
 echo $1
-
-$GETH ${LIGHT} init
 
 if [ ! -f ~/.accountpassword ]; then
     echo `date +%s | sha256sum | base64 | head -c 32` > ~/.accountpassword

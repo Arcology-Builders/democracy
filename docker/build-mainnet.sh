@@ -1,8 +1,7 @@
 #! /bin/sh
+# Build the geth mainnet image, which automatically starts up a geth node and syncs.
 
-# Build the docker image for a geth light node.
-
-DOCKERDIR=geth-light
+DOCKERDIR=geth-mainnet
 cp geth-init.sh ${DOCKERDIR}/
 cp geth.sh ${DOCKERDIR}/ 
 

@@ -1,4 +1,4 @@
-FROM cryptogoth/geth
+FROM invisible-college/geth-base
 MAINTAINER Paul Pham
 
 ADD ./rinkeby.json /root/rinkeby.json
