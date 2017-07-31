@@ -1,4 +1,4 @@
-FROM invisible-college/geth-base
+FROM cryptogoth/geth-base
 MAINTAINER Paul Pham
 
 ADD ./rinkeby.json /root/rinkeby.json
@@ -8,4 +8,4 @@ RUN chmod +x /root/rinkeby.sh
 RUN chmod +x /root/rinkeby-init.sh
 RUN /root/rinkeby-init.sh
 
-CMD /root/rinkeby.sh
+ENTRYPOINT /root/rinkeby.sh
