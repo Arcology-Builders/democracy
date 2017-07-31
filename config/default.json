@@ -1,7 +1,10 @@
 {
   "coinbase": {
      "mainnet": "0x80aff102f5bda839483f529e5ca605b8b6b45658",
-     "rinkeby": "0xb2e9fe08ca9a0323103883fe12c9609ed380f475"
+     "rinkeby": "0x3bae49028f72759d9963722d399fda0e7c654d2b"
+  },
+  "LeanFund": {
+    "version": 1
   },
   "ZcashEscrow": {
     "version": 13,

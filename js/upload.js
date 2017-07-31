@@ -29,8 +29,8 @@ console.log("Coinbase: " + coinbase)
 
 web3.setProvider(new web3.providers.HttpProvider(endpoint));
 
-code = "0x" + fs.readFileSync(`contracts/${contractName}.bin`).toString()
-abi = JSON.parse(fs.readFileSync(`contracts/${contractName}.abi`).toString())
+code = "0x" + fs.readFileSync(`outputs/${contractName}.bin`).toString()
+abi = JSON.parse(fs.readFileSync(`outputs/${contractName}.abi`).toString())
 
 //console.log("ABI: " + JSON.stringify(abi))
 //console.log("Code: " + code)
