@@ -7,8 +7,7 @@ contract PinataEscrow {
   address public beneficiary;
 
   // These are for Ethereum backers only
-  mapping (address => uint) public contributionsETH;
-  mapping (address => uint) public payoutsETH;
+  address public contributor;
 
   // This should be 1.5k USD = 5.391 ETH, according to Gemini
   uint public fundingGoal;     // in wei
@@ -18,20 +17,24 @@ contract PinataEscrow {
   address public owner;
 
   uint public creationTime;
-  bool public filled;           // candy paid into, but not claimed
-  bool public emptied;          // candy paid into and claimed
+  uint public deadlineTime;
+  bool public filled;           // candy paid into, but not approved or claimed
+  bool public blessed;          // candy paid into, approved, but not claimed
+  bool public emptied;          // candy paid into, approved, and claimed
 
   function PinataEscrow() {
     owner = msg.sender;
     creationTime = now;
     filled = false;
+    blessed = false;
     emptied = false;
   }
 
   // We can only initialize once
-  function initialize(uint _fundingGoalInWei, address _beneficiary) {
+  function initialize(uint _fundingGoalInWei, uint _deadlineEpochTime, address _beneficiary) {
     if (filled || msg.sender != owner) throw;
     beneficiary = _beneficiary;
+    deadlineEpochTime = _deadlineEpochTime;
     payoutETH = 0;
     amountRaised = 0;
     fundingGoal = _fundingGoalInWei;
@@ -42,16 +45,27 @@ contract PinataEscrow {
 
   // Normal pay-in function, where msg.sender is the contributor
   function() payable {
-    if (payoutsETH[msg.sender] == 0) { // defend against re-entrancy
+    if (payoutETH == 0) { // defend against re-entrancy
+        contributor = msg.sender
         contributionsETH[msg.sender] += msg.value; // allow multiple contributions
         amountRaised += msg.value;
+        if (amountRaised >= fundingGoal) {
+          filled = true;
+        }
+    }
+  }
+
+  // Only the contributor may approve this
+  function bless() {
+    if (filled and !blessed) {
+      blessed = true;
     }
   }
 
   /* Each backer is responsible for their own safe withdrawal, because it costs gas */
   function safeWithdrawal() {
     uint amount = 0;
-    if (payoutETH == 0) {
+    if (payoutETH == 0 && blessed) {
       // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
       amount = amountRaised;
       payoutETH += amount;

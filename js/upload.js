@@ -20,7 +20,7 @@ if (config['endpoints'][network]) {
   console.log("Net: " + network)
   endpoint = config['endpoints'][network]
 } else {
-  console.err("Endpoint not found for network: " + network)
+  console.error("Endpoint not found for network: " + network)
   process.exit()
 }
 
@@ -35,7 +35,7 @@ abi = JSON.parse(fs.readFileSync(`outputs/${contractName}.abi`).toString())
 //console.log("ABI: " + JSON.stringify(abi))
 //console.log("Code: " + code)
 
-web3.eth.contract(abi).new({data: code, from: coinbase, gas: "0x1249F0", gasPrice: "0x1312D00"}, function(err, contract) {
+web3.eth.contract(abi).new({data: code, from: coinbase, gas: "6000000", gasPrice: "0x21105b0"}, function(err, contract) {
   if (err) {
     console.error("Error " + err);
     return;
