@@ -1,11 +1,11 @@
-contract = new require('../contract')('ZcashEscrow')
+contract = new require('../js/contract')('ZcashEscrow','rinkeby')
 
 var instance = contract.instance
 
 console.log("Instance: " + JSON.stringify(instance));
 console.log("Owner: " + instance.owner());
 console.log("Beneficiary: " + instance.beneficiary());
-console.log("Backer History: " + instance.backer_history());
+//console.log("Backer History: " + instance.backer_history());
 console.log("Deadline: " + instance.deadlineEpoch());
 console.log("FundingGoal: " + instance.fundingGoal());
 console.log("AmountRaised: " + instance.amountRaised());

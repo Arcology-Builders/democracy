@@ -1,19 +1,14 @@
-var fs = require('fs');
-var Web3 = require('web3');
-var web3 = new Web3();
+network = process.argv[3] || "rinkeby"
 
-config = require('config')
+contract = new require('../js/contract')('ZcashEscrow', network)
 
-endpoint = config.get('http_provider')
-address = config.get('contract_address')
+func = (instance) => {
+    var result = instance.safeKill({from: web3.eth.coinbase, gas: 70000},
+            function(err, data, something) {
+                console.log("err: " + err)
+                console.log("data: " + data)
+                console.log("something: " + something)
+            })
+}
 
-web3.setProvider(new web3.providers.HttpProvider(endpoint));
-
-var code = fs.readFileSync("contracts/ZcashEscrow.bin").toString();
-var abi = JSON.parse(fs.readFileSync("contracts/ZcashEscrow.abi").toString());
-
-var instance = web3.eth.contract(abi).at(address);
-
-var result = instance.kill({from: web3.eth.coinbase, gas: 70000});
-console.log("Result: " + result);
-
+contract.runFunc(func)
