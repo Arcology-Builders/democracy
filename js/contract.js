@@ -14,8 +14,8 @@ Contract = (contractName) => {
 
   web3.setProvider(new web3.providers.HttpProvider(this.endpoint))
 
-  code = fs.readFileSync(`contracts/${this.contractName}.bin`).toString()
-  abi = JSON.parse(fs.readFileSync(`contracts/${this.contractName}.abi`).toString())
+  code = fs.readFileSync(`outputs/${this.contractName}.bin`).toString()
+  abi = JSON.parse(fs.readFileSync(`outputs/${this.contractName}.abi`).toString())
 
   this.instance = web3.eth.contract(abi).at(this.address);
   this.web3 = web3

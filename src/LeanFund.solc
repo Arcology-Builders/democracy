@@ -1,11 +1,9 @@
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.1;
 
-import "./SafeMath.solc";
+contract LeanFund {
 
-contract LeanFund is SafeMath {
-
-  // Poloniex Exchange Rate 2017-07-30: 193.7 USD / ETH
-  uint8 constant public version = 1;
+  // Poloniex Exchange Rate 2017-08-06: 266 USD / ETH
+  uint8 constant public version = 2;
 
   address public beneficiary;
 
@@ -18,7 +16,7 @@ contract LeanFund is SafeMath {
   uint public amountRaised;    // in wei, the total amount raised
 
   address public owner;
-  uint    public fee; // the contract fee is 1.5k USD, or ~7.74 ETH 
+  uint    public fee; // the contract fee is 1.5k USD, or ~5.63 ETH
   uint    public feeWithdrawn; // in wei
 
   uint public creationTime;
@@ -34,7 +32,7 @@ contract LeanFund is SafeMath {
   // We can only initialize once, but don't add beforeDeadline guard or check deadline
   function initialize(uint _fundingGoalInWei, address _beneficiary, uint _deadlineBlockNumber) {
     if (open || msg.sender != owner) throw; // we can only initialize once
-    if (_deadlineBlockNumber < block.number + 240) throw; // deadlines must be at least one hour hence
+    if (_deadlineBlockNumber < block.number + 40) throw; // deadlines must be at least ten minutes hence
     beneficiary = _beneficiary;
     payoutETH = 0;
     amountRaised = 0;
@@ -67,7 +65,7 @@ contract LeanFund is SafeMath {
      allow contract owner to clean it up. */
   function safeKill() afterDeadline {
     if ((msg.sender == owner) && (this.balance > amountRaised)) {
-      uint amount = safeSubtract(this.balance, amountRaised);
+      uint amount = this.balance - amountRaised;
       if (owner.send(amount)) {
         open = false; // make this resettable to make testing easier
       }
@@ -83,12 +81,13 @@ contract LeanFund is SafeMath {
       payoutsETH[msg.sender] += amount;
       contributionsETH[msg.sender] = 0;
       if (!msg.sender.send(amount)) {
-        payoutsETH[msg.sender] = 0; 
+        payoutsETH[msg.sender] = 0;
         contributionsETH[msg.sender] = amount;
       }
     } else if (payoutETH == 0) {
       // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
-      amount = safeSubtract(amountRaised, fee);
+      fee = amountRaisedETH * 5.63 / 100; // 5.63% fee, only after beneficiary has received payment
+      amount = amountRaised - fee;
       payoutETH += amount;
       if (!beneficiary.send(amount)) {
         payoutETH = 0;

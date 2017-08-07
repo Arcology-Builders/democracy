@@ -4,7 +4,8 @@
      "rinkeby": "0x3bae49028f72759d9963722d399fda0e7c654d2b"
   },
   "LeanFund": {
-    "version": 1
+    "version": 1,
+    "contractAddress":"0xb4309Ec9549E3cb49FB83437F6c8F19ad110Df64"
   },
   "ZcashEscrow": {
     "version": 13,
