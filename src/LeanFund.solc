@@ -86,7 +86,7 @@ contract LeanFund {
       }
     } else if (payoutETH == 0) {
       // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
-      fee = amountRaisedETH * 5.63 / 100; // 5.63% fee, only after beneficiary has received payment
+      fee = amountRaised * 563 / 10000; // 5.63% fee, only after beneficiary has received payment
       amount = amountRaised - fee;
       payoutETH += amount;
       if (!beneficiary.send(amount)) {
