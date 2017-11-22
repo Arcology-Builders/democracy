@@ -1,0 +1,38 @@
+pragma solidity ^0.4.11;
+
+import "DeadpoolMortgage.solc";
+
+contract DeadpoolInvestor {
+
+    DeadpoolMortgage public parent;
+    address public investor;
+    uint public investment;
+    uint payout;
+    uint8 public version = 1;
+
+    function DeadpoolInvestor(address _investor) {
+        parent = DeadpoolMortgage(msg.sender);
+        investor = _investor;
+        parent.registerInvestor(_investor);
+        payout = 0;
+        investment = 0;
+    }
+
+    function() payable {
+        if (msg.sender != investor || investment != 0) { revert(); }
+        investment = msg.value;
+        parent.invest();
+    }
+
+    function borrow() {
+        if (msg.sender != parent.borrower() || !parent.mortgageOpened()) { revert(); }
+        msg.sender.transfer(this.balance);
+    }
+
+    function refund() {
+        if (msg.sender != address(parent) || !parent.isRefundOkay() || payout != 0) { revert(); }
+        payout = investment;
+        parent.borrower().transfer(payout);
+    }
+}
+

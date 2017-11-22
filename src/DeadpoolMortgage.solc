@@ -1,0 +1,121 @@
+pragma solidity ^0.4.11;
+
+// Design Document at
+// https://goo.gl/XYUzpo
+import "SafeMath.solc";
+import "DeadpoolInvestor.solc";
+
+contract DeadpoolMortgage {
+
+  using SafeMath for uint256;
+
+  uint8 constant public version = 1;
+
+  address public creator; // contract administrator
+  address public borrower; // mortgage borrower
+
+  mapping (address => DeadpoolInvestor) public investorsMap;
+  address[] public investorsList;
+
+  uint public totalPrincipal;     // in wei, the principal amount of loan
+  uint public raisedPrincipal;    // in wei, principal raised so far by all investors
+  uint public remainingPrincipal; // in wei, the amount left to repay
+  uint public monthlyPayment; // in wei, the monthly amount to pay
+  uint public monthlyInterest; // in wei, the monthly interest
+
+  uint8 public mortgageInMonths;
+  uint8 public investmentInWeeks;
+
+  uint public investmentRequiredBlockNumber; // end of the contribution period
+  uint public mortgageRequiredBlockNumber;  // end of the mortgage period
+  uint public investmentActualBlockNumber; // end of the contribution period
+  uint public mortgageActualBlockNumber;  // end of the mortgage period
+  uint public nextMonthlyBlockNumber;  // deadline of next monthly payment
+
+  bool public investmentOpened;        // has the investment period started, and contract initialized
+  bool public mortgageOpened;         // investment was successful, mortgage has started
+  bool public paid;
+
+  function Deadpool() {
+    creator = msg.sender;
+    mortgageOpened = false;
+    investmentOpened = false;
+  }
+
+  // We can only initialize once
+  function initialize(address _borrower, uint _monthlyPrincipal, uint _monthlyInterest, uint8 _mortgageInMonths, uint8 _investmentInWeeks) {
+    if (investmentOpened || msg.sender != creator) throw; // we can only initialize once
+
+    require(_monthlyPrincipal > 0);
+    require(_monthlyInterest > 0);
+    require(_mortgageInMonths > 0);
+    require(_investmentInWeeks > 0);
+
+    borrower = _borrower;
+    paid = false;
+    totalPrincipal = _monthlyPrincipal * _mortgageInMonths;
+    raisedPrincipal = 0;
+    monthlyPayment = _monthlyPrincipal + _monthlyInterest;
+    mortgageInMonths = _mortgageInMonths;
+    investmentInWeeks = _investmentInWeeks;
+    investmentRequiredBlockNumber = block.number + _investmentInWeeks * 40320;
+    // We don't set the mortgageBlockNumber's until funding is successful.
+    investmentOpened = true;
+  }
+
+  modifier duringInvestment() { if ((block.number < investmentRequiredBlockNumber) && investmentOpened) _; else throw; }
+  modifier duringMortgage() { if ((block.number < mortgageRequiredBlockNumber) && mortgageOpened && !paid) _; else throw; }
+
+  function isRefundOkay() constant returns (bool) {
+    investmentOpened && block.number >= investmentRequiredBlockNumber && raisedPrincipal < totalPrincipal;
+  }
+
+  function registerInvestor(address investor) duringInvestment {
+    if (address(investorsMap[msg.sender]) != 0) { revert(); } // register investors exactly once
+    investorsMap[investor] = new DeadpoolInvestor(investor);
+    investorsList.push(investor);
+  }
+
+  function invest() {
+    if (address(investorsMap[msg.sender]) == 0) { revert(); } // only allow registered investors
+    DeadpoolInvestor investor = investorsMap[msg.sender];
+    raisedPrincipal += investor.investment();
+    verifyPrincipal();
+  }
+
+  function verifyPrincipal() internal {
+    if (raisedPrincipal >= totalPrincipal) {
+      mortgageOpened = true;
+      remainingPrincipal = totalPrincipal;
+      nextMonthlyBlockNumber = block.number + 172800; // kick off the deadline
+      investmentActualBlockNumber = block.number;
+      mortgageRequiredBlockNumber = block.number + (mortgageInMonths * 172800);
+    }
+  }
+
+  function payIn() payable duringMortgage {
+    if (msg.sender == borrower) revert(); // don't allow borrower to pay in
+  }
+
+  // Default method allows for monthly payment from borrower
+  function() payable duringMortgage {
+    if (msg.sender != borrower) throw; // only allow payments from borrower
+    if (block.number > nextMonthlyBlockNumber || msg.value < monthlyPayment) {
+      throw;
+    }
+    remainingPrincipal -= (msg.value - monthlyInterest);
+    for (uint256 i = 0; i < investorsList.length; i++) {
+      uint investment = DeadpoolInvestor(investorsList[i]).investment();
+      if (!investorsList[i].send(msg.value.mul(investment).div(raisedPrincipal))) {
+
+      }
+    }
+    if (remainingPrincipal > 0) {
+      nextMonthlyBlockNumber += 172800; // kick the can down the road
+    } else { // We're done!
+      mortgageActualBlockNumber = block.number;
+      paid = true;
+    }
+  }
+
+}
