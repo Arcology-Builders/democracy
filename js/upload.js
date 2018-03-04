@@ -32,10 +32,17 @@ web3.setProvider(new web3.providers.HttpProvider(endpoint));
 code = "0x" + fs.readFileSync(`outputs/${contractName}.bin`).toString()
 abi = JSON.parse(fs.readFileSync(`outputs/${contractName}.abi`).toString())
 
+const LIB_PATTERN = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+__/g
+const matches = code.match(LIB_PATTERN)
+if (matches) {
+  console.log("Library Symbols to Replace: ")
+  console.log(JSON.stringify(matches))
+  code.replace(LIB_PATTERN, "eec918d74c746167564401103096D45BbD494B74")
+}
 //console.log("ABI: " + JSON.stringify(abi))
 //console.log("Code: " + code)
 
-web3.eth.contract(abi).new({data: code, from: coinbase, gas: "6000000", gasPrice: "0x21105b0"}, function(err, contract) {
+web3.eth.contract(abi).new({data: code, from: coinbase, gas: "6700000", gasPrice: "0x21105b0"}, function(err, contract) {
   if (err) {
     console.error("Error " + err);
     return;
