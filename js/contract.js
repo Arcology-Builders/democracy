@@ -4,13 +4,15 @@ web3 = new Web3()
 
 config = require('config')
 
-Contract = (contractName) => {
+Contract = (contractName, network) => {
 
   this.contractName = contractName
   console.log(`Contract Name: ${this.contractName}`)
 
-  this.endpoint = config['http_provider']
+  this.endpoint = config['endpoints'][network]
   this.address = config[this.contractName]['contractAddress']
+  console.log(`Endpoint: ${this.endpoint}`)
+  console.log(`Contract Address: ${this.address}`)
 
   web3.setProvider(new web3.providers.HttpProvider(this.endpoint))
 
@@ -29,4 +31,4 @@ Contract = (contractName) => {
   return this
 }
 
-module.exports = Contract 
+module.exports = Contract

@@ -10,11 +10,16 @@
   },
   "ZcashEscrow": {
     "version": 13,
-    "contractAddress":"0xae1216c076ca19592057ba5e0e4bd61119d55998" 
+    "contractAddress":"0xae1216c076ca19592057ba5e0e4bd61119d55998"
   },
   "CrowdHacker": {
     "version": 5,
     "contractAddress": "0xd829392b3a1ace6e5b0c674c8154264bf5b5433d"
+  },
+  "TimelyResource": {
+      "version": 1,
+      "contractAddress": "0x2a504b5e7ec284aca5b6f49716611237239f0b97",
+      "oldContractAddress": "0xB529f14AA8096f943177c09Ca294Ad66d2E08b1f"
   },
   "endpoints": {
     "kovan": "http://localhost:8546",
@@ -22,5 +27,10 @@
     "rinkeby": "http://localhost:8545",
     "testnet": "http://testnet.local-box.org:8545",
     "mainnet": "http://localhost:8545"
+  },
+  "test": {
+    "gasPrice": "0x21105b0",
+    "gasLimit": "6700000",
+    "endpoint": "http://localhost:8555"
   }
 }

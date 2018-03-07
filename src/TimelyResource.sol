@@ -17,15 +17,10 @@ contract ERC20 is ERC20Events {
     ) public returns (bool);
 }
 
-/*
- * A time-based resource (like a hotel room, a barber's time).
- * Resources can be booked as a list of non-overlapping intervals.
- */
-
-library IntervalsUtil {
+contract TimelyResource {
 
     enum Status {
-        REQUESTED, PAID, COMPLETED, CANCELLED, REFUNDED
+        APPROVED, CONFIRMED, COMPLETED, REFUNDED
     }
 
     struct Interval {
@@ -74,13 +69,12 @@ library IntervalsUtil {
       }
   }
 
-    function init(IntervalsList storage self, uint256 _start, uint16 _duration, uint _price) public {
-        //self.head = _start;
-        //self.last = _start;
-        //self.price = _price;
-        //self.duration = _duration;
-        //self.bits = 0;
-        //delete(self.intervals);
+    function listInit(uint256 _start, uint16 _duration, uint _price) public {
+        list.head = _start;
+        list.last = _start;
+        list.price = _price;
+        list.duration = _duration;
+        list.bits = 0;
     }
 
     /*
@@ -89,84 +83,23 @@ library IntervalsUtil {
      * an invalid start number.
      */
     function insertRequestHelper(
-        IntervalsList storage self,
         address _requester,
         uint _start) public
     {
-        IntervalsUtil.Interval storage ivl = self.intervals[self.head];
-        uint current = self.head;
+        Interval storage ivl = list.intervals[list.head];
+        uint current = list.head;
         // this for-loop can be replaced with something more clever involving
         // bitvector arithmetic
         do {
-            ivl = self.intervals[current];
+            ivl = list.intervals[current];
             current = ivl.next;
         } while (ivl.hasNext && current < _start);
         // ivl should now point to latest interval that is still before the inserted IntervalsList
         // if ivl is/is not the last, we have the same next
         ivl.next = _start;
         ivl.hasNext = true;
-        self.intervals[_start] = Interval(_requester, Status.PAID, 0, ivl.next, ivl.hasNext);
+        list.intervals[_start] = Interval(_requester, Status.CONFIRMED, 0, ivl.next, ivl.hasNext);
     }
-
-    // Insert the newInterval in this IntervalsList in the correct
-    // increasing order of its id's. (Collisions and overlaps are not allowed)
-    function insertRequest(
-        IntervalsList storage self,
-        address _requester,
-        uint8 _startIndex) public
-    {
-        uint start = self.head + (self.duration * _startIndex);
-        set(self, _startIndex);
-        insertRequestHelper(self, _requester, start);
-    }
-
-    function deleteRequestHelper(
-        IntervalsList storage self,
-        uint _start) public
-    {
-        IntervalsUtil.Interval storage ivl = self.intervals[self.head];
-        uint current = self.head;
-        // this for-loop can be replaced with something more clever involving
-        // bitvector arithmetic
-        do {
-            ivl = self.intervals[current];
-            current = ivl.next;
-        } while (ivl.hasNext && current < _start);
-        // ivl should now point to latest interval that is still before the Interval to-be-deleted
-        // if ivl is/is not the last, we have the same next
-        if (!ivl.hasNext) { return; } // we fell off the end and didn't find it
-
-        IntervalsUtil.Interval storage delIvl = self.intervals[ivl.next];
-        ivl.hasNext = delIvl.hasNext;
-        // link around it
-        if (delIvl.hasNext) {
-          ivl.next = delIvl.next;
-        }
-        delete(self.intervals[ivl.next]);
-    }
-
-    function completeRequest(IntervalsList storage self, uint start) public {
-        IntervalsUtil.Interval storage ivl = self.intervals[start];
-        require(ivl.requester != 0);
-        ivl.status = Status.COMPLETED;
-    }
-
-    function cancelRequest(IntervalsList storage self, uint start) public {
-        IntervalsUtil.Interval storage ivl = self.intervals[start];
-        require(ivl.status == Status.REQUESTED);
-        ivl.status = Status.CANCELLED;
-    }
-
-    function refundRequest(IntervalsList storage self, uint start) public {
-        IntervalsUtil.Interval storage ivl = self.intervals[start];
-        require(ivl.status == Status.PAID);
-        ivl.status = Status.REFUNDED;
-        // Todo we still need to handle paying back the token at the contract level
-    }
-
-}
-
-contract TimelyResource {
 
     string public name;
     address public owner;
@@ -179,8 +112,8 @@ contract TimelyResource {
     // 86400 blocks is one day
     uint public constant IN_ADVANCE = 86400;
     ERC20 tokenContract = ERC20(tokenAddr);
-    IntervalsUtil.IntervalsList list;
-    uint payout; // Totals from completed intervals ready for withdrawal
+    IntervalsList public list;
+    uint public payout; // Totals from completed intervals ready for withdrawal
 
     /* name - display name of this TimelyResource
        unitPriceInToken - the price per unit in token "wei" (10^-18 unit)
@@ -188,14 +121,13 @@ contract TimelyResource {
 
      */
     function TimelyResource() public {
-//        owner = msg.sender;
-        //IntervalsUtil.init(list, now + IN_ADVANCE, _blocksPerUnit, _unitPriceInToken);
+        owner = msg.sender;
     }
 
     function init(string _name, uint16 _blocksPerUnit, uint _unitPriceInToken) public {
         owner = msg.sender;
         name = _name;
-        IntervalsUtil.init(list, now + IN_ADVANCE, _blocksPerUnit, _unitPriceInToken);
+        listInit(now + IN_ADVANCE, _blocksPerUnit, _unitPriceInToken);
     }
 
     function setTokenContract(address _tokenAddr) public {
@@ -208,61 +140,72 @@ contract TimelyResource {
         provider = _provider;
     }
 
-    // /*
-    //  * Only the provider can reserve an interval on behalf of the requester.
-    //  * This lets the provider handle approvals off-chain.
-    //  */
-    // function requestBooking(uint8 _startIndex, address _requester) public {
-    //     require(msg.sender == provider);
-    //     IntervalsUtil.insertRequest(list, _requester, _startIndex);
-    // }
-    // /*
-    //  * The requester can cancel/reject their requested booking,
-    //  * before it's been paid.
-    //  */
-    // function cancelBooking(uint8 _startIndex, address _requester) public {
-    //     require(msg.sender == provider || msg.sender == _requester);
-    //     IntervalsUtil.cancelRequest(list, _startIndex);
-    // }
+    /*
+     * Only the provider can reserve an interval on behalf of the requester.
+     * This lets the provider handle approvals off-chain.
+     */
+    function requestBooking(uint8 _startIndex, address _requester) public {
+        require(msg.sender == provider);
+        uint start = list.head + (list.duration * _startIndex);
+        set(list, _startIndex);
+        insertRequestHelper(_requester, start);
+    }
+    /*
+     * Either requester or provider can cancel/reject their requested booking,
+     * before it's been paid.
+     */
+    function cancelBooking(uint _start, address _requester) public {
+        require(msg.sender == provider || msg.sender == _requester);
+        Interval storage ivl = list.intervals[_start];
+        require(ivl.status == Status.APPROVED);
+        delete(list.intervals[_start]);
+    }
 
-    // /*
-    //  * You can only pay before the start time.
-    //  * Consider having the caller pass in the start
-    //  */
-    // function payInterval(uint8 _startIndex, address _requester) public payable {
-    //     uint start = list.head + (_startIndex * list.duration);
-    //     require(start > block.number);
-    //     tokenContract.transferFrom(_requester, address(this), list.duration);
-    //     // We only proceed to this point if we succeed the token transfer
-    //     //IntervalsUtil.payRequest(list, _startIndex);
-    // }
+    /*
+     * You can only pay before the start time.
+     * You can only pay an approved transaction.
+     * Anyone can pay (not just the requester).
+     */
+    function payInterval(uint _start, address _requester) public payable {
+        require(_start > block.number);
+        Interval storage ivl = list.intervals[_start];
+        require(ivl.status == Status.APPROVED);
+        tokenContract.transferFrom(_requester, address(this), list.duration);
+        // We only proceed to this point if we succeed the token transfer
+        ivl.status = Status.CONFIRMED;
+    }
 
-    // function refundInterval(uint8 _startIndex, address _requester) public {
-    //     uint start = list.head + (_startIndex * list.duration);
-    //     require(block.number > start);
-    //     IntervalsUtil.Interval storage ivl = list.intervals[start];
-    //     require(ivl.status == IntervalsUtil.Status.PAID);
-    //     require(ivl.paidOut > 0);
-    //     uint paidOut = ivl.paidOut;
-    //     ivl.paidOut = 0;
-    //     tokenContract.transferFrom(address(this), _requester, paidOut);
-    // }
+    function refundInterval(uint8 _startIndex, address _requester) public {
+        uint start = list.head + (_startIndex * list.duration);
+        require(block.number > start);
+        Interval storage ivl = list.intervals[start];
+        require(ivl.status == Status.CONFIRMED);
+        require(ivl.paidOut > 0);
+        uint paidOut = ivl.paidOut;
+        ivl.paidOut = 0;
+        ivl.status = Status.REFUNDED;
+        // Todo we still need to handle paying back the token at the contract level
 
-    // /*
-    //  * You can only pay before the start time.
-    //  */
-    // function completeInterval(uint _startIndex, address _requester) public {
-    //     uint start = list.head + (_startIndex * list.duration);
-    //     require(block.number > start);
-    //     require(msg.sender == provider || msg.sender == _requester);
-    //     //IntervalsUtil.completeRequest(list, _requester, _startIndex);
-    //     payout += list.intervals[start].paidOut;
-    // }
+        tokenContract.transferFrom(address(this), _requester, paidOut);
+    }
 
-    // function safeWithdrawal() public view {
-    //     require(msg.sender == provider);
-    //     require(payout > 0);
-    //     // todo: adapt code from LeanFund
-    // }
+    /*
+     * You can only pay before the start time.
+     */
+    function completeInterval(uint _startIndex, address _requester) public {
+        uint start = list.head + (_startIndex * list.duration);
+        require(block.number > start);
+        require(msg.sender == provider || msg.sender == _requester);
+        Interval storage ivl = list.intervals[start];
+        require(ivl.requester != 0);
+        ivl.status = Status.COMPLETED;
+        payout += list.intervals[start].paidOut;
+    }
+
+    function safeWithdrawal() public view {
+        require(msg.sender == provider);
+        require(payout > 0);
+        // todo: adapt code from LeanFund
+    }
 
 }
