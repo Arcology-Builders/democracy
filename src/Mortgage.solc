@@ -1,0 +1,122 @@
+pragma solidity ^0.4.1;
+
+// All amounts should be pre-calculated in USD (we won't be performing
+// interest rate calculations / floating point multiplications in the contract)
+// We'll use Oraclize to convert USD amounts into ETH.
+// In every monthly payment, we'll correct for the amount to pay / be paid
+
+// Stages of the contract
+// Creator creates contract
+// Creator initializes contract with Borrower, Lender, Total Principal,
+//   Downpayment
+//
+
+contract Mortgage {
+
+  // Poloniex Exchange Rate 2017-08-06: 266 USD / ETH
+  uint8 constant public version = 1;
+
+  address public lender;
+
+  address public owner; // which of the lender / borrower owns this property
+
+  address public creator; // only the contract creator can initialize
+
+  mapping (address => uint) public contributionsETH;
+  mapping (address => uint) public payoutsETH;
+
+  uint public totalPrincipal;     // in wei, the principal amount of loan
+  uint public monthlyInterest;    // in wei, the amount of interest to pay each month
+  uint public monthlyPrincipal;   // in wei, the amount of principal reduced each month
+  uint public remainingPrincipal; // in wei, the amount left to repay
+  uint public interestPaid;       // in wei, total interest paid so far
+
+  uint public creationTime;
+  uint public crowdfundBlockNumber; // end of the contribution period
+  uint public mortgageBlockNumber;  // end of the mortgage period
+  bool public crowdfundOpen;        // has the mortgage period started, and contract initialized
+  bool public mortgageOpen;         // crowdfund has ended, mortgage has started
+
+  function Mortgage() {
+    creator = msg.sender;
+    creationTime = now;
+    open = false;
+  }
+
+  // We can only initialize once
+  function initialize(uint _totalPrice, address _lender, address _borrower, uint _deadlineBlockNumber) {
+    if (open || msg.sender != creator) throw; // we can only initialize once
+
+     // deadlines must be at least ten minutes hence
+    if (_deadlineBlockNumber < block.number + 40) throw;
+    borrowr = _borrower;
+    owner = _lender; // Lender starts out owning the property
+    paid = 0;
+    // If we pass in a deadline in the past, set it to be 10 minutes from now.
+    deadlineBlockNumber = _deadlineBlockNumber;
+    open = true;
+  }
+
+  modifier dDeadline() { if ((block.number < deadlineBlockNumber) && open) _; else throw; }
+  modifier afterDeadline() { if ((block.number >= deadlineBlockNumber) && open) _; else throw; }
+
+  modifier duringMortgage() { if ((block.number < deadlineBlockNumber) && open) _; else throw; }
+  modifier beforeDeadline() { if ((block.number < deadlineBlockNumber) && open) _; else throw; }
+  modifier afterDeadline() { if ((block.number >= deadlineBlockNumber) && open) _; else throw; }
+
+
+  function payIn() payable beforeDeadline {
+    if (msg.sender == borrower) throw; // don't allow borrower to pay in
+  }
+
+  // Default method allows for monthly payment from borrower
+  function() payable beforeDeadline {
+    if (msg.sender != borrower) throw; // only allow payments from borrower
+    if (payoutsETH[msg.sender] == 0) { // defend against re-entrancy
+        paymentsETH += msg.value; // allow multiple contributions
+        totalPaid += msg.value;
+    }
+    remainingPrincipal -= monthlyPrincipal;
+  }
+
+  fun
+
+  /* As a safeguard, if we were able to pay into account without being a contributor
+     allow contract owner to clean it up. */
+  function safeKill() afterDeadline {
+    if ((msg.sender == creator) && (this.balance > amountRaised)) {
+      uint amount = this.balance - amountRaised;
+      if (owner.send(amount)) {
+        open = false; // make this resettable to make testing easier
+      }
+    }
+  }
+
+  /* The lender is responsible for safe withdrawal, because it costs gas */
+  function safeWithdrawal() afterDeadline {
+    uint amount = 0;
+    if (amountRaised < fundingGoal && payoutsETH[msg.sender] == 0) {
+      // Ethereum backers can only withdraw the full amount they put in, and only once
+      amount = contributionsETH[msg.sender];
+      payoutsETH[msg.sender] += amount;
+      contributionsETH[msg.sender] = 0;
+      if (!msg.sender.send(amount)) {
+        payoutsETH[msg.sender] = 0;
+        contributionsETH[msg.sender] = amount;
+      }
+    } else if (payoutETH == 0) {
+      // anyone can withdraw the crowdfunded amount to the beneficiary after the deadline
+      fee = amountRaised * 563 / 10000; // 5.63% fee, only after beneficiary has received payment
+      amount = amountRaised - fee;
+      payoutETH += amount;
+      if (!beneficiary.send(amount)) {
+        payoutETH = 0;
+      }
+    } else if (msg.sender == owner && feeWithdrawn == 0) {
+      // only the owner can withdraw the fee and any excess funds (rounding errors)
+      feeWithdrawn += fee;
+      selfdestruct(owner);
+    }
+  }
+
+}

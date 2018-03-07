@@ -1,0 +1,54 @@
+pragma solidity ^0.4.19;
+
+/*
+ * Explorations in linked lists with Solidity.
+ */
+
+contract CowTest {
+
+    Cow[] public cows;
+    Cow public lastCow;
+    uint public cowMapSize;
+
+    mapping(uint => Cow) public cowMap;
+
+    struct Cow {
+        uint udderId;
+        bool hasNext;
+        string handle;
+        uint nextId;
+    }
+
+    function CowTest() public {
+        lastCow = Cow(22, false, "bessie", 0);
+        cowMap[22] = lastCow;
+        cowMapSize = 1;
+    }
+
+    function addCow(uint _udderId, string _handle) public {
+        Cow memory newCow = Cow(_udderId, true, _handle, lastCow.udderId);
+        lastCow.hasNext = false;
+        lastCow.nextId = 0;
+        cows.push(newCow);
+        cowMap[_udderId] = newCow;
+        cowMapSize += 1;
+        lastCow = newCow;
+    }
+
+    function removeCow(uint _udderId) public {
+        delete cowMap[_udderId];
+        cowMapSize -= 1;
+    }
+
+    function getCow(uint _udderId) public constant returns (bool success, string handle) {
+        Cow storage cow = cowMap[_udderId];
+        return ((cow.udderId != 0), cow.handle);
+    }
+
+    // This compiles, but returning a struct array causes an error:
+    // "Failed to decode output: Error: Unsupported or invalid type: tuple"
+    function getCowList() public constant returns (Cow[]) {
+        return cows;
+    }
+
+}
