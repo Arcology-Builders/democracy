@@ -35,8 +35,21 @@ TestHarness = (contractName) => {
 
   code = fs.readFileSync(`outputs/${contractName}.bin`).toString()
   abi = JSON.parse(fs.readFileSync(`outputs/${contractName}.abi`).toString())
-
   that = this
+
+  // Takes a partial function that depends on a map of options
+  // and we also add a callback that accepts (err, result) Node.js style 
+  this.runFunc = function(partial_func) {
+    return new Promise((resolve, reject) => {
+      partial_func({from: coinbase, gas: gasLimit, gasPrice: gasPrice},
+        (err, result) => {
+          if (err) { reject(err); }
+          else { resolve(that); } // keep passing the harness object
+        });
+      }
+    );
+  }
+
   return new Promise((resolve, reject) => {
     web3.eth.contract(abi).new({data: code, from: coinbase, gas: gasLimit, gasPrice: gasPrice},
       (err, contract) => {
@@ -47,7 +60,7 @@ TestHarness = (contractName) => {
           console.log(`Contract deployed at ${contract.address}`)
           that.address = contract.address
           that.instance = web3.eth.contract(abi).at(this.address)
-          resolve(that.instance);
+          resolve(that);
         }
       });
   });
