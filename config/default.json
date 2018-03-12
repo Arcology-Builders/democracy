@@ -2,7 +2,8 @@
   "coinbase": {
      "local": "0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
      "mainnet": "0x80aff102f5bda839483f529e5ca605b8b6b45658",
-     "rinkeby": "0x3bae49028f72759d9963722d399fda0e7c654d2b"
+     "rinkeby": "0x3bae49028f72759d9963722d399fda0e7c654d2b",
+     "test": "0x50ab6c85cd53741b28a8f5bce3f985331dfb4455"
   },
   "LeanFund": {
     "version": 1,
@@ -23,6 +24,7 @@
   },
   "endpoints": {
     "kovan": "http://localhost:8546",
+    "test": "http://localhost:8555",
     "local": "http://localhost:7545",
     "rinkeby": "http://localhost:8545",
     "testnet": "http://testnet.local-box.org:8545",

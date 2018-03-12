@@ -17,7 +17,7 @@ contract PinataEscrow {
   address public owner;
 
   uint public creationTime;
-  uint public deadlineTime;
+  uint public deadlineEpochTime;
   bool public filled;           // candy paid into, but not approved or claimed
   bool public blessed;          // candy paid into, approved, but not claimed
   bool public emptied;          // candy paid into, approved, and claimed
@@ -46,8 +46,8 @@ contract PinataEscrow {
   // Normal pay-in function, where msg.sender is the contributor
   function() payable {
     if (payoutETH == 0) { // defend against re-entrancy
-        contributor = msg.sender
-        contributionsETH[msg.sender] += msg.value; // allow multiple contributions
+        contributor = msg.sender;
+        //contributionsETH[msg.sender] += msg.value; // allow multiple contributions
         amountRaised += msg.value;
         if (amountRaised >= fundingGoal) {
           filled = true;
@@ -56,8 +56,8 @@ contract PinataEscrow {
   }
 
   // Only the contributor may approve this
-  function bless() {
-    if (filled and !blessed) {
+  function bless() public {
+    if (filled && !blessed) {
       blessed = true;
     }
   }
