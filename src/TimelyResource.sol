@@ -47,7 +47,7 @@ contract TimelyResource {
       returns (bool success)
   {
       uint shifted = uint(1) << index;
-      if (shifted == ((~self.bits) | shifted)) {
+      if (shifted == ((~self.bits) & shifted)) {
           self.bits = self.bits | shifted;
           return true;
       } else {
@@ -60,7 +60,7 @@ contract TimelyResource {
       returns (bool success)
   {
       uint shifted = uint(1) << index;
-      if (~ self.bits | shifted == shifted) {
+      if (self.bits & shifted == shifted) {
           self.bits = self.bits & ~shifted;
           return true;
       } else {
@@ -99,10 +99,12 @@ contract TimelyResource {
         owner = msg.sender;
     }
 
-    function init(string _name, uint16 _blocksPerUnit) public {
-        owner = msg.sender;
+    function init(string _name, uint _head, uint16 _blocksPerUnit) public {
+        // For convenience, the provider is the one who initializes us
+        provider = msg.sender;
         name = _name;
-        listInit(now + IN_ADVANCE, _blocksPerUnit);
+        require(_head > block.number + IN_ADVANCE);
+        listInit(_head, _blocksPerUnit);
     }
 
     function setTokenContract(address _tokenAddr) public {
@@ -212,6 +214,7 @@ contract TimelyResource {
       uint _start
     ) constant public returns (uint8 count, uint pay, Status status) {
         Interval storage ivl = list.intervals[_start];
+        require(ivl.status != Status.FREE);
         return (ivl.duration, ivl.amount, ivl.status);
     }
 

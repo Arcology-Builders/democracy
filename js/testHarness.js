@@ -21,21 +21,24 @@ web3.setProvider(new web3.providers.HttpProvider(endpoint))
 
 keys = JSON.parse(fs.readFileSync(`keys/ganache.test.json`).toString()).addresses
 
+accounts = []
 //keys = ganache.manager.state.accounts
 
 coinbase = null;
 for (var key in keys) {
   // get first key only for now
-  coinbase = key
-  console.log(`First test key found (coinbase): ${coinbase}`);
-  break;
+  accounts.push(key)
 }
+coinbase = accounts[0]
+console.log(`First test key found (coinbase): ${coinbase}`);
 
 TestHarness = (contractName) => {
 
   code = fs.readFileSync(`outputs/${contractName}.bin`).toString()
   abi = JSON.parse(fs.readFileSync(`outputs/${contractName}.abi`).toString())
   that = this
+  that.web3 = web3
+  that.accounts = accounts
 
   // Takes a partial function that depends on a map of options
   // and we also add a callback that accepts (err, result) Node.js style 
@@ -44,7 +47,10 @@ TestHarness = (contractName) => {
       partial_func({from: coinbase, gas: gasLimit, gasPrice: gasPrice},
         (err, result) => {
           if (err) { reject(err); }
-          else { resolve(that); } // keep passing the harness object
+          else { 
+            that.result = result
+            resolve(that);
+          } // keep passing the harness object
         });
       }
     );
@@ -65,9 +71,6 @@ TestHarness = (contractName) => {
       });
   });
 
-  //this.web3 = web3
-  //this.config = config
-  // return this
 }
 
 module.exports = TestHarness
