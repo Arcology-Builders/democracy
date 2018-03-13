@@ -1,11 +1,12 @@
-testHarness = new require('../js/testHarness')('TimelyResource')
+TimeHarness = require('../js/testHarness')
+testHarness = new TimeHarness('TimelyResource')
 
 const assert = require('assert')
 const NAME = "Haircuts with Ramone"
 const BPU = 200; // blocks per unit, about 40 minutes
 
 it('should schedule a single interval', function(done) {
-  testHarness.then((harness) => {
+  testHarness.deployPromise().then((harness) => {
     head = harness.web3.eth.blockNumber + 86500
     harness.head = head
     assert.equal(typeof(head), "number")
@@ -28,7 +29,5 @@ it('should schedule a single interval', function(done) {
     console.log(JSON.stringify(interval))
     assert.equal(harness.instance.getBits(), 1)
   })
-  .then(() => {
-    done();
-  })
+  .then(() => { done(); })
 })

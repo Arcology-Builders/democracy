@@ -51,7 +51,8 @@ for (var contract in inputs) {
   shortName = path.basename(contract)
   sourceMap[shortName] = inputs[contract]
 }
-outputs = solc.compile({sources: sourceMap}, 1, findImports)
+// Second arg is 1 for optimize, 0 for normal
+outputs = solc.compile({sources: sourceMap}, 0, findImports)
 
 // Uncomment below to dump the output of solc compiler
 console.log(JSON.stringify(outputs.errors))
