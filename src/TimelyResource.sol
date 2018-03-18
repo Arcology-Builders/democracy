@@ -155,10 +155,10 @@ contract TimelyResource {
      * Anyone can pay (not just the requester) but the appointment only goes to the requester.
      */
     function confirmInterval(uint _start, address _requester) public payable {
-        require(_start > block.number);
+        //require(_start > block.number);
         Interval storage ivl = list.intervals[_start];
-        require(ivl.status == Status.APPROVED);
-        if (tokenContract.transferFrom(_requester, address(this), ivl.amount)) {
+        //require(ivl.status == Status.APPROVED);
+        if (tokenContract.transfer(address(this), ivl.amount)) {
             // We only proceed to this point if we succeed the token transfer
             ivl.status = Status.CONFIRMED;
         }
@@ -174,7 +174,7 @@ contract TimelyResource {
         ivl.amount = 0;
         // Todo we still need to handle paying back the token at the contract level
 
-        if (tokenContract.transferFrom(address(this), _requester, ivl.paidOut)) {
+        if (tokenContract.transfer(address(this), ivl.paidOut)) {
             ivl.status = Status.REFUNDED;
         } else {
             ivl.paidOut = 0;

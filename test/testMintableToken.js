@@ -45,6 +45,7 @@ it('should transfer tokens from one account to another', function(done) {
   .then((harness) => {
     assert.equal(harness.instance.balanceOf(harness.accounts[1]), 5e17)
     assert.equal(harness.instance.balanceOf(harness.accounts[2]), 5e17)
+    assert.equal(harness.instance.allowance(harness.accounts[1]), 0)
     return harness // return harness so we can keep chaining
   })
 
