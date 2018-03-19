@@ -42,11 +42,12 @@ contract TimelyResource {
 
       // Checks if the indexed interval is already set in this,
   // and if it isn't sets it and returns true. Otherwise false.
-  function set(IntervalsList storage self, uint8 index)
+  function set(IntervalsList storage self, uint8 index, uint8 duration)
       internal
       returns (bool success)
   {
-      uint shifted = uint(1) << index;
+      uint bits = (2**duration) - 1;
+      uint shifted = bits << index;
       if (shifted == ((~self.bits) & shifted)) {
           self.bits = self.bits | shifted;
           return true;
@@ -83,9 +84,6 @@ contract TimelyResource {
     // Follow mixed-case address literal checksum
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
     address public tokenAddr = 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359;
-    // must start offerings at least this far in advance
-    // 86400 blocks is one day
-    uint constant IN_ADVANCE = 86400;
 
     ERC20 tokenContract = ERC20(tokenAddr);
     IntervalsList list;
@@ -103,7 +101,7 @@ contract TimelyResource {
         // For convenience, the provider is the one who initializes us
         provider = msg.sender;
         name = _name;
-        require(_head > block.number + IN_ADVANCE);
+        require(_head > block.number);
         listInit(_head, _blocksPerUnit);
     }
 
@@ -127,7 +125,8 @@ contract TimelyResource {
     function approveInterval(uint8 _startIndex, address _requester, uint8 _duration, uint _amount) public returns (uint) {
         require(msg.sender == provider);
         uint start = list.head + (list.blocksPerUnit * _startIndex);
-        set(list, _startIndex);
+        bool result = set(list, _startIndex, _duration);
+        require(result == true);
         list.intervals[start] = Interval(_requester, Status.APPROVED, _duration, _amount, 0);
         return start;
     }

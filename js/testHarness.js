@@ -71,7 +71,7 @@ class TestHarness {
             console.error("Error " + err);
             reject(err);
           } else if (contract.address) {
-            console.log(`Contract deployed at ${contract.address}`)
+            console.log(`Contract ${this.contractName} deployed at ${contract.address}`)
             this.address = contract.address
             this.instance = web3.eth.contract(this.abi).at(this.address)
             resolve(this);

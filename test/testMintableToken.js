@@ -20,7 +20,9 @@ promise2 = null;
 it('should mint an initial amount', function(done) {
   promise2 = promise1.then((harness) => {
     assert.equal(harness.instance.totalSupply(), 0)
+    assert.equal(harness.instance.balanceOf(harness.accounts[1]), 0)
     return harness.runFunc((options, callback) => {
+        console.log(`TokenAddr ${harness.address}`)
         harness.instance.mint(harness.accounts[1], 1e18, options, callback)
     })
   })

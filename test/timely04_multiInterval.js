@@ -4,6 +4,10 @@ testHarness = new TimeHarness('TimelyResource')
 const assert = require('assert')
 const NAME = "Haircuts with Ramone"
 const BPU = 200; // blocks per unit, about 40 minutes
+const MI_SHIFT = 23; // multi-interval shift
+const MI_DUR = 7; // multi-interval duration
+const MI_BITS = (2**MI_DUR) - 1
+MI_START = null;
 
 promise0 = null;
 
@@ -17,50 +21,51 @@ it('should deploy and init a contract', function(done) {
       harness.instance.init(NAME, head, BPU, options, callback)
     })
   })
-
-  promise0.then(() => { done() })
-})
-
-promise1 = null;
-
-it('should schedule a single interval', function(done) {
-  promise1 = promise0
   .then((harness) => {
     return harness.runFunc((options, callback) => {
       harness.instance.approveInterval(
               0, harness.accounts[1],
-              1, 5e17,
+              1, 1e17,
+              options, callback)
+    })
+  })
+  .then((harness) => {
+    MI_START = harness.head + (BPU*MI_SHIFT);
+    return harness.runFunc((options, callback) => {
+      harness.instance.approveInterval(
+              MI_SHIFT, harness.accounts[1],
+              MI_DUR, 7e17,
               options, callback)
     })
   })
   .then((harness) => {
     console.log(`Head ${harness.head}`)
     // Offset 0 (interval slot 1) is same as head
-    interval = harness.instance.getInterval(harness.head)
+    interval = harness.instance.getInterval(MI_START)
     console.log(`Interval ${JSON.stringify(interval)}`)
-    assert.equal(harness.instance.getBits(), 1)
+    assert.equal(harness.instance.getBits(), 1 + (MI_BITS<<MI_SHIFT))
     return harness;
   })
 
-  promise1.then(() => { done(); })
+  promise0.then(() => { done(); })
 })
 
-it('should fail to schedule a single interval past 256 slots into the future', function(done) {
+it('should fail to schedule a multi interval past 256 slots into the future', function(done) {
   promise1 = promise0
   .then((harness) => {
     return harness.runFunc((options, callback) => {
       harness.instance.approveInterval(
               25600, harness.accounts[1],
-              2, 5e17,
+              MI_DUR, 5e17,
               options, callback)
     })
   })
   .then((harness) => {
-    console.log(`Start ${harness.head}`)
+    console.log(`Start ${MI_START}`)
     // Offset 0 (interval slot 1) is same as head
-    interval = harness.instance.getInterval(harness.head)
+    interval = harness.instance.getInterval(MI_START)
     console.log(JSON.stringify(interval))
-    assert.equal(harness.instance.getBits(), 1)
+    assert.equal(harness.instance.getBits(), 1 + (MI_BITS<<MI_SHIFT))
     return harness;
   })
 
@@ -72,14 +77,20 @@ it('should fail to schedule a single interval past 256 slots into the future', f
 TokenHarness = require('../js/testHarness')
 tokenHarness = new TokenHarness('MintableToken')
 
-tokenPromise = tokenHarness.deployPromise().then((harness) => {
+tokenPromise = null;
+
+it('should mint initial tokens to account 1', function(done) {
+  tokenPromise = tokenHarness.deployPromise().then((harness) => {
     return harness.runFunc((options, callback) => {
         harness.instance.mint(harness.accounts[1], 1e18, options, callback)
     })
-})
-.then((harness) => {
-  assert.equal(harness.instance.balanceOf(harness.accounts[1]), 1e18)
-  return harness
+  })
+  .then((harness) => {
+    assert.equal(harness.instance.balanceOf(harness.accounts[1]), 1e18)
+    return harness
+  })
+
+  tokenPromise.then(() => { done() })
 })
 
 promise2 = null;
@@ -90,28 +101,24 @@ it('should update token address, precious', function(done) {
   })
   .then((tokenAddr) => {
     promise2 = promise1.then((harness) => {
-      console.log(`Promise1 ${harness.address}`)
       return harness.runFunc((options, callback) => {
         options["from"] = harness.accounts[0]
         harness.instance.setTokenContract(tokenAddr, options, callback)
       })
-    })
-    .then((harness) => {
+    }).then((harness) => {
       assert.equal(harness.instance.tokenAddr(), tokenAddr)
       return harness;
     })
-
-    promise2.then(() => { done() })
   })
-
+  .then(() => { done(); })
 })
 
 promise3 = null;
 
-it('should practice transferring half of your tokens', function(done) {
+it('should practice transferring of your tokens', function(done) {
   promise3 = promise2.then((harness) => {
-    console.log(`Promise2 ${harness.address}`)
-    interval = harness.instance.getInterval(harness.head)
+    interval = harness.instance.getInterval(MI_START)
+    assert.equal(interval[2], 1, "Status should be APPROVED")
     console.log(JSON.stringify(interval))
     tokenPromise.then((tokenHarness) => {
       console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
@@ -124,8 +131,8 @@ it('should practice transferring half of your tokens', function(done) {
       assert(tokenHarness.instance.balanceOf(harness.address).equals(interval[1]),
         "Contract token balance is incremented by interval amount.")
       newAmt = 1e18 - interval[1]
-      console.log(tokenHarness.instance.balanceOf(harness.address))
-      console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
+      //console.log(tokenHarness.instance.balanceOf(harness.address))
+      //console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
       assert(tokenHarness.instance.balanceOf(harness.accounts[1]).equals(newAmt),
         `Requester token balance is decremented by interval amount: ${newAmt}.`)
     })
@@ -134,14 +141,12 @@ it('should practice transferring half of your tokens', function(done) {
   })
 })
 
-promise4 = null;
-
-it('should confirm and pay for an interval', function(done) {
-  promise4 = promise3.then((harness) => {
+it('should confirm and pay for a multi-interval', function(done) {
+  promise3.then((harness) => {
     return harness.runFunc((options, callback) => {
       // Test paying from same requester for now
       options["from"] = harness.accounts[1]
-      interval = harness.instance.getInterval(harness.head)
+      interval = harness.instance.getInterval(MI_START)
       console.log(`Address: ${harness.address}`)
       console.log(JSON.stringify(interval))
       console.log(`Head ${harness.head}`)
@@ -151,8 +156,8 @@ it('should confirm and pay for an interval', function(done) {
         harness.accounts[1], options, callback)
     })
   })
+  .then((harness) => {
 
-  promise4.then(() => { done() })
+  })
+  .then(() => { done() })
 })
-
-module.exports = promise4
