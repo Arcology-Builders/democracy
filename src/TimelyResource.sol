@@ -40,13 +40,13 @@ contract TimelyResource {
         mapping(uint => Interval) intervals;
     }
 
-      // Checks if the indexed interval is already set in this,
+  // Checks if the indexed interval is already set in this,
   // and if it isn't sets it and returns true. Otherwise false.
   function set(IntervalsList storage self, uint8 index, uint8 duration)
       internal
       returns (bool success)
   {
-      uint bits = (2**duration) - 1;
+      uint bits = 2**uint(duration) - 1;
       uint shifted = bits << index;
       if (shifted == ((~self.bits) & shifted)) {
           self.bits = self.bits | shifted;
@@ -56,12 +56,15 @@ contract TimelyResource {
       }
   }
 
-  function clear(IntervalsList storage self, uint8 index)
+  // Checks if the indexed interval is already set in this,
+  // and if it isn't sets it and returns true. Otherwise false.
+  function clear(IntervalsList storage self, uint8 index, uint8 duration)
       internal
       returns (bool success)
   {
-      uint shifted = uint(1) << index;
-      if (self.bits & shifted == shifted) {
+      uint bits = 2**uint(duration) - 1;
+      uint shifted = bits << index;
+      if ((shifted & bits) == shifted) {
           self.bits = self.bits & ~shifted;
           return true;
       } else {
@@ -131,21 +134,19 @@ contract TimelyResource {
         return start;
     }
     /*
-     * Only the provider can cancel/reject their requested booking,
+     * Requests can be cancelled by either provider or requester
      * before it's been confirmed.
      */
-    function cancelInterval(uint _start, address _requester) public {
-        require(msg.sender == provider || msg.sender == _requester);
-        Interval storage ivl = list.intervals[_start];
+    function cancelInterval(uint8 _startIndex) public {
+        uint start = list.head + (list.blocksPerUnit * _startIndex);
+        Interval storage ivl = list.intervals[start];
+        require(msg.sender == provider || msg.sender == ivl.requester);
         // Either we cancel before requester confirms
         // or we refund requester.
-        require((ivl.status == Status.APPROVED || ivl.status == Status.CONFIRMED) && ivl.paidOut == 0);
-        if (ivl.status == Status.CONFIRMED) {
-            ivl.paidOut = ivl.amount;
-            _requester.transfer(ivl.amount);
-            ivl.status = Status.REFUNDED;
+        require(ivl.status == Status.APPROVED);
+        if (clear(list, _startIndex, ivl.duration)) {
+          delete(list.intervals[start]);
         }
-        delete(list.intervals[_start]);
     }
 
     /*
@@ -153,19 +154,24 @@ contract TimelyResource {
      * You can only pay an approved transaction.
      * Anyone can pay (not just the requester) but the appointment only goes to the requester.
      */
-    function confirmInterval(uint _start, address _requester) public payable {
-        //require(_start > block.number);
-        Interval storage ivl = list.intervals[_start];
-        //require(ivl.status == Status.APPROVED);
+    function confirmInterval(uint8 _startIndex) public payable {
+        uint start = list.head + (list.blocksPerUnit * _startIndex);
+        require(start > block.number);
+        Interval storage ivl = list.intervals[start];
+        require(ivl.status == Status.APPROVED);
         if (tokenContract.transfer(address(this), ivl.amount)) {
             // We only proceed to this point if we succeed the token transfer
             ivl.status = Status.CONFIRMED;
         }
     }
 
-    function refundInterval(uint8 _startIndex, address _requester) public {
-        uint start = list.head + (_startIndex * list.blocksPerUnit);
-        require(block.number > start);
+    /*
+     * Refund an interval after it's been confirmed.
+     * Only provider can do this.
+     */
+    function refundInterval(uint8 _startIndex) public {
+        require(msg.sender == provider);
+        uint start = list.head + (list.blocksPerUnit * _startIndex);
         Interval storage ivl = list.intervals[start];
         require(ivl.status == Status.CONFIRMED);
         require(ivl.amount > 0); // we cannot refund a free Interval
@@ -174,7 +180,9 @@ contract TimelyResource {
         // Todo we still need to handle paying back the token at the contract level
 
         if (tokenContract.transfer(address(this), ivl.paidOut)) {
+            clear(list, _startIndex, ivl.duration);
             ivl.status = Status.REFUNDED;
+            // we only want to refund once.
         } else {
             ivl.paidOut = 0;
         }

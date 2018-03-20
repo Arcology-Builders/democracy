@@ -46,11 +46,19 @@ function findImports (path) {
 }
 
 sourceMap = {}
-for (var contract in inputs) {
-  console.log(`${contract}: ${inputs[contract].length}`)
-  shortName = path.basename(contract)
-  sourceMap[shortName] = inputs[contract]
+if (process.argv.length > 2) {
+  // Compile a single file if we get it as arg
+  shortName = path.basename(process.argv[2])
+  sourceMap[shortName] = inputs[shortName]
+} else {
+  // Otherwise compile all files
+  for (var contract in inputs) {
+    console.log(`${contract}: ${inputs[contract].length}`)
+    shortName = path.basename(contract)
+    sourceMap[shortName] = inputs[contract]
+  }
 }
+
 // Second arg is 1 for optimize, 0 for normal
 outputs = solc.compile({sources: sourceMap}, 0, findImports)
 
