@@ -1,4 +1,4 @@
-TestHarness2 = require('../js/testHarness')
+TestHarness2 = require('js/testHarness')
 testHarness2 = new TestHarness2('MintableToken')
 
 TokenPromiseExport = testHarness2.deployPromise().then((harness) => {
