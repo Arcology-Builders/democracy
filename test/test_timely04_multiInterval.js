@@ -40,10 +40,10 @@ describe('Suite TimelyResource Multi-Interval Approving', () => {
       })
     })
     .then((harness) => {
-      console.log(`Head ${harness.head}`)
+      //console.log(`Head ${harness.head}`)
       // Offset 0 (interval slot 1) is same as head
       interval = harness.instance.getInterval(MI_START)
-      console.log(`Interval ${JSON.stringify(interval)}`)
+      //console.log(`Interval ${JSON.stringify(interval)}`)
       assert.equal(harness.instance.getBits(), 1 + (MI_BITS<<MI_SHIFT))
       return harness;
     })
@@ -121,9 +121,9 @@ describe('Suite TimelyResource Multi-Interval Approving', () => {
     promise3 = promise2.then((harness) => {
       interval = harness.instance.getInterval(MI_START)
       assert.equal(interval[2], 1, "Status should be APPROVED")
-      console.log(JSON.stringify(interval))
+      //console.log(JSON.stringify(interval))
       tokenPromise.then((tokenHarness) => {
-        console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
+        //console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
         return tokenHarness.runFunc((options, callback) => {
           options["from"] = harness.accounts[1]
           tokenHarness.instance.transfer(harness.address, interval[1], options, callback)
@@ -149,12 +149,12 @@ describe('Suite TimelyResource Multi-Interval Approving', () => {
         // Test paying from same requester for now
         options["from"] = harness.accounts[1]
         interval = harness.instance.getInterval(MI_START)
-        console.log(`Address: ${harness.address}`)
-        console.log(JSON.stringify(interval))
-        console.log(`Head ${harness.head}`)
-        console.log(`Block Number ${harness.web3.eth.blockNumber}`)
+        //console.log(`Address: ${harness.address}`)
+        //console.log(JSON.stringify(interval))
+        //console.log(`Head ${harness.head}`)
+        //console.log(`Block Number ${harness.web3.eth.blockNumber}`)
 
-        harness.instance.confirmInterval(harness.head,
+        harness.instance.confirmInterval(0,
           harness.accounts[1], options, callback)
       })
     })

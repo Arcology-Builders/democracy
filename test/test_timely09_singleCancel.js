@@ -78,16 +78,40 @@ describe("TestSuite TimelyResource Cancelling Single Interval", () => {
 
   })
 
-  it('should cancel the interval', function(done) {
-    promise3 = promise1
+  it('should still have an scheduled Interval', function(done) {
+    promise2 = promise1
     .then((harness) => {
       interval = harness.instance.getInterval(harness.head)
       assert.equal(harness.instance.getBits(), 1)
       assert.equal(interval[1], 5e17, "Interval should have original approved amount.")
       assert.equal(interval[2],  1, "Interval has APPROVED status")
       assert.equal(interval[0],  1, "Interval has duration one")
-      console.log(`${JSON.stringify(interval)}`)
-      console.log(`${harness.head}`)
+    })
+    .then(() => { done() })
+  })
+
+  it('should fail to cancel a single interval as another account', function(done) {
+    promise2 = promise1
+    .then((harness) => {
+      return harness.runFunc((options, callback) => {
+        options['from'] = harness.accounts[2]
+        harness.instance.cancelInterval(
+                0,
+                options, callback)
+      })
+    })
+    .catch((error) => {
+        assert(error,"Revert because interval doesn't exist");
+        done();
+    })
+
+  })
+
+  it('should cancel the interval', function(done) {
+    promise3 = promise1
+    .then((harness) => {
+      //console.log(`${JSON.stringify(interval)}`)
+      //console.log(`${harness.head}`)
       return harness.runFunc((options, callback) => {
         harness.instance.cancelInterval(
                 0,
