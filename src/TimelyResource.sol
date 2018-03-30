@@ -5,23 +5,15 @@ contract ERC20Events {
     event Transfer(address indexed src, address indexed dst, uint wad);
 }
 
-contract ERC20 is ERC20Events {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address guy) public view returns (uint);
-    function allowance(address src, address guy) public view returns (uint);
-
-    function approve(address guy, uint wad) public returns (bool);
-    function transfer(address dst, uint wad) public returns (bool);
-    function transferFrom(
-        address src, address dst, uint wad
-    ) public returns (bool);
-}
+import "./ERC20.sol";
 
 contract TimelyResource {
 
     enum Status {
         FREE, APPROVED, CONFIRMED, COMPLETED, REFUNDED
     }
+
+    event Approval(uint start);
 
     struct Interval {
         // No start number, since this is the key where we access this Interval
@@ -101,6 +93,7 @@ contract TimelyResource {
     }
 
     function init(string _name, uint _head, uint16 _blocksPerUnit) public {
+        require(msg.sender == owner)
         // For convenience, the provider is the one who initializes us
         provider = msg.sender;
         name = _name;
@@ -109,6 +102,7 @@ contract TimelyResource {
     }
 
     function setTokenContract(address _tokenAddr) public {
+        require(msg.sender == owner)
         tokenAddr = _tokenAddr;
         tokenContract = ERC20(tokenAddr);
     }
@@ -131,6 +125,7 @@ contract TimelyResource {
         bool result = set(list, _startIndex, _duration);
         require(result == true);
         list.intervals[start] = Interval(_requester, Status.APPROVED, _duration, _amount, 0);
+        Approval(start);
         return start;
     }
     /*
@@ -159,7 +154,7 @@ contract TimelyResource {
         require(start > block.number);
         Interval storage ivl = list.intervals[start];
         require(ivl.status == Status.APPROVED);
-        if (tokenContract.transfer(address(this), ivl.amount)) {
+        if (tokenContract.transferFrom(msg.sender, this, ivl.amount)) {
             // We only proceed to this point if we succeed the token transfer
             ivl.status = Status.CONFIRMED;
         }
@@ -179,7 +174,7 @@ contract TimelyResource {
         ivl.amount = 0;
         // Todo we still need to handle paying back the token at the contract level
 
-        if (tokenContract.transfer(address(this), ivl.paidOut)) {
+        if (tokenContract.transfer(ivl.requester, ivl.paidOut)) {
             clear(list, _startIndex, ivl.duration);
             ivl.status = Status.REFUNDED;
             // we only want to refund once.

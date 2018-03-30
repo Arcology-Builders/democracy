@@ -29,18 +29,14 @@ while (queue.length > 0) {
     // in findImport below
     do {
       keys.push(paths.join(path.sep))
-      //console.log(`${paths}`)
       if (paths.length <= 1) { break; }
       paths = paths.slice(-(paths.length - 1))
     } while(true);
-    //console.log("Keys " + JSON.stringify(keys))
     keys.forEach((key) => inputs[key] = source)
   }
 }
 
 function findImports (path) {
-  //console.log(`Finding path ${path}`)
-  //console.log(`Returning path ${inputs[path]}`)
   assert(inputs[path])
   return {contents: inputs[path]}
 }
@@ -63,7 +59,10 @@ if (process.argv.length > 2) {
 outputs = solc.compile({sources: sourceMap}, 0, findImports)
 
 // Uncomment below to dump the output of solc compiler
-console.log(JSON.stringify(outputs.errors))
+if (outputs.errors) {
+  console.log(JSON.stringify(outputs.errors))
+}
+
 for (var contractName in outputs.contracts) {
   shortName = path.basename(contractName).split(":")[1]
   output = {

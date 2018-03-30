@@ -146,14 +146,15 @@ describe('Suite TimelyResource Single Interval Approving', () => {
         // Test paying from same requester for now
         options["from"] = harness.accounts[1]
         interval = harness.instance.getInterval(harness.head)
-        console.log(`Address: ${harness.address}`)
-        console.log(JSON.stringify(interval))
-        console.log(`Head ${harness.head}`)
-        console.log(`Block Number ${harness.web3.eth.blockNumber}`)
-
         harness.instance.confirmInterval(0,
-          harness.accounts[1], options, callback)
+          options, callback)
       })
+    })
+    .then((harness) => {
+      interval = harness.instance.getInterval(head)
+      assert.equal(interval[0], 1, "Duration of 1")
+      assert.equal(interval[1], 5e17, "Amount of 1")
+      assert.equal(interval[2], 2, "Status of CONFIRMED")
     })
 
     promise4.then(() => { done() })

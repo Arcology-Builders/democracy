@@ -47,11 +47,27 @@ describe('Suite MintableToken', () => {
     .then((harness) => {
       assert.equal(harness.instance.balanceOf(harness.accounts[1]), 5e17)
       assert.equal(harness.instance.balanceOf(harness.accounts[2]), 5e17)
-      assert.equal(harness.instance.allowance(harness.accounts[1]), 0)
+      assert.equal(harness.instance.allowance(harness.accounts[1], harness.accounts[0]), 0)
       return harness // return harness so we can keep chaining
     })
 
     promise3.then(() => { done(); })
+  })
+
+  it('should approve a certain amount', (done) => {
+    promise3.then((harness) => {
+      return harness.runFunc((options, callback) => {
+        options['from'] = harness.accounts[2]
+        harness.instance.approve(harness.accounts[0], 1e18, options, callback)
+      })
+    })
+    .then((harness) => {
+      assert.equal(harness.instance.allowance(harness.accounts[2], harness.accounts[0]),
+        1e18, "Approval for account 2 should have been increased.")
+      assert.equal(harness.instance.allowance(harness.accounts[1], harness.accounts[0]),
+        0, "Approval for account 1 should not have changed.")
+    })
+    .then(() => {done()})
   })
 
 })

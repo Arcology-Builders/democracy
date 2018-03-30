@@ -43,6 +43,7 @@ describe('Suite TimelyResource Multi-Interval Approving', () => {
       //console.log(`Head ${harness.head}`)
       // Offset 0 (interval slot 1) is same as head
       interval = harness.instance.getInterval(MI_START)
+      assert.equal(interval[2], 1)
       //console.log(`Interval ${JSON.stringify(interval)}`)
       assert.equal(harness.instance.getBits(), 1 + (MI_BITS<<MI_SHIFT))
       return harness;

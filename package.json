@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "config": "^1.21.0",
+    "ethereumjs-vm": "^2.3.3",
     "express": "^4.13.4",
     "ganache-cli": "^6.1.0",
     "jade": "^1.11.0",
