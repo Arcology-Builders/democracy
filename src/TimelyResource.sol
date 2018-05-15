@@ -93,7 +93,7 @@ contract TimelyResource {
     }
 
     function init(string _name, uint _head, uint16 _blocksPerUnit) public {
-        require(msg.sender == owner)
+        require(msg.sender == owner);
         // For convenience, the provider is the one who initializes us
         provider = msg.sender;
         name = _name;
@@ -102,7 +102,7 @@ contract TimelyResource {
     }
 
     function setTokenContract(address _tokenAddr) public {
-        require(msg.sender == owner)
+        require(msg.sender == owner);
         tokenAddr = _tokenAddr;
         tokenContract = ERC20(tokenAddr);
     }
@@ -151,10 +151,10 @@ contract TimelyResource {
      */
     function confirmInterval(uint8 _startIndex) public payable {
         uint start = list.head + (list.blocksPerUnit * _startIndex);
-        require(start > block.number);
+        //require(start > block.number);
         Interval storage ivl = list.intervals[start];
         require(ivl.status == Status.APPROVED);
-        if (tokenContract.transferFrom(msg.sender, this, ivl.amount)) {
+        if (tokenContract.transferFrom(msg.sender, address(this), ivl.amount)) {
             // We only proceed to this point if we succeed the token transfer
             ivl.status = Status.CONFIRMED;
         }

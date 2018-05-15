@@ -1,24 +1,23 @@
 // Test harness that relies on a fresh ganache running on 8555
 // and keys saved to keys/ganache.test.json
 
-assert = require('assert')
-fs = require('fs')
-Web3 = require('web3')
-web3 = new Web3()
-ganachelib = require('ganache-cli')
+const assert = require('assert')
+const fs = require('fs')
+const Eth = require('ethjs')
+const ganachelib = require('ganache-cli')
 
-config = require('config')['test']
+const config = require('config')['test']
 
-endpoint = config['endpoint']
-gasLimit = config['gasLimit']
-gasPrice = config['gasPrice']
+const endpoint = config['endpoint']
+const gasLimit = config['gasLimit']
+const gasPrice = config['gasPrice']
 
 // Re-enable when you figure out what's wrong with programmatic
 // ganache
 //KEYS_PATH="./keys/ganache.test.json"
 //ganache = ganachelib.provider({account_keys_path: KEYS_PATH})
 //web3.setProvider(ganache)
-web3.setProvider(new web3.providers.HttpProvider(endpoint))
+const eth = new Eth(new Eth.HttpProvider(endpoint));
 
 keys = JSON.parse(fs.readFileSync(`keys/ganache.test.json`).toString()).addresses
 
@@ -43,7 +42,7 @@ class TestHarness {
     this.abi = output.abi
     //console.log(`ABI ${JSON.stringify(this.abi)}`)
 
-    this.web3 = web3
+    this.eth = eth 
     this.accounts = accounts
   }
 
@@ -65,7 +64,7 @@ class TestHarness {
 
   deployPromise() {
     return new Promise((resolve, reject) => {
-      web3.eth.contract(this.abi).new({data: this.code, from: coinbase, gas: gasLimit, gasPrice: gasPrice},
+      eth.contract(this.abi).new({data: this.code, from: coinbase, gas: gasLimit, gasPrice: gasPrice},
         (err, contract) => {
           if (err) {
             console.error("Error " + err);
@@ -73,7 +72,7 @@ class TestHarness {
           } else if (contract.address) {
             console.log(`Contract ${this.contractName} deployed at ${contract.address}`)
             this.address = contract.address
-            this.instance = web3.eth.contract(this.abi).at(this.address)
+            this.instance = eth.contract(this.abi).at(this.address)
             resolve(this);
           }
         });

@@ -63,6 +63,7 @@ if (outputs.errors) {
   console.log(JSON.stringify(outputs.errors))
 }
 
+
 for (var contractName in outputs.contracts) {
   shortName = path.basename(contractName).split(":")[1]
   output = {
@@ -70,5 +71,7 @@ for (var contractName in outputs.contracts) {
     code: outputs.contracts[contractName].bytecode,
     abi: JSON.parse(outputs.contracts[contractName].interface)
   }
+  // Uncomment this to dump format of solidity output
+  //console.log(JSON.stringify(outputs.contracts[contractName]))
   fs.writeFileSync(`outputs/${shortName}.json`, JSON.stringify(output))
 }
