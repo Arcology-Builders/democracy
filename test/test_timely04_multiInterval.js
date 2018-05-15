@@ -138,6 +138,10 @@ describe('Suite TimelyResource Multi-Interval Approving', () => {
         //console.log(tokenHarness.instance.balanceOf(harness.accounts[1]))
         assert(tokenHarness.instance.balanceOf(harness.accounts[1]).equals(newAmt),
           `Requester token balance is decremented by interval amount: ${newAmt}.`)
+        return tokenHarness.runFunc((options, callback) => {
+          options["from"] = harness.accounts[1]
+          tokenHarness.instance.increaseApproval(harness.address, interval[1], options, callback)
+        })
       })
       .then(() => { done() })
       return harness;
