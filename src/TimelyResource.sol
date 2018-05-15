@@ -93,7 +93,7 @@ contract TimelyResource {
     }
 
     function init(string _name, uint _head, uint16 _blocksPerUnit) public {
-        require(msg.sender == owner)
+        require(msg.sender == owner);
         // For convenience, the provider is the one who initializes us
         provider = msg.sender;
         name = _name;
@@ -102,7 +102,7 @@ contract TimelyResource {
     }
 
     function setTokenContract(address _tokenAddr) public {
-        require(msg.sender == owner)
+        require(msg.sender == owner);
         tokenAddr = _tokenAddr;
         tokenContract = ERC20(tokenAddr);
     }
