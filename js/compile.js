@@ -44,14 +44,14 @@ function findImports (path) {
 sourceMap = {}
 if (process.argv.length > 2) {
   // Compile a single file if we get it as arg
-  shortName = path.basename(process.argv[2])
-  sourceMap[shortName] = inputs[shortName]
+  const targetName = path.basename(process.argv[2])
+  sourceMap[targetName] = inputs[targetName]
 } else {
   // Otherwise compile all files
   for (var contract in inputs) {
     console.log(`${contract}: ${inputs[contract].length}`)
-    shortName = path.basename(contract)
-    sourceMap[shortName] = inputs[contract]
+    const targetName = path.basename(contract)
+    sourceMap[targetName] = inputs[contract]
   }
 }
 
@@ -65,10 +65,12 @@ if (outputs.errors) {
 
 for (var contractName in outputs.contracts) {
   shortName = path.basename(contractName).split(":")[1]
-  output = {
+  const output = {
     name: shortName,
     code: outputs.contracts[contractName].bytecode,
     abi: JSON.parse(outputs.contracts[contractName].interface)
   }
+  const abiString = `abi = ${JSON.stringify(output['abi'])}`
   fs.writeFileSync(`outputs/${shortName}.json`, JSON.stringify(output))
+  fs.writeFileSync(`web/${shortName}-abi.json`, abiString)
 }

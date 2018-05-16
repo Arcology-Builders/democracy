@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Timely Resource</title>
+
+  <style media="screen" type="text/css">
+    .daySquare {
+      width: 100px;
+      height: 100px;
+      background-color: aquamarine;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<h1>Timely Resource</h1>
+
+<h3>
+
+<div id="resourceLine">
+  <div id="0" class="daySquare">
+</div>
+
+</h3>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script src="./TimelyResource-abi.json"></script>
+<script type="text/javascript" >
+
+var address = "0xa71efb4b623a34ff59312c4235bc06a1f89662a2";
+  // set the provider you want from Web3.providers
+  var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8555"));
+  var contract = web3.eth.contract(abi).at(address);
+  var intervals = [];
+  var head = contract.getHead().toNumber();
+  var bpu = contract.getBlocksPerUnit().toNumber();
+
+  // Ganache Local Network
+  var genesisTime = 1526419116000;
+  // Rinkeby
+  // var genesisTime = 1492010450;
+for (var current = contract.getBits().toNumber(), i=0; current > 0; current >>= 1, i += 1) {
+	console.log(current);
+	if (current & 1) {
+	  console.log(i);
+	  console.log(head + bpu*i); 
+	  var interval = contract.getInterval(head + bpu*i);
+	  var duration = interval[0].toNumber();
+	  var amount = interval[1].toNumber();
+	  var status = interval[2].toNumber();
+      intervals.push({shift: i, duration: duration, amount: amount, status: status});
+	  current = current >> (duration-1);
+	}
+    document.getElementById("resourceLine").appendChild('<div class="daySquare"></div>');
+}
+
+  
+  console.log("Bitmask " + contract.getBits());
+
+
+</script>
+</body>
+</html>
