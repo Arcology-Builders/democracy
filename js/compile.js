@@ -70,7 +70,7 @@ for (var contractName in outputs.contracts) {
     code: outputs.contracts[contractName].bytecode,
     abi: JSON.parse(outputs.contracts[contractName].interface)
   }
-  const abiString = `abi = ${JSON.stringify(output['abi'])}`
+  const abiString = `abi = ${JSON.stringify(output['abi'], null, 2)}`
   fs.writeFileSync(`outputs/${shortName}.json`, JSON.stringify(output))
   fs.writeFileSync(`web/${shortName}-abi.json`, abiString)
 }

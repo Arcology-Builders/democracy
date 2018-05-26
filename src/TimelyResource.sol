@@ -80,7 +80,7 @@ contract TimelyResource {
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
     address public tokenAddr = 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359;
 
-    ERC20 tokenContract = ERC20(tokenAddr);
+    ERC20 public tokenContract = ERC20(tokenAddr);
     IntervalsList list;
 
     /* name - display name of this TimelyResource
@@ -208,8 +208,24 @@ contract TimelyResource {
         return list.head;
     }
 
+    function getTokenContract() public constant returns (address tokenAddress) {
+        return tokenContract;
+    }
+
     function getBlocksPerUnit() public constant returns (uint256 blocksPerUnit) {
         return list.blocksPerUnit;
+    }
+
+    function practiceTransfer(uint amount) public {
+      tokenContract.transferFrom(msg.sender, this, amount);
+    }
+
+    function checkTokenBalance(uint balance) public {
+      require(tokenContract.balanceOf(msg.sender) == balance);
+    }
+
+    function checkTokenAllowance(uint allowance) public {
+      require(tokenContract.allowance(msg.sender, this) == allowance);
     }
 
     function getInterval(

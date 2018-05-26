@@ -73,35 +73,56 @@
 </h3>
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
 <script src="./TimelyResource-abi.json"></script>
+<script src="./ERC20Basic-abi.json"></script>
 <script type="text/javascript" >
 
+// https://stackoverflow.com/a/8486188
+function getJsonFromUrl() {
+  var query = location.search.substr(1);
+  var result = {};
+  query.split("&").forEach(function(part) {
+    var item = part.split("=");
+    result[item[0]] = decodeURIComponent(item[1]);
+  });
+  return result;
+}
+
+function populateBalances(accountsList) {
+	var provider = web3.currentProvider
+	var metamaskParent = document.getElementById("metamask")
+	metamaskParent.setAttribute("style", "display: block;")
+	for (var accounts = accountsList, i = 0; i < accountsList.length; i++) {
+		var address = accountsList[i]
+		var accountDiv = document.createElement("div")
+		accountDiv.setAttribute("class", "metamaskAccount")
+		accountDiv.innerHTML = address
+		metamaskParent.appendChild(accountDiv)
+		var balanceDiv = document.createElement("div")
+		balanceDiv.setAttribute("class", "metamaskBalance")
+		balanceDiv.innerHTML = web3.fromWei(web3.eth.getBalance(address)).toString()
+		metamaskParent.appendChild(balanceDiv) + "ETH"
+	}
+}
+
 window.addEventListener('load', function() {
+
+  urlParams = getJsonFromUrl();
 
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof web3 !== 'undefined') {
 
+		populateBalances(web.eth.accounts);
     // Use the browser's ethereum provider
-    var provider = web3.currentProvider
-    var metamaskParent = document.getElementById("metamask")
-    metamaskParent.setAttribute("style", "display: block;")
-    for (var accounts = web3.eth.accounts, i = 0; i < web3.eth.accounts.length; i++) {
-      var address = web3.eth.accounts[i]
-      var accountDiv = document.createElement("div")
-      accountDiv.setAttribute("class", "metamaskAccount")
-      accountDiv.innerHTML = address
-      metamaskParent.appendChild(accountDiv)
-      var balanceDiv = document.createElement("div")
-      balanceDiv.setAttribute("class", "metamaskBalance")
-      balanceDiv.innerHTML = web3.fromWei(web3.eth.getBalance(address)).toString()
-      metamaskParent.appendChild(balanceDiv) + "ETH"
-    }
+  } else if (urlParams['net'] === 'ganache') {
+    populateBalances(web.eth.accounts);
   } else {
     console.log('No web3? You should consider trying MetaMask!')
   }
 
 })
 
-var address = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
+var timelyAddress = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
+var tokenAddress = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
   // set the provider you want from Web3.providers
   // var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX"));
   var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8555"));
