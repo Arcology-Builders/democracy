@@ -8,7 +8,36 @@
     .daySquare {
       width: 100px;
       height: 100px;
-      background-color: aquamarine;
+      margin: 10px;
+      float: left;
+    }
+
+    .daySquareEmpty {
+      border-color: navy;
+    }
+
+    .daySquareBooked {
+      background-color: cornflowerblue;
+    }
+
+    .metamaskAccount {
+      float: left;
+      position: relative;
+      background-color: skyblue;
+    }
+
+    .metamaskBalance {
+      float: left;
+      position: relative;
+      font-style: italic;
+    }
+
+    .metamaskClear {
+      clear: both;
+    }
+
+    .resourceLine {
+      width: 5000px;
     }
   </style>
 
@@ -18,8 +47,25 @@
 
 <h1>Timely Resource</h1>
 
+<section id="metamask" style="display: none;">
+  <h3>Metamask Detected</h3>
+  <p>The following accounts and balances were detected.</p>
+  <h4> Wallets Available</h4>
+</section>
+
 <h3>
 
+    <form>
+      <label>Offset</label>
+      <input type="text" id="offsetForm"></input>
+      <label>Duration</label>
+      <input type="text" id="durationForm"></input>
+      <label>Requester Address</label>
+      <input type="text" id="requesterForm"></input>
+      <label>Amount</label>
+      <input type="text" id="amountForm"></input>
+      <input type="button" id="submitBtn"></input>
+    </form>
 <div id="resourceLine">
   <div id="0" class="daySquare">
 </div>
@@ -29,35 +75,84 @@
 <script src="./TimelyResource-abi.json"></script>
 <script type="text/javascript" >
 
-var address = "0xa71efb4b623a34ff59312c4235bc06a1f89662a2";
+window.addEventListener('load', function() {
+
+  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+  if (typeof web3 !== 'undefined') {
+
+    // Use the browser's ethereum provider
+    var provider = web3.currentProvider
+    var metamaskParent = document.getElementById("metamask")
+    metamaskParent.setAttribute("style", "display: block;")
+    for (var accounts = web3.eth.accounts, i = 0; i < web3.eth.accounts.length; i++) {
+      var address = web3.eth.accounts[i]
+      var accountDiv = document.createElement("div")
+      accountDiv.setAttribute("class", "metamaskAccount")
+      accountDiv.innerHTML = address
+      metamaskParent.appendChild(accountDiv)
+      var balanceDiv = document.createElement("div")
+      balanceDiv.setAttribute("class", "metamaskBalance")
+      balanceDiv.innerHTML = web3.fromWei(web3.eth.getBalance(address)).toString()
+      metamaskParent.appendChild(balanceDiv) + "ETH"
+    }
+  } else {
+    console.log('No web3? You should consider trying MetaMask!')
+  }
+
+})
+
+var address = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
   // set the provider you want from Web3.providers
+  // var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX"));
   var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8555"));
   var contract = web3.eth.contract(abi).at(address);
   var intervals = [];
   var head = contract.getHead().toNumber();
   var bpu = contract.getBlocksPerUnit().toNumber();
 
-  // Ganache Local Network
-  var genesisTime = 1526419116000;
+  // Ganache Local Network in seconds
+  var genesisTime = 1526419116;
   // Rinkeby
   // var genesisTime = 1492010450;
-for (var current = contract.getBits().toNumber(), i=0; current > 0; current >>= 1, i += 1) {
-	console.log(current);
+for (var current = contract.getBits().toNumber(), i=0; i < 256; current >>= 1, i += 1) {
+	//console.log(current);
+    //console.log(i);
+    var startBlock = head + bpu*i;
+    //console.log("Start block " + startBlock); 
+    var timeOffset = genesisTime + startBlock * 15;
+    //console.log("Time Offset " + timeOffset);
+    var slotDate = new Date(timeOffset * 1000);
+    var div = document.createElement('div');
+    div.innerHTML = slotDate.toDateString();
 	if (current & 1) {
-	  console.log(i);
-	  console.log(head + bpu*i); 
-	  var interval = contract.getInterval(head + bpu*i);
+	  //console.log(i);
+	  var interval = contract.getInterval(startBlock);
 	  var duration = interval[0].toNumber();
 	  var amount = interval[1].toNumber();
 	  var status = interval[2].toNumber();
       intervals.push({shift: i, duration: duration, amount: amount, status: status});
 	  current = current >> (duration-1);
-	}
-    document.getElementById("resourceLine").appendChild('<div class="daySquare"></div>');
+      div.setAttribute("class", "daySquare daySquareBooked");
+    } else {
+      div.setAttribute("class", "daySquare daySquareEmpty");
+    }
+    document.getElementById("resourceLine").append(div);
 }
 
-  
-  console.log("Bitmask " + contract.getBits());
+  function approveInterval() {
+    var offset = parseInt(document.getElementById("offsetForm").value)
+    var duration = parseInt(document.getElementById("durationForm").value)
+    var requester = web3.toBigNumber(document.getElementById("requesterForm").value)
+    var amount = parseInt(document.getElementById("amountForm").value)
+    contract.approveInterval.call(offset, requester, duration, amount, function(err, result) {
+        console.log(JSON.stringify(result));
+                });
+  }
+
+ var submitBtn = document.getElementById("submitBtn");
+ submitBtn.addEventListener("click", approveInterval, false);
+
+  //console.log("Bitmask " + contract.getBits());
 
 
 </script>

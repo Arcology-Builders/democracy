@@ -30,6 +30,11 @@
     "testnet": "http://testnet.local-box.org:8545",
     "mainnet": "http://localhost:8545"
   },
+  "rinkeby": {
+    "gasPrice": "0x21105b0",
+    "gasLimit": "6700000",
+    "endpoint": "https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX"
+  },
   "test": {
     "gasPrice": "0x21105b0",
     "gasLimit": "6700000",

@@ -5,35 +5,16 @@ assert = require('assert')
 fs = require('fs')
 Web3 = require('web3')
 web3 = new Web3()
-ganachelib = require('ganache-cli')
-
-config = require('config')['test']
-
-endpoint = config['endpoint']
-gasLimit = config['gasLimit']
-gasPrice = config['gasPrice']
 
 // Re-enable when you figure out what's wrong with programmatic
 // ganache
+//ganachelib = require('ganache-cli')
 //KEYS_PATH="./keys/ganache.test.json"
 //ganache = ganachelib.provider({account_keys_path: KEYS_PATH})
 //web3.setProvider(ganache)
-web3.setProvider(new web3.providers.HttpProvider(endpoint))
-
-keys = JSON.parse(fs.readFileSync(`keys/ganache.test.json`).toString()).addresses
-
-accounts = []
-//keys = ganache.manager.state.accounts
-
-coinbase = null;
-for (var key in keys) {
-  accounts.push(key)
-}
-coinbase = accounts[0]
-console.log(`First test key found (coinbase): ${coinbase}`);
 
 class TestHarness {
-  constructor(contractName) {
+  constructor(contractName, network='test') {
     this.contractName = contractName;
     console.log(`CONTRACT NAME ${contractName}`)
 
@@ -44,14 +25,30 @@ class TestHarness {
     //console.log(`ABI ${JSON.stringify(this.abi)}`)
 
     this.web3 = web3
-    this.accounts = accounts
+    var config = require('config')[network]
+    var endpoint = config['endpoint']
+    this.gasLimit = config['gasLimit']
+    this.gasPrice = config['gasPrice']
+    web3.setProvider(new web3.providers.HttpProvider(endpoint))
+
+    var keys = JSON.parse(fs.readFileSync(`keys/ganache.test.json`).toString()).addresses
+
+    this.accounts = []
+    //keys = ganache.manager.state.accounts
+
+    for (var key in keys) {
+      this.accounts.push(key)
+    }
+    this.coinbase = this.accounts[0]
+    console.log(`First test key found (coinbase): ${this.coinbase}`);
+
   }
 
   // Takes a partial function that depends on a map of options
   // and we also add a callback that accepts (err, result) Node.js style
   runFunc(partial_func) {
     return new Promise((resolve, reject) => {
-      partial_func({from: coinbase, gas: gasLimit, gasPrice: gasPrice},
+      partial_func({from: this.coinbase, gas: this.gasLimit, gasPrice: this.gasPrice},
         (err, result) => {
           if (err) { reject(err); }
           else {
@@ -65,7 +62,7 @@ class TestHarness {
 
   deployPromise() {
     return new Promise((resolve, reject) => {
-      web3.eth.contract(this.abi).new({data: this.code, from: coinbase, gas: gasLimit, gasPrice: gasPrice},
+      web3.eth.contract(this.abi).new({data: this.code, from: this.coinbase, gas: this.gasLimit, gasPrice: this.gasPrice},
         (err, contract) => {
           if (err) {
             console.error("Error " + err);
