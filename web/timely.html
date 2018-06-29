@@ -6,9 +6,9 @@
 
   <style media="screen" type="text/css">
     .daySquare {
-      width: 100px;
-      height: 100px;
-      margin: 10px;
+      width: 20px;
+      height: 20px;
+      margin: 5px;
       float: left;
     }
 
@@ -55,6 +55,11 @@
 
 <h1>Timely Resource</h1>
 
+<section>
+  <h3>Current Block Number</h3>
+  <span id="blockNumber"></span>
+</section>
+
 <section id="metamask" style="display: none;">
   <h3>Metamask Detected</h3>
   <p>The following accounts and balances were detected.</p>
@@ -70,15 +75,27 @@
       <label>Duration</label>
       <input type="text" id="durationForm"></input>
       <label>Requester Address</label>
-      <input type="text" id="requesterForm"></input>
+      <select id="approveRequesterId">
+      </select>
       <label>Amount</label>
       <input type="text" id="amountForm"></input>
-      <input type="button" id="submitBtn" value="Approve"></input>
+      <input type="button" id="approveButton" value="Approve"></input>
     </form>
   
 <h3>
   Confirm Request
 </h3>
+    <form>
+      <label>Offset</label>
+      <input type="text" id="confirmOffsetForm"></input>
+      <label>Duration</label>
+      <label>Requester Address</label>
+      <select id="confirmRequesterId">
+      </select>
+      <input type="text" id="confirmAmountForm"></input>
+      <input type="button" id="confirmButton" value="Confirm"></input>
+    </form>
+  
 <div id="resourceLine">
   <div id="0" class="daySquare">
 </div>
@@ -125,8 +142,10 @@ function createBalanceDiv(balanceString) {
 }
 
 function populateBalances(accountsList) {
-	var provider = web3.currentProvider
-	var metamaskParent = document.getElementById("metamask")
+	var provider = web3.currentProvider;
+	var metamaskParent = document.getElementById("metamask");
+	var confirmSelector = document.getElementById("confirmRequesterId");
+	var approveSelector = document.getElementById("approveRequesterId");
 	metamaskParent.setAttribute("style", "display: block;")
 	for (var accounts = accountsList, i = 0; i < accountsList.length; i++) {
 		var address = accountsList[i]
@@ -139,7 +158,21 @@ function populateBalances(accountsList) {
     rowDiv.appendChild(createBalanceDiv(web3.fromWei(web3.eth.getBalance(address)).toString() + " ETH"));
     rowDiv.appendChild(createBalanceDiv(web3.fromWei(tokenContract.balanceOf(address)).toString() + " SYM"));
     metamaskParent.appendChild(rowDiv);
+    
+    function addOption(selector) {
+      var option = document.createElement("option");
+      option.setAttribute("value", i);
+      option.innerHTML = i;
+      selector.appendChild(option);
+    }
+    addOption(approveSelector);
+    addOption(confirmSelector);
 	}
+}
+
+function updateBlockNumber() {
+  document.getElementById("blockNumber").innerHTML = web3.eth.blockNumber;
+  document.getElementById(web3.eth.blockNumber).setAttribute("style", "border: 2px red solid");
 }
 
 window.addEventListener('load', function() {
@@ -157,6 +190,9 @@ window.addEventListener('load', function() {
     console.log('No web3? You should consider trying MetaMask!')
   }
   updateSquares(true);
+  updateBlockNumber();
+  setInterval(updateBlockNumber, 15000);
+
 })
 
 function updateSquares(create) {
@@ -178,7 +214,7 @@ function updateSquares(create) {
     div.innerHTML = startBlock;
     //slotDate.toDateString();
     if (current & 1) {
-      if (duration === 1) {
+      if (duration <= 1) {
         //console.log(i);
         var interval = contract.getInterval(startBlock);
         var duration = interval[0].toNumber();
@@ -186,7 +222,7 @@ function updateSquares(create) {
         var status = interval[2].toNumber();
         intervals.push({shift: i, duration: duration, amount: amount, status: status});
       } else if (duration > 1) {
-        current = current >> (duration-1);
+        //current = current >> (duration-1);
         duration -= 1;
       }
       console.log(`Status ${status}`);
@@ -201,23 +237,37 @@ function updateSquares(create) {
 function approveInterval() {
   var offset = parseInt(document.getElementById("offsetForm").value)
   var duration = parseInt(document.getElementById("durationForm").value)
-  var requester = document.getElementById("requesterForm").value.toString()
-  var amount = parseInt(document.getElementById("amountForm").value)
+  var requesterId = parseInt(document.getElementById("approveRequesterId").value)
+  var amount = web3.toWei(parseInt(document.getElementById("amountForm").value))
   console.log("offset " + offset);
   console.log("duration " + duration);
-  console.log("requester " + requester);
+  console.log("requesterId " + requesterId);
   console.log("amount " + amount);
-  contract.approveInterval(offset, requester, duration, amount, {from: web3.eth.accounts[0]}, function(err, result) {
+  contract.approveInterval(offset, web3.eth.accounts[requesterId], duration, amount,
+    {from: web3.eth.accounts[0]},
+    function(err, result) {
+      if (err) { console.error(err); }
       console.log(JSON.stringify(result));
       updateSquares(false);
   });
 }
 
- var submitBtn = document.getElementById("submitBtn");
- submitBtn.addEventListener("click", approveInterval, false);
+function confirmInterval() {
+  var offset = parseInt(document.getElementById("confirmOffsetForm").value)
+  var requesterId = parseInt(document.getElementById("confirmRequesterId").value)
+  console.log("offset " + offset);
+  console.log("requesterId " + requesterId);
+  contract.confirmInterval(offset,
+    {from: web3.eth.accounts[requesterId]},
+    function(err, result) {
+      if (err) { console.error(err); }
+      console.log(JSON.stringify(result));
+      updateSquares(false);
+  });
+}
 
-  //console.log("Bitmask " + contract.getBits());
-
+ document.getElementById("approveButton").addEventListener("click", approveInterval, false);
+ document.getElementById("confirmButton").addEventListener("click", confirmInterval, false);
 
 </script>
 </body>
