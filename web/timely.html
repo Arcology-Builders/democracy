@@ -24,12 +24,20 @@
       float: left;
       position: relative;
       background-color: skyblue;
+      width: 400px;
     }
 
     .metamaskBalance {
       float: left;
       position: relative;
       font-style: italic;
+      padding-left: 10px;
+      width: 300px;
+    }
+
+    .metamaskRow {
+      clear: both;
+      padding: 5px;
     }
 
     .metamaskClear {
@@ -54,7 +62,8 @@
 </section>
 
 <h3>
-
+   Approve Request
+</h3>
     <form>
       <label>Offset</label>
       <input type="text" id="offsetForm"></input>
@@ -64,16 +73,20 @@
       <input type="text" id="requesterForm"></input>
       <label>Amount</label>
       <input type="text" id="amountForm"></input>
-      <input type="button" id="submitBtn"></input>
+      <input type="button" id="submitBtn" value="Approve"></input>
     </form>
+  
+<h3>
+  Confirm Request
+</h3>
 <div id="resourceLine">
   <div id="0" class="daySquare">
 </div>
 
-</h3>
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-<script src="./TimelyResource-abi.json"></script>
-<script src="./ERC20Basic-abi.json"></script>
+<script src="./TimelyResource-abi.js"></script>
+<script src="./ERC20Basic-abi.js"></script>
+<script src="./addresses.js"></script>
 <script type="text/javascript" >
 
 // https://stackoverflow.com/a/8486188
@@ -87,20 +100,45 @@ function getJsonFromUrl() {
   return result;
 }
 
+var timelyAddress = addresses['timelyAddress'];
+var tokenAddress = addresses['tokenAddress'];
+// set the provider you want from Web3.providers
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX"));
+var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8555"));
+var contract = web3.eth.contract(abiTimelyResource).at(timelyAddress);
+var tokenContract = web3.eth.contract(abiERC20Basic).at(tokenAddress);
+var intervals = [];
+var head = contract.getHead().toNumber();
+var bpu = contract.getBlocksPerUnit().toNumber();
+
+// Ganache Local Network in seconds
+var genesisTime = 1526419116;
+// Rinkeby
+// var genesisTime = 1492010450;
+
+
+function createBalanceDiv(balanceString) {
+  var balanceDiv = document.createElement("div");
+  balanceDiv.setAttribute("class", "metamaskBalance");
+  balanceDiv.innerHTML = balanceString;
+  return balanceDiv; 
+}
+
 function populateBalances(accountsList) {
 	var provider = web3.currentProvider
 	var metamaskParent = document.getElementById("metamask")
 	metamaskParent.setAttribute("style", "display: block;")
 	for (var accounts = accountsList, i = 0; i < accountsList.length; i++) {
 		var address = accountsList[i]
+    var rowDiv = document.createElement("div")
+    rowDiv.setAttribute("class", "metamaskRow")
 		var accountDiv = document.createElement("div")
 		accountDiv.setAttribute("class", "metamaskAccount")
 		accountDiv.innerHTML = address
-		metamaskParent.appendChild(accountDiv)
-		var balanceDiv = document.createElement("div")
-		balanceDiv.setAttribute("class", "metamaskBalance")
-		balanceDiv.innerHTML = web3.fromWei(web3.eth.getBalance(address)).toString()
-		metamaskParent.appendChild(balanceDiv) + "ETH"
+    rowDiv.appendChild(accountDiv);
+    rowDiv.appendChild(createBalanceDiv(web3.fromWei(web3.eth.getBalance(address)).toString() + " ETH"));
+    rowDiv.appendChild(createBalanceDiv(web3.fromWei(tokenContract.balanceOf(address)).toString() + " SYM"));
+    metamaskParent.appendChild(rowDiv);
 	}
 }
 
@@ -111,64 +149,69 @@ window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof web3 !== 'undefined') {
 
-		populateBalances(web.eth.accounts);
+		populateBalances(web3.eth.accounts);
     // Use the browser's ethereum provider
   } else if (urlParams['net'] === 'ganache') {
-    populateBalances(web.eth.accounts);
+    populateBalances(web3.eth.accounts);
   } else {
     console.log('No web3? You should consider trying MetaMask!')
   }
-
+  updateSquares(true);
 })
 
-var timelyAddress = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
-var tokenAddress = "0x0d9da4c14a6865619e1df24d14d1febc126e0a40";
-  // set the provider you want from Web3.providers
-  // var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX"));
-  var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8555"));
-  var contract = web3.eth.contract(abi).at(address);
-  var intervals = [];
-  var head = contract.getHead().toNumber();
-  var bpu = contract.getBlocksPerUnit().toNumber();
+function updateSquares(create) {
 
-  // Ganache Local Network in seconds
-  var genesisTime = 1526419116;
-  // Rinkeby
-  // var genesisTime = 1492010450;
-for (var current = contract.getBits().toNumber(), i=0; i < 256; current >>= 1, i += 1) {
-	//console.log(current);
+  var duration = 1;
+
+  for (var current = contract.getBits().toNumber(), i=0; i < 256; current >>= 1, i += 1) {
+    //console.log(current);
     //console.log(i);
     var startBlock = head + bpu*i;
     //console.log("Start block " + startBlock); 
     var timeOffset = genesisTime + startBlock * 15;
     //console.log("Time Offset " + timeOffset);
     var slotDate = new Date(timeOffset * 1000);
-    var div = document.createElement('div');
-    div.innerHTML = slotDate.toDateString();
-	if (current & 1) {
-	  //console.log(i);
-	  var interval = contract.getInterval(startBlock);
-	  var duration = interval[0].toNumber();
-	  var amount = interval[1].toNumber();
-	  var status = interval[2].toNumber();
-      intervals.push({shift: i, duration: duration, amount: amount, status: status});
-	  current = current >> (duration-1);
+    var div = (create) ? document.createElement('div') : document.getElementById(startBlock);
+    if (create) {
+      div.setAttribute("id", startBlock);
+    }
+    div.innerHTML = startBlock;
+    //slotDate.toDateString();
+    if (current & 1) {
+      if (duration === 1) {
+        //console.log(i);
+        var interval = contract.getInterval(startBlock);
+        var duration = interval[0].toNumber();
+        var amount = interval[1].toNumber();
+        var status = interval[2].toNumber();
+        intervals.push({shift: i, duration: duration, amount: amount, status: status});
+      } else if (duration > 1) {
+        current = current >> (duration-1);
+        duration -= 1;
+      }
+      console.log(`Status ${status}`);
       div.setAttribute("class", "daySquare daySquareBooked");
     } else {
       div.setAttribute("class", "daySquare daySquareEmpty");
     }
     document.getElementById("resourceLine").append(div);
+  }
 }
 
-  function approveInterval() {
-    var offset = parseInt(document.getElementById("offsetForm").value)
-    var duration = parseInt(document.getElementById("durationForm").value)
-    var requester = web3.toBigNumber(document.getElementById("requesterForm").value)
-    var amount = parseInt(document.getElementById("amountForm").value)
-    contract.approveInterval.call(offset, requester, duration, amount, function(err, result) {
-        console.log(JSON.stringify(result));
-                });
-  }
+function approveInterval() {
+  var offset = parseInt(document.getElementById("offsetForm").value)
+  var duration = parseInt(document.getElementById("durationForm").value)
+  var requester = document.getElementById("requesterForm").value.toString()
+  var amount = parseInt(document.getElementById("amountForm").value)
+  console.log("offset " + offset);
+  console.log("duration " + duration);
+  console.log("requester " + requester);
+  console.log("amount " + amount);
+  contract.approveInterval(offset, requester, duration, amount, {from: web3.eth.accounts[0]}, function(err, result) {
+      console.log(JSON.stringify(result));
+      updateSquares(false);
+  });
+}
 
  var submitBtn = document.getElementById("submitBtn");
  submitBtn.addEventListener("click", approveInterval, false);

@@ -1,6 +1,7 @@
-TimeHarness = require('../js/testHarness')
-testHarness = new TimeHarness('TimelyResource')
+TestHarness = require('../js/testHarness')
+testHarness = new TestHarness('TimelyResource')
 
+const fs = require('fs')
 const assert = require('assert')
 const NAME = "Private Room in an Arcology"
 const BPU = 1; // blocks per unit, for testing
@@ -16,6 +17,7 @@ promise0 = testHarness.deployPromise().then((harness) => {
   })
 })
 .then((harness) => {
+  data = {timelyAddress: harness.address}
   return harness.runFunc((options, callback) => {
     harness.instance.approveInterval(
             0, harness.accounts[1],
@@ -42,6 +44,7 @@ tokenPromise = tokenHarness.deployPromise().then((harness) => {
     })
 })
 .then((harness) => {
+  console.log("Getting balance")
   assert.equal(harness.instance.balanceOf(harness.accounts[1]), 1e18)
   return harness
 })
@@ -49,6 +52,11 @@ tokenPromise = tokenHarness.deployPromise().then((harness) => {
 promise1 = Promise.all([promise0, tokenPromise]).then((values) => {
   timelyHarness = values[0]
   tokenHarness = values[1]
+  addressData = {
+    timelyAddress: timelyHarness.address,
+    tokenAddress: tokenHarness.address
+  }
+  fs.writeFileSync("web/addresses.js", `var addresses=${JSON.stringify(addressData)}`)
   return timelyHarness.runFunc((options, callback) => {
     options["from"] = timelyHarness.accounts[0]
     timelyHarness.instance.setTokenContract(tokenHarness.address, options, callback)
@@ -102,7 +110,7 @@ promise1.then((harness) => {
     harness.instance.checkTokenAllowance(interval[1], options, callback); 
     console.log(`${harness.instance.getBlocksPerUnit()}`)
     //harness.instance.practiceTransfer(5e17, options, callback);
-    harness.instance.confirmInterval(0, options, callback)
+    //harness.instance.confirmInterval(0, options, callback)
   })
 })
 .then((harness) => {
