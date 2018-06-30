@@ -71,7 +71,8 @@
 </h3>
     <form>
       <label>Offset</label>
-      <input type="text" id="offsetForm"></input>
+      <select id="approveOffset">
+      </select>
       <label>Duration</label>
       <input type="text" id="durationForm"></input>
       <label>Requester Address</label>
@@ -87,7 +88,8 @@
 </h3>
     <form>
       <label>Offset</label>
-      <input type="text" id="confirmOffsetForm"></input>
+      <select id="confirmOffset">
+      </select>
       <label>Duration</label>
       <label>Requester Address</label>
       <select id="confirmRequesterId">
@@ -172,6 +174,7 @@ function populateBalances(accountsList) {
 
 function updateBlockNumber() {
   document.getElementById("blockNumber").innerHTML = web3.eth.blockNumber;
+  document.getElementById(web3.eth.blockNumber-1).setAttribute("style", "");
   document.getElementById(web3.eth.blockNumber).setAttribute("style", "border: 2px red solid");
 }
 
@@ -198,8 +201,11 @@ window.addEventListener('load', function() {
 function updateSquares(create) {
 
   var duration = 1;
+  var approveOffset = document.getElementById("approveOffset");
+  var confirmOffset = document.getElementById("confirmOffset");
 
-  for (var current = contract.getBits().toNumber(), i=0; i < 256; current >>= 1, i += 1) {
+  for (var current = contract.getBits(), i=0; i < 256;
+           current = current.dividedToIntegerBy(2), i += 1) {
     //console.log(current);
     //console.log(i);
     var startBlock = head + bpu*i;
@@ -213,7 +219,7 @@ function updateSquares(create) {
     }
     div.innerHTML = startBlock;
     //slotDate.toDateString();
-    if (current & 1) {
+    if (current.mod(2).equals(1)) {
       if (duration <= 1) {
         //console.log(i);
         var interval = contract.getInterval(startBlock);
@@ -231,14 +237,25 @@ function updateSquares(create) {
       div.setAttribute("class", "daySquare daySquareEmpty");
     }
     document.getElementById("resourceLine").append(div);
+    function addOption(selector) {
+      var option = document.createElement("option");
+      option.setAttribute("value", i);
+      if (startBlock === web3.eth.blockNumber) {
+        option.setAttribute("selected", "selected");
+      }
+      option.innerHTML = startBlock;
+      selector.appendChild(option);
+    }
+    addOption(approveOffset);
+    addOption(confirmOffset);
   }
 }
 
 function approveInterval() {
-  var offset = parseInt(document.getElementById("offsetForm").value)
+  var offset = parseInt(document.getElementById("approveOffset").value)
   var duration = parseInt(document.getElementById("durationForm").value)
   var requesterId = parseInt(document.getElementById("approveRequesterId").value)
-  var amount = web3.toWei(parseInt(document.getElementById("amountForm").value))
+  var amount = web3.toWei(parseFloat(document.getElementById("amountForm").value))
   console.log("offset " + offset);
   console.log("duration " + duration);
   console.log("requesterId " + requesterId);
@@ -253,7 +270,7 @@ function approveInterval() {
 }
 
 function confirmInterval() {
-  var offset = parseInt(document.getElementById("confirmOffsetForm").value)
+  var offset = parseInt(document.getElementById("confirmOffset").value)
   var requesterId = parseInt(document.getElementById("confirmRequesterId").value)
   console.log("offset " + offset);
   console.log("requesterId " + requesterId);
