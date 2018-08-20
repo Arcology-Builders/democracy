@@ -16,8 +16,12 @@
       border-color: navy;
     }
 
-    .daySquareBooked {
-      background-color: cornflowerblue;
+    .daySquareApproved {
+      background-color: paleturquoise;
+    }
+    
+    .daySquareConfirmed {
+      background-color: deepskyblue;
     }
 
     .metamaskAccount {
@@ -74,12 +78,12 @@
       <select id="approveOffset">
       </select>
       <label>Duration</label>
-      <input type="text" id="durationForm"></input>
+      <input type="text" id="approveDuration"></input>
       <label>Requester Address</label>
       <select id="approveRequesterId">
       </select>
       <label>Amount</label>
-      <input type="text" id="amountForm"></input>
+      <input type="text" id="approveAmount"></input>
       <input type="button" id="approveButton" value="Approve"></input>
     </form>
   
@@ -91,9 +95,11 @@
       <select id="confirmOffset">
       </select>
       <label>Duration</label>
+      <input type="text" id="confirmDuration"></input>
       <label>Requester Address</label>
       <select id="confirmRequesterId">
       </select>
+      <label>Amount</label>
       <input type="text" id="confirmAmountForm"></input>
       <input type="button" id="confirmButton" value="Confirm"></input>
     </form>
@@ -203,6 +209,7 @@ function updateSquares(create) {
   var duration = 1;
   var approveOffset = document.getElementById("approveOffset");
   var confirmOffset = document.getElementById("confirmOffset");
+  var status;
 
   for (var current = contract.getBits(), i=0; i < 256;
            current = current.dividedToIntegerBy(2), i += 1) {
@@ -223,16 +230,20 @@ function updateSquares(create) {
       if (duration <= 1) {
         //console.log(i);
         var interval = contract.getInterval(startBlock);
-        var duration = interval[0].toNumber();
+        duration = interval[0].toNumber();
         var amount = interval[1].toNumber();
-        var status = interval[2].toNumber();
+        status = interval[2].toNumber();
         intervals.push({shift: i, duration: duration, amount: amount, status: status});
       } else if (duration > 1) {
         //current = current >> (duration-1);
         duration -= 1;
       }
-      console.log(`Status ${status}`);
-      div.setAttribute("class", "daySquare daySquareBooked");
+      console.log(`${i} Status ${status}`);
+      if (status === 2) {
+        div.setAttribute("class", "daySquare daySquareConfirmed");
+      } else if (status === 1) {
+        div.setAttribute("class", "daySquare daySquareApproved");
+      }
     } else {
       div.setAttribute("class", "daySquare daySquareEmpty");
     }
@@ -253,9 +264,9 @@ function updateSquares(create) {
 
 function approveInterval() {
   var offset = parseInt(document.getElementById("approveOffset").value)
-  var duration = parseInt(document.getElementById("durationForm").value)
+  var duration = parseInt(document.getElementById("approveDuration").value)
   var requesterId = parseInt(document.getElementById("approveRequesterId").value)
-  var amount = web3.toWei(parseFloat(document.getElementById("amountForm").value))
+  var amount = web3.toWei(parseFloat(document.getElementById("approveAmount").value))
   console.log("offset " + offset);
   console.log("duration " + duration);
   console.log("requesterId " + requesterId);
@@ -271,12 +282,16 @@ function approveInterval() {
 
 function confirmInterval() {
   var offset = parseInt(document.getElementById("confirmOffset").value)
-  var requesterId = parseInt(document.getElementById("confirmRequesterId").value)
+  var duration = parseInt(document.getElementById("confirmDuration").value)
+  //var requesterId = parseInt(document.getElementById("confirmRequesterId").value)
+  //var amount = web3.toWei(parseFloat(document.getElementById("confirmAmount").value))
   console.log("offset " + offset);
-  console.log("requesterId " + requesterId);
+  console.log("duration " + duration);
+  //console.log("requesterId " + requesterId);
+  //console.log("amount " + amount);
   contract.confirmInterval(offset,
     {from: web3.eth.accounts[requesterId]},
-    function(err, result) {
+     function(err, result) {
       if (err) { console.error(err); }
       console.log(JSON.stringify(result));
       updateSquares(false);
