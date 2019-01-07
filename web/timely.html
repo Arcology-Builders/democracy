@@ -64,6 +64,11 @@
   <span id="blockNumber"></span>
 </section>
 
+<section>
+  <h3>Contract Token Balance</h3>
+  <span id="tokenBalance"></span>
+</section>
+
 <section id="metamask" style="display: none;">
   <h3>Metamask Detected</h3>
   <p>The following accounts and balances were detected.</p>
@@ -135,12 +140,43 @@ var tokenContract = web3.eth.contract(abiERC20Basic).at(tokenAddress);
 var intervals = [];
 var head = contract.getHead().toNumber();
 var bpu = contract.getBlocksPerUnit().toNumber();
+console.log(`BPU ${bpu}`);
 
 // Ganache Local Network in seconds
-var genesisTime = 1526419116;
+var genesisTime = Math.round(new Date().getTime()/1000);
 // Rinkeby
 // var genesisTime = 1492010450;
 
+var monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+  ]
+
+function timeLabel(blockNum, pastLabel) {
+  var time = genesisTime + (blockNum * 15);
+  var dateTime = new Date(time*1000);
+  if (!pastLabel || dateTime.getMonth() > pastLabel.dateTime.getMonth()) {
+    return {
+      displayName: `${monthNames[dateTime.getMonth()]} ${dateTime.getFullYear()}`,
+      dateTime: dateTime
+    }
+  } else {
+    return { 
+      displayName: "",
+      dateTime: dateTime
+    }
+  }
+}
 
 function createBalanceDiv(balanceString) {
   var balanceDiv = document.createElement("div");
@@ -180,7 +216,7 @@ function populateBalances(accountsList) {
 
 function updateBlockNumber() {
   document.getElementById("blockNumber").innerHTML = web3.eth.blockNumber;
-  document.getElementById(web3.eth.blockNumber-1).setAttribute("style", "");
+  document.getElementById(web3.eth.blockNumber-bpu).setAttribute("style", "");
   document.getElementById(web3.eth.blockNumber).setAttribute("style", "border: 2px red solid");
 }
 
@@ -210,6 +246,7 @@ function updateSquares(create) {
   var approveOffset = document.getElementById("approveOffset");
   var confirmOffset = document.getElementById("confirmOffset");
   var status;
+  var pastLabel;
 
   for (var current = contract.getBits(), i=0; i < 256;
            current = current.dividedToIntegerBy(2), i += 1) {
@@ -224,7 +261,8 @@ function updateSquares(create) {
     if (create) {
       div.setAttribute("id", startBlock);
     }
-    div.innerHTML = startBlock;
+    pastLabel = timeLabel(startBlock, pastLabel);
+    div.innerHTML = pastLabel.displayName + "<br/>" + i;
     //slotDate.toDateString();
     if (current.mod(2).equals(1)) {
       if (duration <= 1) {

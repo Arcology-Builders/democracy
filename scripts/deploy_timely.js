@@ -4,7 +4,7 @@ testHarness = new TestHarness('TimelyResource')
 const fs = require('fs')
 const assert = require('assert')
 const NAME = "Private Room in an Arcology"
-const BPU = 1; // blocks per unit, for testing
+const BPU = 5760; // blocks per unit, for testing
 
 var interval = undefined;
 
