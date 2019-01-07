@@ -14,14 +14,7 @@ Preamble = () => {
 
     network = process.argv[2]
     console.log("Net: " + network)
-
-    if (network === 'mainnet') {
-      console.log("Mainnet")
-      endpoint = config['endpoints']['mainnet']
-    } else {
-      console.log("kovan")
-      endpoint = config['endpoints']['kovan']
-    }
+    endpoint = config['endpoints'][network]
 
     command = process.argv[3]
 
