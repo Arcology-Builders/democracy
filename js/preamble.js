@@ -1,6 +1,5 @@
 // Script to connect to JSONRPC and enter a REPL
-var Web3 = require('web3');
-var web3 = new Web3();
+const Eth = require('ethjs');
 
 config = require('config')
 
@@ -11,8 +10,8 @@ Preamble = (network, command) => {
     console.log("Net: " + network)
     endpoint = config['endpoints'][network]
 
-    web3.setProvider(new web3.providers.HttpProvider(endpoint))
-    return { "web3": web3 }
+    const eth = new Eth(new Eth.HttpProvider(endpoint));
+    return { "eth": eth }
 }
 
 module.exports = Preamble

@@ -16,7 +16,6 @@
     "ethjs": "^0.3.6",
     "ganache-cli": "^6.1.0",
     "solc": "^0.4.20",
-    "web3": "^1.0.0-beta.37",
     "zeppelin-solidity": "^1.7.0"
   },
   "devDependencies": {
