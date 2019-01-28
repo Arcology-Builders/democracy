@@ -1,8 +1,10 @@
 {
   "name": "@invisible-college/democracy",
-  "version": "0.0.1",
-  "description": "A minimalist, test-driven framework for Ethereum development",
-  "main": "index.js",
+  "version": "0.0.2",
+  "description": "A minimalist framework for cross-developing Ethereum, Whisper, and Secure Scuttlebutt",
+  "bin": {
+    "demo": "./demo.js"
+  },
   "directories": {
     "test": "test"
   },
