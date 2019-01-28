@@ -11,7 +11,7 @@ Preamble = (network, command) => {
     endpoint = config['endpoints'][network]
 
     const eth = new Eth(new Eth.HttpProvider(endpoint));
-    return { "eth": eth }
+    return eth
 }
 
 module.exports = Preamble

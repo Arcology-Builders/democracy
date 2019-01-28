@@ -17,6 +17,7 @@
     "ethereumjs-vm": "^2.3.3",
     "ethjs": "^0.3.6",
     "ganache-cli": "^6.1.0",
+    "immutable": "^4.0.0-rc.12",
     "solc": "^0.4.20",
     "zeppelin-solidity": "^1.7.0"
   },
