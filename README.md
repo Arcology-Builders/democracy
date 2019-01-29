@@ -3,6 +3,30 @@ democracy
 
 Tools for running a country on Ethereum.
 
+With reusable components for general dapp development.
+
+Install with npm
+================
+
+Roadmap
+=======
+
+This is a tentative roadmap to guide our exploration.
+To the future!
+
+* 0.1 Release - basic subcommands and libraries for testing
+  * commands for deploying and interacting with contracts, use json files for now
+
+* 0.2 Release - basic whisper support
+  * commands for sending and listening to messages
+
+* 0.3 Release - ssb config
+  * switch to using an ssb alternet for storing configs, artifacts, and messages
+  * including sharing reproducible builds across the universe
+
+* 0.4 Release - browserified with webpack?
+  * depends on what's useful. also, we'll see if ssb can be webpack'd
+
 REPL
 =======
 

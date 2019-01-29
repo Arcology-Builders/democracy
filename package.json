@@ -1,7 +1,7 @@
 {
   "name": "@invisible-college/democracy",
-  "version": "0.0.2",
-  "description": "A minimalist framework for cross-developing Ethereum, Whisper, and Secure Scuttlebutt",
+  "version": "0.0.3",
+  "description": "A minimalist framework for Ethereum and Secure Scuttlebutt",
   "bin": {
     "demo": "./demo.js"
   },
@@ -33,6 +33,7 @@
   },
   "keywords": [
     "ethereum",
+    "ssb",
     "javascript",
     "framework"
   ],
