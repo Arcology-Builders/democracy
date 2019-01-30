@@ -22,7 +22,6 @@ function compile(sources) {
       //console.log(JSON.stringify(queue))
     } else {
       source = fs.readFileSync(f).toString();
-      //key = f.replace("node_modules/zeppelin-solidity/", "")
       paths = f.split(path.sep)
       keys = []
       // This is a hack to push all suffixes of a contract path
