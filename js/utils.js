@@ -2,6 +2,12 @@
 fs = require('fs')
 path = require('path')
 
+/**
+ * Traverse directories collecting files to perform a callback function on
+ * @param startDirs a list of paths to start searching in
+ * @param skipFilt a function that returns true for files that need to be skipped
+ * @param cb a callback that accepts the source text of a file plus its full path
+ */
 function traverseDirs(startDirs, skipFilt, cb) {
   queue = startDirs
 	while (queue.length > 0) {
@@ -12,7 +18,7 @@ function traverseDirs(startDirs, skipFilt, cb) {
       fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
     } else {
       source = fs.readFileSync(f).toString();
-      cb(source, path.basename(f))
+      cb(source, f)
     }
   }
 }

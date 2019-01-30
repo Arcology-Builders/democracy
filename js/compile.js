@@ -3,6 +3,7 @@ fs = require('fs')
 path = require('path')
 solc = require('solc')
 assert = require('assert')
+const { traverseDirs } = require('./utils')
 
 function compile(sources) {
   // Open contracts installed by npm -E zeppelin-solidity
@@ -13,15 +14,10 @@ function compile(sources) {
 
   queue = [ZEPPELIN_PATH, DEMO_PATH]
 
-  while (queue.length > 0) {
-    f = queue.pop();
-    shortList = path.basename(f).split('.')
-    if (shortList.length > 1 && !shortList[1].startsWith('sol')) { continue; } // Skip hidden files like DS_Store
-    if (fs.lstatSync(f).isDirectory()) {
-      fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
-      //console.log(JSON.stringify(queue))
-    } else {
-      source = fs.readFileSync(f).toString();
+  traverseDirs(
+    queue,
+    (fnParts) => { return ((fnParts.length > 1) && !fnParts[1].startsWith('sol')); },
+    function(source, f) {
       paths = f.split(path.sep)
       keys = []
       // This is a hack to push all suffixes of a contract path
@@ -31,12 +27,28 @@ function compile(sources) {
         keys.push(paths.join(path.sep))
         if (paths.length <= 1) { break; }
         paths = paths.slice(-(paths.length - 1))
-      } while(true);
+      } while(true)
+      console.log(`f ${f}`)
       keys.forEach((key) => inputs[key] = source)
     }
+  )
+
+  /*
+  while (queue.length > 0) {
+    f = queue.pop();
+    shortList = path.basename(f).split('.')
+    if (shortList.length > 1 && !shortList[1].startsWith('sol')) { continue; } // Skip hidden files like DS_Store
+    if (fs.lstatSync(f).isDirectory()) {
+      fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
+      //console.log(JSON.stringify(queue))
+    } else {
+      source = fs.readFileSync(f).toString();
+    }
   }
+*/
 
   function findImports (path) {
+    console.log(`path ${path}`)
     assert(inputs[path])
     return {contents: inputs[path]}
   }
