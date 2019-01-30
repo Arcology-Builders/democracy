@@ -28,7 +28,6 @@ function compile(sources) {
         if (paths.length <= 1) { break; }
         paths = paths.slice(-(paths.length - 1))
       } while(true)
-      console.log(`f ${f}`)
       keys.forEach((key) => inputs[key] = source)
     }
   )

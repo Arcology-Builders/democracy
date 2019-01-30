@@ -65,6 +65,21 @@ getContractNames = () => {
   )
 }
 
+const ethUtil = require('ethereumjs-util')
+
+// Return a map of { 'dependencyName' : 'deployId' }
+getDepMap = (indexFromStart) => {
+  depMap = {}
+  for (var i = process.argv[start+index]; i < process.argv.length; i++) {
+    const [ dep, deployId ] = process.argv[i].split(':')
+    if (!dep || !deployId) {
+      throw new Error(`Invalid dependency:address pair ${process.argvi[i]}`)
+    }
+    depMap[dep] = deployId
+  }
+  return depMap
+}
+
 getCompile = async() => {
   compileName = process.argv[start+2]
   console.log(`Compile Name ${compileName}`)
@@ -83,7 +98,7 @@ async function main() {
 
   CONTRACT_SUBTABLE = {
     ''        : (contractName) => { console.log(JSON.stringify(contractOutputs[contractName])) },
-    'link'    : () => { require('./js/link')() }, 
+    'link'    : () => { require('./js/link')(getNetwork(3), getDepMap(4)) }, 
     'deploy'  : () => { require('./js/deploy')(getNetwork(3), process.argv[start+4]) }, 
   }
 
