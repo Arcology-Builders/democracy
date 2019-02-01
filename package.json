@@ -14,12 +14,11 @@
   "dependencies": {
     "config": "^3.0.1",
     "ethereumjs-util": "^6.0.0",
-    "ethereumjs-vm": "^2.3.3",
+    "ethereumjs-vm": "^2.5.1",
     "ethjs": "^0.3.6",
     "ganache-cli": "^6.1.0",
     "immutable": "^4.0.0-rc.12",
     "solc": "^0.4.25",
-    "solc-js": "^0.5.5",
     "zeppelin-solidity": "^1.7.0"
   },
   "devDependencies": {

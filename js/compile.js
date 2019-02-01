@@ -6,6 +6,7 @@ assert = require('assert')
 const { traverseDirs } = require('./utils')
 
 function compile(sources) {
+  console.log(`Sources ${sources}`)
   // Open contracts installed by npm -E zeppelin-solidity
   ZEPPELIN_PATH = "node_modules/zeppelin-solidity/contracts"
   // Open contracts from democracy
@@ -82,7 +83,7 @@ function compile(sources) {
       abi: JSON.parse(outputs.contracts[contractName].interface)
     }
     const abiString = `abi${shortName} = ${JSON.stringify(output['abi'], null, 2)}`
-    fs.writeFileSync(`outputs/${shortName}.js`, JSON.stringify(output))
+    fs.writeFileSync(`outputs/${shortName}.json`, JSON.stringify(output))
     fs.writeFileSync(`web/${shortName}-abi.js`, abiString)
   }
 }

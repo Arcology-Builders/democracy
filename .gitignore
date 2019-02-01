@@ -36,4 +36,5 @@ keys/ganache.test.json
 web/addresses.js
 
 web/*-abi.js
+outputs/*.json
 outputs/*.js
