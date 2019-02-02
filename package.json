@@ -22,10 +22,12 @@
     "zeppelin-solidity": "^1.7.0"
   },
   "devDependencies": {
+    "eslint": "^5.13.0",
     "mocha": "^5.0.2"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "eslint": "./node_modules/.bin/eslint demo.js"
   },
   "repository": {
     "type": "git",
