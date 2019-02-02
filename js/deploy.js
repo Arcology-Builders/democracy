@@ -16,13 +16,13 @@ function ensureDirectory(dirName) {
  * @param eth network object connected to a local provider
  * @param contractOutput the JSON compiled output to deploy
  */
-async function deploy(eth, deployerAddr, contractOutput, deployId, linkMap) {
+async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap) {
   console.log(`Deploying ${contractOutput['name']} with id ${deployId}`)
   const networkId = await eth.net_version() 
   const code = "0x" + contractOutput.bytecode
   const abi = contractOutput.abi
   const contractName = contractOutput['name']
-  const deployName = `${contractName} - ${deployId}`
+  const deployName = `${contractName}-${deployId}`
   // Deps are of the form [ { 'libraryName': ..., 'deployId': ..., 'address':, 'deployTime': ...} ]
   const deps = contractOutput['libraryDeps']
 
@@ -42,7 +42,9 @@ async function deploy(eth, deployerAddr, contractOutput, deployId, linkMap) {
 
   // Warn with multiple deploys with the same ID
   if (deployMap[deployName]) {
-    console.error(`Contract "${contractName}" has already been deployed on this chain with ID "${deployId}"`)
+    deployError = `Contract "${contractName}" has already been deployed on this chain with ID "${deployId}"`
+    console.error(deployError)
+    return { ...deployError }
   }
   const LIB_PATTERN = /(__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+)/g
   const matches = code.match(LIB_PATTERN)
@@ -64,33 +66,44 @@ async function deploy(eth, deployerAddr, contractOutput, deployId, linkMap) {
 
   deployPromise = new Promise((resolve, reject) => {
     eth.contract(abi).new({data: code, from: deployerAddr, gas: "6700000", gasPrice: "0x21105b0"},
-      function(err, data) {
+      (err, txHash) => {
         if (err) {
           console.error("Error " + err)
 	  reject(err)
-        } else if (data) {
-	  console.log(JSON.stringify(data))
-	  resolve(data)
-	}
+        }
+        const checkTransaction = setInterval(() => {
+          eth.getTransactionReceipt(txHash).then((receipt) => {
+            if (receipt) {
+	      clearInterval(checkTransaction)
+	      resolve(receipt) 
+            }
+          })
+        })
       }
-      )
+    )
   })
 
-  console.log(`Deploy Dor ${deployDir}`)
-  const minedContract = await deployPromise.then((contract) => {return contract} );
+  const minedContract = await deployPromise.then((receipt) => { return receipt })
+  console.log(JSON.stringify(minedContract, null, "  "))
+
+  const now = new Date()
 
   const deployOutput = {
     name: contractName,
+    networkId: networkId,
     deployId: deployId,
-    linkDepMap: linkDepMap,
-    deployAddress: minedContract.address,
-    deployTime: new Date().getTime()
+    linkMap: linkMap,
+    deployTx: minedContract,
+    deployAddress: minedContract.contractAddress,
+    deployDate: now.toLocaleString(),
+    deployTime: now.getTime()
     }
 
-  fs.writeFileSync(path.join(deployDir, deployName), deployOutput);
+  console.log(`Writing deploy to ${deployDir}`)
+  console.log(JSON.stringify(deployOutput, null, '  '))
+  fs.writeFileSync(path.join(deployDir, deployName), JSON.stringify(deployOutput, null, '  '));
 
   return deployOutput
-
 }
 
 module.exports = deploy

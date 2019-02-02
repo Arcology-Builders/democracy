@@ -107,8 +107,8 @@ async function main() {
     'accounts': (args) => { doBalances(getNetwork(args[0])) },
 
     'info'    : (args) => {
-      const { contractOutputs } = getContracts() 
-      console.log(JSON.stringify(contractOutputs[args[0]], null, '  '))
+      const { contractSources, contractOutputs } = getContracts() 
+      console.log(JSON.stringify(contractOutputs.get(args[0]), null, '  '))
     },
 
     'compile' : (args) => {
@@ -128,14 +128,15 @@ async function main() {
 
     'deploy'  : async (args) => {
       argsOrDie(args,
-	'<0 ContractName> <1 netName> <2 deployerAddr> <3 deployId>')
+	'<0 ContractName> <1 netName> <2 deployerAddr> <3 deployId> [4 linkId]')
       const { contractOutputs } = getContracts()
-      const contract     = contractOutputs[args[0]]
+      const contract     = contractOutputs.get(args[0])
       const net          = getNetwork(args[1])
       const accounts     = await getAccounts(net)
       const deployerAddr = getAccountFromArg(accounts, args[2])
       const deployId     = args[3]
-      require('./js/deploy')(net, deployerAddr, contract, deployId)
+      const linkMap      = args[4]
+      require('./js/deploy')(contract, net, deployerAddr, deployId, linkMap)
     }, 
   }
 
