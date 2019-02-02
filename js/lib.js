@@ -1,31 +1,24 @@
-#!/usr/bin/env node
-// demo.js, the entry point for Democracy, an undiscovered decentralized country
+// lib.js, the entry point for Democracy, an undiscovered decentralized country
 
 const { Map, Seq } = require('immutable')
 const path   = require('path')
 const assert = require('assert')
 const BN = require('bn.js')
 
-
-// Standardize args
-const command      = process.argv[start]   
-const subcommand   = process.argv[start+1]
-
-console.log(`Command ${command}`)
-console.log(`Subcommand ${subcommand}`)
+const { traverseDirs } = require('./utils')
 
 // Menu of opt/arg processors to use in each subcommand below
 
 argsOrDie = (args, msg) => {
-  if (args.length == 0) {
-    console.log(`\n  ${path.basename(command)} ${subcommand} ${msg}\n`)
+  if (!args || args.length == 0) {
+    console.log(`\n  ${path.basename("")} ${subcommand} ${msg}\n`)
     process.exit(1)
   }
 }
 
 getNetwork = (netName) => {
   console.log(`Network ${netName}`)
-  return require('./js/preamble')(netName)
+  return require('./preamble')(netName)
 }
 
 getAccounts = async (network) => {
@@ -62,8 +55,6 @@ getConstructorArgs = (ctorArgs, abi) => {
     return [name, coercedVal]
   }))
 }
-
-const { traverseDirs } = require('./js/utils')
 
 getContracts = () => {
   const contractSources = []
@@ -117,10 +108,7 @@ doBalances = async (eth) => {
   })    
 }
 
-
-async function main() {
-
-  TABLE = {
+TABLE = {
 
     undefined        : () => {
       const { contractOutputs } = getContracts() 
@@ -136,7 +124,7 @@ async function main() {
 
     'compile' : (args) => {
       // compile [0 ContractName]
-      require('./js/compile')(args[0])
+      require('./compile')(args[0])
     },
 	      
     'link'    : (args) => {
@@ -146,7 +134,7 @@ async function main() {
       const contract     = contractOutputs.get(args[0])
       const net          = getNetwork(args[1])
       const linkMap      = getDepMap(args.slice(2))
-      require('./js/link')(contract, net, linkMap)
+      require('./link')(contract, net, linkMap)
     },
 
     'deploy'  : async (args) => {
@@ -161,14 +149,35 @@ async function main() {
       const linkMap      = getArgMap(args[4])
       const ctorArgs     = getConstructorArgs(getArgMap(args[5]), Seq(contract['abi']))
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
-      //const linkOutput   = require('./js/link')(contract, net, linkMap)
-      require('./js/deploy')(contract, net, deployerAddr, deployId, linkMap, ctorArgs)
+      //const linkOutput   = require('./link')(contract, net, linkMap)
+      require('./deploy')(contract, net, deployerAddr, deployId, linkMap, ctorArgs)
     }, 
-  }
-
-  TABLE[subcommand](process.argv.slice(start+2))
-
 }
 
-// Do the thing
-main().then(() => { })
+
+let command      = ""
+let subcommand   = ""
+
+// Arg numbers might depend on how we invoke this script
+const start = (path.basename(process.argv[0]) === 'node') ? 1 : 0
+
+async function demo(...args) {
+  command = args[0]
+  subcommand = args[1]
+  console.log(`Command ${command}`)
+  console.log(`Subcommand ${subcommand}`)
+  TABLE[subcommand](args.slice(start+2))
+}
+
+module.exports = {
+  argsOrDie : argsOrDie,
+  getNetwork : getNetwork,
+  getAccounts : getAccounts,
+  getAccountFromArg : getAccountFromArg,
+  getConstructorArgs : getConstructorArgs,
+  getContracts : getContracts,
+  getArgMap : getArgMap,
+  doBalances : doBalances,
+  TABLE : TABLE,
+  demo : demo,
+}

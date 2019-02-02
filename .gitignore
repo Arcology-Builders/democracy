@@ -38,3 +38,4 @@ web/addresses.js
 web/*-abi.js
 outputs/*.json
 outputs/*.js
+deploys

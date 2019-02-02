@@ -14,7 +14,7 @@ const { Map } = require('immutable')
  * @param depMap is an Immutable Map of library names to deploy IDs
  * @return the contractOutput augmented with a linkDepMap
  */
-async function link(eth, contractOutput, depMap) {
+async function link(contractOutput, eth, depMap) {
   const networkId = await eth.net_version() 
   const code = "0x" + contractOutput.bytecode
   const abi = contractOutput.abi
@@ -24,7 +24,7 @@ async function link(eth, contractOutput, depMap) {
 
   // Load all previous deploys
   traverseDirs(
-    ['deploys/networkId'],
+    [`deploys/${networkId}`],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to 
     // differentiate different deploy IDs for a single contract name?
@@ -33,7 +33,10 @@ async function link(eth, contractOutput, depMap) {
 
   const LIB_PATTERN = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
   const matches = code.match(LIB_PATTERN)
-  console.log(`Symbols to replace ${JSON.stringify(matches)}`)
+
+  if (!depMap || depMap.count() == 0) {
+    console.log(`Symbols to replace ${JSON.stringify(matches)}`)
+  }
 
   linkDepMap = Map({})
   depMap.map((v, k) => {
@@ -48,12 +51,12 @@ async function link(eth, contractOutput, depMap) {
     code.replace(matches[i], deployAddress)
 
     linkDepMap = linkDepMap.set(k, {
-      deployId: ${v},
+      deployId: v,
       address: deployAddress
     })
   })
 
-  return contract.set('linkDepMap', linkDepMap)
+  return contractOutput.set('linkDepMap', linkDepMap)
 }
 
 module.exports = link

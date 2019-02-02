@@ -1,22 +1,18 @@
 const fs = require('fs');
-const { traverseDirs } = require('./utils')
+const { traverseDirs, ensureDir } = require('./utils')
 
 const config = require('config')
 const assert = require('assert')
-const { Seq } = require('immutable')
+const { List, Seq } = require('immutable')
 
 const DEPLOY_DIR = "deploys"
-
-function ensureDirectory(dirName) {
-  if (!fs.existsSync(dirName)) { fs.mkdirSync(dirName) }
-}
 
 /**
  * Validate dependencies then deploy the given contract output to a network.
  * @param eth network object connected to a local provider
  * @param contractOutput the JSON compiled output to deploy
  */
-async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap) {
+async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap, ctorArgs) {
   console.log(`Deploying ${contractOutput['name']} with id ${deployId}`)
   const networkId = await eth.net_version() 
   const code = "0x" + contractOutput.bytecode
@@ -24,12 +20,13 @@ async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap) {
   const contractName = contractOutput['name']
   const deployName = `${contractName}-${deployId}`
   // Deps are of the form [ { 'libraryName': ..., 'deployId': ..., 'address':, 'deployTime': ...} ]
-  const deps = contractOutput['libraryDeps']
+  //const deps = contractOutput['libraryDeps']
+  console.log(`ctor args ${JSON.stringify(ctorArgs, null, " ")}`)
 
   deployMap = {}
 
   deployDir = path.join(DEPLOY_DIR, networkId)
-  ensureDirectory(deployDir)
+  ensureDir(deployDir)
 
   // Load all previous deploys
   traverseDirs(
@@ -65,8 +62,8 @@ async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap) {
   }
 
   deployPromise = new Promise((resolve, reject) => {
-    eth.contract(abi).new({data: code, from: deployerAddr, gas: "6700000", gasPrice: "0x21105b0"},
-      (err, txHash) => {
+    eth.contract(abi, code, {from: deployerAddr, gas: "6700000", gasPrice: "0x21105b0"})
+       .new(List(ctorArgs.values()).toJS()).then((txHash) => {
         if (err) {
           console.error("Error " + err)
 	  reject(err)

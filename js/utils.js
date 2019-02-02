@@ -2,6 +2,10 @@
 fs = require('fs')
 path = require('path')
 
+function ensureDir(dirName) {
+  if (!fs.existsSync(dirName)) { fs.mkdirSync(dirName) }
+}
+
 /**
  * Traverse directories collecting files to perform a callback function on
  * @param startDirs a list of paths to start searching in
@@ -29,5 +33,6 @@ function thenPrint(promise) {
 
 module.exports = {
   traverseDirs: traverseDirs,
-  thenPrint   : thenPrint
+  thenPrint   : thenPrint,
+  ensureDir   : ensureDir,
 }
