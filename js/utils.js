@@ -2,7 +2,7 @@
 fs = require('fs')
 path = require('path')
 
-const { Map } = require('immutable')
+const { Map, fromJS } = require('immutable')
 
 LIB_PATTERN = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 
@@ -44,7 +44,7 @@ function getLinks(networkId) {
     // differentiate different deploy IDs for a single contract name?
     (source,f) => { linkMap[path.basename(f)] = JSON.parse(source) }
   )
-  return Map(linkMap)
+  return fromJS(linkMap)
 }
 
 
@@ -55,9 +55,38 @@ function getDeploys(networkId) {
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to
     // differentiate different deploy IDs for a single contract name?
-    (source,f) => { deployMap[path.basename(f)] = Map(JSON.parse(source)) }
+    (source,f) => { deployMap[path.basename(f)] = JSON.parse(source) }
   )
-  return Map(deployMap)
+  return fromJS(deployMap)
+}
+
+/**
+ * Return a contract read from a file in the `outputs/${networkId}` directory.
+ * @param contractName name of the compiled contract
+ */
+getContract = (contractName) => {
+  const { contractOutputs } = getContracts()
+  return contractOutputs.get(contractName)
+}
+
+/**
+ * Return a link object read from a file in the `links/${networkId}` directory.
+ * @param networkId name of the chain / network deployed onto
+ * @param linkName the name of the contract and link ID of the form `ContractName-linkId`
+ */
+getLink = (networkId, linkName) => {
+  const linkMap = getLinks(networkId)
+  return linkMap.get(linkName)
+}
+
+/**
+ * Return a deploy object read from a file
+ * @param networkId name of the chain / network deployed onto
+ * @param deployName the name of the contract and deploy of the form `ContractName-deployId`
+ */
+getDeploy = (networkId, deployName) => {
+  const deployMap = getDeploys(networkId)
+  return deployMap.get(deployName)
 }
 
 function thenPrint(promise) {
@@ -70,5 +99,9 @@ module.exports = {
   print       : print,
   ensureDir   : ensureDir,
   getDeploys  : getDeploys,
+  getDeploy   : getDeploy,
+  getLinks    : getLinks,
+  getLink     : getLink,
+  getContract : getContract,
   LIB_PATTERN : LIB_PATTERN,
 }

@@ -4,6 +4,7 @@ const { traverseDirs, ensureDir } = require('./utils')
 const config = require('config')
 const assert = require('assert')
 const { List, Seq } = require('immutable')
+const BN = require('bn.js')
 
 const DEPLOY_DIR = "deploys"
 
@@ -12,16 +13,15 @@ const DEPLOY_DIR = "deploys"
  * @param eth network object connected to a local provider
  * @param contractOutput the JSON compiled output to deploy
  */
-async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap, ctorArgs) {
-  console.log(`Deploying ${contractOutput['name']} with id ${deployId}`)
+async function deploy(eth, link, deployId, ctorArgs) {
+  const contractName = link.get('name')
+  console.log(`Deploying ${contractName} with id ${deployId}`)
   const networkId = await eth.net_version() 
-  const code = "0x" + contractOutput.bytecode
-  const abi = contractOutput.abi
-  const contractName = contractOutput['name']
+  const code = "0x" + link.get('code')
+  const abi = link.get('abi')
   const deployName = `${contractName}-${deployId}`
-  // Deps are of the form [ { 'libraryName': ..., 'deployId': ..., 'address':, 'deployTime': ...} ]
-  //const deps = contractOutput['libraryDeps']
-  console.log(`ctor args ${JSON.stringify(ctorArgs, null, " ")}`)
+  const deployerAddress = link.get('deployerAddress')
+  console.log(`ctor args ${ctorArgs.get('_abc')}`)
 
   deployMap = {}
 
@@ -43,31 +43,14 @@ async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap, ctor
     console.error(deployError)
     return { ...deployError }
   }
-  const LIB_PATTERN = /(__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+)/g
-  const matches = code.match(LIB_PATTERN)
 
-  console.log(`Matches ${JSON.stringify(matches)}`)
-
-  if (matches) {
-    matches.map((linkName) => {
-      let linkDeployId = linkMap[linkName]
-      if (!linkDeployId) { throw new Error(`no deploy ID provided for link ${linkName}`) }
-      let linkDeployName = `${linkName}-${linkDeployId}`
-      if (!deployMap[deployName]) { throw new Error(`undeployed library dependency ${deployName}`) }
-      let deployedAddress = deployMap[linkDeployName]['deployedAddress']
-      console.log("Library Symbols to Replace: ${linkName} with ${deployedAddress}")
-      console.log(JSON.stringify(matches))
-      code.replace(dep, deployedAddress)
-    })
-  }
+  const ctorArgList = List(ctorArgs.values()).toJS()
+  console.log(`ctorArgList ${JSON.stringify(ctorArgList)}`)
 
   deployPromise = new Promise((resolve, reject) => {
-    eth.contract(abi, code, {from: deployerAddr, gas: "6700000", gasPrice: "0x21105b0"})
-       .new(List(ctorArgs.values()).toJS()).then((txHash) => {
-        if (err) {
-          console.error("Error " + err)
-	  reject(err)
-        }
+    eth.contract(abi.toJS(), code,
+      {from: deployerAddress, gas: "6700000", gasPrice: "0x21105b0"})
+       .new(...ctorArgList).then((txHash) => {
         const checkTransaction = setInterval(() => {
           eth.getTransactionReceipt(txHash).then((receipt) => {
             if (receipt) {
@@ -89,7 +72,7 @@ async function deploy(contractOutput, eth, deployerAddr, deployId, linkMap, ctor
     name: contractName,
     networkId: networkId,
     deployId: deployId,
-    linkMap: linkMap,
+    linkId: link.get('linkId'),
     deployTx: minedContract,
     deployAddress: minedContract.contractAddress,
     deployDate: now.toLocaleString(),

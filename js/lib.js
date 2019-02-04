@@ -43,19 +43,24 @@ getAccountFromArg = (accounts, arg) => {
 /**
  * @param abi Immutable Seq of objects
  */
-getConstructorArgs = (ctorArgs, abi) => {
-  ctorMethods = abi.filter((obj) => { return obj.type === 'constructor' })
+getConstructorArgs = (ctorArgMap, abi) => {
+  console.log(`ctorArgMap ${ctorArgMap.toString()}`)
+  ctorMethods = abi.filter((obj) => { return obj.get('type') === 'constructor' })
   assert(ctorMethods.count() == 1)
-  console.log(`abi ${JSON.stringify(ctorMethods.get(0)['inputs'], null, "  ")}`)
-  ctorObj = Seq(ctorMethods.get(0)['inputs'])
+  console.log(`abi ${JSON.stringify(ctorMethods.get(0).get('inputs'), null, "  ")}`)
+  ctorObj = ctorMethods.get(0).get('inputs')
   return Map(ctorObj.map((obj) => {
-    name = obj['name']
-    type = obj['type']
-    value = ctorArgs.get(name)
+    name = obj.get('name')
+    type = obj.get('type')
+    value = ctorArgMap.get(name)
     if (!value) { throw new Error(`Missing constructor arg ${JSON.stringify(name)}`) }
     var coercedVal;
-    if (type === "uint256") { coercedVal = new BN(value) }
+    if (type === "uint256") {
+	coercedVal = new BN(value)
+        console.log(`bignum`)
+    }
     else coercedVal = value;
+    console.log(`name ${name} val ${coercedVal}`)
     return [name, coercedVal]
   }))
 }
@@ -87,31 +92,6 @@ getContracts = (shouldPrint) => {
     contractSources: Seq(contractSources),
     contractOutputs: Map(contractOutputs)
   }
-}
-
-getContract = (contractName) => {
-  const { contractOutputs } = getContracts()
-  return contractOutputs.get(contractName)
-}
-
-/**
- * Return a link object read from a file in the `links/${networkId}` directory.
- * @param networkId name of the chain / network deployed onto
- * @param linkName the name of the contract and link ID of the form `ContractName-linkId`
- */
-getLink = (networkId, linkName) => {
-  const linkMap = getLinks(networkId)
-  return linkMap.get(linkName)
-}
-
-/**
- * Return a deploy object read from a file
- * @param networkId name of the chain / network deployed onto
- * @param deployName the name of the contract and deploy of the form `ContractName-deployId`
- */
-getDeploy = (networkId, deployName) => {
-  const deployMap = getDeploys(networkId)
-  return deployMap.get(deployName)
 }
 
 // Accepts List of "key1=val1","key2=val2","key3=val3"
@@ -174,19 +154,18 @@ TABLE = {
     },
 
     'deploy'  : async (args) => {
-      argsOrDie(args, List(['<0 linkId>','<1 deployId>','[2 ctorArgs]']))
-      const { contractOutputs } = getContracts()
-      const contract     = contractOutputs.get(args.get(0))
+      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 linkId>','<3 deployId>','[4 ctorArgs]']))
       const net          = getNetwork(args.get(1))
-      const deployId     = args.get(1)
+      const networkId    = await net.net_version()
+      const linkName     = `${args.get(0)}-${args.get(2)}`
+      const link         = getLink(networkId, linkName)
+      const deployId     = args.get(3)
       if (!deployId.startsWith("deploy")) {
         throw new Error("${deployId} should begin with `deploy`")
       }
-      const linkMap      = getArgMap(args.get(4))
-      const ctorArgs     = getConstructorArgs(getArgMap(args.get(5)), Seq(contract['abi']))
+      const ctorArgs     = getConstructorArgs(getArgMap(List(args.get(4).split(','))), link.get('abi'))
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
-      //const linkOutput   = require('./link')(contract, net, linkMap)
-      require('./deploy')(contract, net, deployerAddr, deployId, linkMap, ctorArgs)
+      require('./deploy')(net, link, deployId, ctorArgs)
     }, 
 }
 
@@ -213,8 +192,6 @@ module.exports = {
   getConstructorArgs : getConstructorArgs,
   getContracts : getContracts,
   getContract : getContract,
-  getLink : getLink,
-  getDeploy : getDeploy,
   getArgMap : getArgMap,
   doBalances : doBalances,
   TABLE : TABLE,

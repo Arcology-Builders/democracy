@@ -17,13 +17,13 @@ LINKS_DIR = 'links'
  * @param depMap is an Immutable Map of library names to deploy IDs
  * @return the contractOutput augmented with a linkDepMap
  */
-async function link(contractOutput, eth, deployerAddr, linkId, depMap) {
+async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   const networkId = await eth.net_version() 
   const code = "0x" + contractOutput.get('code')
   const contractName = contractOutput.get('name')
   const linkName = `${contractName}-${linkId}`
 
-  assert(!getLink(linkName))
+  assert(!getLink(networkId, linkName))
 
   deployMap = getDeploys(networkId)
 
@@ -53,7 +53,7 @@ async function link(contractOutput, eth, deployerAddr, linkId, depMap) {
     assert(deployAddress)
 
     console.log(`Replacing symbols ${matches[indexMatch]} with ${deployAddress}`)
-    return codeSoFar.replace(matches[indexMatch], deployAddress)
+    return codeSoFar.replace(matches[0], deployAddress.slice(2))
   }, code)
 
   assert(replacedCode.match(LIB_PATTERN) === null) // All placeholders should be replaced
@@ -67,6 +67,7 @@ async function link(contractOutput, eth, deployerAddr, linkId, depMap) {
     linkMap: depMap,
     linkDate: now.toLocaleString(),
     linkTime: now.getTime(),
+    deployerAddress: deployerAddress,
     }).merge(contractOutput.set('code', replacedCode))
 
   linkFilePath = path.join(linksDir, linkName)
