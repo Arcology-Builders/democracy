@@ -8,6 +8,17 @@ With reusable components for general dapp development.
 Install with npm
 ================
 
+```
+npm i @invisible-college/democracy
+```
+
+Then in your modules
+
+```
+const demo = require('@invisible-college/democracy')
+```
+
+
 Roadmap
 =======
 
