@@ -167,6 +167,19 @@ TABLE = {
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
       require('./deploy')(net, link, deployId, ctorArgs)
     }, 
+
+    'do' : async (args) => {
+      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 deployId>','<3 methodName>','<4 args>']))
+      const contractName = args.get(0)
+      const net          = getNetwork(args.get(1))
+      const networkId    = await net.net_version()
+      const deployId     = args.get(2)
+      const deployName   = `${contractName}-${deployId}`
+      const deploy       = getDeploy(networkId, deployName)
+      const methodName   = args.get(3)
+      const argMap       = getArgMap(List(args.get(4).split(',')))
+      require('./do')(net, deploy, methodName, argMap)
+    },
 }
 
 

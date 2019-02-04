@@ -73,6 +73,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
     networkId: networkId,
     deployId: deployId,
     linkId: link.get('linkId'),
+    abi: abi,
     deployTx: minedContract,
     deployAddress: minedContract.contractAddress,
     deployDate: now.toLocaleString(),
