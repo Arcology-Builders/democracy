@@ -9,4 +9,8 @@ contract TestUseLibrary {
     constructor(uint256 _abc) public {
         def = TestLibrary.double(_abc);
     }
+
+    function double(uint256 _def) public returns (uint256) {
+        return 2*_def;
+    }
 }

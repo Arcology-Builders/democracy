@@ -15,14 +15,23 @@ async function dodo(eth, deploy, methodName, argMap) {
   const contractName = deploy.get('name')
   console.log(`Doing ${contractName}.${methodName} with args ${argMap.toJS()}`)
   const networkId = await eth.net_version() 
-  const abi = deploy.get('abi')
+  const abi = deploy.get('abi').toJS()
   const deployAddress = deploy.get('deployAddress')
 
   const instance = eth.contract(abi).at(deployAddress)
 
-  instance['methodName'](...argMap.values().toJS(), (...args) => {
-    console.log(`Return Value ${JSON.stringify(args)}`)
-  })
+  const argValues = List(argMap.values()).toJS()
+  console.log(`Args '${argValues[0]}'`)
+  if (!argValues || argValues[0] === undefined) {
+    console.log("Zero args")
+    instance[methodName]().then((...args) => {
+      console.log(`Return Value ${JSON.stringify(args)}`)
+    })
+  } else {
+    instance[methodName](...argValues).then((...args) => {
+      console.log(`Return Value ${JSON.stringify(args)}`)
+    })
+  }
   /*
    * we will get a tx receipt for setter / mutator methods
    * and uncomment this later when we figure out how to handle it uniformly
