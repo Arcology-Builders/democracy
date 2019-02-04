@@ -8,7 +8,7 @@ const { traverseDirs } = require('./utils')
 function compile(sourcePath, sources) {
   console.log(`Sources ${sources}`)
   // Open contracts installed by npm -E zeppelin-solidity
-  ZEPPELIN_PATH = "node_modules/zeppelin-solidity/contracts"
+  ZEPPELIN_PATH = "node_modules/openzeppelin-solidity/contracts"
   // Open contracts from democracy
   DEMO_PATH = sourcePath || "contracts"
   inputs = {};
