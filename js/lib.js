@@ -7,6 +7,8 @@ const BN = require('bn.js')
 
 const { traverseDirs } = require('./utils')
 
+const SOURCE_DIR = 'contracts'
+
 // Menu of opt/arg processors to use in each subcommand below
 
 argsOrDie = (args, argDescs, _requiredArgCount) => {
@@ -69,7 +71,7 @@ getContracts = (shouldPrint) => {
   const contractSources = []
   const contractOutputs = {}
   traverseDirs(
-    ['src'], // start out by finding all contracts rooted in current directory
+    [SOURCE_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
     function(source, f) {
       fb = path.basename(f.split('.')[0])
@@ -133,8 +135,8 @@ TABLE = {
     },
 
     'compile' : (args) => {
-      argsOrDie(args, List(['[0 ContractName]']))
-      require('./compile')(args.get(0))
+      argsOrDie(args, List(['[0 sourceDir]','<1 ContractName>']), 1)
+      require('./compile')(args.get(0), args.get(1))
     },
 	      
     'link'    : async (args) => {

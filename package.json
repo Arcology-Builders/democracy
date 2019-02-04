@@ -1,6 +1,6 @@
 {
   "name": "@invisible-college/democracy",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A minimalist framework for Ethereum and Secure Scuttlebutt",
   "bin": {
     "demo": "./demo.js"
@@ -19,7 +19,7 @@
     "ganache-cli": "^6.1.0",
     "immutable": "^4.0.0-rc.12",
     "solc": "^0.4.25",
-    "zeppelin-solidity": "^1.7.0"
+    "openzeppelin-solidity": "^2.1.2"
   },
   "devDependencies": {
     "eslint": "^5.13.0",

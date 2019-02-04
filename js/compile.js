@@ -5,12 +5,12 @@ solc = require('solc')
 assert = require('assert')
 const { traverseDirs } = require('./utils')
 
-function compile(sources) {
+function compile(sourcePath, sources) {
   console.log(`Sources ${sources}`)
   // Open contracts installed by npm -E zeppelin-solidity
   ZEPPELIN_PATH = "node_modules/zeppelin-solidity/contracts"
   // Open contracts from democracy
-  DEMO_PATH = "src"
+  DEMO_PATH = sourcePath || "contracts"
   inputs = {};
 
   queue = [ZEPPELIN_PATH, DEMO_PATH]
