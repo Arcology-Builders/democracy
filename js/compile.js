@@ -3,7 +3,9 @@ fs = require('fs')
 path = require('path')
 solc = require('solc')
 assert = require('assert')
-const { traverseDirs } = require('./utils')
+const { traverseDirs, ensureDir } = require('./utils')
+
+COMPILES_DIR = "compiles"
 
 function compile(sourcePath, sources) {
   console.log(`Sources ${sources}`)
@@ -14,6 +16,8 @@ function compile(sourcePath, sources) {
   inputs = {};
 
   queue = [ZEPPELIN_PATH, DEMO_PATH]
+
+  ensureDir(COMPILES_DIR)
 
   traverseDirs(
     queue,
@@ -83,7 +87,8 @@ function compile(sourcePath, sources) {
       abi: JSON.parse(outputs.contracts[contractName].interface)
     }
     const abiString = `abi${shortName} = ${JSON.stringify(output['abi'], null, 2)}`
-    fs.writeFileSync(`outputs/${shortName}.json`, JSON.stringify(output))
+    const compileFilename = `${COMPILES_DIR}/${shortName}.json`
+    fs.writeFileSync(compileFilename, JSON.stringify(output))
     fs.writeFileSync(`web/${shortName}-abi.js`, abiString)
   }
 }
