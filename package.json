@@ -1,6 +1,6 @@
 {
   "name": "@invisible-college/democracy",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A minimalist framework for Ethereum and Secure Scuttlebutt",
   "bin": {
     "demo": "./demo.js"
