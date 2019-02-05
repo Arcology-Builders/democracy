@@ -4,7 +4,11 @@ path = require('path')
 
 const { Map, fromJS } = require('immutable')
 
-LIB_PATTERN = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
+SOURCES_DIR  = 'contracts'
+COMPILES_DIR = 'compiles'
+LINKS_DIR    = 'links'
+DEPLOYS_DIR  = 'deploys'
+LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 
 function print(data) {
   console.log(JSON.stringify(data, null, '  '))
@@ -37,8 +41,9 @@ function traverseDirs(startDirs, skipFilt, cb) {
 
 function getLinks(networkId) {
   linkMap = {}
+  ensureDir(`${LINKS_DIR}/${networkId}`)
   traverseDirs(
-    [`links/${networkId}`],
+    [`${LINKS_DIR}/${networkId}`],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Link names will have the form <contractName>-<linkID>, do we need to
     // differentiate different deploy IDs for a single contract name?
@@ -50,8 +55,9 @@ function getLinks(networkId) {
 
 function getDeploys(networkId) {
   deployMap = {}
+  ensureDir(`${DEPLOYS_DIR}/${networkId}`)
   traverseDirs(
-    [`deploys/${networkId}`],
+    [`${DEPLOYS_DIR}/${networkId}`],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to
     // differentiate different deploy IDs for a single contract name?
@@ -65,6 +71,7 @@ function getDeploys(networkId) {
  * @param contractName name of the compiled contract
  */
 getContract = (contractName) => {
+  ensureDir(`${COMPILES_DIR}/${networkId}`)
   const { contractOutputs } = getContracts()
   return contractOutputs.get(contractName)
 }
@@ -89,19 +96,48 @@ getDeploy = (networkId, deployName) => {
   return deployMap.get(deployName)
 }
 
+cleanCompile = (compileName) => {
+  fs.unlinkSync(`${COMPILES_DIR}/${compileName}.json`)
+}
+
+cleanLink = async (eth, linkName) => {
+  const networkId = await eth.net_version()
+  fs.unlinkSync(`${LINKS_DIR}/${networkId}/${linkName}.json`)
+}
+
+cleanDeploy = async (eth, deployName) => {
+  const networkId = await eth.net_version()
+  fs.unlinkSync(`${DEPLOYS_DIR}/${networkId}/${deployName}.json`)
+}
+
+clean = async (eth) => {
+  const networkId = await eth.net_version()
+  fs.rmdirSync(`${COMPILES_DIR}`)
+  fs.rmdirSync(`${LINKS_DIR}/${networkId}/${linkName}`)
+  fs.rmdirSync(`${DEPLOYS_DIR}/${networkId}/${deployName}`)
+}
+
 function thenPrint(promise) {
   promise.then((value) => {console.log(JSON.stringify(value))})
 }
 
 module.exports = {
-  traverseDirs: traverseDirs,
-  thenPrint   : thenPrint,
-  print       : print,
-  ensureDir   : ensureDir,
-  getDeploys  : getDeploys,
-  getDeploy   : getDeploy,
-  getLinks    : getLinks,
-  getLink     : getLink,
-  getContract : getContract,
-  LIB_PATTERN : LIB_PATTERN,
+  traverseDirs  : traverseDirs,
+  thenPrint     : thenPrint,
+  print         : print,
+  ensureDir     : ensureDir,
+  getDeploys    : getDeploys,
+  getDeploy     : getDeploy,
+  getLinks      : getLinks,
+  getLink       : getLink,
+  getContract   : getContract,
+  cleanCompile  : cleanCompile,
+  cleanLink     : cleanLink,
+  cleanDeploy   : cleanDeploy,
+  clean         : clean,
+  LIB_PATTERN   : LIB_PATTERN,
+  SOURCES_DIR   : SOURCES_DIR,
+  COMPILES_DIR  : COMPILES_DIR,
+  LINKS_DIR     : LINKS_DIR,
+  DEPLOYS_DIR   : DEPLOYS_DIR,
 }

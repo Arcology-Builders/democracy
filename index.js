@@ -1,10 +1,12 @@
 const { List } = require('immutable')
+const lib = require('./js/lib')
+const utils = require('./js/utils')
 
 module.exports = {
-  ...require('./js/lib'),
-  ...require('./js/utils'),
-  compile: (...args) => { demo.TABLE['compile'](List(args)) },
-  link: (...args) => { demo.TABLE['link'](List(args)) },
-  deploy: (...args) => { demo.TABLE['deploy'](List(args)) },
-  do: (...args) => { demo.TABLE['do'](List(args)) },
+  ...lib,
+  ...utils,
+  compile: (...args) => { lib.TABLE['compile'](List(args)) },
+  link: (...args) => { lib.TABLE['link'](List(args)) },
+  deploy: (...args) => { lib.TABLE['deploy'](List(args)) },
+  do: (...args) => { lib.TABLE['do'](List(args)) },
 }

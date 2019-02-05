@@ -5,10 +5,8 @@ const fs = require('fs');
 const config = require('config')
 const assert = require('assert')
 const { Map } = require('immutable')
-const { print, ensureDir, traverseDirs, getDeploys } = require('./utils')
+const { print, ensureDir, traverseDirs, getDeploys, LIB_PATTERN, LINKS_DIR } = require('./utils')
 const { getLink } = require('./utils')
-
-LINKS_DIR = 'links'
 
 /**
  * Validate dependencies and generate appropriate metadata
@@ -30,10 +28,9 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
 
   deployMap = getDeploys(networkId)
 
-  const LIB_PATTERN = /__([a-zA-Z]+\.sol):([a-zA-Z]+)_+/g
   const matches = LIB_PATTERN.exec(code)
 
-  if (!depMap || depMap.count() == 0) {
+  if (matches && (!depMap || depMap.count() == 0)) {
     throw new Error(`No link map found to replace ${JSON.stringify(matches)}`)
   }
 

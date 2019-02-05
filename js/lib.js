@@ -5,10 +5,7 @@ const path   = require('path')
 const assert = require('assert')
 const BN = require('bn.js')
 
-const { traverseDirs } = require('./utils')
-
-const SOURCE_DIR = 'contracts'
-const COMPILES_DIR = 'compiles'
+const { traverseDirs, SOURCES_DIR, COMPILES_DIR } = require('./utils')
 
 // Menu of opt/arg processors to use in each subcommand below
 
@@ -49,6 +46,9 @@ getAccountFromArg = (accounts, arg) => {
 getConstructorArgs = (ctorArgMap, abi) => {
   console.log(`ctorArgMap ${ctorArgMap.toString()}`)
   ctorMethods = abi.filter((obj) => { return obj.get('type') === 'constructor' })
+  if (ctorMethods.count() < 1) { // this is a library, or has no ctor
+    return Map({})
+  }
   assert(ctorMethods.count() == 1)
   console.log(`abi ${JSON.stringify(ctorMethods.get(0).get('inputs'), null, "  ")}`)
   ctorObj = ctorMethods.get(0).get('inputs')
@@ -59,7 +59,7 @@ getConstructorArgs = (ctorArgMap, abi) => {
     if (!value) { throw new Error(`Missing constructor arg ${JSON.stringify(name)}`) }
     var coercedVal;
     if (type === "uint256") {
-	coercedVal = new BN(value)
+	    coercedVal = new BN(value)
         console.log(`bignum`)
     }
     else coercedVal = value;
@@ -72,7 +72,7 @@ getContracts = (shouldPrint) => {
   const contractSources = []
   const contractOutputs = {}
   traverseDirs(
-    [SOURCE_DIR], // start out by finding all contracts rooted in current directory
+    [SOURCES_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
     function(source, f) {
       fb = path.basename(f.split('.')[0])
@@ -157,7 +157,7 @@ TABLE = {
     },
 
     'deploy'  : async (args) => {
-      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 linkId>','<3 deployId>','[4 ctorArgs]']))
+      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 linkId>','<3 deployId>','[4 ctorArgs]']), 3)
       const net          = getNetwork(args.get(1))
       const networkId    = await net.net_version()
       const linkName     = `${args.get(0)}-${args.get(2)}`
@@ -166,9 +166,11 @@ TABLE = {
       if (!deployId.startsWith("deploy")) {
         throw new Error("${deployId} should begin with `deploy`")
       }
-      const ctorArgs     = getConstructorArgs(getArgMap(List(args.get(4).split(','))), link.get('abi'))
+      const ctorArgs = (args.get(4)) ? getArgMap(List(args.get(4).split(','))) : Map({})
+
+      const matchedCtorArgs     = getConstructorArgs(ctorArgs, link.get('abi'))
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
-      require('./deploy')(net, link, deployId, ctorArgs)
+      require('./deploy')(net, link, deployId, matchedCtorArgs)
     }, 
 
     'do' : async (args) => {
