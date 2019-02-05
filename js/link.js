@@ -23,12 +23,12 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   const contractName = contractOutput.get('name')
   const linkName = `${contractName}-${linkId}`
 
+  linksDir = path.join(LINKS_DIR, networkId)
+  ensureDir(linksDir)
+
   assert(!getLink(networkId, linkName))
 
   deployMap = getDeploys(networkId)
-
-  linksDir = path.join(LINKS_DIR, networkId)
-  ensureDir(linksDir)
 
   const LIB_PATTERN = /__([a-zA-Z]+\.sol):([a-zA-Z]+)_+/g
   const matches = LIB_PATTERN.exec(code)

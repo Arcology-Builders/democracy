@@ -8,6 +8,7 @@ const BN = require('bn.js')
 const { traverseDirs } = require('./utils')
 
 const SOURCE_DIR = 'contracts'
+const COMPILES_DIR = 'compiles'
 
 // Menu of opt/arg processors to use in each subcommand below
 
@@ -80,7 +81,7 @@ getContracts = (shouldPrint) => {
     }
   )
   traverseDirs(
-    ['outputs'], // start out by finding all contracts rooted in current directory
+    [COMPILES_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return ((fnParts.length > 1) &&
       (fnParts[1] !== 'json')) },
     function(source, f) {
