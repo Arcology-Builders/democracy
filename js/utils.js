@@ -47,7 +47,7 @@ function getLinks(networkId) {
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Link names will have the form <contractName>-<linkID>, do we need to
     // differentiate different deploy IDs for a single contract name?
-    (source,f) => { linkMap[path.basename(f)] = JSON.parse(source) }
+    (source,f) => { linkMap[path.basename(f).split('.')[0]] = JSON.parse(source) }
   )
   return fromJS(linkMap)
 }
@@ -61,7 +61,7 @@ function getDeploys(networkId) {
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to
     // differentiate different deploy IDs for a single contract name?
-    (source,f) => { deployMap[path.basename(f)] = JSON.parse(source) }
+    (source,f) => { deployMap[path.basename(f).split('.')[0]] = JSON.parse(source) }
   )
   return fromJS(deployMap)
 }
@@ -71,7 +71,7 @@ function getDeploys(networkId) {
  * @param contractName name of the compiled contract
  */
 getContract = (contractName) => {
-  ensureDir(`${COMPILES_DIR}/${networkId}`)
+  ensureDir(`${COMPILES_DIR}`)
   const { contractOutputs } = getContracts()
   return contractOutputs.get(contractName)
 }

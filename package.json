@@ -1,6 +1,6 @@
 {
   "name": "@invisible-college/democracy",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A minimalist framework for Ethereum and Secure Scuttlebutt",
   "bin": {
     "demo": "./demo.js"
@@ -22,11 +22,14 @@
     "openzeppelin-solidity": "^2.1.2"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^5.13.0",
     "mocha": "^5.0.2"
   },
   "scripts": {
     "test": "mocha",
+    "test-deploy": "mocha -t 10000 test/testDeploy.js",
     "eslint": "./node_modules/.bin/eslint demo.js"
   },
   "repository": {

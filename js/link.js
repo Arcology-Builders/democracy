@@ -24,7 +24,7 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   linksDir = path.join(LINKS_DIR, networkId)
   ensureDir(linksDir)
 
-  assert(!getLink(networkId, linkName))
+  assert(!getLink(networkId, linkName), `Link ${linkName} already exists`)
 
   deployMap = getDeploys(networkId)
 
@@ -65,9 +65,9 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     linkDate: now.toLocaleString(),
     linkTime: now.getTime(),
     deployerAddress: deployerAddress,
-    }).merge(contractOutput.set('code', replacedCode))
+  }).merge(contractOutput.set('code', replacedCode))
 
-  linkFilePath = path.join(linksDir, linkName)
+  linkFilePath = path.join(linksDir, linkName) + ".json"
 
   console.log(`Writing link to ${linkFilePath}`)
   const linkString = JSON.stringify(linkOutput, null, '  ')

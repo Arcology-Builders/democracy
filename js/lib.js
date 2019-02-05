@@ -127,7 +127,7 @@ TABLE = {
       contractOutputs.map((out) => { console.log(JSON.stringify(out, null, '  ')) })
     },
 
-    'accounts': (args) => { doBalances(getNetwork(args.get(0))) },
+    'accounts': async (args) => { return doBalances(getNetwork(args.get(0))) },
 
     'info'    : (args) => {
       argsOrDie(args, List(['[0 ContractName]']))
@@ -135,9 +135,9 @@ TABLE = {
       console.log(JSON.stringify(contractOutputs.get(args.get(0)), null, '  '))
     },
 
-    'compile' : (args) => {
+    'compile' : async (args) => {
       argsOrDie(args, List(['[0 sourceDir]','<1 ContractName>']), 1)
-      require('./compile')(args.get(0), args.get(1))
+      return require('./compile')(args.get(0), args.get(1))
     },
 	      
     'link'    : async (args) => {
@@ -153,7 +153,7 @@ TABLE = {
         throw new Error("${linkId} should begin with `link`")
       }
       const linkMap      = getArgMap(args.slice(4))
-      require('./link')(contract, net, deployerAddr, linkId, linkMap)
+      return require('./link')(contract, net, deployerAddr, linkId, linkMap)
     },
 
     'deploy'  : async (args) => {
@@ -162,15 +162,16 @@ TABLE = {
       const networkId    = await net.net_version()
       const linkName     = `${args.get(0)}-${args.get(2)}`
       const link         = getLink(networkId, linkName)
+      if (!link) { throw new Error(`${linkName} not found`) }
       const deployId     = args.get(3)
       if (!deployId.startsWith("deploy")) {
-        throw new Error("${deployId} should begin with `deploy`")
+        throw new Error(`${deployId} should begin with 'deploy'`)
       }
       const ctorArgs = (args.get(4)) ? getArgMap(List(args.get(4).split(','))) : Map({})
 
-      const matchedCtorArgs     = getConstructorArgs(ctorArgs, link.get('abi'))
+      const matchedCtorArgs = getConstructorArgs(ctorArgs, link.get('abi'))
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
-      require('./deploy')(net, link, deployId, matchedCtorArgs)
+      return require('./deploy')(net, link, deployId, matchedCtorArgs)
     }, 
 
     'do' : async (args) => {

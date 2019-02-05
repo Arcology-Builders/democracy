@@ -5,8 +5,8 @@ const utils = require('./js/utils')
 module.exports = {
   ...lib,
   ...utils,
-  compile: (...args) => { lib.TABLE['compile'](List(args)) },
-  link: (...args) => { lib.TABLE['link'](List(args)) },
-  deploy: (...args) => { lib.TABLE['deploy'](List(args)) },
-  do: (...args) => { lib.TABLE['do'](List(args)) },
+  compile: (...args) => { return lib.TABLE['compile'](List(args)) },
+  link: (...args) => { return lib.TABLE['link'](List(args)) },
+  deploy: (...args) => { return lib.TABLE['deploy'](List(args)) },
+  do: (...args) => { return lib.TABLE['do'](List(args)) },
 }

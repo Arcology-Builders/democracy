@@ -80,9 +80,10 @@ async function deploy(eth, link, deployId, ctorArgs) {
     deployTime: now.getTime()
     }
 
-  console.log(`Writing deploy to ${deployDir}`)
+  const deployFilePath = path.join(deployDir, deployName) + ".json"
+  console.log(`Writing deploy to ${deployFilePath}`)
   console.log(JSON.stringify(deployOutput, null, '  '))
-  fs.writeFileSync(path.join(deployDir, deployName), JSON.stringify(deployOutput, null, '  '));
+  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput, null, '  '));
 
   return deployOutput
 }

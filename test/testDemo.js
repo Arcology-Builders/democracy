@@ -2,16 +2,20 @@ const demo = require('..')
 
 eth = demo.getNetwork('test')
 
-demo.compile('contracts', 'TestLibrary.sol')
-demo.link('TestLibrary','test','account0','linkLib')
-demo.deploy('TestLibrary','test','linkLib','deployLib','')
+main = async() => {
+  await demo.compile('contracts', 'TestLibrary.sol')
+  await demo.link('TestLibrary','test','account0','linkLib')
+  await demo.deploy('TestLibrary','test','linkLib','deployLib','')
 
-demo.link('TestUseLibrary','test','account0','linkBr','TestLibrary=deployLib')
-demo.deploy('TestUseLibrary','test','linkBr','deployAAA')
+  await demo.link('TestUseLibrary','test','account0','linkBr','TestLibrary=deployLib')
+  await demo.deploy('TestUseLibrary','test','linkBr','deployAAA','_abc=123')
 
-demo.cleanCompile('TestLibrary')
-//demo.cleanLink(eth, 'TestLibrary-linkLib')
-//demo.cleanLink(eth, 'TestLibrary-linkBr')
-//demo.cleanDeploy(eth, 'TestLibrary-deployLib')
-//demo.cleanDeploy(eth, 'TestUseLibrary-deployAAA')
+  await demo.cleanCompile('TestLibrary')
+  await demo.cleanLink(eth, 'TestLibrary-linkLib')
+  await demo.cleanLink(eth, 'TestUseLibrary-linkBr')
+  await demo.cleanDeploy(eth, 'TestLibrary-deployLib')
+  await demo.cleanDeploy(eth, 'TestUseLibrary-deployAAA')
+}
+
+main().then(() => {})
 
