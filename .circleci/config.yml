@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: cryptogoth/node-circle-test
+    steps:
+      - checkout
+      - run: . ~/.nvm/nvm.sh; npm install; ./test.sh
