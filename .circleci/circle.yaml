@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: cryptogoth/rb-aztec-demo
+    steps:
+      - checkout
+      - run: npm install; ./test.sh
