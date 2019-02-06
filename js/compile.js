@@ -3,19 +3,16 @@ fs = require('fs')
 path = require('path')
 solc = require('solc')
 assert = require('assert')
-const { traverseDirs, ensureDir } = require('./utils')
+const { traverseDirs, ensureDir,
+  COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH } = require('./utils')
 
-COMPILES_DIR = "compiles"
-
-function compile(sourcePath, sources) {
+function compile(sourcePathList, sources) {
   console.log(`Sources ${sources}`)
   // Open contracts installed by npm -E zeppelin-solidity
-  ZEPPELIN_PATH = "node_modules/openzeppelin-solidity/contracts"
   // Open contracts from democracy
-  DEMO_PATH = sourcePath || "contracts"
   inputs = {};
 
-  queue = [ZEPPELIN_PATH, DEMO_PATH]
+  queue = sourcePathList || [ DEMO_PATH, ZEPPELIN_PATH ]
 
   ensureDir(COMPILES_DIR)
 
@@ -36,20 +33,6 @@ function compile(sourcePath, sources) {
       keys.forEach((key) => inputs[key] = source)
     }
   )
-
-  /*
-  while (queue.length > 0) {
-    f = queue.pop();
-    shortList = path.basename(f).split('.')
-    if (shortList.length > 1 && !shortList[1].startsWith('sol')) { continue; } // Skip hidden files like DS_Store
-    if (fs.lstatSync(f).isDirectory()) {
-      fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
-      //console.log(JSON.stringify(queue))
-    } else {
-      source = fs.readFileSync(f).toString();
-    }
-  }
-*/
 
   function findImports (path) {
     console.log(`path ${path}`)

@@ -136,7 +136,7 @@ TABLE = {
     },
 
     'compile' : async (args) => {
-      argsOrDie(args, List(['[0 sourceDir]','<1 ContractName>']), 1)
+      argsOrDie(args, List(['[0 sourcePathList]','<1 ContractName>']), 1)
       return require('./compile')(args.get(0), args.get(1))
     },
 	      

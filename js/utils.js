@@ -10,6 +10,13 @@ LINKS_DIR    = 'links'
 DEPLOYS_DIR  = 'deploys'
 LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 
+DEMO_SRC_PATH = "contracts"
+ZEPPELIN_SRC_PATH = "node_modules/openzeppelin-solidity/contracts"
+
+function tryIfNot(eth, checkFunc, tryFunc, args) {
+  if (!checkFunc(eth, args.get(0))) { tryFunc(args) }
+}
+
 function print(data) {
   console.log(JSON.stringify(data, null, '  '))
 }
@@ -122,22 +129,25 @@ function thenPrint(promise) {
 }
 
 module.exports = {
-  traverseDirs  : traverseDirs,
-  thenPrint     : thenPrint,
-  print         : print,
-  ensureDir     : ensureDir,
-  getDeploys    : getDeploys,
-  getDeploy     : getDeploy,
-  getLinks      : getLinks,
-  getLink       : getLink,
-  getContract   : getContract,
-  cleanCompile  : cleanCompile,
-  cleanLink     : cleanLink,
-  cleanDeploy   : cleanDeploy,
-  clean         : clean,
-  LIB_PATTERN   : LIB_PATTERN,
-  SOURCES_DIR   : SOURCES_DIR,
-  COMPILES_DIR  : COMPILES_DIR,
-  LINKS_DIR     : LINKS_DIR,
-  DEPLOYS_DIR   : DEPLOYS_DIR,
+  tryIfNot          : tryIfNot,
+  traverseDirs      : traverseDirs,
+  thenPrint         : thenPrint,
+  print             : print,
+  ensureDir         : ensureDir,
+  getDeploys        : getDeploys,
+  getDeploy         : getDeploy,
+  getLinks          : getLinks,
+  getLink           : getLink,
+  getContract       : getContract,
+  cleanCompile      : cleanCompile,
+  cleanLink         : cleanLink,
+  cleanDeploy       : cleanDeploy,
+  clean             : clean,
+  LIB_PATTERN       : LIB_PATTERN,
+  SOURCES_DIR       : SOURCES_DIR,
+  COMPILES_DIR      : COMPILES_DIR,
+  LINKS_DIR         : LINKS_DIR,
+  DEPLOYS_DIR       : DEPLOYS_DIR,
+  DEMO_SRC_PATH     : DEMO_SRC_PATH,
+  ZEPPELIN_SRC_PATH : ZEPPELIN_SRC_PATH,
 }

@@ -9,7 +9,7 @@ const    eth = demo.getNetwork('test')
 describe('Democracy linking.', () => {
 
   before(async () => {
-    await demo.compile('contracts', 'TestLibrary.sol')
+    await demo.compile(['contracts'], 'TestLibrary.sol')
   })
 
   it("should find a previously linked contract.", (done) => {

@@ -5,7 +5,7 @@ const { Map } = require('immutable')
 eth = demo.getNetwork('test')
 
 main = async() => {
-  await demo.compile('contracts', 'TestLibrary.sol')
+  await demo.compile(['contracts'], 'TestLibrary.sol')
   await demo.link('TestLibrary','test','account0','linkLib')
   await demo.deploy('TestLibrary','test','linkLib','deployLib','')
 
