@@ -167,7 +167,9 @@ TABLE = {
       if (!deployId.startsWith("deploy")) {
         throw new Error(`${deployId} should begin with 'deploy'`)
       }
-      const ctorArgs = (args.get(4)) ? getArgMap(List(args.get(4).split(','))) : Map({})
+      const ogCtorArgs   = args.get(4)
+      const ctorArgs = (Map.isMap(ogCtorArgs)) ? ogCtorArgs : 
+        (ogCtorArgs ? getArgMap(List(args.get(4).split(','))) : Map({}))
 
       const matchedCtorArgs = getConstructorArgs(ctorArgs, link.get('abi'))
       console.log(`ctorArgs ${JSON.stringify(ctorArgs)}`)
@@ -175,15 +177,17 @@ TABLE = {
     }, 
 
     'do' : async (args) => {
-      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 deployId>','<3 methodName>','<4 args>']))
+      argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 deployId>','<3 doerAccount>','<4 methodName>','<5 args>']), 5)
       const contractName = args.get(0)
       const net          = getNetwork(args.get(1))
+      const accounts     = await getAccounts(net)
+      const deployerAddr = getAccountFromArg(accounts, args.get(3))
       const networkId    = await net.net_version()
       const deployId     = args.get(2)
       const deployName   = `${contractName}-${deployId}`
       const deploy       = getDeploy(networkId, deployName)
-      const methodName   = args.get(3)
-      const argMap       = getArgMap(List(args.get(4).split(',')))
+      const methodName   = args.get(4)
+      const argMap       = (args.get(5)) ? getArgMap(List(args.get(5).split(','))) : Map({})
       require('./do')(net, deploy, methodName, argMap)
     },
 }

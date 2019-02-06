@@ -11,7 +11,7 @@ const BN = require('bn.js')
  * @param eth network object connected to  provider
  * @param contractOutput the JSON compiled output to deploy
  */
-async function dodo(eth, deploy, methodName, argMap) {
+async function dodo(eth, deploy, deployerAddress, methodName, argMap) {
   const contractName = deploy.get('name')
   console.log(`Doing ${contractName}.${methodName} with args ${argMap.toJS()}`)
   const networkId = await eth.net_version() 
@@ -24,11 +24,11 @@ async function dodo(eth, deploy, methodName, argMap) {
   console.log(`Args '${argValues[0]}'`)
   if (!argValues || argValues[0] === undefined) {
     console.log("Zero args")
-    instance[methodName]().then((...args) => {
+    instance[methodName]().then((...args, {from: deployerAddress, gas: "6700000", gasPrice: "0x21105b0"}) => {
       console.log(`Return Value ${JSON.stringify(args)}`)
     })
   } else {
-    instance[methodName](...argValues).then((...args) => {
+    instance[methodName](...argValues).then((...args, {from: deployerAddress, gas: "6700000", gasPrice: "0x21105b0"}) => {
       console.log(`Return Value ${JSON.stringify(args)}`)
     })
   }
