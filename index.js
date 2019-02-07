@@ -9,4 +9,6 @@ module.exports = {
   link: (...args) => { return lib.TABLE['link'](List(args)) },
   deploy: (...args) => { return lib.TABLE['deploy'](List(args)) },
   do: (...args) => { return lib.TABLE['do'](List(args)) },
+  get: (...args) => { return lib.TABLE['get'](List(args)) },
+  set: (...args) => { return lib.TABLE['set'](List(args)) },
 }

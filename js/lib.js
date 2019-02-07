@@ -1,6 +1,6 @@
 // lib.js, the entry point for Democracy, an undiscovered decentralized country
 
-const { Map, Seq, List } = require('immutable')
+const { Map, Seq, List, fromJS } = require('immutable')
 const path   = require('path')
 const assert = require('assert')
 const BN = require('bn.js')
@@ -188,7 +188,22 @@ TABLE = {
       const deploy       = getDeploy(networkId, deployName)
       const methodName   = args.get(4)
       const argMap       = (args.get(5)) ? getArgMap(List(args.get(5).split(','))) : Map({})
-      require('./do')(net, deploy, methodName, argMap)
+      return require('./do')(net, deploy, methodName, argMap)
+    },
+
+    'get' : (args) => {
+      argsOrDie(args, List(['<0 namespace>','<1 key>','[2 defaultValue]']), 2)
+      const value = require('./get')(...args)
+      console.log(`Value ${value.toString()}`)
+      return value 
+    },
+
+    'set' : (args) => {
+      argsOrDie(args, List(['<0 namespace>','<1 key>','<2 value>']), 3)
+      const valArg = args.get(2)
+      const value = (Map.isMap(valArg) || List.isList(valArg) || !valArg) ?
+                     valArg : fromJS(JSON.parse(args.get(2))) 
+      return require('./set')(args.get(0), args.get(1), value)
     },
 }
 

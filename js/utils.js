@@ -4,6 +4,7 @@ path = require('path')
 
 const { Map, fromJS } = require('immutable')
 
+DB_DIR       = 'db'
 SOURCES_DIR  = 'contracts'
 COMPILES_DIR = 'compiles'
 LINKS_DIR    = 'links'
@@ -144,6 +145,7 @@ module.exports = {
   cleanDeploy       : cleanDeploy,
   clean             : clean,
   LIB_PATTERN       : LIB_PATTERN,
+  DB_DIR            : DB_DIR,
   SOURCES_DIR       : SOURCES_DIR,
   COMPILES_DIR      : COMPILES_DIR,
   LINKS_DIR         : LINKS_DIR,
