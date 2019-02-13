@@ -1,18 +1,100 @@
 // Utilities
-fs = require('fs')
-path = require('path')
+const fs = require('fs')
+const path = require('path')
 
-const { Map, fromJS } = require('immutable')
+const { Map, List, fromJS } = require('immutable')
+const assert = require('assert')
 
-DB_DIR       = 'db'
-SOURCES_DIR  = 'contracts'
-COMPILES_DIR = 'compiles'
-LINKS_DIR    = 'links'
-DEPLOYS_DIR  = 'deploys'
-LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
+const DB_DIR       = 'db'
+const SOURCES_DIR  = 'contracts'
+const COMPILES_DIR = 'compiles'
+const LINKS_DIR    = 'links'
+const DEPLOYS_DIR  = 'deploys'
+const LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 
-DEMO_SRC_PATH = "contracts"
-ZEPPELIN_SRC_PATH = "node_modules/openzeppelin-solidity/contracts"
+const DEMO_SRC_PATH = 'contracts'
+const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
+
+/**
+ * Use this to perform different actions based on whether we are in browser or not
+ */
+function isBrowser() {
+  return (typeof window != 'undefined' && window.document)
+}
+
+/**
+ * Take the callback action for every level in a hierarchical key space
+ */
+function getFileKeySpace(key, cb) {
+  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
+  const dirSpaces = keySpaces.slice(0,-1)
+  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
+  const keyBase = keySpaces.get(-1)
+  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+
+  // Return the base filename and don't add .json extension
+  // b/c the latter is only correct behavior for setImmutableKey
+  // and this method is also used by getImmutableKey
+  return path.join(dbDir, `${keyBase}`)
+}
+
+function setImmutableKey(fullKey, value) {
+  assert(typeof(fullKey) === 'string')
+  assert(Map.isMap(value) || List.isList(value) || !value)
+
+  if (isBrowser()) {
+    localStorage.setItem(fullKey, value)
+  } else {
+    const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
+      ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
+
+    if (fs.existsSync(`${dbFile}.json`)) {
+      if (!value) {
+        // We never delete, only move to the side
+        const now = Date.now()
+        console.log(`Marking key ${fullKey} deleted at time ${now}`)
+        fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
+        return true
+      } else {
+        throw new Error(`Key ${dbFile}.json exists and is read-only.`)
+      }
+    } else if (fs.existsSync(dbFile)) {
+      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+    } else if (!value) {
+      console.log(`Unnecessary deletion of non-existent key ${fullKey}`)
+      return true;
+    }
+    const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
+    console.log(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
+    fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
+    return true
+  }
+
+}
+
+function getImmutableKey(fullKey, defaultValue) {
+  assert(typeof(fullKey) === 'string')
+
+  if (isBrowser()) {
+    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
+    if (!value) {
+      if (defaultValue) return defaultValue
+      else { throw new Error(`Key ${fullKey} does not exist.`) }
+		}
+    return value
+  } else {
+    const dbFile = getFileKeySpace(fullKey, () => {})
+		if (fs.existsSync(`${dbFile}.json`)) {
+      return buildFromDirs(`${dbFile}.json`, () => {return false})
+    } else if (fs.existsSync(dbFile)) {
+      return buildFromDirs(dbFile,
+        (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) })
+    } else {
+      if (defaultValue) return defaultValue
+      else { throw new Error(`Key ${dbFile} does not exist.`) }
+    }
+  }
+}  
 
 function tryIfNot(eth, checkFunc, tryFunc, args) {
   if (!checkFunc(eth, args.get(0))) { tryFunc(args) }
@@ -31,24 +113,48 @@ function ensureDir(dirName) {
  * @param startDirs a list of paths to start searching in
  * @param skipFilt a function that returns true for files that need to be skipped
  * @param cb a callback that accepts the source text of a file plus its full path
+ * @param dcb a callback for every directory that is encountered
  */
-function traverseDirs(startDirs, skipFilt, cb) {
-  queue = startDirs
-	while (queue.length > 0) {
-		f = queue.pop();
-		shortList = path.basename(f).split('.')
-    if (skipFilt(shortList)) { continue; }
+function traverseDirs(startDirs, skipFilt, cb, dcb) {
+  const queue = startDirs
+  while (queue.length > 0) {
+    const f = queue.pop()
+    const shortList = path.basename(f).split('.')
+    if (skipFilt(shortList)) { continue }
     if (fs.lstatSync(f).isDirectory()) {
       fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
+      if (dcb) { dcb(f) }
     } else {
-      source = fs.readFileSync(f).toString();
+      const source = fs.readFileSync(f).toString()
       cb(source, f)
     }
   }
 }
 
+/**
+ * Traverse directories recursively building an Immutable Map with hierarchical keys
+ * as directory paths and values as file contents (leaf nodes)
+ * @param f the full path to a filename (possibly a directory) to start traversal
+ * @param skipFilt a function that returns true for files that need to be skipped
+ */
+function buildFromDirs(f, skipFilt) {
+  shortList = path.basename(f).split('.')
+  if (skipFilt(shortList)) { return null }
+  if (fs.lstatSync(f).isDirectory()) {
+    return new Map(List(fs.readdirSync(f)).map((f2) => {
+      const builtValues = buildFromDirs(path.join(f,f2), skipFilt)
+      const baseKey = path.basename(f2)
+      const key = (baseKey.endsWith('.json')) ? baseKey.split('.')[0] : baseKey
+      return builtValues ? [key, builtValues] : null
+    }))
+  } else {
+    return fromJS(JSON.parse(fs.readFileSync(f)))
+  }
+}
+
+
 function getLinks(networkId) {
-  linkMap = {}
+  const linkMap = {}
   ensureDir(`${LINKS_DIR}/${networkId}`)
   traverseDirs(
     [`${LINKS_DIR}/${networkId}`],
@@ -60,9 +166,8 @@ function getLinks(networkId) {
   return fromJS(linkMap)
 }
 
-
 function getDeploys(networkId) {
-  deployMap = {}
+  const deployMap = {}
   ensureDir(`${DEPLOYS_DIR}/${networkId}`)
   traverseDirs(
     [`${DEPLOYS_DIR}/${networkId}`],
@@ -78,7 +183,7 @@ function getDeploys(networkId) {
  * Return a contract read from a file in the `outputs/${networkId}` directory.
  * @param contractName name of the compiled contract
  */
-getContract = (contractName) => {
+const getContract = (contractName) => {
   ensureDir(`${COMPILES_DIR}`)
   const { contractOutputs } = getContracts()
   return contractOutputs.get(contractName)
@@ -89,7 +194,7 @@ getContract = (contractName) => {
  * @param networkId name of the chain / network deployed onto
  * @param linkName the name of the contract and link ID of the form `ContractName-linkId`
  */
-getLink = (networkId, linkName) => {
+const getLink = (networkId, linkName) => {
   const linkMap = getLinks(networkId)
   return linkMap.get(linkName)
 }
@@ -99,39 +204,41 @@ getLink = (networkId, linkName) => {
  * @param networkId name of the chain / network deployed onto
  * @param deployName the name of the contract and deploy of the form `ContractName-deployId`
  */
-getDeploy = (networkId, deployName) => {
+const getDeploy = (networkId, deployName) => {
   const deployMap = getDeploys(networkId)
   return deployMap.get(deployName)
 }
 
-cleanCompile = (compileName) => {
+const cleanCompile = (compileName) => {
   fs.unlinkSync(`${COMPILES_DIR}/${compileName}.json`)
 }
 
-cleanLink = async (eth, linkName) => {
+const cleanLink = async (eth, linkName) => {
   const networkId = await eth.net_version()
   fs.unlinkSync(`${LINKS_DIR}/${networkId}/${linkName}.json`)
 }
 
-cleanDeploy = async (eth, deployName) => {
+const cleanDeploy = async (eth, deployName) => {
   const networkId = await eth.net_version()
   fs.unlinkSync(`${DEPLOYS_DIR}/${networkId}/${deployName}.json`)
 }
 
-clean = async (eth) => {
-  const networkId = await eth.net_version()
+const clean = async (eth) => {
+  //const networkId = await eth.net_version()
   fs.rmdirSync(`${COMPILES_DIR}`)
-  fs.rmdirSync(`${LINKS_DIR}/${networkId}/${linkName}`)
-  fs.rmdirSync(`${DEPLOYS_DIR}/${networkId}/${deployName}`)
+  // TODO Re-enable when you're written a recursive remove directory function
+  //fs.rmdirSync(`${LINKS_DIR}/${networkId}/${linkName}`)
+  //fs.rmdirSync(`${DEPLOYS_DIR}/${networkId}/${deployName}`)
 }
 
-function thenPrint(promise) {
+const thenPrint = (promise) => {
   promise.then((value) => {console.log(JSON.stringify(value))})
 }
 
 module.exports = {
   tryIfNot          : tryIfNot,
   traverseDirs      : traverseDirs,
+  buildFromDirs     : buildFromDirs,
   thenPrint         : thenPrint,
   print             : print,
   ensureDir         : ensureDir,
@@ -144,6 +251,9 @@ module.exports = {
   cleanLink         : cleanLink,
   cleanDeploy       : cleanDeploy,
   clean             : clean,
+  getFileKeySpace   : getFileKeySpace,
+  getImmutableKey   : getImmutableKey,
+  setImmutableKey   : setImmutableKey,
   LIB_PATTERN       : LIB_PATTERN,
   DB_DIR            : DB_DIR,
   SOURCES_DIR       : SOURCES_DIR,

@@ -192,18 +192,18 @@ TABLE = {
     },
 
     'get' : (args) => {
-      argsOrDie(args, List(['<0 namespace>','<1 key>','[2 defaultValue]']), 2)
+      argsOrDie(args, List(['<0 key>','<1 defaultValue]']), 1)
       const value = require('./get')(...args)
       console.log(`Value ${value.toString()}`)
       return value 
     },
 
     'set' : (args) => {
-      argsOrDie(args, List(['<0 namespace>','<1 key>','<2 value>']), 3)
-      const valArg = args.get(2)
+      argsOrDie(args, List(['<0 key>','<1 value>']), 2)
+      const valArg = args.get(1)
       const value = (Map.isMap(valArg) || List.isList(valArg) || !valArg) ?
-                     valArg : fromJS(JSON.parse(args.get(2))) 
-      return require('./set')(args.get(0), args.get(1), value)
+                     valArg : fromJS(JSON.parse(valArg)) 
+      return require('./set')(args.get(0), value)
     },
 }
 
@@ -229,7 +229,6 @@ module.exports = {
   getAccountFromArg : getAccountFromArg,
   getConstructorArgs : getConstructorArgs,
   getContracts : getContracts,
-  getContract : getContract,
   getArgMap : getArgMap,
   doBalances : doBalances,
   TABLE : TABLE,
