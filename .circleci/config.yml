@@ -5,4 +5,13 @@ jobs:
       - image: cryptogoth/node-circle-test
     steps:
       - checkout
-      - run: . ~/.nvm/nvm.sh; npm install; ./node_modules/ganache-cli/cli.js &; npm test
+      - run: . ~/.nvm/nvm.sh; npm install
+      - run:
+          command: . ~/.nvm/nvm.sh; ./node_modules/ganache-cli/cli.js
+          background: true
+      - run:
+          shell: /bin/sh
+          command: |
+            wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8555
+            :
+      - run: . ~/.nvm/nvm.sh; npm test
