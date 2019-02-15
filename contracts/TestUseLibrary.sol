@@ -13,4 +13,8 @@ contract TestUseLibrary {
     function double(uint256 _def) public returns (uint256) {
         return 2*_def;
     }
+
+    function() payable {
+    }
+
 }

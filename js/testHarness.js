@@ -15,7 +15,7 @@ web3 = new Web3()
 
 class TestHarness {
   constructor(contractName, network='test') {
-    this.contractName = contractName;
+    this.contractName = contractName
     console.log(`CONTRACT NAME ${contractName}`)
 
     var output = JSON.parse(fs.readFileSync(`outputs/${contractName}.json`).toString())
@@ -31,7 +31,7 @@ class TestHarness {
     this.gasPrice = config['gasPrice']
     web3.setProvider(new web3.providers.HttpProvider(endpoint))
 
-    var keys = JSON.parse(fs.readFileSync(`keys/ganache.test.json`).toString()).addresses
+    var keys = JSON.parse(fs.readFileSync('keys/ganache.test.json').toString()).addresses
 
     this.accounts = []
     //keys = ganache.manager.state.accounts
@@ -40,7 +40,7 @@ class TestHarness {
       this.accounts.push(key)
     }
     this.coinbase = this.accounts[0]
-    console.log(`First test key found (coinbase): ${this.coinbase}`);
+    console.log(`First test key found (coinbase): ${this.coinbase}`)
 
   }
 
@@ -50,14 +50,14 @@ class TestHarness {
     return new Promise((resolve, reject) => {
       partial_func({from: this.coinbase, gas: this.gasLimit, gasPrice: this.gasPrice},
         (err, result) => {
-          if (err) { reject(err); }
+          if (err) { reject(err) }
           else {
             this.result = result
-            resolve(this);
+            resolve(this)
           } // keep passing the harness object
-        });
-      }
-    );
+        })
+    }
+    )
   }
 
   deployPromise() {
@@ -65,16 +65,16 @@ class TestHarness {
       web3.eth.contract(this.abi).new({data: this.code, from: this.coinbase, gas: this.gasLimit, gasPrice: this.gasPrice},
         (err, contract) => {
           if (err) {
-            console.error("Error " + err);
-            reject(err);
+            console.error('Error ' + err)
+            reject(err)
           } else if (contract.address) {
             console.log(`Contract ${this.contractName} deployed at ${contract.address}`)
             this.address = contract.address
             this.instance = web3.eth.contract(this.abi).at(this.address)
-            resolve(this);
+            resolve(this)
           }
-        });
-    });
+        })
+    })
   }
 
 }

@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs')
 const { traverseDirs, ensureDir } = require('./utils')
 
 const config = require('config')
@@ -6,7 +6,7 @@ const assert = require('assert')
 const { List, Seq } = require('immutable')
 const BN = require('bn.js')
 
-const DEPLOY_DIR = "deploys"
+const DEPLOY_DIR = 'deploys'
 
 /**
  * Validate dependencies then deploy the given contract output to a network.
@@ -15,13 +15,13 @@ const DEPLOY_DIR = "deploys"
  */
 async function deploy(eth, link, deployId, ctorArgs) {
   const contractName = link.get('name')
-  console.log(`Deploying ${contractName} with id ${deployId}`)
+  //console.log(`Deploying ${contractName} with id ${deployId}`)
   const networkId = await eth.net_version() 
-  const code = "0x" + link.get('code')
+  const code = '0x' + link.get('code')
   const abi = link.get('abi')
   const deployName = `${contractName}-${deployId}`
   const deployerAddress = link.get('deployerAddress')
-  console.log(`ctor args ${ctorArgs.get('_abc')}`)
+  //console.log(`ctor args ${ctorArgs.get('_abc')}`)
 
   deployMap = {}
 
@@ -45,12 +45,12 @@ async function deploy(eth, link, deployId, ctorArgs) {
   }
 
   const ctorArgList = List(ctorArgs.values()).toJS()
-  console.log(`ctorArgList ${JSON.stringify(ctorArgList)}`)
+  //console.log(`ctorArgList ${JSON.stringify(ctorArgList)}`)
 
   deployPromise = new Promise((resolve, reject) => {
     eth.contract(abi.toJS(), code,
-      {from: deployerAddress, gas: "6700000", gasPrice: "0x21105b0"})
-       .new(...ctorArgList).then((txHash) => {
+      {from: deployerAddress, gas: '6700000', gasPrice: '0x21105b0'})
+      .new(...ctorArgList).then((txHash) => {
         const checkTransaction = setInterval(() => {
           eth.getTransactionReceipt(txHash).then((receipt) => {
             if (receipt) {
@@ -60,11 +60,11 @@ async function deploy(eth, link, deployId, ctorArgs) {
           })
         })
       }
-    )
+      )
   })
 
   const minedContract = await deployPromise.then((receipt) => { return receipt })
-  console.log(JSON.stringify(minedContract, null, "  "))
+  //console.log(JSON.stringify(minedContract, null, '  '))
 
   const now = new Date()
 
@@ -78,12 +78,12 @@ async function deploy(eth, link, deployId, ctorArgs) {
     deployAddress: minedContract.contractAddress,
     deployDate: now.toLocaleString(),
     deployTime: now.getTime()
-    }
+  }
 
-  const deployFilePath = path.join(deployDir, deployName) + ".json"
-  console.log(`Writing deploy to ${deployFilePath}`)
-  console.log(JSON.stringify(deployOutput, null, '  '))
-  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput, null, '  '));
+  const deployFilePath = path.join(deployDir, deployName) + '.json'
+  //console.log(`Writing deploy to ${deployFilePath}`)
+  //console.log(JSON.stringify(deployOutput, null, '  '))
+  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput, null, '  '))
 
   return deployOutput
 }

@@ -1,6 +1,6 @@
 // Linking command, for detecting library dependencies and generating
 // link metadata as an input to deploying
-const fs = require('fs');
+const fs = require('fs')
 
 const config = require('config')
 const assert = require('assert')
@@ -17,7 +17,7 @@ const { getLink } = require('./utils')
  */
 async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   const networkId = await eth.net_version() 
-  const code = "0x" + contractOutput.get('code')
+  const code = '0x' + contractOutput.get('code')
   const contractName = contractOutput.get('name')
   const linkName = `${contractName}-${linkId}`
 
@@ -36,10 +36,10 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
 
   const replacedCode = depMap.reduce((codeSoFar, linkId, linkPlaceholder) => {
     const deployName = `${linkPlaceholder}-${linkId}`
-    console.log(`deployName ${deployName}`)
+    //console.log(`deployName ${deployName}`)
     const indexMatch = matches.indexOf(linkPlaceholder)
     if (indexMatch == -1) {
-      throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`);
+      throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
     }
 
     const deployObject = deployMap.get(deployName)
@@ -49,7 +49,7 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     const deployAddress = deployObject.get('deployAddress')
     assert(deployAddress)
 
-    console.log(`Replacing symbols ${matches[indexMatch]} with ${deployAddress}`)
+    //console.log(`Replacing symbols ${matches[indexMatch]} with ${deployAddress}`)
     return codeSoFar.replace(matches[0], deployAddress.slice(2))
   }, code)
 
@@ -67,11 +67,11 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     deployerAddress: deployerAddress,
   }).merge(contractOutput.set('code', replacedCode))
 
-  linkFilePath = path.join(linksDir, linkName) + ".json"
+  linkFilePath = path.join(linksDir, linkName) + '.json'
 
-  console.log(`Writing link to ${linkFilePath}`)
+  //console.log(`Writing link to ${linkFilePath}`)
   const linkString = JSON.stringify(linkOutput, null, '  ')
-  console.log(linkString)
+  //console.log(linkString)
   fs.writeFileSync(linkFilePath, linkString)
 
   return linkOutput

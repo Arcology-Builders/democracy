@@ -1,24 +1,38 @@
-const demo = require('..')
+require('module-alias/register')
+const demo = require('@root')
+const { print } = require('@root/js/utils')
 
 const chai = require('chai').use(require('chai-as-promised'));
-const assert = require('assert')
+const assert = chai.assert
 const should = chai.should(); 
+const Eth = require('ethjs')
 
-const    eth = demo.getNetwork('test')
+//process.env["NODE_CONFIG_DIR"] = "./../config"
+const config = require('config')
+let networkId
 
 describe('Democracy linking.', () => {
 
-  before(async () => {
-    await demo.compile(['contracts'], 'TestLibrary.sol')
+  before((done) => {
+    (async () => {
+      const eth = await demo.getNetwork('test')
+      networkId = await eth.net_version()
+      demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
+      print("clean deploy")
+      demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
+      demo.cleanCompileSync('TestLibrary')
+      await demo.compile('contracts', 'TestLibrary.sol')
+    })().then(() => { done() })
   })
 
   it("should find a previously linked contract.", (done) => {
     main = async () => {
+      let  eth = demo.getNetwork('test')
       const networkId = await eth.net_version()
       return demo.link('TestLibrary','test','account0','linkLib').then((output) => {
         assert(demo.getLink(networkId, "TestLibrary-linkLib"),
           "TestLibrary-linkLib not found")
-        return demo.cleanLink(eth, 'TestLibrary-linkLib')
+        return demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
       }).then((output) => {
         assert(!demo.getLink(networkId, "TestLibrary-linkLib"),
           "TestLibrary-linkLib should not be found after cleaning")
@@ -30,7 +44,6 @@ describe('Democracy linking.', () => {
 
   it("should *not* find a previously linked contract.", (done) => {
     main = async() => {
-      const networkId = await eth.net_version()
       assert(!demo.getLink(networkId, "TestLibrary-linkBlah"),
         "TestLibrary-linkBlah not found")
     }
@@ -39,7 +52,6 @@ describe('Democracy linking.', () => {
 
   it("should find a previously deployed contract.", (done) => {
     main = async () => {
-      const networkId = await eth.net_version()
       return demo.link('TestLibrary','test','account0','linkLib').then((output) => {
         return demo.deploy('TestLibrary', 'test', 'linkLib', 'deployLib', '')
       }).then((output) => {
@@ -47,16 +59,18 @@ describe('Democracy linking.', () => {
           "TestLibrary-linkLib not found")
         assert(demo.getDeploy(networkId, "TestLibrary-deployLib"),
           "TestLibrary-deployLib not found")
-        return demo.cleanLink(eth, 'TestLibrary-linkLib')
+        return demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
       }).then((output) => {
-        return demo.cleanDeploy(eth, 'TestLibrary-deployLib')
+        return demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
       })
     }
     main().then(() => { done() })
   })
 
   after( async() => {
-    await demo.cleanCompile('TestLibrary')
+    demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
+    demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
+    demo.cleanCompileSync('TestLibrary')
   })
 
 

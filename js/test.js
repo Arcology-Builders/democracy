@@ -6,8 +6,8 @@ assert = require('assert')
 Mocha = require('mocha')
 
 // Tests from democracy
-DEMO_PATH = "test"
-inputs = {};
+DEMO_PATH = 'test'
+inputs = {}
 
 queue = [DEMO_PATH]
 
@@ -18,7 +18,7 @@ if (process.argv.length > 2) {
   testFiles = []
 
   while (queue.length > 0) {
-    fullpath = queue.pop();
+    fullpath = queue.pop()
     f = path.basename(fullpath)
     //f = path.basename(fullpath)
 
@@ -27,8 +27,8 @@ if (process.argv.length > 2) {
       fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
     }
     else if (f.substr(-3) === '.js' && f.substr(0,4) === 'test') {
-      source = fs.readFileSync(fullpath).toString();
-      testFiles.push(fullpath);
+      source = fs.readFileSync(fullpath).toString()
+      testFiles.push(fullpath)
     }
   }
 }

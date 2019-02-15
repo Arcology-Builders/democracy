@@ -36,6 +36,7 @@ keys/ganache.test.json
 web/addresses.js
 
 web/*-abi.js
+db
 compiles
 links
 deploys

@@ -2,23 +2,25 @@
 fs = require('fs')
 path = require('path')
 solc = require('solc')
-assert = require('assert')
+assert = require('chai').assert
+
 const { traverseDirs, ensureDir,
   COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH } = require('./utils')
 
-function compile(sourcePathList, sources) {
+function compile(sourceStartPath, sources) {
   console.log(`Sources ${sources}`)
   // Open contracts installed by npm -E zeppelin-solidity
   // Open contracts from democracy
-  inputs = {};
+  inputs = {}
+  assert.typeOf(sourceStartPath, 'string')
 
-  queue = sourcePathList || [ DEMO_PATH, ZEPPELIN_PATH ]
+  queue = [ sourceStartPath ] || [ DEMO_PATH, ZEPPELIN_PATH ]
 
   ensureDir(COMPILES_DIR)
 
   traverseDirs(
     queue,
-    (fnParts) => { return ((fnParts.length > 1) && !fnParts[1].startsWith('sol')); },
+    (fnParts) => { return ((fnParts.length > 1) && !fnParts[1].startsWith('sol')) },
     function(source, f) {
       paths = f.split(path.sep)
       keys = []
@@ -27,7 +29,7 @@ function compile(sourcePathList, sources) {
       // in findImport below
       do {
         keys.push(paths.join(path.sep))
-        if (paths.length <= 1) { break; }
+        if (paths.length <= 1) { break }
         paths = paths.slice(-(paths.length - 1))
       } while(true)
       keys.forEach((key) => inputs[key] = source)
@@ -63,7 +65,7 @@ function compile(sourcePathList, sources) {
   }
 
   for (var contractName in outputs.contracts) {
-    shortName = path.basename(contractName).split(":")[1]
+    shortName = path.basename(contractName).split(':')[1]
     const output = {
       name: shortName,
       code: outputs.contracts[contractName].bytecode,

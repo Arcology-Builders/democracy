@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 
 const { Map, List, fromJS } = require('immutable')
-const assert = require('assert')
+const assert = require('chai').assert
 
 const DB_DIR       = 'db'
 const SOURCES_DIR  = 'contracts'
@@ -45,6 +45,7 @@ function setImmutableKey(fullKey, value) {
   if (isBrowser()) {
     localStorage.setItem(fullKey, value)
   } else {
+    ensureDir(DB_DIR)
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
 
@@ -62,7 +63,7 @@ function setImmutableKey(fullKey, value) {
       throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
     } else if (!value) {
       console.log(`Unnecessary deletion of non-existent key ${fullKey}`)
-      return true;
+      return true
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
     console.log(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
@@ -80,11 +81,11 @@ function getImmutableKey(fullKey, defaultValue) {
     if (!value) {
       if (defaultValue) return defaultValue
       else { throw new Error(`Key ${fullKey} does not exist.`) }
-		}
+    }
     return value
   } else {
     const dbFile = getFileKeySpace(fullKey, () => {})
-		if (fs.existsSync(`${dbFile}.json`)) {
+    if (fs.existsSync(`${dbFile}.json`)) {
       return buildFromDirs(`${dbFile}.json`, () => {return false})
     } else if (fs.existsSync(dbFile)) {
       return buildFromDirs(dbFile,
@@ -209,21 +210,24 @@ const getDeploy = (networkId, deployName) => {
   return deployMap.get(deployName)
 }
 
-const cleanCompile = (compileName) => {
-  fs.unlinkSync(`${COMPILES_DIR}/${compileName}.json`)
+const cleanCompileSync = (compileName) => {
+  const fn = `${COMPILES_DIR}/${compileName}.json`
+  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
 }
 
-const cleanLink = async (eth, linkName) => {
-  const networkId = await eth.net_version()
-  fs.unlinkSync(`${LINKS_DIR}/${networkId}/${linkName}.json`)
+const cleanLinkSync = (networkId, linkName) => {
+  assert.typeOf(networkId, "string")
+  const fn = `${LINKS_DIR}/${networkId}/${linkName}.json`
+  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
 }
 
-const cleanDeploy = async (eth, deployName) => {
-  const networkId = await eth.net_version()
-  fs.unlinkSync(`${DEPLOYS_DIR}/${networkId}/${deployName}.json`)
+const cleanDeploySync = (networkId, deployName) => {
+  assert.typeOf(networkId, "string")
+  const fn = `${DEPLOYS_DIR}/${networkId}/${deployName}.json`
+  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
 }
 
-const clean = async (eth) => {
+const cleanSync = (networkId) => {
   //const networkId = await eth.net_version()
   fs.rmdirSync(`${COMPILES_DIR}`)
   // TODO Re-enable when you're written a recursive remove directory function
@@ -247,10 +251,10 @@ module.exports = {
   getLinks          : getLinks,
   getLink           : getLink,
   getContract       : getContract,
-  cleanCompile      : cleanCompile,
-  cleanLink         : cleanLink,
-  cleanDeploy       : cleanDeploy,
-  clean             : clean,
+  cleanCompileSync  : cleanCompileSync,
+  cleanLinkSync     : cleanLinkSync,
+  cleanDeploySync   : cleanDeploySync,
+  cleanSync         : cleanSync,
   getFileKeySpace   : getFileKeySpace,
   getImmutableKey   : getImmutableKey,
   setImmutableKey   : setImmutableKey,
