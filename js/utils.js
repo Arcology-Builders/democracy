@@ -15,6 +15,9 @@ const LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
 
+/**
+ * Deep version of fromJS https://stackoverflow.com/a/40663730
+ */
 function fromJSGreedy(js) {
   return typeof js !== 'object' || js === null ? js :
     Array.isArray(js) ? 

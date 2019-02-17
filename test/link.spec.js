@@ -18,6 +18,8 @@ describe('Democracy linking', () => {
     done()
   })
 
+  // Expect error thrown from promise
+  // https://stackoverflow.com/a/45496509
   it('throws an error to link without compiling', async () => {
     await expect(demo.link('TestLibrary', 'test', 'account0', 'linkLib'))
                  .to.be.rejectedWith(Error)
