@@ -5,6 +5,8 @@ Tools for running a country on Ethereum.
 
 With reusable components for general dapp development.
 
+[![CircleCI](https://circleci.com/gh/invisible-college/democracy.svg?style=svg)](https://circleci.com/gh/invisible-college/democracy)
+
 Install with npm
 ================
 
