@@ -11,7 +11,7 @@ const Eth = require('ethjs')
 const config = require('config')
 let networkId
 
-describe('Democracy linking.', () => {
+describe('Democracy deploying.', () => {
 
   before(async () => {
       const eth = demo.getNetwork('test')

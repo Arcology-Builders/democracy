@@ -11,11 +11,10 @@ let networkId
 
 describe('Democracy linking', () => {
 
-  before(async (done) => {
+  before(async () => {
     demo.cleanCompileSync("TestLibrary")
     eth = demo.getNetwork('test')
     networkId = await eth.net_version()
-    done()
   })
 
   // Expect error thrown from promise
