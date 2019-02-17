@@ -89,7 +89,7 @@ const getContracts = (shouldPrint) => {
     function(source, f) {
       fb = path.basename(f.split('.')[0])
       if (contractSources.indexOf(fb) == -1) { return }
-      contractOutputs[fb] = Map(JSON.parse(source))
+      contractOutputs[fb] = fromJS(JSON.parse(source))
       shouldPrint && console.log(`Compiled ${fb}`)
     }
   )
@@ -146,7 +146,11 @@ const TABLE = {
     argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 deployerAccount>','<3 linkId>',
 	      '[4 depLink1:depDeploy1 depLink2:depDeploy2 ... ]']), 4)
     const { contractOutputs } = getContracts()
-    const contract     = contractOutputs.get(args.get(0))
+    const contractName = args.get(0)
+    const contract     = contractOutputs.get(contractName)
+    if (!contract) {
+      throw new Error(`${contractName} compile output not found.`)
+    }
     const net          = getNetwork(args.get(1))
     const accounts     = await getAccounts(net)
     const deployerAddr = getAccountFromArg(accounts, args.get(2))

@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const { Map, List, fromJS } = require('immutable')
+const { Seq, Map, List, fromJS } = require('immutable')
 const assert = require('chai').assert
 
 const DB_DIR       = 'db'
@@ -14,6 +14,13 @@ const LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
 
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
+
+function fromJSGreedy(js) {
+  return typeof js !== 'object' || js === null ? js :
+    Array.isArray(js) ? 
+      Seq(js).map(fromJSGreedy).toList() :
+      Seq(js).map(fromJSGreedy).toMap();
+}
 
 /**
  * Use this to perform different actions based on whether we are in browser or not
@@ -180,6 +187,35 @@ function getDeploys(networkId) {
   return fromJS(deployMap)
 }
 
+const getContracts = (shouldPrint) => {
+  const contractSources = []
+  const contractOutputs = {}
+  traverseDirs(
+    [SOURCES_DIR], // start out by finding all contracts rooted in current directory
+    (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
+    function(source, f) {
+      fb = path.basename(f.split('.')[0])
+      contractSources.push(fb)
+      shouldPrint && console.log(`Source ${fb}`)
+    }
+  )
+  traverseDirs(
+    [COMPILES_DIR], // start out by finding all contracts rooted in current directory
+    (fnParts) => { return ((fnParts.length > 1) &&
+      (fnParts[1] !== 'json')) },
+    function(source, f) {
+      fb = path.basename(f.split('.')[0])
+      if (contractSources.indexOf(fb) == -1) { return }
+      contractOutputs[fb] = fromJSGreedy(JSON.parse(source))
+      shouldPrint && console.log(`Compiled ${fb}`)
+    }
+  )
+  return {
+    contractSources: Seq(contractSources),
+    contractOutputs: Map(contractOutputs)
+  }
+}
+
 /**
  * Return a contract read from a file in the `outputs/${networkId}` directory.
  * @param contractName name of the compiled contract
@@ -250,6 +286,7 @@ module.exports = {
   getDeploy         : getDeploy,
   getLinks          : getLinks,
   getLink           : getLink,
+  getContracts      : getContracts,
   getContract       : getContract,
   cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,

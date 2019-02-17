@@ -13,16 +13,15 @@ let networkId
 
 describe('Democracy linking.', () => {
 
-  before((done) => {
-    (async () => {
-      const eth = await demo.getNetwork('test')
+  before(async (done) => {
+      const eth = demo.getNetwork('test')
       networkId = await eth.net_version()
       demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
       print("clean deploy")
       demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
       demo.cleanCompileSync('TestLibrary')
       await demo.compile('contracts', 'TestLibrary.sol')
-    })().then(() => { done() })
+      done()
   })
 
   it("should find a previously linked contract.", (done) => {

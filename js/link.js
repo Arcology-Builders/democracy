@@ -57,7 +57,7 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
 
   const now = new Date()
 
-  const linkOutput = Map({
+  const linkOutput = new Map({
     name: contractName,
     networkId: networkId,
     linkId: linkId,
@@ -70,7 +70,7 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   linkFilePath = path.join(linksDir, linkName) + '.json'
 
   //console.log(`Writing link to ${linkFilePath}`)
-  const linkString = JSON.stringify(linkOutput, null, '  ')
+  const linkString = JSON.stringify(linkOutput.toJS(), null, '  ')
   //console.log(linkString)
   fs.writeFileSync(linkFilePath, linkString)
 

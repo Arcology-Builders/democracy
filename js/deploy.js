@@ -3,7 +3,7 @@ const { traverseDirs, ensureDir } = require('./utils')
 
 const config = require('config')
 const assert = require('assert')
-const { List, Seq } = require('immutable')
+const { Map, List, Seq } = require('immutable')
 const BN = require('bn.js')
 
 const DEPLOY_DIR = 'deploys'
@@ -68,7 +68,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
 
   const now = new Date()
 
-  const deployOutput = {
+  const deployOutput = new Map({
     name: contractName,
     networkId: networkId,
     deployId: deployId,
@@ -78,12 +78,12 @@ async function deploy(eth, link, deployId, ctorArgs) {
     deployAddress: minedContract.contractAddress,
     deployDate: now.toLocaleString(),
     deployTime: now.getTime()
-  }
+  })
 
   const deployFilePath = path.join(deployDir, deployName) + '.json'
   //console.log(`Writing deploy to ${deployFilePath}`)
   //console.log(JSON.stringify(deployOutput, null, '  '))
-  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput, null, '  '))
+  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput.toJS(), null, '  '))
 
   return deployOutput
 }

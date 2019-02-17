@@ -1,8 +1,7 @@
 const demo = require('..')
 
-const chai = require('chai').use(require('chai-as-promised'));
-const assert = require('assert')
-const should = chai.should(); 
+const chai = require('chai').use(require('chai-as-promised'))
+const should = chai.should()
 
 let networkId
 
