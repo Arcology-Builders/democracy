@@ -1,23 +1,26 @@
 democracy
 =========
 
-Tools for running a country on Ethereum.
+Tools for running a distributed country, currently on Ethereum.
 
 With reusable components for general dapp development.
+Note: we have change our NPM package name from `@invisible-college/democracy`
+to `democracy.js`.
 
+[![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js)
 [![CircleCI](https://circleci.com/gh/invisible-college/democracy.svg?style=svg)](https://circleci.com/gh/invisible-college/democracy)
 
 Install with npm
 ================
 
 ```
-npm i @invisible-college/democracy
+npm i democracy.js
 ```
 
 Then in your modules
 
 ```
-const demo = require('@invisible-college/democracy')
+const demo = require('democracy.js')
 ```
 
 
@@ -29,6 +32,9 @@ To the future!
 
 * 0.1 Release - basic subcommands and libraries for testing
   * commands for deploying and interacting with contracts, use json files for now
+  * 0.1.7 CircleCI integration
+  * 0.1.8 Add support for a dependent sample project @democracy/timely
+  * 0.1.9 Something else cool I haven't decided yet 
 
 * 0.2 Release - basic whisper support
   * commands for sending and listening to messages

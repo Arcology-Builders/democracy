@@ -1,7 +1,7 @@
 {
-  "name": "@invisible-college/democracy",
+  "name": "democracy.js",
   "version": "0.1.7",
-  "description": "A minimalist framework for Ethereum and Secure Scuttlebutt",
+  "description": "Democracy: a minimalist framework for distributed countries",
   "bin": {
     "demo": "./demo.js"
   },
