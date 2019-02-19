@@ -74,7 +74,6 @@ function compile(sourceStartPath, sources) {
     const abiString = `abi${shortName} = ${JSON.stringify(output['abi'], null, 2)}`
     const compileFilename = `${COMPILES_DIR}/${shortName}.json`
     fs.writeFileSync(compileFilename, JSON.stringify(output))
-    fs.writeFileSync(`web/${shortName}-abi.js`, abiString)
   }
 }
 
