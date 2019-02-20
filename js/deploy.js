@@ -47,10 +47,10 @@ async function deploy(eth, link, deployId, ctorArgs) {
   const ctorArgList = List(ctorArgs.values()).toJS()
   //console.log(`ctorArgList ${JSON.stringify(ctorArgList)}`)
 
+  const Contract = eth.contract(abi.toJS(), code)
+
   deployPromise = new Promise((resolve, reject) => {
-    eth.contract(abi.toJS(), code,
-      {from: deployerAddress, gas: '6700000', gasPrice: '0x21105b0'})
-      .new(...ctorArgList, {from: deployerAddress})
+    Contract.new(...ctorArgList, {from: deployerAddress, gas: '6700000', gasPrice: '0x21105b0'})
       .then((txHash) => {
         const checkTransaction = setInterval(() => {
           eth.getTransactionReceipt(txHash).then((receipt) => {
@@ -69,6 +69,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
 
   const minedContract = await deployPromise.then((receipt) => { return receipt })
   //console.log(JSON.stringify(minedContract, null, '  '))
+  const instance = Contract.at(minedContract.contractAddress)
 
   const now = new Date()
 
@@ -89,7 +90,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
   //console.log(JSON.stringify(deployOutput, null, '  '))
   fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput.toJS(), null, '  '))
 
-  return deployOutput
+  return { deploy: deployOutput, instance: instance }
 }
 
 module.exports = deploy

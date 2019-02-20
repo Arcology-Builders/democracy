@@ -27,10 +27,7 @@ describe('Getting and setting vars.', () => {
       await demo.compile('contracts', 'GetSet.sol')
       const link  = await demo.link('GetSet', 'test', 'account0', 'link')
       const deploy = await demo.deploy('GetSet', 'test', 'link', 'deploy', '')
-      const GetSet = eth.contract(link.get('abi').toJS(), link.get('code'))
-      const minedTx = await GetSet.new({from: accounts[0], gas: 300000, gasPrice: "4a817c800"}).then((txHash) => { return eth.getTransactionReceipt(txHash) }).catch((error) => console.error(error))
-      console.log(`contractAddress ${JSON.stringify(minedTx['contractAddress'])}`)
-      instance = GetSet.at(minedTx['contractAddress'])
+      instance = deploy.instance
   })
 
   it("should get a default value.", async () => {
