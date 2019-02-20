@@ -211,6 +211,15 @@ const TABLE = {
       valArg : fromJS(JSON.parse(valArg)) 
     return require('./set')(args.get(0), value)
   },
+  
+  'bind' : (args) => {
+    argsOrDie(args, List(['<0 alias>','<1 cmd1,...,cmdk>','[2 boundparam=cmdparam,...]','[3 freeparam=cmdparam,...]']), 2)
+    const alias = args.get(0)
+    const cmds = List(args.get(1).split(','))
+    const boundParamMap = args.get(2) ? getArgMap(List(args.get(2))) : Map({})
+    const freeParamMap = args.get(3) ? getArgMap(List(args.get(3))) : Map({})
+    return require('./bind')(alias, cmds, boundParamMap, freeParamMap)
+  },
 }
 
 

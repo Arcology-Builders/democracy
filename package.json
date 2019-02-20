@@ -31,7 +31,7 @@
     "mocha": "^5.0.2"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "eslint": "./node_modules/.bin/eslint demo.js js/*.js"
   },
   "_moduleAliases": {

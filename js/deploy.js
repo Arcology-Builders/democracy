@@ -17,7 +17,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
   const contractName = link.get('name')
   //console.log(`Deploying ${contractName} with id ${deployId}`)
   const networkId = await eth.net_version() 
-  const code = '0x' + link.get('code')
+  const code = link.get('code')
   const abi = link.get('abi')
   const deployName = `${contractName}-${deployId}`
   const deployerAddress = link.get('deployerAddress')
@@ -50,17 +50,21 @@ async function deploy(eth, link, deployId, ctorArgs) {
   deployPromise = new Promise((resolve, reject) => {
     eth.contract(abi.toJS(), code,
       {from: deployerAddress, gas: '6700000', gasPrice: '0x21105b0'})
-      .new(...ctorArgList).then((txHash) => {
+      .new(...ctorArgList, {from: deployerAddress})
+      .then((txHash) => {
         const checkTransaction = setInterval(() => {
           eth.getTransactionReceipt(txHash).then((receipt) => {
             if (receipt) {
-	      clearInterval(checkTransaction)
-	      resolve(receipt) 
+              clearInterval(checkTransaction)
+              resolve(receipt) 
             }
           })
         })
-      }
-      )
+      })
+      .catch((error) => {
+        console.error(`error ${error}`)
+        reject(error)
+      })
   })
 
   const minedContract = await deployPromise.then((receipt) => { return receipt })
