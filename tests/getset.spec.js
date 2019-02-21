@@ -1,8 +1,8 @@
 require('module-alias/register')
 const demo = require('@root')
-const { print } = require('@root/js/utils')
-const BN = require('bn.js')
+const { print, getInstance } = require('@root/js/utils')
 
+const BN = require('bn.js')
 const chai = require('chai').use(require('chai-as-promised'));
 const assert = chai.assert
 const should = chai.should(); 
@@ -27,7 +27,7 @@ describe('Getting and setting vars.', () => {
       await demo.compile('contracts', 'GetSet.sol')
       const link  = await demo.link('GetSet', 'test', 'account0', 'link')
       const deploy = await demo.deploy('GetSet', 'test', 'link', 'deploy', '')
-      instance = deploy.instance
+      instance = getInstance(eth, deploy)
   })
 
   it("should get a default value.", async () => {

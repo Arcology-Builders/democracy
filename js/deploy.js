@@ -74,11 +74,13 @@ async function deploy(eth, link, deployId, ctorArgs) {
   const now = new Date()
 
   const deployOutput = new Map({
+    type: 'deploy',
     name: contractName,
     networkId: networkId,
     deployId: deployId,
     linkId: link.get('linkId'),
     abi: abi,
+    code: code,
     deployTx: minedContract,
     deployAddress: minedContract.contractAddress,
     deployDate: now.toLocaleString(),
@@ -90,7 +92,7 @@ async function deploy(eth, link, deployId, ctorArgs) {
   //console.log(JSON.stringify(deployOutput, null, '  '))
   fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput.toJS(), null, '  '))
 
-  return { deploy: deployOutput, instance: instance }
+  return deployOutput
 }
 
 module.exports = deploy

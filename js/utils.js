@@ -249,6 +249,32 @@ const getDeploy = (networkId, deployName) => {
   return deployMap.get(deployName)
 }
 
+/**
+ * @return true if the given object is an ethjs object, otherwise false
+ */
+const isNetwork = (network) => {
+  return (network && network.net_version)
+}
+
+/**
+ * @return true if the given object is a deploy output, otherwise false
+ */
+const isDeploy = (deploy) => {
+  return (deploy && deploy.get('type') === 'deploy')
+}
+
+/**
+ * Return an instance from a previously deployed contract
+ * @param deploy of previous
+ * @return an ethjs instance that can be used to call methods on the deployed contract
+ */
+const getInstance = (eth, deploy) => {
+  assert(isNetwork(eth), 'First parameter is not an Ethereum network.')
+  assert(isDeploy(deploy), 'Second parameter is not a deploy output.')
+  const Contract = eth.contract(deploy.get('abi').toJS(), deploy.get('code'))
+  return Contract.at(deploy.get('deployAddress'))
+} 
+
 const cleanCompileSync = (compileName) => {
   const fn = `${COMPILES_DIR}/${compileName}.json`
   if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
@@ -291,6 +317,8 @@ module.exports = {
   getLink           : getLink,
   getContracts      : getContracts,
   getContract       : getContract,
+  isDeploy          : isDeploy,
+  getInstance       : getInstance,
   cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,
   cleanDeploySync   : cleanDeploySync,
