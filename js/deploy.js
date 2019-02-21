@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const { traverseDirs, ensureDir } = require('./utils')
 
 const config = require('config')

@@ -27,11 +27,13 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "eslint": "^5.13.0",
-    "mocha": "^5.0.2"
+    "mocha": "^5.0.2",
+    "nyc": "^13.3.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "eslint": "./node_modules/.bin/eslint demo.js js/*.js"
+    "lint": "./node_modules/.bin/eslint demo.js js/*.js",
+    "cov": "./node_modules/nyc/bin/nyc.js mocha tests/"
   },
   "_moduleAliases": {
     "@root": "."
