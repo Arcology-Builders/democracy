@@ -1,6 +1,6 @@
 require('module-alias/register')
 const demo = require('@root')
-const { print, getInstance } = require('@root/js/utils')
+const { print, getInstance } = require('@democracy/utils')
 
 const BN = require('bn.js')
 const chai = require('chai').use(require('chai-as-promised'));

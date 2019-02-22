@@ -5,7 +5,7 @@ solc = require('solc')
 assert = require('chai').assert
 
 const { traverseDirs, ensureDir,
-  COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH } = require('./utils')
+  COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH } = require('@democracy/utils')
 
 function compile(sourceStartPath, sources) {
   console.log(`Sources ${sources}`)

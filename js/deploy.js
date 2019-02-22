@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { traverseDirs, ensureDir } = require('./utils')
+const { traverseDirs, ensureDir } = require('@democracy/utils')
 
 const config = require('config')
 const assert = require('assert')

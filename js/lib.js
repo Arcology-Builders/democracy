@@ -5,7 +5,7 @@ const path   = require('path')
 const assert = require('assert')
 const BN = require('bn.js')
 
-const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR } = require('./utils')
+const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR } = require('@democracy/utils')
 
 // Menu of opt/arg processors to use in each subcommand below
 

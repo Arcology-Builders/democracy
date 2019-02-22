@@ -12,6 +12,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@democracy/utils": "file:packages/utils",
     "config": "^3.0.1",
     "ethereumjs-util": "^6.0.0",
     "ethereumjs-vm": "^2.5.1",
