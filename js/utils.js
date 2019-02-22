@@ -131,7 +131,7 @@ function traverseDirs(startDirs, skipFilt, cb, dcb) {
   while (queue.length > 0) {
     const f = queue.pop()
     const shortList = path.basename(f).split('.')
-    if (skipFilt(shortList)) { continue }
+    if (skipFilt(shortList, f)) { continue }
     if (fs.lstatSync(f).isDirectory()) {
       fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
       if (dcb) { dcb(f) }

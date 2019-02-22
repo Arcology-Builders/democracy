@@ -17,6 +17,7 @@ main = async() => {
   networkId = await eth.net_version()
   cleanAll(networkId)
   await demo.compile('contracts', 'TestLibrary.sol')
+  await demo.compile('contracts', 'TestUseLibrary.sol')
   await demo.link('TestLibrary','test','account0','linkLib')
   await demo.deploy('TestLibrary','test','linkLib','deployLib','')
 

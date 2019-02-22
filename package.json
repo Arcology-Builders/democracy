@@ -19,6 +19,7 @@
     "ganache-cli": "^6.3.0",
     "ganache-core": "^2.4.0",
     "immutable": "^4.0.0-rc.12",
+    "lodash": "^4.17.11",
     "module-alias": "^2.2.0",
     "openzeppelin-solidity": "^2.1.2",
     "solc": "^0.4.25"
