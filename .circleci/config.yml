@@ -15,3 +15,4 @@ jobs:
             wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8555
             :
       - run: . ~/.nvm/nvm.sh; npm test
+      - run: . ~/.nvm/nvm.sh; lerna test

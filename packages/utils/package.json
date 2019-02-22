@@ -1,0 +1,41 @@
+{
+  "name": "@democracy/utils",
+  "version": "0.0.1",
+  "description": "Utilities for Democracy, a minimalist framework for distributed countries",
+  "directories": {
+    "tests": "tests"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^5.13.0",
+    "mocha": "^5.0.2",
+    "nyc": "^13.3.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "lint": "./node_modules/.bin/eslint demo.js js/*.js",
+    "cov": "./node_modules/nyc/bin/nyc.js mocha tests/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "keywords": [
+    "ethereum",
+    "javascript",
+    "framework"
+  ],
+  "author": "Paul Pham",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "homepage": "https://github.com/invisible-college/democracy#readme"
+}
