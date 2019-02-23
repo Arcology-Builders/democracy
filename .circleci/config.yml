@@ -5,7 +5,7 @@ jobs:
       - image: cryptogoth/node-circle-test
     steps:
       - checkout
-      - run: . ~/.nvm/nvm.sh; npm install
+      - run: . ~/.nvm/nvm.sh; lerna bootstrap; npm install
       - run:
           command: . ~/.nvm/nvm.sh; ganache-cli -p 8555
           background: true
