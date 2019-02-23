@@ -21,11 +21,15 @@ RUN pacman -Sy && \
 RUN touch ~/.profile
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 RUN . ~/.nvm/nvm.sh && nvm install v11.2.0 && \
-  npm i -g truffle@4.1.15 && \
-  npm i -g lerna@3.13.0   && \
-  npm i -g pm2            && \
-  npm i -g mocha          && \
-  npm i -g ganache-cli@6.3.0
+  npm i -g truffle@4.1.15    && \
+  npm i -g lerna@3.13.0      && \
+  npm i -g pm2               && \
+  npm i -g ganache-cli@6.3.0 && \
+  npm i -g eslint            && \
+  npm i -g mocha             && \
+  npm i -g chai              && \
+  npm i -g chai-as-promised  && \
+  npm i -g nyc
 
 RUN ln -s /usr/sbin/nvim /usr/local/bin/vi
 
