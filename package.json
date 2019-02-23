@@ -14,6 +14,7 @@
   "dependencies": {
     "@democracy.js/utils": "file:packages/utils",
     "config": "^3.0.1",
+    "ethereumjs-abi": "^0.6.6",
     "ethereumjs-util": "^6.0.0",
     "ethereumjs-vm": "^2.5.1",
     "ethjs": "^0.3.6",
