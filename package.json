@@ -14,7 +14,8 @@
   "dependencies": {
     "@democracy.js/utils": "file:packages/utils",
     "config": "^3.0.1",
-    "ethjs": "0.3.8",
+    "ethjs": "0.3.9",
+    "ethjs-query": "0.3.8",
     "immutable": "4.0.0-rc.12",
     "module-alias": "2.2.0",
     "openzeppelin-solidity": "2.1.2",
