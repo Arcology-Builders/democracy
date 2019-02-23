@@ -25,7 +25,7 @@ RUN . ~/.nvm/nvm.sh && nvm install v11.2.0 && \
   npm i -g lerna@3.13.0   && \
   npm i -g pm2            && \
   npm i -g mocha          && \
-  npm i -g ganache-cli
+  npm i -g ganache-cli@6.3.0
 
 RUN ln -s /usr/sbin/nvim /usr/local/bin/vi
 
