@@ -1,6 +1,6 @@
 const { List } = require('immutable')
 const lib = require('./js/lib')
-const utils = require('@democracy/utils')
+const utils = require('@democracy.js/utils')
 
 module.exports = {
   ...lib,

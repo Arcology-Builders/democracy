@@ -5,7 +5,8 @@ const fs = require('fs')
 const config = require('config')
 const assert = require('assert')
 const { Map } = require('immutable')
-const { print, ensureDir, traverseDirs, getDeploys, getLink, LIB_PATTERN, LINKS_DIR } = require('@democracy/utils')
+const { print, ensureDir, traverseDirs, getDeploys, getLink, LIB_PATTERN, LINKS_DIR }
+  = require('@democracy.js/utils')
 
 /**
  * Validate dependencies and generate appropriate metadata
