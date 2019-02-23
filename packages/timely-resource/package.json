@@ -1,4 +1,5 @@
 {
+  "name": "@democracy.js/timely-resource",
   "dependencies": {
     "@invisible-college/democracy": "^0.1.5"
   }

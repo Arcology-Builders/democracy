@@ -1,4 +1,5 @@
 {
+  "name": "@democracy.js/webify",
   "dependencies": {
     "aztec.js": "^0.4.0-beta.14",
     "config": "^3.0.1",
