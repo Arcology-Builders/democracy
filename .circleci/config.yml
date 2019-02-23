@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run: . ~/.nvm/nvm.sh; npm install
       - run:
-          command: . ~/.nvm/nvm.sh; ./node_modules/ganache-cli/cli.js -p 8555
+          command: . ~/.nvm/nvm.sh; ganache-cli -p 8555
           background: true
       - run:
           shell: /bin/sh
