@@ -1,5 +1,4 @@
-require('module-alias/register')
-const demo = require('@root')
+const demo = require('..')
 const { print } = require('@democracy.js/utils')
 
 const chai = require('chai').use(require('chai-as-promised'));

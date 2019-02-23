@@ -14,27 +14,20 @@
   "dependencies": {
     "@democracy.js/utils": "file:packages/utils",
     "config": "^3.0.1",
-    "ethereumjs-abi": "^0.6.6",
-    "ethereumjs-util": "^6.0.0",
-    "ethereumjs-vm": "^2.5.1",
-    "ethjs": "^0.3.6",
-    "immutable": "^4.0.0-rc.12",
-    "lodash": "^4.17.11",
-    "module-alias": "^2.2.0",
-    "openzeppelin-solidity": "^2.1.2",
-    "solc": "^0.4.25"
+    "ethjs": "0.3.7",
+    "immutable": "4.0.0-rc.12",
+    "module-alias": "2.2.0",
+    "openzeppelin-solidity": "2.1.2",
+    "solc": "0.4.25"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "eslint": "^5.13.0",
-    "mocha": "^5.0.2",
-    "nyc": "^13.3.0"
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "lint": "./node_modules/.bin/eslint demo.js js/*.js",
-    "cov": "./node_modules/nyc/bin/nyc.js mocha tests/"
+    "test": "mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "lint": "eslint demo.js js/*.js",
+    "cov": "nyc mocha tests/"
   },
   "_moduleAliases": {
     "@root": "."
