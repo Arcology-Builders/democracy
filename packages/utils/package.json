@@ -1,5 +1,5 @@
 {
-  "name": "@democracy/utils",
+  "name": "@democracy.js/utils",
   "version": "0.0.1",
   "description": "Utilities for Democracy, a minimalist framework for distributed countries",
   "directories": {
