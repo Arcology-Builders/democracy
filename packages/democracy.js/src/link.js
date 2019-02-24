@@ -22,6 +22,7 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   const linkName = `${contractName}-${linkId}`
 
   linksDir = path.join(LINKS_DIR, networkId)
+  ensureDir(LINKS_DIR)
   ensureDir(linksDir)
 
   assert(!getLink(networkId, linkName), `Link ${linkName} already exists`)

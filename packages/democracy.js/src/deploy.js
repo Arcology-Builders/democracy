@@ -1,13 +1,11 @@
 const fs = require('fs')
 const path = require('path')
-const { traverseDirs, ensureDir } = require('@democracy.js/utils')
+const { traverseDirs, ensureDir, DEPLOYS_DIR } = require('@democracy.js/utils')
 
 const config = require('config')
 const assert = require('assert')
 const { Map, List, Seq } = require('immutable')
 const BN = require('bn.js')
-
-const DEPLOY_DIR = 'deploys'
 
 /**
  * Validate dependencies then deploy the given contract output to a network.
@@ -26,7 +24,8 @@ async function deploy(eth, link, deployId, ctorArgs) {
 
   deployMap = {}
 
-  deployDir = path.join(DEPLOY_DIR, networkId)
+  deployDir = path.join(DEPLOYS_DIR, networkId)
+  ensureDir(DEPLOYS_DIR)
   ensureDir(deployDir)
 
   // Load all previous deploys

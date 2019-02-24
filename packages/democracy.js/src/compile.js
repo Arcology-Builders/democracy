@@ -13,8 +13,9 @@ function compile(sourceStartPath, sources) {
   // Open contracts from democracy
   inputs = {}
   assert.typeOf(sourceStartPath, 'string')
+  assert(fs.existsSync(sourceStartPath), `Start source path '${sourceStartPath}' does not exist`)
 
-  queue = [ sourceStartPath ] || [ DEMO_PATH, ZEPPELIN_PATH ]
+  queue = [ sourceStartPath ] || [ DEMO_SRC_PATH, ZEPPELIN_PATH ]
 
   ensureDir(COMPILES_DIR)
 

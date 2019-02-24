@@ -163,12 +163,12 @@ function buildFromDirs(f, skipFilt) {
   }
 }
 
-
 function getLinks(networkId) {
   const linkMap = {}
-  ensureDir(`${LINKS_DIR}/${networkId}`)
+  linksDir = `${LINKS_DIR}/${networkId}`
+  if (!fs.existsSync(linksDir)) { console.log(`Links directory '${linksDir}' not found.`); return {} }
   traverseDirs(
-    [`${LINKS_DIR}/${networkId}`],
+    [linksDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Link names will have the form <contractName>-<linkID>, do we need to
     // differentiate different deploy IDs for a single contract name?
@@ -179,9 +179,10 @@ function getLinks(networkId) {
 
 function getDeploys(networkId) {
   const deployMap = {}
-  ensureDir(`${DEPLOYS_DIR}/${networkId}`)
+  const deploysDir = `${DEPLOYS_DIR}/${networkId}`
+  if (!fs.existsSync(deploysDir)) { console.log(`Deploys directory '${deploysDir}' not found.`); return {} }
   traverseDirs(
-    [`${DEPLOYS_DIR}/${networkId}`],
+    [deploysDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to
     // differentiate different deploy IDs for a single contract name?
@@ -193,6 +194,7 @@ function getDeploys(networkId) {
 const getContracts = (shouldPrint) => {
   const contractSources = []
   const contractOutputs = {}
+  if (!fs.existsSync(SOURCES_DIR)) { console.log(`Sources directory '${SOURCES_DIR}' not found.`); return {} }
   traverseDirs(
     [SOURCES_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
