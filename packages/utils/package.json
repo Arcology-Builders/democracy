@@ -11,7 +11,9 @@
   "dependencies": {
     "immutable": "^4.0.0-rc.12"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0"
+  },
   "scripts": {
     "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "./node_modules/.bin/eslint demo.js js/*.js",

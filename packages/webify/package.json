@@ -1,9 +1,8 @@
 {
   "name": "@democracy.js/webify",
   "dependencies": {
-    "aztec.js": "^0.4.0-beta.14",
     "config": "^3.0.1",
-    "democracy.js": "file:../../"
+    "democracy.js": "file:../democracy.js"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
