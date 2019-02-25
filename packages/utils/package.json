@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Utilities for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -15,9 +15,9 @@
     "chai": "^4.2.0"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "lint": "./node_modules/.bin/eslint demo.js js/*.js",
-    "cov": "./node_modules/nyc/bin/nyc.js mocha tests/"
+    "test": "mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "lint": "eslint demo.js js/*.js",
+    "cov": "nyc/bin/nyc.js mocha tests/"
   },
   "repository": {
     "type": "git",
