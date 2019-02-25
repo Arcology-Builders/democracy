@@ -68,6 +68,7 @@ function compile(sourceStartPath, sources) {
   for (var contractName in outputs.contracts) {
     shortName = path.basename(contractName).split(':')[1]
     const output = {
+      type: 'compile',
       name: shortName,
       code: outputs.contracts[contractName].bytecode,
       abi: JSON.parse(outputs.contracts[contractName].interface)

@@ -1,12 +1,13 @@
 // lib.js, the entry point for Democracy, an undiscovered decentralized country
 
-const { Map, Seq, List, fromJS } = require('immutable')
+const { Map, Seq, List, fromJS }
+             = require('immutable')
 const path   = require('path')
-const assert = require('assert')
-const BN = require('bn.js')
+const assert = require('chai').assert
+const BN     = require('bn.js')
 
 const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR }
-  = require('@democracy.js/utils')
+             = require('@democracy.js/utils')
 
 // Menu of opt/arg processors to use in each subcommand below
 
@@ -100,9 +101,13 @@ const getContracts = (shouldPrint) => {
   }
 }
 
-// Accepts List of "key1=val1","key2=val2","key3=val3"
-// Return an Immutable Map of { 'key1' : 'val1', 'key2' : 'val2' }
+/**
+ * Return an Immutable Map of key:val pairs from a List of strings
+ * @param args an Immutable {List} of "key1=val1","key2=val2",...
+ * @return an Immutable Map of { 'key1' : 'val1', 'key2' : 'val2' }
+ */
 const getArgMap = (args) => {
+  assert(List.isList(args))
   return Map(args.map((arg) => {
     if (!arg) return []
     const [ key, val ] = arg.split('=')
@@ -145,7 +150,7 @@ const TABLE = {
 	      
   'link'    : async (args) => {
     argsOrDie(args, List(['<0 ContractName>','<1 netName>','<2 deployerAccount>','<3 linkId>',
-	      '[4 depLink1:depDeploy1 depLink2:depDeploy2 ... ]']), 4)
+	      '[4 depLink1=depDeploy1 depLink2=depDeploy2 ... ]']), 4)
     const { contractOutputs } = getContracts()
     const contractName = args.get(0)
     const contract     = contractOutputs.get(contractName)

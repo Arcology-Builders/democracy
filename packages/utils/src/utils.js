@@ -10,7 +10,7 @@ const SOURCES_DIR  = 'contracts'
 const COMPILES_DIR = 'compiles'
 const LINKS_DIR    = 'links'
 const DEPLOYS_DIR  = 'deploys'
-const LIB_PATTERN  = /__(([a-zA-Z])+\/*)+\.sol:[a-zA-Z]+_+/g
+const LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
 
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
@@ -166,7 +166,7 @@ function buildFromDirs(f, skipFilt) {
 function getLinks(networkId) {
   const linkMap = {}
   linksDir = `${LINKS_DIR}/${networkId}`
-  if (!fs.existsSync(linksDir)) { console.log(`Links directory '${linksDir}' not found.`); return {} }
+  if (!fs.existsSync(linksDir)) { console.log(`Links directory '${linksDir}' not found.`); return Map({}) }
   traverseDirs(
     [linksDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
@@ -180,7 +180,7 @@ function getLinks(networkId) {
 function getDeploys(networkId) {
   const deployMap = {}
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
-  if (!fs.existsSync(deploysDir)) { console.log(`Deploys directory '${deploysDir}' not found.`); return {} }
+  if (!fs.existsSync(deploysDir)) { console.log(`Deploys directory '${deploysDir}' not found.`); return Map({}) }
   traverseDirs(
     [deploysDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
@@ -194,7 +194,7 @@ function getDeploys(networkId) {
 const getContracts = (shouldPrint) => {
   const contractSources = []
   const contractOutputs = {}
-  if (!fs.existsSync(SOURCES_DIR)) { console.log(`Sources directory '${SOURCES_DIR}' not found.`); return {} }
+  if (!fs.existsSync(SOURCES_DIR)) { console.log(`Sources directory '${SOURCES_DIR}' not found.`); return Map({}) }
   traverseDirs(
     [SOURCES_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
@@ -254,15 +254,29 @@ const getDeploy = (networkId, deployName) => {
 /**
  * @return true if the given object is an ethjs object, otherwise false
  */
-const isNetwork = (network) => {
-  return (network && network.net_version)
+const isNetwork = (_network) => {
+  return (_network && _network.net_version)
 }
 
 /**
  * @return true if the given object is a deploy output, otherwise false
  */
-const isDeploy = (deploy) => {
-  return (deploy && deploy.get('type') === 'deploy')
+const isDeploy = (_deploy) => {
+  return (_deploy && _deploy.get('type') === 'deploy')
+}
+
+/**
+ * @return true if the given object is a link output, otherwise false
+ */
+const isLink = (_link) => {
+  return (_link && _link.get('type') === 'link')
+}
+
+/**
+ * @return true if the given object is a compile output, otherwise false
+ */
+const isCompile = (_compile) => {
+  return (_compile && _compile.get('type') === 'compile')
 }
 
 /**
@@ -320,6 +334,8 @@ module.exports = {
   getContracts      : getContracts,
   getContract       : getContract,
   isDeploy          : isDeploy,
+  isLink            : isLink,
+  isCompile         : isCompile,
   getInstance       : getInstance,
   cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,

@@ -12,7 +12,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.0.1",
+    "@democracy.js/utils": "file:../utils",
     "config": "^3.0.1",
     "ethjs": "0.3.9",
     "ethjs-query": "0.3.8",
