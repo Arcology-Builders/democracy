@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run: . ~/.nvm/nvm.sh; lerna bootstrap; npm install
       - run:
-          command: . ~/.nvm/nvm.sh; ganache-cli -p 8555
+          command: . ~/.nvm/nvm.sh; ganache-cli -p 8545
           background: true
       - run:
           shell: /bin/sh
