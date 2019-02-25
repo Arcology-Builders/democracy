@@ -11,15 +11,27 @@ contract TestUseLibrary2 {
         def = TestLibrary.double(_abc);
     }
 
-    function double(uint256 _def) public view returns (uint256) {
-        return 2*_def;
+    function double(uint256 _def) public returns (uint256) {
+        //we modify state b/c Solidity return values don't travel through RPC
+        def = 2*_def;
+        return def;
     }
 
-    function triple(uint256 _ghi) public view returns (uint256) {
-        return TestLibrary2.triple(_ghi);
+    function triple(uint256 _ghi) public returns (uint256) {
+        def = TestLibrary2.triple(_ghi);
+        return def;
     }
 
-    function() payable {
+    function hextuple(uint256 _ghi) public returns (uint256) {
+        def = 2*TestLibrary2.triple(_ghi);
+        return def;
+    }
+
+    function getValue() public constant returns (uint256) {
+        return def;
+    }
+
+    function() public payable {
     }
 
 }

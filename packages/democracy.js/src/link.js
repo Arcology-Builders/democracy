@@ -37,16 +37,16 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     assert(match[0], `Match expression not found in ${code}`)
     assert(match[1], `Match group not found ${code}`)
     console.log(`Match found ${JSON.stringify(match)}`)
-    if (matches.has(match[1])) { assert.eq(match[0], matches.get(match[1])); continue }
+    if (matches.has(match[1])) { assert.equal(match[0], matches.get(match[1])); continue }
     matches = matches.set(match[1], match[0])
   }
   console.log(`matches ${matches.toString()}`)
 
-  if (!matches && depMap && depMap.count() > 0) {
+  if (matches.count() === 0 && depMap && depMap.count() > 0) {
     throw new Error(`No matches to replace with link map ${JSON.stringify(depMap)}`)
   }
 
-  if (matches && (!depMap || depMap.count() == 0)) {
+  if (matches.count() > 0 && (!depMap || depMap.count() == 0)) {
     throw new Error(`No link map found to replace ${JSON.stringify(matches)}`)
   }
 
