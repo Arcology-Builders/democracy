@@ -50,10 +50,15 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     throw new Error(`No link map found to replace ${JSON.stringify(matches)}`)
   }
 
-  const replacedCode = depMap.reduce((codeSoFar, linkId, linkName) => {
-    const deployName = `${linkName}-${linkId}`
+  const replacedCode = depMap.reduce((codeSoFar, deployId, contractName) => {
+    // The linkId to replace for the given linkName can also
+    // be a full deployName by itself (e.g. TestInterface=TestImpl-deploy)
+    // in which case, deployId == `TestImpl-deploy` directly
+    // instead of `TestInterface-deploy`
+    const deployName = (deployId.startsWith('deploy')) ?
+      `${contractName}-${deployId}` : deployId
     //console.log(`deployName ${deployName}`)
-    const linkPlaceholder = matches.get(linkName)
+    const linkPlaceholder = matches.get(contractName)
     if (!linkPlaceholder) {
       throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
     }

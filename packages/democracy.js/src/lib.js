@@ -90,7 +90,6 @@ const getContracts = (shouldPrint) => {
       (fnParts[1] !== 'json')) },
     function(source, f) {
       fb = path.basename(f.split('.')[0])
-      if (contractSources.indexOf(fb) == -1) { return }
       contractOutputs[fb] = fromJS(JSON.parse(source))
       shouldPrint && console.log(`Compiled ${fb}`)
     }
