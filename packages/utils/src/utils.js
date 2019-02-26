@@ -352,4 +352,5 @@ module.exports = {
   DEPLOYS_DIR       : DEPLOYS_DIR,
   DEMO_SRC_PATH     : DEMO_SRC_PATH,
   ZEPPELIN_SRC_PATH : ZEPPELIN_SRC_PATH,
+  fromJS            : fromJSGreedy,
 }
