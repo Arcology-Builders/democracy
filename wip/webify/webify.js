@@ -4,7 +4,7 @@ const demo = require('democracy.js')
 const { List } = require('immutable')
 const assert = require('chai').assert
 
-DIST_DIR = 'dist'
+DIST_DIR = 'interim'
 REQUIRE_PATH_PATTERN = /require\(path.join\(__dirname, \'([a-zA-Z\-\.0-9]+)\'\)\)/g
 
 function replace(source) {
