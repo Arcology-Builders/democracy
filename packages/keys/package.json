@@ -1,7 +1,7 @@
 {
-  "name": "@democracy.js/utils",
-  "version": "0.0.2",
-  "description": "Utilities for Democracy, a minimalist framework for distributed countries",
+  "name": "@democracy.js/keys",
+  "version": "0.0.1",
+  "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
   },
@@ -9,11 +9,21 @@
     "access": "public"
   },
   "dependencies": {
+    "ethereumjs-utils": "^5.2.5",
     "immutable": "^4.0.0-rc.12",
     "keythereum": "^1.0.4"
   },
   "devDependencies": {
-    "chai": "^4.2.0"
+    "@babel/core": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "chai": "^4.2.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "mocha": "^6.0.2",
+    "prop-types": "^15.7.2",
+    "webpack": "^4.29.5"
   },
   "scripts": {
     "test": "mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
