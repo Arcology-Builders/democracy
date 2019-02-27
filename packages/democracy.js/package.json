@@ -1,6 +1,6 @@
 {
   "name": "democracy.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Democracy: a minimalist framework for distributed countries",
   "bin": {
     "demo": "./demo.js"
