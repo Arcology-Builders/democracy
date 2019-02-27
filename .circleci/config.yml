@@ -5,7 +5,7 @@ jobs:
       - image: cryptogoth/node-circle-test
     steps:
       - checkout
-      - run: . ~/.nvm/nvm.sh; lerna bootstrap; npm install
+      - run: . ~/.nvm/nvm.sh; lerna bootstrap
       - run:
           command: . ~/.nvm/nvm.sh; ganache-cli -p 8545
           background: true
@@ -14,5 +14,4 @@ jobs:
           command: |
             wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8555
             :
-      - run: . ~/.nvm/nvm.sh; npm test
       - run: . ~/.nvm/nvm.sh; lerna run test

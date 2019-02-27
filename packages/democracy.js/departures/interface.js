@@ -23,6 +23,7 @@ const depart = async () => {
     if (!contract) {
       contract = await demo.compile('contracts', 'TestInterface.sol')
     }
+    assert(demo.isCompile(contract))
     compiles = compiles.push(contract)
   }
 
@@ -33,6 +34,7 @@ const depart = async () => {
     if (!contract) {
       contract = await demo.compile('contracts', 'TestUseInterface.sol')
     }
+    assert(demo.isCompile(contract))
     compiles = compiles.push(contract)
   }
 
