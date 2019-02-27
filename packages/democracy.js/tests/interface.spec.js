@@ -24,7 +24,7 @@ describe('Deploying contract using interface.', () => {
     assert(deploys.get('TestUseInterface-deploy'))
     assert(links.get('TestImpl-link'))
     assert(links.get('TestUseInterface-link'))
-    assert(compiles.get('TestInterface'))
+    assert(compiles.get('TestImpl'))
     done()
   })
 

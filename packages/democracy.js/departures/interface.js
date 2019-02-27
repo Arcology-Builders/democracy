@@ -19,9 +19,12 @@ const depart = async () => {
   const networkId = await eth.net_version()
   
   {
-    let contract = demo.getContract('TestInterface')
+    let contract = demo.getContract('TestImpl')
     if (!contract) {
-      contract = await demo.compile('contracts', 'TestInterface.sol')
+      compileOutputs = await demo.compile('contracts', 'TestInterface.sol')
+      assert(Map.isMap(compileOutputs))
+      demo.print(compileOutputs)
+      contract = compileOutputs.get('TestImpl')
     }
     assert(demo.isCompile(contract))
     compiles = compiles.push(contract)
@@ -32,7 +35,8 @@ const depart = async () => {
   {
     let contract = demo.getContract('TestUseInterface')
     if (!contract) {
-      contract = await demo.compile('contracts', 'TestUseInterface.sol')
+      compileOutputs = await demo.compile('contracts', 'TestUseInterface.sol')
+      contract = compileOutputs.get('TestUseInterface')
     }
     assert(demo.isCompile(contract))
     compiles = compiles.push(contract)

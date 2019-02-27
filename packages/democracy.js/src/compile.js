@@ -1,11 +1,14 @@
 // Compile with solcjs
-fs = require('fs')
-path = require('path')
-solc = require('solc')
+fs     = require('fs')
+path   = require('path')
+solc   = require('solc')
 assert = require('chai').assert
 
-const { traverseDirs, ensureDir,
-  COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH } = require('@democracy.js/utils')
+const { List, Map }
+       = require('immutable')
+
+const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS }
+       = require('@democracy.js/utils')
 
 function compile(sourceStartPath, sources) {
   console.log(`Sources ${sources}`)
@@ -58,25 +61,31 @@ function compile(sourceStartPath, sources) {
   }
 
   // Second arg is 1 for optimize, 0 for normal
-  outputs = solc.compile({sources: sourceMap}, 0, findImports)
+  const outputs = solc.compile({sources: sourceMap}, 0, findImports)
 
   // Uncomment below to dump the output of solc compiler
   if (outputs.errors) {
     console.log(JSON.stringify(outputs.errors))
   }
+  
+  const compiles = List(Map(outputs.contracts).map((contract, contractName) => {
+    contract.name = path.basename(contractName).split(':')[1]
+    return contract
+  }).values())
 
-  for (var contractName in outputs.contracts) {
-    shortName = path.basename(contractName).split(':')[1]
-    const output = {
+  return Map(compiles.map((contract) => {
+    //shortName = contract.name //path.basename(contractName).split(':')[1]
+    const output = Map({
       type: 'compile',
-      name: shortName,
-      code: outputs.contracts[contractName].bytecode,
-      abi: JSON.parse(outputs.contracts[contractName].interface)
-    }
-    const abiString = `abi${shortName} = ${JSON.stringify(output['abi'], null, 2)}`
-    const compileFilename = `${COMPILES_DIR}/${shortName}.json`
+      name: contract.name,
+      code: contract.bytecode,
+      abi : fromJS(JSON.parse(contract.interface)),
+    })
+    const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
+    const compileFilename = `${COMPILES_DIR}/${contract.name}.json`
     fs.writeFileSync(compileFilename, JSON.stringify(output))
-  }
+    return [contract.name, output]
+  }))
 }
 
 module.exports = compile
