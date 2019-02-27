@@ -12,6 +12,6 @@ jobs:
       - run:
           shell: /bin/sh
           command: |
-            wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8555
+            wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8545
             :
       - run: . ~/.nvm/nvm.sh; lerna run test
