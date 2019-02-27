@@ -28,6 +28,16 @@ describe('Deploying contract using interface.', () => {
     done()
   })
 
+  it("should find a compiled interface that does not have its own source file", (done) => {
+    const contracts = demo.getContracts()
+    assert(contracts['contractSources'].indexOf('TestInterface') !== -1)
+    assert(contracts['contractSources'].indexOf('TestUseInterface') !== -1)
+    assert(contracts['contractOutputs'].get('TestUseInterface'))
+    assert(contracts['contractOutputs'].get('TestImpl'))
+    assert(contracts['contractOutputs'].get('TestInterface'))
+    done()
+  })
+
   it("should call an interface method successfully ", async () => {
     const instance = demo.getInstance(eth, deploys.get('TestUseInterface-deploy'))
     const result = await instance.callInterface(123)

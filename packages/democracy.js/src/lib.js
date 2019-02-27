@@ -72,34 +72,6 @@ const getConstructorArgs = (ctorArgMap, abi) => {
   }))
 }
 
-const getContracts = (shouldPrint) => {
-  const contractSources = []
-  const contractOutputs = {}
-  traverseDirs(
-    [SOURCES_DIR], // start out by finding all contracts rooted in current directory
-    (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-    function(source, f) {
-      fb = path.basename(f.split('.')[0])
-      contractSources.push(fb)
-      shouldPrint && console.log(`Source ${fb}`)
-    }
-  )
-  traverseDirs(
-    [COMPILES_DIR], // start out by finding all contracts rooted in current directory
-    (fnParts) => { return ((fnParts.length > 1) &&
-      (fnParts[1] !== 'json')) },
-    function(source, f) {
-      fb = path.basename(f.split('.')[0])
-      contractOutputs[fb] = fromJS(JSON.parse(source))
-      shouldPrint && console.log(`Compiled ${fb}`)
-    }
-  )
-  return {
-    contractSources: Seq(contractSources),
-    contractOutputs: Map(contractOutputs)
-  }
-}
-
 /**
  * Return an Immutable Map of key:val pairs from a List of strings
  * @param args an Immutable {List} of "key1=val1","key2=val2",...
@@ -245,7 +217,6 @@ module.exports = {
   getAccounts : getAccounts,
   getAccountFromArg : getAccountFromArg,
   getConstructorArgs : getConstructorArgs,
-  getContracts : getContracts,
   getArgMap : getArgMap,
   doBalances : doBalances,
   TABLE : TABLE,

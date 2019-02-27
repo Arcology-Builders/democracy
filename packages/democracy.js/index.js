@@ -1,6 +1,12 @@
-const { List } = require('immutable')
+const { List, Map, Set } = require('immutable')
 const lib = require('./src/lib')
 const utils = require('@democracy.js/utils')
+const assert = require('chai').assert
+
+const libKeys = new Set(Map(lib).keys())
+const utilKeys = new Set(Map(utils).keys())
+const overlap = libKeys.intersect(utilKeys) 
+assert(overlap.isEmpty(), `Overlapping keys ${overlap.toString()}`)
 
 module.exports = {
   ...lib,
