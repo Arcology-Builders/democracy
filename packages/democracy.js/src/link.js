@@ -4,7 +4,7 @@ const fs     = require('fs')
 const path   = require('path')
 
 const config = require('config')
-const assert = require('assert')
+const assert = require('chai').assert
 const { List, Map }
              = require('immutable')
 const { print, ensureDir, traverseDirs, getDeploys, getLink, isDeploy, LIB_PATTERN, LINKS_DIR }
@@ -19,7 +19,9 @@ const { print, ensureDir, traverseDirs, getDeploys, getLink, isDeploy, LIB_PATTE
  */
 async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   const networkId = await eth.net_version() 
-  const code = '0x' + contractOutput.get('code')
+  const bytecode = contractOutput.get('evm').get('bytecode').get('object')
+  assert.typeOf(bytecode, 'string')
+  const code = '0x' + bytecode
   const contractName = contractOutput.get('name')
   const linkName = `${contractName}-${linkId}`
 
@@ -34,11 +36,13 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
   let matches = Map({})
   let match
   while (match = LIB_PATTERN.exec(code)) {
-    assert(match[0], `Match expression not found in ${code}`)
-    assert(match[1], `Match group not found ${code}`)
+    assert(match[0], `LIB_PATTERN not found in ${code}`)
+    // match[1] could be empty if there are no subdirs in path
+    assert(match[2], `Match group filepath not found ${code}`)
+    assert(match[3], `Match group symbol name not found ${code}`)
     console.log(`Match found ${JSON.stringify(match)}`)
     if (matches.has(match[1])) { assert.equal(match[0], matches.get(match[1])); continue }
-    matches = matches.set(match[1], match[0])
+    matches = matches.set(match[3], match[0])
   }
   console.log(`matches ${matches.toString()}`)
 
@@ -77,7 +81,8 @@ async function link(contractOutput, eth, deployerAddress, linkId, depMap) {
     return codeSoFar
   }, code)
 
-  assert(replacedCode.match(LIB_PATTERN) === null) // All placeholders should be replaced
+  // All placeholders should be replaced
+  assert.notOk(replacedCode.match(LIB_PATTERN), `${replacedCode} still matches LIB_PATTERN`)
 
   const now = new Date()
 

@@ -10,7 +10,7 @@ const SOURCES_DIR  = 'contracts'
 const COMPILES_DIR = 'compiles'
 const LINKS_DIR    = 'links'
 const DEPLOYS_DIR  = 'deploys'
-const LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
+const LIB_PATTERN  = /__([a-zA-Z0-9]+\/)*([a-zA-Z0-9]+)\.sol:([a-zA-Z][a-zA-Z0-9]+)_+/g
 
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
