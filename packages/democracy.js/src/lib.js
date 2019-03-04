@@ -6,7 +6,8 @@ const path   = require('path')
 const assert = require('chai').assert
 const BN     = require('bn.js')
 
-const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR, getContracts }
+const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR, getContracts,
+        setImmutableKey, getImmutableKey }
              = require('@democracy.js/utils')
 
 // Menu of opt/arg processors to use in each subcommand below
@@ -176,7 +177,7 @@ const TABLE = {
 
   'get' : (args) => {
     argsOrDie(args, List(['<0 key>','<1 defaultValue]']), 1)
-    const value = require('./get')(...args)
+    const value = getImmutableKey(...args)
     console.log(`Value ${value.toString()}`)
     return value 
   },
@@ -186,7 +187,7 @@ const TABLE = {
     const valArg = args.get(1)
     const value = (Map.isMap(valArg) || List.isList(valArg) || !valArg) ?
       valArg : fromJS(JSON.parse(valArg)) 
-    return require('./set')(args.get(0), value)
+    return setImmutableKey(args.get(0), value)
   },
   
   'bind' : (args) => {
