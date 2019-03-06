@@ -62,7 +62,7 @@ const getFileKeySpace = (key, cb) => {
   return path.join(dbDir, `${keyBase}`)
 }
 
-function setImmutableKey(fullKey, value) {
+const setImmutableKey = (fullKey, value) => {
   assert(typeof(fullKey) === 'string')
   assert(Map.isMap(value) || List.isList(value) || !value)
 
@@ -90,7 +90,7 @@ function setImmutableKey(fullKey, value) {
       return true
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-    console.log(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
+    LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
     fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
     return true
   }
@@ -125,11 +125,11 @@ function tryIfNot(eth, checkFunc, tryFunc, args) {
   if (!checkFunc(eth, args.get(0))) { tryFunc(args) }
 }
 
-function print(data) {
+const print = (data) => {
   console.log(JSON.stringify(data, null, '  '))
 }
 
-function ensureDir(dirName) {
+const ensureDir = (dirName) => {
   if (!fs.existsSync(dirName)) { fs.mkdirSync(dirName, { recursive: true } ) }
 }
 
@@ -140,7 +140,7 @@ function ensureDir(dirName) {
  * @param cb a callback that accepts the source text of a file plus its full path
  * @param dcb a callback for every directory that is encountered
  */
-function traverseDirs(startDirs, skipFilt, cb, dcb) {
+const traverseDirs = (startDirs, skipFilt, cb, dcb) => {
   const queue = startDirs
   while (queue.length > 0) {
     const f = queue.pop()
@@ -162,7 +162,7 @@ function traverseDirs(startDirs, skipFilt, cb, dcb) {
  * @param f the full path to a filename (possibly a directory) to start traversal
  * @param skipFilt a function that returns true for files that need to be skipped
  */
-function buildFromDirs(f, skipFilt) {
+const buildFromDirs = (f, skipFilt) => {
   shortList = path.basename(f).split('.')
   if (skipFilt(shortList)) { return null }
   if (fs.lstatSync(f).isDirectory()) {
@@ -177,7 +177,7 @@ function buildFromDirs(f, skipFilt) {
   }
 }
 
-function getLinks(networkId) {
+const getLinks = (networkId) => {
   const linkMap = {}
   linksDir = `${LINKS_DIR}/${networkId}`
   if (!fs.existsSync(linksDir)) {
@@ -193,7 +193,7 @@ function getLinks(networkId) {
   return fromJS(linkMap)
 }
 
-function getDeploys(networkId) {
+const getDeploys = (networkId) => {
   const deployMap = {}
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
   if (!fs.existsSync(deploysDir)) {

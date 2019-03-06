@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/utils",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Utilities for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"

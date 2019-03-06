@@ -9,17 +9,27 @@ describe('Self-generated keys and signing', () => {
   before(() => {
     account = keys.create()
   })
-  
+ 
+  it('randomly created account is valid', async () => {
+    keys.isAccount(account)
+  })
+
   it('generates a valid key randomly from scratch', async () => {
     assert(utils.isValidAddress(account.get('addressPrefixed')))
     assert.equal(40 , account.get('addressString'     ).length)
     assert.equal(42 , account.get('addressPrefixed'   ).length)
-    assert.equal(64 , account.get('privateKeyString'  ).length)
-    assert.equal(66, account.get('privateKeyPrefixed').length)
-    assert.equal(128, account.get('publicKeyString'   ).length)
-    assert.equal(130, account.get('publicKeyPrefixed' ).length)
-    const address = utils.publicToAddress(account.get('publicKeyPrefixed')).toString('hex')
+    assert.equal(64 , account.get('privateString'  ).length)
+    assert.equal(66, account.get('privatePrefixed').length)
+    assert.equal(128, account.get('publicString'   ).length)
+    assert.equal(130, account.get('publicPrefixed' ).length)
+    const address = utils.publicToAddress(account.get('publicPrefixed')).toString('hex')
     assert.equal(address, account.get('addressString'))
+  })
+
+  it('generates a valid wallet from private key', async () => {
+    const account = keys.createFromPrivateString(
+      '4DBE88D79BCACD8C3EE962213A58C67BAD17660AF2CF66F9891CE74CC6FCAC34')
+    keys.isAccount(account)
   })
 
 })

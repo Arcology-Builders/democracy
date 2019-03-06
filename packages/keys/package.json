@@ -9,7 +9,11 @@
     "access": "public"
   },
   "dependencies": {
+    "@democracy.js/utils": "0.0.7",
+    "bops": "^1.0.0",
     "ethereumjs-utils": "^5.2.5",
+    "ethjs": "^0.4.0",
+    "ethjs-signer": "^0.1.1",
     "immutable": "^4.0.0-rc.12",
     "keythereum": "^1.0.4"
   },
@@ -28,7 +32,8 @@
   "scripts": {
     "test": "mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "eslint demo.js js/*.js",
-    "cov": "nyc/bin/nyc.js mocha tests/"
+    "cov": "nyc/bin/nyc.js mocha tests/",
+    "web": "webpack && open dist/index.html"
   },
   "repository": {
     "type": "git",
