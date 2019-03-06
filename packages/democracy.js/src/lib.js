@@ -7,7 +7,7 @@ const assert = require('chai').assert
 const BN     = require('bn.js')
 
 const { print, traverseDirs, getLink, SOURCES_DIR, COMPILES_DIR, getContracts,
-        setImmutableKey, getImmutableKey }
+        setImmutableKey, getImmutableKey, getNetwork }
              = require('@democracy.js/utils')
 
 // Menu of opt/arg processors to use in each subcommand below
@@ -22,13 +22,6 @@ const argsOrDie = (args, argDescs, _requiredArgCount) => {
     console.log(' ' + argDescs.map((argDesc, i) => {
 	    return ` ${argDesc}=${args.get(i) ? args.get(i) : '?'}` }).toJS())
   }
-}
-
-const getNetwork = (netName, _config) => {
-  console.log(`Network ${netName}`)
-  const Eth = require('ethjs')
-  const config = (_config) ? _config : require('config')
-  return new Eth(new Eth.HttpProvider(config['endpoints'][netName]))
 }
 
 const getAccounts = async (network) => {
@@ -214,7 +207,6 @@ async function demo(args) {
 
 module.exports = {
   argsOrDie : argsOrDie,
-  getNetwork : getNetwork,
   getAccounts : getAccounts,
   getAccountFromArg : getAccountFromArg,
   getConstructorArgs : getConstructorArgs,

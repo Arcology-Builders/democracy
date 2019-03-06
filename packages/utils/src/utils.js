@@ -1,9 +1,13 @@
 // Utilities
-const fs = require('fs')
+const fs   = require('fs')
 const path = require('path')
 
-const { Seq, Map, List, fromJS } = require('immutable')
+const Logger = require('./logger')
+const LOGGER = new Logger('@democracy.js/utils/utils.js', ['info'])
+const { Seq, Map, List, fromJS } 
+                   = require('immutable')
 const assert = require('chai').assert
+const ethjs = require('ethjs')
 
 const DB_DIR       = 'db'
 const SOURCES_DIR  = 'contracts'
@@ -15,10 +19,20 @@ const LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
 
+const getEndpointURL = (_netName, _config) => {
+  const config = (_config) ? _config : require('config')
+  return config['endpoints'][_netName] 
+}
+
+const getNetwork = (_netName, _config) => {
+  const Eth = require('ethjs')
+  return new Eth(new Eth.HttpProvider(getEndpointURL(_netName)))
+}
+
 /**
  * Deep version of fromJS https://stackoverflow.com/a/40663730
  */
-function fromJSGreedy(js) {
+const fromJSGreedy = (js) => {
   return typeof js !== 'object' || js === null ? js :
     Array.isArray(js) ? 
       Seq(js).map(fromJSGreedy).toList() :
@@ -35,7 +49,7 @@ function isBrowser() {
 /**
  * Take the callback action for every level in a hierarchical key space
  */
-function getFileKeySpace(key, cb) {
+const getFileKeySpace = (key, cb) => {
   const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
   const dirSpaces = keySpaces.slice(0,-1)
   dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
@@ -63,7 +77,7 @@ function setImmutableKey(fullKey, value) {
       if (!value) {
         // We never delete, only move to the side
         const now = Date.now()
-        console.log(`Marking key ${fullKey} deleted at time ${now}`)
+        LOGGER.debug(`Marking key ${fullKey} deleted at time ${now}`)
         fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
         return true
       } else {
@@ -72,7 +86,7 @@ function setImmutableKey(fullKey, value) {
     } else if (fs.existsSync(dbFile)) {
       throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
     } else if (!value) {
-      console.log(`Unnecessary deletion of non-existent key ${fullKey}`)
+      LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
       return true
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
@@ -166,7 +180,9 @@ function buildFromDirs(f, skipFilt) {
 function getLinks(networkId) {
   const linkMap = {}
   linksDir = `${LINKS_DIR}/${networkId}`
-  if (!fs.existsSync(linksDir)) { console.log(`Links directory '${linksDir}' not found.`); return Map({}) }
+  if (!fs.existsSync(linksDir)) {
+    LOGGER.info(`Links directory '${linksDir}' not found.`); return Map({})
+  }
   traverseDirs(
     [linksDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
@@ -180,7 +196,9 @@ function getLinks(networkId) {
 function getDeploys(networkId) {
   const deployMap = {}
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
-  if (!fs.existsSync(deploysDir)) { console.log(`Deploys directory '${deploysDir}' not found.`); return Map({}) }
+  if (!fs.existsSync(deploysDir)) {
+    LOGGER.info(`Deploys directory '${deploysDir}' not found.`); return Map({})
+  }
   traverseDirs(
     [deploysDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
@@ -194,7 +212,9 @@ function getDeploys(networkId) {
 const getContracts = (shouldPrint) => {
   const contractSources = []
   const contractOutputs = {}
-  if (!fs.existsSync(SOURCES_DIR)) { console.log(`Sources directory '${SOURCES_DIR}' not found.`); return Map({}) }
+  if (!fs.existsSync(SOURCES_DIR)) {
+    LOGGER.info(`Sources directory '${SOURCES_DIR}' not found.`); return Map({})
+  }
   traverseDirs(
     [SOURCES_DIR], // start out by finding all contracts rooted in current directory
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
@@ -211,7 +231,7 @@ const getContracts = (shouldPrint) => {
     function(source, f) {
       fb = path.basename(f.split('.')[0])
       contractOutputs[fb] = fromJSGreedy(JSON.parse(source))
-      shouldPrint && console.log(`Compiled ${fb}`)
+      shouldPrint && LOGGER.info(`Compiled ${fb}`)
     }
   )
   return {
@@ -326,6 +346,8 @@ module.exports = {
   thenPrint         : thenPrint,
   print             : print,
   ensureDir         : ensureDir,
+  getEndpointURL    : getEndpointURL,
+  getNetwork        : getNetwork,
   getDeploys        : getDeploys,
   getDeploy         : getDeploy,
   getLinks          : getLinks,
