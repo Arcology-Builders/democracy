@@ -1,5 +1,7 @@
 utils = require('./src/utils')
+Logger = require('./src/logger')
 
 module.exports = {
-  ...utils
+  ...utils,
+  Logger: Logger
 }
