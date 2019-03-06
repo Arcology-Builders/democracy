@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/keys",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@democracy.js/utils": "0.0.8",
-    "bops": "^1.0.0",
-    "config": "^3.0.1",
-    "ethereumjs-utils": "^5.2.5",
-    "ethjs": "^0.4.0",
+    "bops": "1.0.0",
+    "config": "3.0.1",
+    "ethereumjs-utils": "5.2.5",
+    "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
-    "ethjs-signer": "^0.1.1",
-    "immutable": "^4.0.0-rc.12",
-    "keythereum": "^1.0.4",
+    "ethjs-signer": "0.1.1",
+    "immutable": "4.0.0-rc.12",
+    "keythereum": "1.0.4",
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
