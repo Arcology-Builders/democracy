@@ -19,14 +19,15 @@ const LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
 const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
 
-const getEndpointURL = (_netName, _config) => {
-  const config = (_config) ? _config : require('config')
-  return config['endpoints'][_netName] 
+const getEndpointURL = () => {
+  config = require('./config.js')()
+  assert(config['ENDPOINT_URL'])
+  return config['ENDPOINT_URL']
 }
 
-const getNetwork = (_netName, _config) => {
+const getNetwork = () => {
   const Eth = require('ethjs')
-  return new Eth(new Eth.HttpProvider(getEndpointURL(_netName)))
+  return new Eth(new Eth.HttpProvider(getEndpointURL()))
 }
 
 /**

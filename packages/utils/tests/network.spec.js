@@ -15,7 +15,8 @@ describe('network and tx sending', () => {
   })
 
   it('endpoint URL works', () => {
-    assert.equal('http://localhost:8545', getEndpointURL('test'))
+    process.env['NODE_ENV'] = 'DEVELOPMENT'
+    assert.equal('http://localhost:8545', getEndpointURL())
   })
 
   it('network exists for test chains', async () => {
@@ -24,12 +25,14 @@ describe('network and tx sending', () => {
   })
 
   it('network exists for rinkeby', async () => {
-    const chain = await getNetwork('rinkeby').net_version()
+    process.env['NODE_ENV'] = 'RINKEBY'
+    const chain = await getNetwork().net_version()
     assert.equal(4, Number(chain), `Rinkeby chain ID was ${chain}`)
   })
 
   it('network exists for mainnet', async () => {
-    const chain = await getNetwork('mainnet').net_version()
+    process.env['NODE_ENV'] = 'MAINNET'
+    const chain = await getNetwork().net_version()
     assert.equal(1, Number(chain), `Mainnet chain ID was ${chain}`)
   })
 

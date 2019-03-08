@@ -24,8 +24,13 @@ const Logger = function(prefix, enabled) {
     }
   }
   
+  this.errorAndThrow = (msg) => {
+    console.error("["+this.prefix+"] " + msg)
+    throw new Error(msg)
+  }
+  
   // Always print errors for now
-  this.error = (msg) => { console.error("["+this.prefix+"] " + msg) }
+  this.error = (msg) => {console.error("["+this.prefix+"] " + msg) }
 
 }
 

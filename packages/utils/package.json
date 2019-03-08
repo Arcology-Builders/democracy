@@ -9,7 +9,6 @@
     "access": "public"
   },
   "dependencies": {
-    "config": "3.0.1",
     "ethjs": "0.4.0",
     "immutable": "4.0.0-rc.12",
     "keythereum": "1.0.4"
