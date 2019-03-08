@@ -6,3 +6,6 @@ links
 tests
 scratch
 webpack.log
+dist
+src/index.html
+src/index.js

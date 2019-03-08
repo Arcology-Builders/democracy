@@ -4,7 +4,7 @@ path   = require('path')
 solc   = require('solc')
 assert = require('chai').assert
 
-const { List, Map }
+const { List, Map, Set }
        = require('immutable')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS }
@@ -18,7 +18,7 @@ function compile(sourceStartPath, sources) {
   assert.typeOf(sourceStartPath, 'string')
   assert(fs.existsSync(sourceStartPath), `Start source path '${sourceStartPath}' does not exist`)
 
-  queue = [ sourceStartPath ] || [ DEMO_SRC_PATH, ZEPPELIN_PATH ]
+  queue = Set([ sourceStartPath, DEMO_SRC_PATH, ZEPPELIN_SRC_PATH ]).toJS()
 
   ensureDir(COMPILES_DIR)
 
@@ -36,7 +36,10 @@ function compile(sourceStartPath, sources) {
         if (paths.length <= 1) { break }
         paths = paths.slice(-(paths.length - 1))
       } while(true)
-      keys.forEach((key) => inputs[key] = source)
+      keys.forEach((key) => {
+        if (inputs[key]) { console.log(`Replacing import ${key} with ${f}`) }
+        inputs[key] = source
+      })
     }
   )
 

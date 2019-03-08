@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/keys",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
