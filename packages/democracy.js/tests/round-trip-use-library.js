@@ -11,8 +11,8 @@ describe('Deploying contract using library.', () => {
     (async () => {
       const eth = demo.getNetwork('test')
       networkId = await eth.net_version()
-      demo.cleanCompileSync('TestLibrary')
-      demo.cleanCompileSync('TestUseLibrary')
+      demo.cleanContractSync('TestLibrary')
+      demo.cleanContractSync('TestUseLibrary')
       demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
       demo.cleanLinkSync(networkId, 'TestUseLibrary-linkUse')
       demo.cleanDeploySync(networkId, 'TestUseLibrary-deployUse')
@@ -46,8 +46,8 @@ describe('Deploying contract using library.', () => {
     demo.cleanLinkSync(networkId, 'TestUseLibrary-linkUse')
     demo.cleanDeploySync(networkId, 'TestUseLibrary-deployUse')
     demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
-    demo.cleanCompileSync('TestLibrary')
-    demo.cleanCompileSync('TestUseLibrary')
+    demo.cleanContractSync('TestLibrary')
+    demo.cleanContractSync('TestUseLibrary')
     done()
   })
 

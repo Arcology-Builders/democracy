@@ -23,7 +23,7 @@ describe('Getting and setting vars.', () => {
       accounts = await demo.getAccounts(eth)
       demo.cleanDeploySync(networkId, 'GetSet-deploy')
       demo.cleanLinkSync(networkId, 'GetSet-link')
-      demo.cleanCompileSync('GetSet')
+      demo.cleanContractSync('GetSet')
       await demo.compile('contracts', 'GetSet.sol')
       const link  = await demo.link('GetSet', 'test', 'account0', 'link')
       const deploy = await demo.deploy('GetSet', 'test', 'link', 'deploy', '')
@@ -51,7 +51,7 @@ describe('Getting and setting vars.', () => {
   after( async() => {
     demo.cleanDeploySync(networkId, 'GetSet-deploy')
     demo.cleanLinkSync(networkId, 'GetSet-link')
-    demo.cleanCompileSync('GetSet')
+    demo.cleanContractSync('GetSet')
   })
 
 

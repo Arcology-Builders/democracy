@@ -108,7 +108,7 @@ const TABLE = {
     console.log(JSON.stringify(contractOutputs.get(args.get(0)), null, '  '))
   },
 
-  'compile' : (args) => {
+  'compile' : async (args) => {
     argsOrDie(args, List(['[0 sourcePath]','<1 ContractName>']), 1)
     return require('./compile')(args.get(0), args.get(1))
   },

@@ -5,7 +5,7 @@ const { Map, List }
 const assert = require('chai').assert
 const fs     = require('fs')
 
-let compiles = List([])
+let compiles = Map({})
 let links    = List([])
 let deploys  = List([])
 
@@ -20,25 +20,30 @@ const depart = async () => {
   
   {
     let contract = demo.getContract('TestImpl')
+    let compileOutputs
     if (!contract) {
-      compileOutputs = demo.compile('contracts', 'TestInterface.sol')
-      assert(isCompile(compileOutputs))
+      compileOutputs = await demo.compile('contracts', 'TestInterface.sol')
+      assert(compileOutputs)
+      compiles = compiles.merge(compileOutputs)
+      assert(demo.isCompile(compileOutputs))
       contract = compileOutputs.get('TestImpl')
     }
     assert(demo.isContract(contract))
-    compiles = compiles.push(contract)
   }
 
   assert(fs.existsSync('./compiles/TestImpl.json'))
 
   {
     let contract = demo.getContract('TestUseInterface')
+    let compileOutputs
     if (!contract) {
       compileOutputs = await demo.compile('contracts', 'TestUseInterface.sol')
+      assert(compileOutputs)
+      compiles = compiles.merge(compileOutputs)
+      assert(demo.isCompile(compileOutputs))
       contract = compileOutputs.get('TestUseInterface')
     }
     assert(demo.isContract(contract))
-    compiles = compiles.push(contract)
   }
 
   assert(fs.existsSync('./compiles/TestInterface.json'))
@@ -59,7 +64,6 @@ const depart = async () => {
 
   let linkUseIx = demo.getLink(networkId, 'TestUseInterface-link')
   if (!linkUseIx) {
-    console.log("KABLAM")
     linkUseIx = await demo.link('TestUseInterface', 'test', 'account0', 'link', 'TestInterface=TestImpl-deploy')
   }
   assert(demo.isLink(linkUseIx))
@@ -80,23 +84,37 @@ const depart = async () => {
       return [`${dep.get('name')}-${dep.get('linkId')}`, dep]})),
     'deploys'  : Map(deploys.map((dep) => {
       return [`${dep.get('name')}-${dep.get('deployId')}`, dep]})),
-    'compiles' : Map(compiles.map((con) => {
+    'compiles' : Map(compiles.map((con, name) => {
       return [con.get('name'), con] }))
   }
 }
 
 const clean = async() => {
 
+  console.log("Returning for cleanup.")
   const networkId = await eth.net_version()
-
-  // Disable cleaning compiles for now for speed
-  // But any Solidity contract changes will need a manual re-compile.
-  compiles.forEach(async (compile) => { await demo.cleanCompileSync(compile) })
-  links.forEach(async (link) => { await demo.cleanLinkSync(networkId, link) })
-  deploys.forEach(async (deploy) => { await demo.cleanDeploySync(networkId, deploy) } )
+  demo.cleanContractSync('TestImpl')
+  demo.cleanContractSync('TestUserInterface')
+  demo.cleanCompileSync(compiles)
+  return Promise.all( [
+    Promise.all( links.map(async (link) => {
+      return await demo.cleanLinkSync(networkId, link)
+    }).toJS()) ,
+    Promise.all( deploys.map(async (deploy) => {
+      return await demo.cleanDeploySync(networkId, deploy)
+    }).toJS())
+  ] )
+  
 }
 
 module.exports = {
   depart: depart,
   clean : clean
+}
+
+if (require.main === module) {
+  (async () => {
+    await depart()
+    await clean()
+  })().then(() => { console.log() })
 }

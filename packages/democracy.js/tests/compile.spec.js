@@ -8,12 +8,12 @@ describe('Democracy compiling.', () => {
   
   let eth
   let networkId
+  let compileOutput
 
   before(async () => {
     eth = demo.getNetwork('test')
     networkId = await eth.net_version()
-    demo.cleanCompileSync('TestLibrary')
-    await demo.compile('contracts', 'TestLibrary.sol')
+    compileOutput = await demo.compile('contracts', 'TestLibrary.sol')
   })
 
   it("should find a previously compiled contract.", async () => {
@@ -26,14 +26,15 @@ describe('Democracy compiling.', () => {
     done()
   })
   
-  it('should compile from OpenZeppelin paths', (done) => {
-    const compile = demo.compile('', 'ERC20.sol')
+  it('should compile from OpenZeppelin paths', async () => {
+    const compile = await demo.compile('', 'ERC20.sol')
     assert.ok(isCompile(compile))
-    done()
+    demo.cleanCompileSync(compile)
+    assert.notOk(demo.getContract('ERC20'))
   })
 
   after( async() => {
-    demo.cleanCompileSync('TestLibrary')
+    demo.cleanCompileSync(compileOutput)
   })
 
 })

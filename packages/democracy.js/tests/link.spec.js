@@ -12,7 +12,7 @@ let networkId
 describe('Democracy linking', () => {
 
   before(async () => {
-    demo.cleanCompileSync("TestLibrary")
+    demo.cleanContractSync("TestLibrary")
     eth = demo.getNetwork('test')
     networkId = await eth.net_version()
   })
@@ -44,7 +44,7 @@ describe('Democracy linking', () => {
   })
 
   after((done) => {
-    demo.cleanCompileSync("TestLibrary")
+    demo.cleanContractSync("TestLibrary")
     demo.cleanLinkSync(networkId, "TestLibrary-linkLib")
     done()
   })

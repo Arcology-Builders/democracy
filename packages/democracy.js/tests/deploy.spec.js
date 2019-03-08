@@ -18,7 +18,7 @@ describe('Democracy deploying.', () => {
       demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
       print("clean deploy")
       demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
-      demo.cleanCompileSync('TestLibrary')
+      demo.cleanContractSync('TestLibrary')
       await demo.compile('contracts', 'TestLibrary.sol')
   })
 
@@ -67,7 +67,7 @@ describe('Democracy deploying.', () => {
   after( async() => {
     demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
     demo.cleanLinkSync(networkId, 'TestLibrary-linkLib')
-    demo.cleanCompileSync('TestLibrary')
+    demo.cleanContractSync('TestLibrary')
   })
 
 
