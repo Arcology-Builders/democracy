@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/utils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Utilities for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "ethjs": "0.4.0",
-    "immutable": "4.0.0-rc.12",
-    "keythereum": "1.0.4"
+    "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
     "chai": "^4.2.0"
