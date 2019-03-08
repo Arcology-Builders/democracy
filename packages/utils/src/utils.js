@@ -295,7 +295,8 @@ const isLink = (_link) => {
  * @return true if the given object is a compile output, otherwise false
  */
 const isCompile = (_compile) => {
-  return (_compile && Map.isMap(_compile) && _compile.reduce((prev, val) => {
+  return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
+          _compile.reduce((prev, val) => {
     return prev && val.get('type') === 'compile'
   }, true))
 }
@@ -319,9 +320,15 @@ const getInstance = (eth, deploy) => {
   return Contract.at(deploy.get('deployAddress'))
 } 
 
-const cleanCompileSync = (compileName) => {
-  const fn = `${COMPILES_DIR}/${compileName}.json`
+const cleanContractSync = (contract) => {
+  const fn = `${COMPILES_DIR}/${contract}.json`
   if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
+}
+
+const cleanCompileSync = (compile) => {
+  compile.map((compile, compileName) => {
+    cleanContractSync(compileName)
+  })
 }
 
 const cleanLinkSync = (networkId, linkName) => {
@@ -368,6 +375,7 @@ module.exports = {
   isCompile         : isCompile,
   isContract        : isContract,
   getInstance       : getInstance,
+  cleanContractSync : cleanContractSync,
   cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,
   cleanDeploySync   : cleanDeploySync,
