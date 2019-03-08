@@ -2,7 +2,7 @@ const demo = require('..')
 
 const chai = require('chai').use(require('chai-as-promised'));
 const assert = chai.assert
-const should = chai.should(); 
+const { isCompile, isContract } = require('@democracy.js/utils')
 
 describe('Democracy compiling.', () => {
   
@@ -17,12 +17,18 @@ describe('Democracy compiling.', () => {
   })
 
   it("should find a previously compiled contract.", async () => {
-    const compile = demo.getContract('TestLibrary')
-    assert.ok(compile, "TestLibrary should have a compile output.")
+    const contract = demo.getContract('TestLibrary')
+    assert.ok(isContract(contract), "TestLibrary should have a compile output.")
   })
 
   it("should *not* find a non-existent compiled contract.", (done) => {
     assert.notOk(demo.getContract('TestLooberry'), "TestLooberry is not even a real thing, dude.")
+    done()
+  })
+  
+  it('should compile from OpenZeppelin paths', (done) => {
+    const compile = demo.compile('', 'ERC20.sol')
+    assert.ok(isCompile(compile))
     done()
   })
 

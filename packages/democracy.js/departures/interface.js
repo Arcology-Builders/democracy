@@ -21,12 +21,11 @@ const depart = async () => {
   {
     let contract = demo.getContract('TestImpl')
     if (!contract) {
-      compileOutputs = await demo.compile('contracts', 'TestInterface.sol')
-      assert(Map.isMap(compileOutputs))
-      demo.print(compileOutputs)
+      compileOutputs = demo.compile('contracts', 'TestInterface.sol')
+      assert(isCompile(compileOutputs))
       contract = compileOutputs.get('TestImpl')
     }
-    assert(demo.isCompile(contract))
+    assert(demo.isContract(contract))
     compiles = compiles.push(contract)
   }
 
@@ -38,7 +37,7 @@ const depart = async () => {
       compileOutputs = await demo.compile('contracts', 'TestUseInterface.sol')
       contract = compileOutputs.get('TestUseInterface')
     }
-    assert(demo.isCompile(contract))
+    assert(demo.isContract(contract))
     compiles = compiles.push(contract)
   }
 

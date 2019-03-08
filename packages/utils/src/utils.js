@@ -295,7 +295,16 @@ const isLink = (_link) => {
  * @return true if the given object is a compile output, otherwise false
  */
 const isCompile = (_compile) => {
-  return (_compile && _compile.get('type') === 'compile')
+  return (_compile && Map.isMap(_compile) && _compile.reduce((prev, val) => {
+    return prev && val.get('type') === 'compile'
+  }, true))
+}
+
+/**
+ * @return true if the given object is a compile output, otherwise false
+ */
+const isContract = (_contract) => {
+  return (Map.isMap(_contract) && _contract.get('type') === 'compile')
 }
 
 /**
@@ -357,6 +366,7 @@ module.exports = {
   isDeploy          : isDeploy,
   isLink            : isLink,
   isCompile         : isCompile,
+  isContract        : isContract,
   getInstance       : getInstance,
   cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,

@@ -1,6 +1,6 @@
 {
   "name": "democracy.js",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Democracy: a minimalist framework for distributed countries",
   "bin": {
     "demo": "./demo.js"
@@ -18,7 +18,7 @@
     "ethjs-query": "0.3.8",
     "immutable": "4.0.0-rc.12",
     "module-alias": "2.2.0",
-    "openzeppelin-solidity": "2.1.2",
+    "openzeppelin-solidity": "2.0.0",
     "solc": "0.4.25"
   },
   "devDependencies": {
