@@ -1,4 +1,4 @@
-const keythereum = require('keythereum')
+const keythereum = require('@invisible-college/keythereum')
 const utils = require('ethereumjs-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert

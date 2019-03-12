@@ -17,7 +17,7 @@ describe('Signing and spending transactions', () => {
 
   before(async () => {
     newAccounts = List(Range(0,2).map((i) => keys.create() ))
-    eth = getNetwork('test', require('config'))
+    eth = getNetwork()
     testAccounts = await eth.accounts() 
   })
 
