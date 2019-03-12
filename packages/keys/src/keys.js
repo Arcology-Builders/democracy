@@ -33,7 +33,7 @@ const bufferToMap = (_privateBuffer, _publicBuffer, _addressBuffer) => {
 }
 
 const createFromPrivateString = (_privateString) => {
-  const privateBuffer = bops.from(_privateString, 'hex')
+  const privateBuffer = Buffer(bops.from(_privateString, 'hex'))
   const publicBuffer = utils.privateToPublic(privateBuffer)
   const addressBuffer = utils.privateToAddress(privateBuffer)
   return bufferToMap(privateBuffer, publicBuffer, addressBuffer)

@@ -1,7 +1,8 @@
 const keys = require('./keys')
 const assert = require('chai').assert
 const account1 = keys.create()
-const account2 = keys.createFromPrivateString(crypto.randomBytes(32).toString())
+const randombytes = require('randombytes')
+const account2 = keys.createFromPrivateString(randombytes(32).toString('hex'))
 
 const body = document.getElementsByTagName('body')
 assert(body.length == 1)

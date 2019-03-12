@@ -4,7 +4,7 @@ compiles
 deploys
 links
 tests
-scratch
+scraps
 webpack.log
 dist
 src/index.html

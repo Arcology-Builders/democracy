@@ -1,6 +1,7 @@
 const assert = require('chai').assert
 const utils = require('ethereumjs-utils')
 const keys = require('../src/keys')
+const randombytes = require('randombytes')
 
 describe('Self-generated keys and signing', () => {
  
@@ -30,6 +31,8 @@ describe('Self-generated keys and signing', () => {
     const account = keys.createFromPrivateString(
       '4DBE88D79BCACD8C3EE962213A58C67BAD17660AF2CF66F9891CE74CC6FCAC34')
     keys.isAccount(account)
+    const account2 = keys.createFromPrivateString(randombytes(32).toString('hex'))
+    keys.isAccount(account2)
   })
 
 })
