@@ -15,13 +15,14 @@ RUN pacman -Sy && \
     echo "Y" | pacman -Sy openssh && \
     echo "Y" | pacman -Sy net-tools && \
     echo "Y" | pacman -Sy wget && \
-    echo "Y" | pacman -Sy tmux
+    echo "Y" | pacman -Sy tmux && \
+    echo "Y" | pacman -Sy gnu-netcat
 
 # Need to create a shell profile file first, so nvm has something to load into
 RUN touch ~/.profile
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 RUN . ~/.nvm/nvm.sh && nvm install v11.2.0 && \
-  npm i -g truffle@4.1.15    && \
+  npm i -g truffle@4.1.14    && \
   npm i -g lerna@3.13.0      && \
   npm i -g pm2               && \
   npm i -g ganache-cli@6.3.0 && \
@@ -33,6 +34,6 @@ RUN ln -s /usr/sbin/nvim /usr/local/bin/vi
 
 ENTRYPOINT . ~/.nvm/nvm.sh \
   && node /root/.nvm/versions/node/v11.2.0/bin/ganache-cli \
-       --debug -v --hostname 0.0.0.0 
+       --debug -v -p 8545 --hostname 0.0.0.0 
 
 EXPOSE 8545

@@ -20,7 +20,8 @@ const DEMO_SRC_PATH = 'contracts'
 const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
 
 const getEndpointURL = () => {
-  config = require('./config.js')()
+  const { getConfig } = require('./config.js')
+  const config = getConfig()
   assert(config['ENDPOINT_URL'])
   return config['ENDPOINT_URL']
 }

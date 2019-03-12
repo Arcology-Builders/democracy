@@ -2,6 +2,7 @@
 
 const Logger = require('./logger')
 const logger = new Logger('config', ['info','debug','error'])
+const assert = require('chai').assert
 
 const createEnv = ({ url, gp, db }) => {
   return {
@@ -20,12 +21,15 @@ const checkEnv = (config, vars) => {
   return config
 }
 
+const devEnv = createEnv({
+  'url': "http://localhost:8545",
+  'gp' : 5,
+  'db' : 'dev',
+})
+
 const ENVIRONMENTS = {
-  'DEVELOPMENT': createEnv({
-    'url': "http://localhost:8545",
-    'gp' : 5,
-    'db' : 'dev',
-  }),
+  'DEVELOPMENT': devEnv,
+  'DEV'        : devEnv,
   'TEST'       : createEnv({
     'url': 'http://ganache.arcology.nyc:8545',
     'gp' : 5,
@@ -43,8 +47,15 @@ const ENVIRONMENTS = {
   }), ['INFURA_PROJECT_ID']),
 }
 
-getConfig = () => {
-  config = ENVIRONMENTS[process.env.NODE_ENV]
+const isNetName = (_name) => {
+  assert(_name, 'Net name cannot be empty.')
+  return (ENVIRONMENTS[_name.toUpperCase()] !== undefined)
+}
+
+const getConfig = () => {
+  const env = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
+  logger.info(`NODE_ENV=${env}`)
+  config = ENVIRONMENTS[env]
   if (config) {
    return config
   } else {
@@ -53,4 +64,7 @@ getConfig = () => {
   }
 }
 
-module.exports = getConfig
+module.exports = {
+  getConfig: getConfig,
+  isNetName: isNetName,
+}

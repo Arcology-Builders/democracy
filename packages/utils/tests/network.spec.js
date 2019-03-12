@@ -5,13 +5,15 @@ const assert = chai.assert
 const { getNetwork, getEndpointURL }
              = require('..')
 const Logger = require('../src/logger')
+const { isNetName } = require('../src/config')
 
 describe('network and tx sending', () => {
 
   let eth
 
   before(() => {
-    eth = getNetwork('test')
+    process.env['NODE_ENV'] = 'DEVELOPMENT'
+    eth = getNetwork()
   })
 
   it('endpoint URL works', () => {
@@ -30,10 +32,26 @@ describe('network and tx sending', () => {
     assert.equal(4, Number(chain), `Rinkeby chain ID was ${chain}`)
   })
 
+  it('network name gets uppercased', async () => {
+    process.env['NODE_ENV'] = 'rInKeBY'
+    const chain = await getNetwork().net_version()
+    assert.equal(4, Number(chain), `Rinkeby chain ID was ${chain}`)
+  })
+
   it('network exists for mainnet', async () => {
     process.env['NODE_ENV'] = 'MAINNET'
     const chain = await getNetwork().net_version()
     assert.equal(1, Number(chain), `Mainnet chain ID was ${chain}`)
+  })
+  
+  it('verifies net names', (done) => {
+    assert.ok(isNetName('tEsT'))
+    assert.notOk(isNetName('nonet'))
+    assert.ok(isNetName('DEVELOPMENT'))
+    assert.ok(isNetName('dev'))
+    assert.ok(isNetName('mainnet'))
+    assert.ok(isNetName('RINKEBY'))
+    done()
   })
 
 })
