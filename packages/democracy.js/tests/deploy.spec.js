@@ -6,14 +6,12 @@ const assert = chai.assert
 const should = chai.should(); 
 const Eth = require('ethjs')
 
-//process.env["NODE_CONFIG_DIR"] = "./../config"
-const config = require('config')
 let networkId
 
 describe('Democracy deploying.', () => {
 
   before(async () => {
-      const eth = demo.getNetwork('test')
+      const eth = demo.getNetwork()
       networkId = await eth.net_version()
       demo.cleanDeploySync(networkId, 'TestLibrary-deployLib')
       print("clean deploy")

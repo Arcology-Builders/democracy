@@ -1,7 +1,6 @@
 const fs = require('fs');
 const { traverseDirs, ensureDir } = require('./utils')
 
-const config = require('config')
 const assert = require('assert')
 const { List, Seq } = require('immutable')
 const BN = require('bn.js')

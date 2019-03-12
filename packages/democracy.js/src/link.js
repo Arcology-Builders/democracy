@@ -3,7 +3,6 @@
 const fs     = require('fs')
 const path   = require('path')
 
-const config = require('config')
 const assert = require('assert')
 const { List, Map }
              = require('immutable')

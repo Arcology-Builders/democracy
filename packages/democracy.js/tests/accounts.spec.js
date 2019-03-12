@@ -8,8 +8,6 @@ const assert = chai.assert
 const should = chai.should(); 
 const Eth = require('ethjs')
 
-const config = require('config')
-
 describe('Getting accounts and balances.', () => {
 
   let eth
@@ -17,7 +15,7 @@ describe('Getting accounts and balances.', () => {
   let accounts
 
   before(async () => {
-      eth = demo.getNetwork('test')
+      eth = demo.getNetwork()
       networkId = await eth.net_version()
       accounts = await demo.getAccounts(eth)
   })

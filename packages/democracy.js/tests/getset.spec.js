@@ -8,8 +8,6 @@ const assert = chai.assert
 const should = chai.should(); 
 const Eth = require('ethjs')
 
-const config = require('config')
-
 describe('Getting and setting vars.', () => {
 
   let eth
@@ -18,7 +16,7 @@ describe('Getting and setting vars.', () => {
   let accounts
 
   before(async () => {
-      eth = demo.getNetwork('test')
+      eth = demo.getNetwork()
       networkId = await eth.net_version()
       accounts = await demo.getAccounts(eth)
       demo.cleanDeploySync(networkId, 'GetSet-deploy')

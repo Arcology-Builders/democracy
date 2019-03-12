@@ -2,8 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const { traverseDirs, ensureDir, DEPLOYS_DIR } = require('@democracy.js/utils')
 
-const config = require('config')
-const assert = require('assert')
+const assert = require('chai').assert
 const { Map, List, Seq } = require('immutable')
 const BN = require('bn.js')
 
