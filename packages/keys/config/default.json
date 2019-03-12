@@ -1,7 +1,0 @@
-{
-  "endpoints": {
-    "test": "http://localhost:8545",
-    "rinkeby": "https://rinkeby.infura.io/SvSUp3SMR9Zk4FUvE6oX",
-    "mainnet": "https://mainnet.infura.io/SvSUp3SMR9Zk4FUvE6oX"
-  }
-}
