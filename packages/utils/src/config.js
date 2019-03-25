@@ -4,11 +4,12 @@ const Logger = require('./logger')
 const logger = new Logger('config', ['info','debug','error'])
 const assert = require('chai').assert
 
-const createEnv = ({ url, gp, db }) => {
+const createEnv = ({ url, gp, db, ll }) => {
   return {
     'ENDPOINT_URL': url,
     'DB_NAMESPACE': db,
     'GAS_PRICE'   : gp,
+    'LOG_LEVELS'  : ll,
   }
 }
 
@@ -25,6 +26,7 @@ const devEnv = createEnv({
   'url': "http://localhost:8545",
   'gp' : 5,
   'db' : 'dev',
+  'll' : ['info', 'debug', 'warn', 'error'],
 })
 
 const ENVIRONMENTS = {
@@ -34,16 +36,19 @@ const ENVIRONMENTS = {
     'url': 'http://ganache.arcology.nyc:8545',
     'gp' : 5,
     'db' : 'test',
+    'll' : ['info', 'warn', 'error'],
   }),
   'RINKEBY'    : checkEnv(createEnv({
     'url': `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'gp' : 5,
     'db' : 'rinkeby',
+    'll' : ['warn', 'error'],
   }), ['INFURA_PROJECT_ID']),
   'MAINNET'    : checkEnv(createEnv({
     'url': `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'gp' : 5,
     'db' : 'mainnet',
+    'll' : ['warn', 'error'],
   }), ['INFURA_PROJECT_ID']),
 }
 

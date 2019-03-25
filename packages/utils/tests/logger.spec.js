@@ -19,4 +19,9 @@ describe('logger facility', () => {
     logger.info('an info message')
   })
 
+  it('multiple messages', () => {
+    logger.debug('first debug message', { 'a': 1 } )
+    logger.info('first info message', Map({ 'a': 1}))
+  })
+
 })

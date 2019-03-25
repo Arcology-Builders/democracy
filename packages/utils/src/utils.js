@@ -1,9 +1,10 @@
+
 // Utilities
 const fs   = require('fs')
 const path = require('path')
 
 const Logger = require('./logger')
-const LOGGER = new Logger('@democracy.js/utils/utils.js', ['info'])
+const LOGGER = new Logger('@democracy.js/utils/utils.js', ['info', 'warn'])
 const { Seq, Map, List, fromJS } 
                    = require('immutable')
 const assert = require('chai').assert
@@ -41,6 +42,76 @@ const fromJSGreedy = (js) => {
       Seq(js).map(fromJSGreedy).toMap();
 }
 
+/*
+ * Deep JS object equality testing from https://stackoverflow.com/a/10316616
+ */
+const deepEqual = (a,b) => {
+	if (a instanceof Array && b instanceof Array)
+		return arraysEqual(a,b);
+	if (Object.getPrototypeOf(a)===Object.prototype &&
+      Object.getPrototypeOf(b)===Object.prototype) {
+	  return objectsEqual(a,b)
+  }
+	if (a instanceof Map && b instanceof Map) {
+	  return mapsEqual(a,b)
+  }
+	if (a instanceof Set && b instanceof Set) {
+	  throw new Error("equality by hashing not implemented.")
+  }
+  if ((a instanceof ArrayBuffer || ArrayBuffer.isView(a)) &&
+      (b instanceof ArrayBuffer || ArrayBuffer.isView(b))) {
+	  return typedArraysEqual(a,b)
+  }
+	return a==b;  // see note[1] -- IMPORTANT
+}
+
+const arraysEqual = (a,b) => {
+  if (a.length!=b.length) { return false }
+	for (let i=0; i < a.length; i++) {
+		if (!deepEqual(a[i],b[i]))
+			return false;
+		return true;
+	}
+}
+
+const objectsEqual = (a,b) => {
+	const aKeys = Object.getOwnPropertyNames(a)
+  const bKeys = Object.getOwnPropertyNames(b)
+  if (aKeys.length != bKeys.length) { return false }
+  aKeys.sort()
+	bKeys.sort()
+	for (let i=0; i < aKeys.length; i++) {
+    if (aKeys[i]!=bKeys[i]) { // keys must be strings
+			return false
+    }
+    return deepEqual(aKeys.map(k=>a[k]), aKeys.map(k=>b[k]))
+  }
+}
+
+const mapsEqual = (a,b) => {
+	if (a.size != b.size) { return false }
+	const aPairs = Array.from(a);
+	const bPairs = Array.from(b);
+	aPairs.sort((x,y) => x[0]<y[0]);
+	bPairs.sort((x,y) => x[0]<y[0]);
+	for (let i=0; i<a.length; i++) {
+		if (!deepEqual(aPairs[i][0],bPairs[i][0]) || !deepEqual(aPairs[i][1],bPairs[i][1])) {
+			return false
+		}
+		return true
+	}
+}
+
+const typedArraysEqual = (_a, _b) => {
+	const a = new Uint8Array(_a);
+	const b = new Uint8Array(_b);
+	if (a.length != b.length) { return false }
+	for (let i=0; i < a.length; i++) {
+		if (a[i]!=b[i]) { return false }
+		return true
+  }
+}
+
 /**
  * Use this to perform different actions based on whether we are in browser or not
  */
@@ -64,7 +135,7 @@ const getFileKeySpace = (key, cb) => {
   return path.join(dbDir, `${keyBase}`)
 }
 
-const setImmutableKey = (fullKey, value) => {
+const setImmutableKey = (fullKey, value, overwrite) => {
   assert(typeof(fullKey) === 'string')
   assert(Map.isMap(value) || List.isList(value) || !value)
 
@@ -76,10 +147,14 @@ const setImmutableKey = (fullKey, value) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
 
     if (fs.existsSync(`${dbFile}.json`)) {
-      if (!value) {
+      if (!value || overwrite) {
         // We never delete, only move to the side
         const now = Date.now()
-        LOGGER.debug(`Marking key ${fullKey} deleted at time ${now}`)
+        if (overwrite) {
+          LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
+        } else {
+          LOGGER.debug(`Marking key ${fullKey} deleted at time ${now}`)
+        }
         fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
         return true
       } else {
@@ -148,6 +223,10 @@ const traverseDirs = (startDirs, skipFilt, cb, dcb) => {
     const f = queue.pop()
     const shortList = path.basename(f).split('.')
     if (skipFilt(shortList, f)) { continue }
+    if (!fs.existsSync(f)) {
+      LOGGER.warn(`Directory ${f} does not exist, skipping.`)
+      continue
+    }
     if (fs.lstatSync(f).isDirectory()) {
       fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
       if (dcb) { dcb(f) }
@@ -180,76 +259,37 @@ const buildFromDirs = (f, skipFilt) => {
 }
 
 const getLinks = (networkId) => {
-  const linkMap = {}
   linksDir = `${LINKS_DIR}/${networkId}`
-  if (!fs.existsSync(linksDir)) {
-    LOGGER.info(`Links directory '${linksDir}' not found.`); return Map({})
+  const linkMap = getImmutableKey(linksDir)
+  if (!linkMap) {
+    LOGGER.info(`Links key '${linksDir}' not found.`); return Map({})
   }
+  /*
   traverseDirs(
     [linksDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Link names will have the form <contractName>-<linkID>, do we need to
     // differentiate different deploy IDs for a single contract name?
     (source,f) => { linkMap[path.basename(f).split('.')[0]] = JSON.parse(source) }
-  )
+  )*/
   return fromJS(linkMap)
 }
 
 const getDeploys = (networkId) => {
-  const deployMap = {}
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
-  if (!fs.existsSync(deploysDir)) {
-    LOGGER.info(`Deploys directory '${deploysDir}' not found.`); return Map({})
+  const deployMap = getImmutableKey(deploysDir)
+  if (!deployMap) {
+    LOGGER.info(`Deploys key '${deploysDir}' not found.`); return Map({})
   }
+  /*
   traverseDirs(
     [deploysDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Deploy names will have the form <contractName>-<deployID>, do we need to
     // differentiate different deploy IDs for a single contract name?
     (source,f) => { deployMap[path.basename(f).split('.')[0]] = JSON.parse(source) }
-  )
+  )*/
   return fromJS(deployMap)
-}
-
-const getContracts = (shouldPrint) => {
-  const contractSources = []
-  const contractOutputs = {}
-  if (!fs.existsSync(SOURCES_DIR)) {
-    LOGGER.info(`Sources directory '${SOURCES_DIR}' not found.`); return Map({})
-  }
-  traverseDirs(
-    [SOURCES_DIR], // start out by finding all contracts rooted in current directory
-    (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-    function(source, f) {
-      fb = path.basename(f.split('.')[0])
-      contractSources.push(fb)
-      shouldPrint && console.log(`Source ${fb}`)
-    }
-  )
-  traverseDirs(
-    [COMPILES_DIR], // start out by finding all contracts rooted in current directory
-    (fnParts) => { return ((fnParts.length > 1) &&
-      (fnParts[1] !== 'json')) },
-    function(source, f) {
-      fb = path.basename(f.split('.')[0])
-      contractOutputs[fb] = fromJSGreedy(JSON.parse(source))
-      shouldPrint && LOGGER.info(`Compiled ${fb}`)
-    }
-  )
-  return {
-    contractSources: Seq(contractSources),
-    contractOutputs: Map(contractOutputs)
-  }
-}
-
-/**
- * Return a contract read from a file in the `outputs/${networkId}` directory.
- * @param contractName name of the compiled contract
- */
-const getContract = (contractName) => {
-  ensureDir(`${COMPILES_DIR}`)
-  const { contractOutputs } = getContracts()
-  return contractOutputs.get(contractName)
 }
 
 /**
@@ -294,23 +334,6 @@ const isLink = (_link) => {
 }
 
 /**
- * @return true if the given object is a compile output, otherwise false
- */
-const isCompile = (_compile) => {
-  return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
-          _compile.reduce((prev, val) => {
-    return prev && val.get('type') === 'compile'
-  }, true))
-}
-
-/**
- * @return true if the given object is a compile output, otherwise false
- */
-const isContract = (_contract) => {
-  return (Map.isMap(_contract) && _contract.get('type') === 'compile')
-}
-
-/**
  * Return an instance from a previously deployed contract
  * @param deploy of previous
  * @return an ethjs instance that can be used to call methods on the deployed contract
@@ -321,17 +344,6 @@ const getInstance = (eth, deploy) => {
   const Contract = eth.contract(deploy.get('abi').toJS(), deploy.get('code'))
   return Contract.at(deploy.get('deployAddress'))
 } 
-
-const cleanContractSync = (contract) => {
-  const fn = `${COMPILES_DIR}/${contract}.json`
-  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
-}
-
-const cleanCompileSync = (compile) => {
-  compile.map((compile, compileName) => {
-    cleanContractSync(compileName)
-  })
-}
 
 const cleanLinkSync = (networkId, linkName) => {
   assert.typeOf(networkId, "string")
@@ -370,15 +382,9 @@ module.exports = {
   getDeploy         : getDeploy,
   getLinks          : getLinks,
   getLink           : getLink,
-  getContracts      : getContracts,
-  getContract       : getContract,
   isDeploy          : isDeploy,
   isLink            : isLink,
-  isCompile         : isCompile,
-  isContract        : isContract,
   getInstance       : getInstance,
-  cleanContractSync : cleanContractSync,
-  cleanCompileSync  : cleanCompileSync,
   cleanLinkSync     : cleanLinkSync,
   cleanDeploySync   : cleanDeploySync,
   cleanSync         : cleanSync,
@@ -394,4 +400,7 @@ module.exports = {
   DEMO_SRC_PATH     : DEMO_SRC_PATH,
   ZEPPELIN_SRC_PATH : ZEPPELIN_SRC_PATH,
   fromJS            : fromJSGreedy,
+  deepEqual         : deepEqual,
+  arraysEqual       : arraysEqual,
+  mapsEqual         : mapsEqual,
 }

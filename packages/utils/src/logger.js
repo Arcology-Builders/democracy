@@ -1,8 +1,16 @@
 // Class for flexible, namespaced logging
 // With possible future extension to write output to a file.
 
+const { Map, List } = require('immutable')
+const assert = require('chai').assert
+
 const Logger = function(prefix, enabled) {
   if (this.prefix) { console.trace(); throw `prefix predefined to ${this.prefix}` }
+ 
+  // Only use config if we are not provided a list, to avoid self-loop in ./config.js 
+  this.enabled = (enabled) ? enabled : require('./config')['getConfig']()['LOG_LEVELS']
+  console.log('Enabled', JSON.stringify(this.enabled))
+  assert(this.enabled.indexOf('error'))
 
   this.prefix = prefix
   if (typeof(enabled) !== 'object') {
@@ -10,18 +18,27 @@ const Logger = function(prefix, enabled) {
     //throw "error";
   }
 
-  this.debug = (msg, _namespace) => {
-    let namespace  = (typeof(_namespace) == 'string') ? "["+_namespace+"]" : "";
-      
-    if (enabled.indexOf('debug') !== -1) {
-      console.log(`[{this.prefix}]{namespace} {msg}`)
+  this.printMsgs = (type, msgs) => {
+    if (this.enabled.indexOf(type) !== -1) {
+      msgs.forEach((msg) => {
+       const str = (Map.isMap(msg) || List.isList(msg)) ?
+         msg.toString() : JSON.stringify(msg)
+       console.log("["+this.prefix+"] " + str) })
     }
   }
 
-  this.info = (msg, namespace) => {
-    if (enabled.indexOf('info') !== -1) {
-      console.log("["+this.prefix+"] " + msg)
-    }
+  this.debug = (...msgs) => {
+    //let namespace  = (typeof(_namespace) == 'string') ? "["+_namespace+"]" : "";
+      
+    this.printMsgs('debug', msgs)
+  }
+
+  this.info = (...msgs) => {
+    this.printMsgs('info', msgs)
+  }
+  
+  this.warn = (...msgs) => {
+    this.printMsgs('warn', msgs)
   }
   
   this.errorAndThrow = (msg) => {

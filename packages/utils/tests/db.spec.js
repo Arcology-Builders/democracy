@@ -43,8 +43,12 @@ describe('Database tests for key/value store', () => {
     assert.equal(JSON.stringify(newMap.toJS()), '{"b":{"d":3},"c":{"e":4}}')
   })
 
-  it('cannot overwrite an existing key', () => {
+  it('cannot overwrite an existing key by accident', () => {
     should.Throw(() => { utils.setImmutableKey('someSpace', new Map({"c":3})) }, Error)
+  })
+
+  it('can overwrite a key explicitly', () => {
+    utils.setImmutableKey('someSpace/b', new Map({"c":3}), true)
   })
 
 })
