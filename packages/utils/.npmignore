@@ -4,3 +4,4 @@ compiles
 deploys
 links
 tests
+*.log
