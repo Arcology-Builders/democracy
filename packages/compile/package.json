@@ -11,12 +11,13 @@
   "author": "Paul Pham <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/compile#readme",
   "license": "MIT",
-  "main": "lib/compile.js",
+  "main": "index.js",
   "directories": {
     "src": "src",
     "test": "tests"
   },
   "files": [
+    "index.js",
     "src"
   ],
   "publishConfig": {

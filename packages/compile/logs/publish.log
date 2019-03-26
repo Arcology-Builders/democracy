@@ -1,16 +1,1 @@
-npm notice
-npm notice 📦  @democracy.js/compile@0.0.0
-npm notice === Tarball Contents ===
-npm notice 1.2kB package.json
-npm notice 258B  README.md
-npm notice 9.9kB src/compile.js
-npm notice === Tarball Details ===
-npm notice name:          @democracy.js/compile
-npm notice version:       0.0.0
-npm notice package size:  3.9 kB
-npm notice unpacked size: 11.3 kB
-npm notice shasum:        4802554f0ce767ba1d7029f7ab6c8aa4fb2a1983
-npm notice integrity:     sha512-/r9TIt59hfgD8[...]VH+8YCoTKDhUQ==
-npm notice total files:   3
-npm notice
-+ @democracy.js/compile@0.0.0
++ @democracy.js/compile@0.0.1
