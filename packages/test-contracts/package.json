@@ -1,0 +1,33 @@
+{
+  "name": "@democracy.js/test-contracts",
+  "version": "0.0.0",
+  "description": "Test contracts for Democracy, a distributed country framework",
+  "keywords": [
+    "democracy",
+    "javascript",
+    "ethereum",
+    "test",
+    "solidity",
+    "contracts"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/test-contracts#readme",
+  "license": "MIT",
+  "main": "lib/test-contracts.js",
+  "directories": {
+    "contracts": "contracts"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  }
+}
