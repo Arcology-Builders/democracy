@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/test-contracts",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Test contracts for Democracy, a distributed country framework",
   "keywords": [
     "democracy",
@@ -18,8 +18,11 @@
     "contracts": "contracts"
   },
   "files": [
-    "lib"
+    "contracts"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"

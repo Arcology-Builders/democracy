@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/compile",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -33,7 +33,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "@democracy.js/test-contracts": "0.0.0",
+    "@democracy.js/test-contracts": "0.0.1",
     "chai": "4.2.0",
     "openzeppelin-solidity": "2.0.0"
   },
