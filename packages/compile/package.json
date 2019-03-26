@@ -1,5 +1,5 @@
 {
-  "name": "compile",
+  "name": "@democracy.js/compile",
   "version": "0.0.0",
   "description": "Compiling for Democracy, tool for a distributed country",
   "keywords": [
@@ -13,12 +13,15 @@
   "license": "MIT",
   "main": "lib/compile.js",
   "directories": {
-    "lib": "lib",
-    "test": "__tests__"
+    "src": "src",
+    "test": "tests"
   },
   "files": [
-    "lib"
+    "src"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
@@ -30,14 +33,14 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "openzeppelin-solidity": "2.0.0",
-    "@democracy.js/test-contracts": "file:../test-contracts",
-    "@democracy.js/utils": "file:../utils",
+    "@democracy.js/test-contracts": "0.0.0",
     "chai": "4.2.0",
-    "immutable": "4.0.0-rc.12",
-    "solc": "0.4.25"
+    "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
-    "ethereumjs-util": "^6.1.0"
+    "@democracy.js/utils": "0.1.3",
+    "ethereumjs-util": "^6.1.0",
+    "immutable": "4.0.0-rc.12",
+    "solc": "0.4.25"
   }
 }

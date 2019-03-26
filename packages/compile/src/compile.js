@@ -184,21 +184,7 @@ const Compiler = class {
     const inputsToBuild = this.getInputsToBuild(requestedInputs, existingOutputs)
 
     const sourcesToBuild = this.getSourceMapForSolc(inputsToBuild)
-       /* 
-    if (sources && sources.length > 2) {
-      // Compile a single file if we get it as arg
-      const targetName = path.basename(sources)
-      sourceMap[targetName] = inputs[targetName]
-    } else {
-      // Otherwise compile all files
-      for (var contract in inputs) {
-        LOGGER.info(`${contract}: ${inputs[contract].length}`)
-        const targetName = path.basename(contract)
-        sourceMap[targetName] = inputs[contract]
-      }
-    }
-*/
-    // Second arg is 1 for optimize, 0 for normal
+
     if (sourcesToBuild.count() === 0) {
       // Hooray, nothing to build. Return existing outputs as if we had built it.
       return existingOutputs.filter((val, key) => { return requestedInputs.has(key) })
@@ -211,14 +197,7 @@ const Compiler = class {
     if (outputs.errors) {
       LOGGER.error(JSON.stringify(outputs.errors))
     }
-   /* 
-    const compiles = List(Map(outputs.contracts).map((contract, contractName) => {
-      contract.name = path.basename(contractName).split(':')[1]
-      contract.sourceHash = keccak(sourceMap[contractName].hash)
-      assert(contract.sourceHash)
-      return contract
-    }).values())
-*/
+
     return this.getCompileOutputFromSolc(outputs.contracts, requestedInputs, existingOutputs)
   }
 
@@ -242,17 +221,7 @@ const Compiler = class {
       }
     )
     const contractOutputs = getImmutableKey(COMPILES_DIR, new Map({}))
-    /*
-    traverseDirs(
-      [COMPILES_DIR], // start out by finding all contracts rooted in current directory
-      (fnParts) => { return ((fnParts.length > 1) &&
-        (fnParts[1] !== 'json')) },
-      function(source, f) {
-        fb = path.basename(f.split('.')[0])
-        contractOutputs[fb] = fromJSGreedy(JSON.parse(source))
-        shouldPrint && LOGGER.info(`Compiled ${fb}`)
-      }
-    )*/
+
     return {
       contractSources: List(contractSources),
       contractOutputs: contractOutputs
@@ -274,16 +243,6 @@ const Compiler = class {
 
   cleanAllCompilesSync() {
     setImmutableKey(`${COMPILES_DIR}`, null)
-    /*
-    traverseDirs(
-      [COMPILES_DIR], // start out by finding all contracts rooted in current directory
-      (fnParts) => { return ((fnParts.length > 1) &&
-        (fnParts[1] !== 'json')) },
-      function(source, f) {
-        LOGGER.info(`Cleaning ${f}`)
-        fs.removeSync(f)
-      }
-    )*/
   }
 
   cleanCompileSync(compile) {

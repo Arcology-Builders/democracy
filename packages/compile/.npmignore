@@ -1,0 +1,10 @@
+node_modules
+db
+compiles
+deploys
+links
+tests
+*.log
+.*.swo
+.*.swp
+README.md
