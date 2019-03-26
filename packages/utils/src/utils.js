@@ -145,11 +145,11 @@ const setImmutableKey = (fullKey, value, overwrite) => {
     ensureDir(DB_DIR)
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
+    const now = Date.now()
 
     if (fs.existsSync(`${dbFile}.json`)) {
       if (!value || overwrite) {
         // We never delete, only move to the side
-        const now = Date.now()
         if (overwrite) {
           LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
         } else {
@@ -161,7 +161,12 @@ const setImmutableKey = (fullKey, value, overwrite) => {
         throw new Error(`Key ${dbFile}.json exists and is read-only.`)
       }
     } else if (fs.existsSync(dbFile)) {
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+      if (!value) {
+        LOGGER.debug(`Deleting sub-key ${dbFile}`)
+        fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+      } else { 
+        throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+      }
     } else if (!value) {
       LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
       return true
