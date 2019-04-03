@@ -34,15 +34,16 @@ const Compiler = class {
   getInputsToBuild(requestedInputs, existingOutputs) {
     return new Map(requestedInputs.map((val,key) => {
       const isNew = !existingOutputs.has(key)
-      const inputHash = requestedInputs.get(key).get('inputHash')
-      const isUpdated = !isNew &&
-        (existingOutputs.get(key).get('inputHash') !==
-         requestedInputs.get(key).get('inputHash'))
+      const inputHash = keccak(requestedInputs.get(key)).toString('hex')
+      const isUpdated = !isNew && (existingOutputs.get(key).get('inputHash') !== inputHash)
+      LOGGER.debug('InputHash', inputHash)
       if (isNew) {
         LOGGER.info(`${key} has not been compiled before.`)
+      } else {
+        LOGGER.debug('InputHash2', existingOutputs.get(key).get('inputHash'))
       }
       if (isUpdated) {
-        LOGGER.info(`${key} is up-to-date with hash ${inputHash}`)
+        LOGGER.info(`${key} is not up-to-date with hash ${inputHash}`)
       }
       return val.set('isUpdated', isUpdated).set('isNew', isNew)
     })).filter((val, key) => { 
@@ -65,7 +66,8 @@ const Compiler = class {
       })
 
     const tuples = List(requestedOutputs.values()).map((contract) => {
-            
+           
+      const now = new Date() 
       const inputHash = requestedInputs.get(contract.name).get('inputHash') 
       const output = Map({
         type       : 'compile',
@@ -74,15 +76,18 @@ const Compiler = class {
         abi        : fromJS(JSON.parse(contract.interface)),
         contentHash: keccak(JSON.stringify(contract)).toString('hex'),
         inputHash  : inputHash,
+        timestamp  : now.getTime(),
+        dateTime   : now.toUTCString(),
       })
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
       const compileKey = `${COMPILES_DIR}/${contract.name}`
       if (existingOutputs.has(contract.name) &&
           existingOutputs.get(contract.name).get('inputHash') === inputHash) {
-        LOGGER.warn(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting`)
-        assert.fail(`We didn't need to compile ${contract.name} check your logic :)`) 
+        LOGGER.warn(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
+        return [contract.name, existingOutputs.get(contract.name)]
       } else {
+        LOGGER.debug('Writing compile output', output)
         setImmutableKey(compileKey, output, true)
       }
       return [contract.name, output]
@@ -100,6 +105,8 @@ const Compiler = class {
    */
   getSourceMapForSolc(inputsToBuild) {
     return new Map(List(inputsToBuild.values()).map((val) => {
+      const fn = val.get('filename')
+      assert(val.get('source'), `${fn} contains null source`)
       return [ val.get('filename'), val.get('source') ]
     })) 
   } 
@@ -107,9 +114,9 @@ const Compiler = class {
  /**
   * Traverse solidity source files from disk and build requested inputs, and a
   * solidity findImports callback function.
-  * @param { source } the filename of the requested source file input to compile
+  * @param { source } the filename of the requested source file input to compile, could be empty for compile all files found
   * @return { findImports } a callback for solc to resolve import statements
-  * @return { requestedInputs } an Immutable {Map}
+  * @return { requestedInputs } an Immutable {Map} of filenames as keys and source file contents as values
   */ 
   getRequestedInputsFromDisk(source) {
     const allInputFiles = []
@@ -189,6 +196,7 @@ const Compiler = class {
       // Hooray, nothing to build. Return existing outputs as if we had built it.
       return existingOutputs.filter((val, key) => { return requestedInputs.has(key) })
     }
+    LOGGER.debug('sourcesToBuild', sourcesToBuild)
 
     const outputs = solc.compile({sources: sourcesToBuild.toJS()}, 0, findImports)
     assert.ok(outputs.contracts, `Expected compile output for requested sources`)
