@@ -1,0 +1,55 @@
+{
+  "name": "invisible-library",
+  "version": "0.0.0",
+  "description": "The Invisible Library of tools, books, and artifacts from the NYC Arcology",
+  "keywords": [
+    "ethereum",
+    "invisible-college",
+    "arcology"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/invisible-library#readme",
+  "license": "MIT",
+  "main": "lib/invisible-library.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --open --mode development",
+    "test:public": "NODE_ENV=TEST mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 25000",
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "devDependencies": {
+    "@democracy.js/compile": "0.0.1",
+    "@democracy.js/webify": "0.0.0",
+    "democracy.js": "^0.2.5",
+    "@babel/core": "7.3.3",
+    "@babel/preset-env": "7.3.1",
+    "@babel/preset-react": "7.0.0",
+    "babel-loader": "8.0.5",
+    "html-loader": "0.5.5",
+    "html-webpack-plugin": "3.2.0",
+    "prop-types": "15.7.2",
+    "react": "16.8.2",
+    "react-dom": "16.8.2",
+    "webpack": "4.29.4",
+    "webpack-cli": "3.2.1",
+    "webpack-dev-server": "3.1.14"
+  },
+  "dependencies": {
+    "@democracy.js/keys": "0.0.6",
+    "@democracy.js/utils": "^0.1.2",
+    "readline-sync": "^1.4.9"
+  }
+}
