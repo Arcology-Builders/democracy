@@ -52,4 +52,12 @@ describe('Database tests for key/value store', () => {
     setImmutableKey('someSpace/b', new Map({"c":3}), true)
   })
 
+  it('overwrites a directory with a null', () => {
+    // such as happens when cleaning compile keys
+    assert.ok(fs.lstatSync('db/someSpace').isDirectory())
+    setImmutableKey('someSpace', null)
+    assert.notOk(fs.existsSync('db/someSpace'))
+    assert.notOk(fs.existsSync('db/someSpace.json'))
+  })
+
 })

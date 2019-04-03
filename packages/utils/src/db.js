@@ -100,6 +100,12 @@ const getFileKeySpace = (key, cb) => {
   return path.join(dbDir, `${keyBase}`)
 }
 
+/**
+ * set an immutable key, possibly moving aside previous immutable values
+ * @param {fullKey} the full path to the key, separated by `/`
+ * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
+ * @param {overwrite} true if are allowed to move aside previous immutable keys
+ */
 const setImmutableKey = (fullKey, value, overwrite) => {
   assert(typeof(fullKey) === 'string')
   assert(Map.isMap(value) || List.isList(value) || !value)
@@ -132,6 +138,7 @@ const setImmutableKey = (fullKey, value, overwrite) => {
       if (!value) {
         LOGGER.debug(`Deleting sub-key ${dbFile}`)
         fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+        return true
       } else { 
         throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
       }
