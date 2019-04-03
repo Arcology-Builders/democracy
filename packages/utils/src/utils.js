@@ -115,93 +115,10 @@ const typedArraysEqual = (_a, _b) => {
 /**
  * Use this to perform different actions based on whether we are in browser or not
  */
-function isBrowser() {
+const isBrowser = () => {
   return (typeof window != 'undefined' && window.document)
 }
 
-/**
- * Take the callback action for every level in a hierarchical key space
- */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
-
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
-}
-
-const setImmutableKey = (fullKey, value, overwrite) => {
-  assert(typeof(fullKey) === 'string')
-  assert(Map.isMap(value) || List.isList(value) || !value)
-
-  if (isBrowser()) {
-    localStorage.setItem(fullKey, value)
-  } else {
-    ensureDir(DB_DIR)
-    const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-      ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-    const now = Date.now()
-
-    if (fs.existsSync(`${dbFile}.json`)) {
-      if (!value || overwrite) {
-        // We never delete, only move to the side
-        if (overwrite) {
-          LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
-        } else {
-          LOGGER.debug(`Marking key ${fullKey} deleted at time ${now}`)
-        }
-        fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
-        return true
-      } else {
-        throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-      }
-    } else if (fs.existsSync(dbFile)) {
-      if (!value) {
-        LOGGER.debug(`Deleting sub-key ${dbFile}`)
-        fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      } else { 
-        throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-      }
-    } else if (!value) {
-      LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-      return true
-    }
-    const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-    LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-    fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-    return true
-  }
-
-}
-
-function getImmutableKey(fullKey, defaultValue) {
-  assert(typeof(fullKey) === 'string')
-
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
-    const dbFile = getFileKeySpace(fullKey, () => {})
-    if (fs.existsSync(`${dbFile}.json`)) {
-      return buildFromDirs(`${dbFile}.json`, () => {return false})
-    } else if (fs.existsSync(dbFile)) {
-      return buildFromDirs(dbFile,
-        (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) })
-    } else {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${dbFile} does not exist.`) }
-    }
-  }
-}  
 
 function tryIfNot(eth, checkFunc, tryFunc, args) {
   if (!checkFunc(eth, args.get(0))) { tryFunc(args) }
@@ -265,18 +182,20 @@ const buildFromDirs = (f, skipFilt) => {
 
 const getLinks = (networkId) => {
   linksDir = `${LINKS_DIR}/${networkId}`
+  const linkMap = {} 
+  /*
   const linkMap = getImmutableKey(linksDir)
   if (!linkMap) {
     LOGGER.info(`Links key '${linksDir}' not found.`); return Map({})
   }
-  /*
+ */
   traverseDirs(
     [linksDir],
     (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
     // Link names will have the form <contractName>-<linkID>, do we need to
     // differentiate different deploy IDs for a single contract name?
     (source,f) => { linkMap[path.basename(f).split('.')[0]] = JSON.parse(source) }
-  )*/
+  )
   return fromJS(linkMap)
 }
 
@@ -375,6 +294,7 @@ const thenPrint = (promise) => {
 }
 
 module.exports = {
+  isBrowser         : isBrowser,
   tryIfNot          : tryIfNot,
   traverseDirs      : traverseDirs,
   buildFromDirs     : buildFromDirs,
@@ -393,9 +313,6 @@ module.exports = {
   cleanLinkSync     : cleanLinkSync,
   cleanDeploySync   : cleanDeploySync,
   cleanSync         : cleanSync,
-  getFileKeySpace   : getFileKeySpace,
-  getImmutableKey   : getImmutableKey,
-  setImmutableKey   : setImmutableKey,
   LIB_PATTERN       : LIB_PATTERN,
   DB_DIR            : DB_DIR,
   SOURCES_DIR       : SOURCES_DIR,

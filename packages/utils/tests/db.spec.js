@@ -2,7 +2,8 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const expect = require('chai').expect
 const should = require('chai').should()
-const { traverseDirs, buildFromDirs, DB_DIR } = require('..')
+const { traverseDirs, buildFromDirs, DB_DIR,
+        setImmutableKey, getImmutableKey } = require('..')
 const path = require('path')
 const fs = require('fs')
 
@@ -20,23 +21,23 @@ describe('Database tests for key/value store', () => {
   })
 
   it('gets a non-existent key which should be null', () => {
-    assert(isNaN(utils.getImmutableKey('someSpace/a', "boo")))
+    assert(isNaN(getImmutableKey('someSpace/a', "boo")))
   })
 
   it('creates a new sub-key', () => {
-    assert(utils.setImmutableKey('someSpace/a', new Map({'a': 1, 'b': 2})),
+    assert(setImmutableKey('someSpace/a', new Map({'a': 1, 'b': 2})),
            "Cannot set a new value from Map" )
-    assert.equal(JSON.stringify(utils.getImmutableKey('someSpace/a').toJS()), '{"a":1,"b":2}')
+    assert.equal(JSON.stringify(getImmutableKey('someSpace/a').toJS()), '{"a":1,"b":2}')
   })
 
   it('deletes a subkey by moving it to the side', () => {
-    assert(utils.setImmutableKey('someSpace/a', null), 'Deleting an existing key should succeed')
+    assert(setImmutableKey('someSpace/a', null), 'Deleting an existing key should succeed')
     assert.notOk(fs.existsSync(`${DB_DIR}/someSpace/a.json`), 'JSON file should not exist.')
   })
 
   it('sets hierarchical keys', () => {
-    assert(utils.setImmutableKey('someSpace/b', new Map({"d":3})))
-    assert(utils.setImmutableKey('someSpace/c', new Map({"e":4})))
+    assert(setImmutableKey('someSpace/b', new Map({"d":3})))
+    assert(setImmutableKey('someSpace/c', new Map({"e":4})))
 
     newMap = buildFromDirs('db/someSpace', (fnParts) => {
       return (fnParts.length > 1 && (fnParts[1] !== 'json' || fnParts.length == 3))})
@@ -44,11 +45,11 @@ describe('Database tests for key/value store', () => {
   })
 
   it('cannot overwrite an existing key by accident', () => {
-    should.Throw(() => { utils.setImmutableKey('someSpace', new Map({"c":3})) }, Error)
+    should.Throw(() => { setImmutableKey('someSpace', new Map({"c":3})) }, Error)
   })
 
   it('can overwrite a key explicitly', () => {
-    utils.setImmutableKey('someSpace/b', new Map({"c":3}), true)
+    setImmutableKey('someSpace/b', new Map({"c":3}), true)
   })
 
 })
