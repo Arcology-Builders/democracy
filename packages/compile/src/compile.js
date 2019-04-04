@@ -9,48 +9,50 @@ const { List, Map, Set }
                  = require('immutable')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
-        getImmutableKey, setImmutableKey, Logger }
+        getImmutableKey, setImmutableKey, Logger, getInputsToBuild }
                  = require('@democracy.js/utils')
 
 const LOGGER = new Logger('Compiler')
 
-const Compiler = class {
-  constructor(_startSourcePath) {
+/**
+ * A reusable Compiler for Democracy.js with a search path and custom outputter.
+ * @param _startSourcePath {string} a local directory. Can omit the `./` for relative paths.
+ * @param _outputter {async function} a (possibly asynchronous) function that
+ *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
+ *        other value that you want returned from `compile` or `clean*` methods.
+ *        If missing, _outputter defaults to `setImmutableKey`
+ *        to a local file-based DB store.
+ */
+class Compiler {
+  
+  constructor(_startSourcePath, _inputter, _outputter) {
     this.startSourcePath = (_startSourcePath && typeof(_startSourcePath) === 'string') ?
       _startSourcePath : DEMO_SRC_PATH
+    assert((this._inputter && this._outputter) || (!this._inputter && !this.outputter))
+    this.inputter = _inputter || getImmutableKey
+    this.outputter = _outputter || setImmutableKey
     ensureDir(this.startSourcePath)
   }
 
   /**
-   * Filter out which requested inputs are out-of-date by source hash or are new,
-   * and need to be recompiled, based on the existing outputs.
-   * TODO: Abstract this out into a generic build package, reuse for linking / deploying
-   * @param requestedInputs Immutable {Map} of keys and values that are inputs to be built
-   * @param existingOutputs Immutable {Map} with matching keys and values that represent
-   *        built outputs, including a member `inputHash` that matches a `requestedInput`
-   *        value that will deterministically reproduce this output
-   * @return a Map of keys and values from {requestedInputs}
+   * Chain and return a (possibly asynchronous) call after the outputter,
+   * also possibly asynchronous. 
+   * @param outputCallResult the result calling outputter method, will have a `then`
+   *        property if it's thenable / asynchronous.
+   * @param callback method, possibly asynchronous, which accepts as input the
+   *        return value of the outputter method call (`outputCallResult`) 
    */
-  getInputsToBuild(requestedInputs, existingOutputs) {
-    return new Map(requestedInputs.map((val,key) => {
-      const isNew = !existingOutputs.has(key)
-      const inputHash = keccak(requestedInputs.get(key)).toString('hex')
-      const isUpdated = !isNew && (existingOutputs.get(key).get('inputHash') !== inputHash)
-      LOGGER.debug('InputHash', inputHash)
-      if (isNew) {
-        LOGGER.info(`${key} has not been compiled before.`)
-      } else {
-        LOGGER.debug('InputHash2', existingOutputs.get(key).get('inputHash'))
-      }
-      if (isUpdated) {
-        LOGGER.info(`${key} is not up-to-date with hash ${inputHash}`)
-      }
-      return val.set('isUpdated', isUpdated).set('isNew', isNew)
-    })).filter((val, key) => { 
-      return val.get('isUpdated') || val.get('isNew')
-    })
+  awaitOutputter(outputCallResult, afterOutput) {
+    if (outputCallResult.then) {
+      return outputCallResult.then(afterOutput) 
+    } else {
+      return afterOutput(outputCallResult)
+    }
   }
 
+  /**
+   * Format the output from `solc` compiler into an Immutable {Map}
+   */
   getCompileOutputFromSolc(solcOutputContracts, requestedInputs, existingOutputs) {
     const requestedOutputs = Map(solcOutputContracts).filter(
       (contract, contractLongName) => {
@@ -87,12 +89,13 @@ const Compiler = class {
         LOGGER.warn(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contract.name, existingOutputs.get(contract.name)]
       } else {
-        LOGGER.debug('Writing compile output', output)
-        setImmutableKey(compileKey, output, true)
+        return this.awaitOutputter(
+          this.outputter(compileKey, output, true),
+          () => { return [ contract.name, output ] }
+        )
       }
-      return [contract.name, output]
     })
-    return Map(tuples)
+    return Promise.all(tuples).then((pairs) => { return Map(tuples) })
   }
   
   /**
@@ -143,7 +146,6 @@ const Compiler = class {
           paths = paths.slice(-(paths.length - 1))
         } while(true)
         const sourceObj = {source: source, inputHash: keccak(source).toString('hex')}
-        //LOGGER.info(JSON.stringify(sourceObj))
         keys.forEach((key) => {
           if (inputs[key]) { LOGGER.warn(`Replacing import ${key} with ${f}`) }
           inputs[key] = sourceObj
@@ -188,7 +190,7 @@ const Compiler = class {
     const { requestedInputs, findImports } = this.getRequestedInputsFromDisk(source)
 
     const { contractOutputs: existingOutputs } = this.getContracts()
-    const inputsToBuild = this.getInputsToBuild(requestedInputs, existingOutputs)
+    const inputsToBuild = getInputsToBuild(requestedInputs, existingOutputs)
 
     const sourcesToBuild = this.getSourceMapForSolc(inputsToBuild)
 
@@ -237,26 +239,28 @@ const Compiler = class {
   }
 
   /**
-   * Return a contract read from a file in the `outputs/${networkId}` directory.
+   * Asynchronously return a contract previously outputted at key `/compiles/`
    * @param contractName name of the compiled contract
    */
-  getContract(contractName) {
+  async getContract(contractName) {
     const { contractOutputs } = this.getContracts(false)
     return contractOutputs.get(contractName)
   }
 
-  cleanContractSync(contract) {
-    setImmutableKey(`${COMPILES_DIR}/${contract}`, null)
+  async cleanContract(contract) {
+    return this.outputter(`${COMPILES_DIR}/${contract}`, null)
   }
 
-  cleanAllCompilesSync() {
-    setImmutableKey(`${COMPILES_DIR}`, null)
+  async cleanAllCompiles() {
+    return this.outputter(`${COMPILES_DIR}`, null)
   }
 
-  cleanCompileSync(compile) {
-    compile.map((compile, compileName) => {
-      this.cleanContractSync(compileName)
-    })
+  async cleanCompile(compile) {
+    return Promise.all(List(
+      compile.map((compile, compileName) => {
+        return this.cleanContract(compileName)
+      }).values()).toJS()
+    )
   }
 
 }

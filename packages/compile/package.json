@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/compile",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -28,7 +28,8 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "doc": "documentation build src/** -f md -o docs/Compiler.md" 
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
