@@ -1,0 +1,44 @@
+{
+  "name": "@democracy.js/rest-server",
+  "version": "0.0.0",
+  "description": "a REST server for the Democracy immutable key store",
+  "keywords": [
+    "rest",
+    "server",
+    "democracy"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/rest-server#readme",
+  "license": "MIT",
+  "main": "src/server.js",
+  "directories": {
+    "src": "src",
+    "test": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "start": "npx pm2 start src/server.js --watch",
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "@democracy.js/utils": "0.1.5",
+    "body-parser": "1.18.3",
+    "chai": "4.2.0",
+    "ethereumjs-utils": "5.2.5",
+    "express": "4.16.4",
+    "immutable": "4.0.0-rc.12",
+    "request": "2.88.0"
+  },
+  "devDependencies": {
+    "pm2": "^2.10.3"
+  }
+}
