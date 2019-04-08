@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/rest-server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "a REST server for the Democracy immutable key store",
   "keywords": [
     "rest",
@@ -16,8 +16,12 @@
     "test": "tests"
   },
   "files": [
-    "lib"
+    "src",
+    "index.js"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
@@ -30,7 +34,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.1.5",
+    "@democracy.js/utils": "0.1.7",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "ethereumjs-utils": "5.2.5",
@@ -39,6 +43,7 @@
     "request": "2.88.0"
   },
   "devDependencies": {
-    "pm2": "^2.10.3"
+    "pm2": "^2.10.3",
+    "chai-as-promised": "7.1.1"
   }
 }
