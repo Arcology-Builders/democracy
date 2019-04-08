@@ -1,0 +1,34 @@
+{
+  "name": "@democracy.js/linker",
+  "version": "0.0.0",
+  "description": "A linker for Democracy, a distributed country",
+  "keywords": [
+    "ethereum",
+    "democracy",
+    "dao",
+    "linker",
+    "evm",
+    "distributed"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/linker#readme",
+  "license": "MIT",
+  "main": "src/linker.js",
+  "directories": {
+    "src": "src",
+    "test": "tests"
+  },
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  }
+}
