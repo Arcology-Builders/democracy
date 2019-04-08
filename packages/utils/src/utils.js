@@ -1,14 +1,15 @@
 
 // Utilities
-const fs   = require('fs')
-const path = require('path')
+const fs     = require('fs')
+const path   = require('path')
 
 const Logger = require('./logger')
-const LOGGER = new Logger('@democracy.js/utils/utils.js', ['info', 'warn'])
+const LOGGER = new Logger('@democracy.js/utils/utils.js')
 const { Seq, Map, List, fromJS } 
                    = require('immutable')
 const assert = require('chai').assert
-const ethjs = require('ethjs')
+const ethjs  = require('ethjs')
+const util   = require('ethereumjs-util')
 
 const DB_DIR       = 'db'
 const SOURCES_DIR  = 'contracts'
@@ -23,8 +24,8 @@ const ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
 const getEndpointURL = () => {
   const { getConfig } = require('./config.js')
   const config = getConfig()
-  assert(config['ENDPOINT_URL'])
-  return config['ENDPOINT_URL']
+  assert(config['ETH_URL'])
+  return config['ETH_URL']
 }
 
 const getNetwork = () => {
@@ -120,10 +121,6 @@ const isBrowser = () => {
 }
 
 
-function tryIfNot(eth, checkFunc, tryFunc, args) {
-  if (!checkFunc(eth, args.get(0))) { tryFunc(args) }
-}
-
 const print = (data) => {
   console.log(JSON.stringify(data, null, '  '))
 }
@@ -198,6 +195,32 @@ const getLinks = (networkId) => {
   )
   return fromJS(linkMap)
 }
+
+  /**
+   * Filter out which requested inputs are out-of-date by source hash or are new,
+   * and need to be recompiled, based on the existing outputs.
+   * @param requestedInputs Immutable {Map} of keys and values that are inputs to be built
+   * @param existingOutputs Immutable {Map} with matching keys and values that represent
+   *        built outputs, including a member `inputHash` that matches a `requestedInput`
+   *        value that will deterministically reproduce this output
+   * @return a Map of keys and values from {requestedInputs}
+   */
+  const getInputsToBuild = (requestedInputs, existingOutputs) => {
+    return new Map(requestedInputs.map((val,key) => {
+      const isNew = !existingOutputs.has(key)
+      const inputHash = util.keccak(requestedInputs.get(key)).toString('hex')
+      const isUpdated = !isNew && (existingOutputs.get(key).get('inputHash') !== inputHash)
+      if (isNew) {
+        LOGGER.info(`${key} has not been built before.`)
+      }
+      if (isUpdated) {
+        LOGGER.info(`${key} is not up-to-date with hash ${inputHash}`)
+      }
+      return val.set('isUpdated', isUpdated).set('isNew', isNew)
+    })).filter((val, key) => { 
+      return val.get('isUpdated') || val.get('isNew')
+    })
+  }
 
 const getDeploys = (networkId) => {
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
@@ -295,8 +318,8 @@ const thenPrint = (promise) => {
 
 module.exports = {
   isBrowser         : isBrowser,
-  tryIfNot          : tryIfNot,
   traverseDirs      : traverseDirs,
+  getInputsToBuild  : getInputsToBuild,
   buildFromDirs     : buildFromDirs,
   thenPrint         : thenPrint,
   print             : print,

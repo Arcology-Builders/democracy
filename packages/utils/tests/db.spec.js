@@ -12,10 +12,10 @@ describe('Database tests for key/value store', () => {
   before(() => {
     if (fs.existsSync('db')) {
       traverseDirs(['db'], () => {return false},
-                   (source, fn) => { console.log(fn); fs.unlinkSync(fn) })
+                   (source, fn) => { fs.unlinkSync(fn) })
       const dirs = []
       traverseDirs(['db'], () => {return false},
-                   (source, fn) => { }, (dir) => { console.log(`Dir ${dir}`); dirs.push(dir) })
+                   (source, fn) => { }, (dir) => { dirs.push(dir) })
       List(dirs.reverse()).map((dir) => { fs.rmdirSync(dir) })
     }
   })

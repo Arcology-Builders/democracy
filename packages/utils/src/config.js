@@ -1,12 +1,14 @@
 // Environment-controlled configuration to choose network and deploy parameters
 
+require('dotenv').config()
 const Logger = require('./logger')
-const logger = new Logger('config', ['info','debug','error'])
+const LOGGER = new Logger('config', [ 'info', 'debug', 'warn', 'error' ])
 const assert = require('chai').assert
 
-const createEnv = ({ url, gp, db, ll }) => {
+const createEnv = ({ ethURL, dbURL, gp, db, ll }) => {
   return {
-    'ENDPOINT_URL': url,
+    'DB_URL'      : dbURL,
+    'ETH_URL'     : ethURL,
     'DB_NAMESPACE': db,
     'GAS_PRICE'   : gp,
     'LOG_LEVELS'  : ll,
@@ -15,40 +17,44 @@ const createEnv = ({ url, gp, db, ll }) => {
 
 const checkEnv = (config, vars) => {
   vars.forEach((v) => {
-    if (process.env[v]) {
-      logger.errorAndThrow(`Environment variable ${v} needed but not defined.`)
+    if (!process.env[v]) {
+      LOGGER.errorAndThrow(`Environment variable ${v} needed but not defined.`)
     }
   })
   return config
 }
 
 const devEnv = createEnv({
-  'url': "http://localhost:8545",
-  'gp' : 5,
-  'db' : 'dev',
-  'll' : ['info', 'debug', 'warn', 'error'],
+  'dbURL' : "http://localhost:7000",
+  'ethURL': "http://localhost:8545",
+  'gp'    : 5,
+  'db'    : 'dev',
+  'll'    : [ 'info', 'debug', 'warn', 'error' ],
 })
 
 const ENVIRONMENTS = {
   'DEVELOPMENT': devEnv,
   'DEV'        : devEnv,
   'TEST'       : createEnv({
-    'url': 'http://ganache.arcology.nyc:8545',
-    'gp' : 5,
-    'db' : 'test',
-    'll' : ['info', 'warn', 'error'],
+    'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
+    'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
+    'gp'     : 5,
+    'db'     : 'test',
+    'll'     : ['info', 'warn', 'error'],
   }),
   'RINKEBY'    : checkEnv(createEnv({
-    'url': `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
-    'gp' : 5,
-    'db' : 'rinkeby',
-    'll' : ['warn', 'error'],
+    'dbURL'  : process.env[ 'RINKEBY.DB_URL'   ] || 'http://ganache.arcology.nyc:8545',
+    'ethURL' : process.env[ 'RINKEBY.ETH_URL ' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'gp'     : 5,
+    'db'     : 'rinkeby',
+    'll'     : ['warn', 'error'],
   }), ['INFURA_PROJECT_ID']),
   'MAINNET'    : checkEnv(createEnv({
-    'url': `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
-    'gp' : 5,
-    'db' : 'mainnet',
-    'll' : ['warn', 'error'],
+    'dbURL'  : process.env[ 'MAINNET.DB_URL' ] || 'http://ganache.arcology.nyc:8545',
+    'ethURL' : process.env[ 'MAINNET.ETH_URL'] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'gp'     : 5,
+    'db'     : 'mainnet',
+    'll'     : ['warn', 'error'],
   }), ['INFURA_PROJECT_ID']),
 }
 
@@ -59,12 +65,12 @@ const isNetName = (_name) => {
 
 const getConfig = () => {
   const env = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
-  logger.info(`NODE_ENV=${env}`)
+  LOGGER.debug(`NODE_ENV=${env}`)
   config = ENVIRONMENTS[env]
   if (config) {
    return config
   } else {
-   logger.info('NODE_ENV not defined, using TEST')
+   LOGGER.info('NODE_ENV not defined, using TEST')
    return ENVIRONMENTS['TEST']
   }
 }

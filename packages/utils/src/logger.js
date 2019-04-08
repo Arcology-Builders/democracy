@@ -3,27 +3,24 @@
 
 const { Map, List } = require('immutable')
 const assert = require('chai').assert
+const colors = require('colors')
 
 const Logger = function(prefix, enabled) {
   if (this.prefix) { console.trace(); throw `prefix predefined to ${this.prefix}` }
  
   // Only use config if we are not provided a list, to avoid self-loop in ./config.js 
   this.enabled = (enabled) ? enabled : require('./config')['getConfig']()['LOG_LEVELS']
-  console.log('Enabled', JSON.stringify(this.enabled))
   assert(this.enabled.indexOf('error'))
 
   this.prefix = prefix
-  if (typeof(enabled) !== 'object') {
-    console.error("enabled param should be a list of strings indicating which log levels.");
-    //throw "error";
-  }
 
-  this.printMsgs = (type, msgs) => {
+  this.printMsgs = (type, msgs, _out) => {
+    const out = _out || console.log
     if (this.enabled.indexOf(type) !== -1) {
       msgs.forEach((msg) => {
        const str = (Map.isMap(msg) || List.isList(msg)) ?
          msg.toString() : JSON.stringify(msg)
-       console.log("["+this.prefix+"] " + str) })
+       out(`[${this.prefix}]`.magenta + `[${type}]`.green +`${str}`) })
     }
   }
 
@@ -47,7 +44,9 @@ const Logger = function(prefix, enabled) {
   }
   
   // Always print errors for now
-  this.error = (msg) => {console.error("["+this.prefix+"] " + msg) }
+  this.error = (...msgs) => {
+    this.printMsgs('error', msgs, console.error)
+  }
 
 }
 

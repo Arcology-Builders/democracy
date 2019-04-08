@@ -40,16 +40,21 @@ const RemoteDB = class {
 				const data = []
 				res.on('data', (chunk) => {
 					data.push(Buffer.from(chunk))
-          LOGGER.info('data', data)
+          LOGGER.debug('data', data)
 				}).on('end', () => {
-          LOGGER.info('data', data)
+          LOGGER.debug('data', data)
 					const body = Buffer.concat(data)
           resolve(body)
 				}).on('error', (err) => {
+          LOGGER.error('res error', err)
           reject(err)
         })
 			})
 
+      post_req.on('error', (err) => {
+        LOGGER.error('req error', err)
+        reject(err)
+      })
 			post_req.write(post_data)
 			post_req.end()
     })
