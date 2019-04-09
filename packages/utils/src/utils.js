@@ -40,9 +40,14 @@ const fromJSGreedy = (js) => {
   return typeof js !== 'object' || js === null ? js :
     Array.isArray(js) ? 
       Seq(js).map(fromJSGreedy).toList() :
-      Seq(js).map(fromJSGreedy).toMap();
+      Seq(js).map(fromJSGreedy).toMap()
 }
 
+const toJS = (imm) => {
+  return (List.isList(imm)) ? imm.map((val) => {return toJS(val)}).toJS() :
+    (Map.isMap(imm)) ? imm.map((val) => {return toJS(val)}).toJS() :
+    imm
+}
 /*
  * Deep JS object equality testing from https://stackoverflow.com/a/10316616
  */
@@ -345,6 +350,7 @@ module.exports = {
   DEMO_SRC_PATH     : DEMO_SRC_PATH,
   ZEPPELIN_SRC_PATH : ZEPPELIN_SRC_PATH,
   fromJS            : fromJSGreedy,
+  toJS              : toJS,
   deepEqual         : deepEqual,
   arraysEqual       : arraysEqual,
   mapsEqual         : mapsEqual,

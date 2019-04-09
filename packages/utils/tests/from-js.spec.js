@@ -2,7 +2,7 @@ const { List, Map }
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
-const { fromJS }
+const { fromJS, toJS }
              = require('..')
 
 describe('from JS nested values', () => {
@@ -29,4 +29,19 @@ describe('from JS nested values', () => {
     ])))
   })
 
+  it( 'converts a nested Immutable obj to JS', () => {
+    const m = Map({
+      'abi': List([
+        Map({'constant': true,
+             'inputs': List([]),
+             'stateMutability': 'view',
+        })
+      ])
+    })
+    const s = JSON.stringify(toJS(m))
+    const expected = '{"abi":[{"constant":true,"inputs":[],"stateMutability":"view"}]}' 
+    assert.equal(s, expected)
+    const s2 = m.toJS()
+    assert.notEqual(s2, expected)
+  })
 })
