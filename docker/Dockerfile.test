@@ -1,27 +1,31 @@
 # Based on https://github.com/Kunstmaan/docker-ethereum/blob/master/geth/Dockerfile
-FROM base/archlinux:2019.01.01
+FROM node:11.13.0-alpine
 MAINTAINER Paul Pham
-ENV nv=v11.2.0
 
-RUN pacman -Sy && \
-    echo "Y" | pacman -Sy sudo && \
-    echo "Y" | pacman -Sy make && \
-    echo "Y" | pacman -Sy gcc && \
-    echo "Y" | pacman -Sy autoconf && \
-    echo "Y" | pacman -Sy automake && \
-    echo "Y" | pacman -Sy python2 && \
-    echo "Y" | pacman -Sy git && \
-    echo "Y" | pacman -Sy neovim && \
-    echo "Y" | pacman -Sy openssh && \
-    echo "Y" | pacman -Sy net-tools && \
-    echo "Y" | pacman -Sy wget && \
-    echo "Y" | pacman -Sy tmux && \
-    echo "Y" | pacman -Sy gnu-netcat
+RUN apk update
+RUN apk add sudo
+RUN apk add make
+RUN apk add gcc
+RUN apk add autoconf
+RUN apk add automake
+RUN apk add python2
+RUN apk add git
+RUN apk add neovim
+RUN apk add openssh
+RUN apk add net-tools
+RUN apk add wget
+RUN apk add tmux
+RUN apk add curl
+RUN apk add bash
 
 # Need to create a shell profile file first, so nvm has something to load into
 RUN touch ~/.profile
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-RUN . ~/.nvm/nvm.sh && nvm install v11.2.0 && \
+RUN npm config delete prefix 
+RUN . ~/.nvm/nvm.sh && npm config set prefix $NVM_DIR/versions/node/v11.2.0
+
+RUN . ~/.nvm/nvm.sh && nvm install v11.2.0
+RUN . ~/.nvm/nvm.sh && nvm use --delete-prefix v11.2.0 && \
   npm i -g truffle@4.1.14    && \
   npm i -g lerna@3.13.0      && \
   npm i -g pm2               && \
