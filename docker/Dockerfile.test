@@ -25,19 +25,19 @@ RUN npm config delete prefix
 RUN . ~/.nvm/nvm.sh && npm config set prefix $NVM_DIR/versions/node/v11.2.0
 
 RUN . ~/.nvm/nvm.sh && nvm install v11.2.0
-RUN . ~/.nvm/nvm.sh && nvm use --delete-prefix v11.2.0 && \
-  npm i -g truffle@4.1.14    && \
-  npm i -g lerna@3.13.0      && \
-  npm i -g pm2               && \
-  npm i -g ganache-cli@6.3.0 && \
-  npm i -g eslint            && \
-  npm i -g mocha             && \
-  npm i -g nyc
+RUN . ~/.nvm/nvm.sh && nvm use v11.2.0
+RUN  npm i -g truffle@4.1.14    
+RUN  npm i -g lerna@3.13.0     
+RUN  npm i -g pm2              
+RUN  npm i -g ganache-cli@6.3.0
+RUN  npm i -g eslint           
+RUN  npm i -g mocha           
+RUN  npm i -g nyc
 
 RUN ln -s /usr/sbin/nvim /usr/local/bin/vi
 
 ENTRYPOINT . ~/.nvm/nvm.sh \
-  && node /root/.nvm/versions/node/v11.2.0/bin/ganache-cli \
+  && /bin/versions/node/v11.2.0/bin/ganache-cli \
        --debug -v -p 8545 --hostname 0.0.0.0 
 
 EXPOSE 8545
