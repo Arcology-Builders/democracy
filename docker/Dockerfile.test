@@ -20,6 +20,7 @@ RUN apk add bash
 
 # Need to create a shell profile file first, so nvm has something to load into
 RUN touch ~/.profile
+RUN echo "export PATH=$PATH:/bin/versions/node/v11.2.0/bin" >> ~/.profile
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 RUN npm config delete prefix 
 RUN . ~/.nvm/nvm.sh && npm config set prefix $NVM_DIR/versions/node/v11.2.0
