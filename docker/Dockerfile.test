@@ -6,6 +6,7 @@ RUN apk update
 RUN apk add sudo
 RUN apk add make
 RUN apk add gcc
+RUN apk add g++
 RUN apk add autoconf
 RUN apk add automake
 RUN apk add python2
