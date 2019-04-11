@@ -3,12 +3,10 @@ const path        = require('path')
 const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
-const http        = require('http')
-const url         = require('url')
-const querystring = require('querystring')
+const request     = require('request-promise')
 const Logger      = require('./logger')
 const LOGGER      = new Logger('RemoteDB')
-const { isBrowser, ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+const { isBrowser, ensureDir, DB_DIR, buildFromDirs, fromJS } = require('./utils')
 
 const RemoteDB = class {
 
@@ -22,58 +20,34 @@ const RemoteDB = class {
     return getHTTP('/api/config')
   } 
 
+  /**
+   * Post the given JS object to the HTTP endpoint.
+   * @param {_apiPath} an absolute `/`-separated path to the API endpoint
+   * @param {bodyObj} a Javascript object to stringify and write as data to the given key
+   * @return a Promise of the asynchronous HTTP post method.
+   */
   async postHTTP(_apiPath, bodyObj) {
-    const post_data = querystring.stringify(bodyObj)
+    const post_data = JSON.stringify(bodyObj)
+    //const post_data = querystring.stringify(bodyObj)
     const post_options = {
-      host: this.host,
-      port: this.port,
-      path: _apiPath,
+      uri: `${this.url}${_apiPath}`,
+      body: bodyObj,
+      json: true,
       method: 'POST',
       headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
           'Content-Length': Buffer.byteLength(post_data),
       }
     }
-    return new Promise((resolve, reject) => {
-			const post_req = http.request(post_options, (res) => {
-				res.setEncoding('utf8')
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(Buffer.from(chunk))
-          LOGGER.debug('data', data)
-				}).on('end', () => {
-          LOGGER.debug('data', data)
-					const body = Buffer.concat(data)
-          resolve(body)
-				}).on('error', (err) => {
-          LOGGER.error('res error', err)
-          reject(err)
-        })
-			})
-
-      post_req.on('error', (err) => {
-        LOGGER.error('req error', err)
-        reject(err)
-      })
-			post_req.write(post_data)
-			post_req.end()
-    })
+    return request.post(post_options)
+    
   }
  
   async getHTTP(_apiPath) {
-    return new Promise((resolve, reject) => {
-      http.get(url.parse(this.url + _apiPath), (res) => {
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(chunk);
-				}).on('end', () => {
-					const body = Buffer.concat(data)
-				  resolve(body)	
-				}).on('error', (err) => {
-					reject(err)
-        })
-      })
-    }) 
+    return request({
+      uri: `${this.url}${_apiPath}`,
+      json: true,
+      method: 'GET',
+    })
   }
 
   /**
