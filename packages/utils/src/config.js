@@ -24,38 +24,40 @@ const checkEnv = (config, vars) => {
   return config
 }
 
-const devEnv = createEnv({
-  'dbURL' : "http://localhost:7000",
-  'ethURL': "http://localhost:8545",
-  'gp'    : 5,
-  'db'    : 'dev',
-  'll'    : [ 'info', 'debug', 'warn', 'error' ],
-})
-
+const createDevEnv = () => {
+  return createEnv({
+    'dbURL' : "http://localhost:7000",
+    'ethURL': "http://localhost:8545",
+    'gp'    : 5,
+    'db'    : 'dev',
+    'll'    : [ 'info', 'debug', 'warn', 'error' ],
+  })
+}
+	
 const ENVIRONMENTS = {
-  'DEVELOPMENT': devEnv,
-  'DEV'        : devEnv,
-  'TEST'       : createEnv({
+  'DEVELOPMENT': createDevEnv,
+  'DEV'        : createDevEnv,
+  'TEST'       : () => { return createEnv({
     'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
     'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
     'gp'     : 5,
     'db'     : 'test',
     'll'     : ['info', 'warn', 'error'],
-  }),
-  'RINKEBY'    : checkEnv(createEnv({
+  }) },
+  'RINKEBY'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'RINKEBY.DB_URL'   ] || 'http://ganache.arcology.nyc:8545',
     'ethURL' : process.env[ 'RINKEBY.ETH_URL ' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'gp'     : 5,
     'db'     : 'rinkeby',
     'll'     : ['warn', 'error'],
-  }), ['INFURA_PROJECT_ID']),
-  'MAINNET'    : checkEnv(createEnv({
+  }), ['INFURA_PROJECT_ID']) },
+  'MAINNET'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'MAINNET.DB_URL' ] || 'http://ganache.arcology.nyc:8545',
     'ethURL' : process.env[ 'MAINNET.ETH_URL'] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'gp'     : 5,
     'db'     : 'mainnet',
     'll'     : ['warn', 'error'],
-  }), ['INFURA_PROJECT_ID']),
+  }), ['INFURA_PROJECT_ID']) },
 }
 
 const isNetName = (_name) => {
@@ -63,15 +65,24 @@ const isNetName = (_name) => {
   return (ENVIRONMENTS[_name.toUpperCase()] !== undefined)
 }
 
+const lazyEval = (env) => {
+  config = ENVIRONMENTS[env]
+  if (typeof(config) === 'function') {
+    ENVIRONMENTS[env] = config()
+    config = ENVIRONMENTS[env]
+  }
+  return config
+}
+
 const getConfig = () => {
   const env = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
   LOGGER.debug(`NODE_ENV=${env}`)
-  config = ENVIRONMENTS[env]
+  config = lazyEval(env)
   if (config) {
    return config
   } else {
    LOGGER.info('NODE_ENV not defined, using TEST')
-   return ENVIRONMENTS['TEST']
+   return lazyEval('TEST')
   }
 }
 

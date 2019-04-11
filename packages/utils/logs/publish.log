@@ -1,19 +1,20 @@
 npm notice 
-npm notice 📦  @democracy.js/utils@0.1.8
+npm notice package: @democracy.js/utils@0.1.9
 npm notice === Tarball Contents === 
 npm notice 1.1kB  package.json 
+npm notice 220B   .env.sample  
 npm notice 201B   index.js     
-npm notice 2.4kB  src/config.js
+npm notice 2.7kB  src/config.js
 npm notice 5.2kB  src/db.js    
 npm notice 1.5kB  src/logger.js
 npm notice 11.6kB src/utils.js 
 npm notice === Tarball Details === 
 npm notice name:          @democracy.js/utils                     
-npm notice version:       0.1.8                                   
-npm notice package size:  7.3 kB                                  
-npm notice unpacked size: 21.9 kB                                 
-npm notice shasum:        f1e2fd1c459a74d14711da4237513a4d4d88a10f
-npm notice integrity:     sha512-Nvv18X8CHjxMa[...]6QgL8ceT+h9MQ==
-npm notice total files:   6                                       
+npm notice version:       0.1.9                                   
+npm notice package size:  7.5 kB                                  
+npm notice unpacked size: 22.5 kB                                 
+npm notice shasum:        746d0f788663a95cdb66440a5ff5161e5e579c18
+npm notice integrity:     sha512-PPbgKb6FSgo7p[...]HcywKzwteIetw==
+npm notice total files:   7                                       
 npm notice 
-+ @democracy.js/utils@0.1.8
++ @democracy.js/utils@0.1.9
