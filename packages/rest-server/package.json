@@ -34,7 +34,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.1.8",
+    "@democracy.js/utils": "0.1.9",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "ethereumjs-utils": "5.2.5",
