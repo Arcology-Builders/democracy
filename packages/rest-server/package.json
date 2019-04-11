@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/rest-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "a REST server for the Democracy immutable key store",
   "keywords": [
     "rest",

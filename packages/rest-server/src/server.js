@@ -40,6 +40,10 @@ class RESTServer {
     return this.router
   }
 
+  getApp() {
+    return this.app
+  }
+
   static constructKey(body, res) {
     const address = body.address
     utils.isValidAddress(address) || res.send(`Invalid address ${address}`)
