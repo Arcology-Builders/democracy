@@ -2,16 +2,16 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cryptogoth/node-circle-test
+      - image: cryptogoth/node-circle-test:663bbd5
     steps:
       - checkout
-      - run: . ~/.nvm/nvm.sh; lerna bootstrap
+      - run: . ~/.profile; lerna bootstrap
       - run:
-          command: . ~/.nvm/nvm.sh; ganache-cli -p 8545
+          command: . ~/.profile; ganache-cli -p 8545
           background: true
       - run:
           shell: /bin/sh
           command: |
             wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8545
             :
-      - run: . ~/.nvm/nvm.sh; lerna run test
+      - run: . ~/.profile; lerna run test
