@@ -1,11 +1,15 @@
-const RESTServer = require('../src/server')
-const { RemoteDB, Logger } = require('@democracy.js/utils')
-const LOGGER = new Logger('rest.spec')
-
-const chai = require('chai')
+const fs     = require('fs')
+const path   = require('path')
+const chai   = require('chai')
 chai.use(require('chai-as-promised'))
 const assert = chai.assert
 const expect = chai.expect
+const { Map } = require('immutable')
+
+const RESTServer = require('../src/server')
+const { RemoteDB, Logger, setImmutableKey, DB_DIR, COMPILES_DIR }
+                 = require('@democracy.js/utils')
+const LOGGER     = new Logger('rest.spec')
 
 describe('Runs a REST server', () => {
 
@@ -14,12 +18,14 @@ describe('Runs a REST server', () => {
 
   const randInt = Math.round(Math.random() * 100)
 
-  it( 'starts a REST server that handles a test request' , async () => {
+  before(async () => {
     server.start()
+  })
+
+  it( 'starts a REST server that handles a test request' , async () => {
     const res = await r.postHTTP('/api/test', { 'a': randInt })
-    const expected = `{"message":"Test posted!","a":"${randInt}"}`
-    assert.equal(res.toString(), expected)
-    server.stop()
+    const expected = `{"message":"Test posted!","a":${randInt}}`
+    assert.equal(JSON.stringify(res), expected)
   })
 
   it( 'posting to a non-listening server times out and fails' , async () => {
@@ -40,11 +46,27 @@ describe('Runs a REST server', () => {
     router.route('/someRoute').get((req, res) => {
       res.json({ 'a': randInt+1 })
     })
-    server.start()
     const res = await r.getHTTP('/api/someRoute', {})
-    assert.equal( res.toString(), `{"a":${randInt+1}}`)
-    server.stop()
+    assert.equal( JSON.stringify(res), `{"a":${randInt+1}}`)
   }) 
+  
+  it( 'get all empty compiles', async () => {
+    const res = await r.getHTTP('/api/compiles', {})
+    assert.equal( JSON.stringify(res), `{}`)
+  })
+
+  it( 'get all compiles', async () => {
+    setImmutableKey('/compiles/FirstContract', new Map({}))
+    setImmutableKey('/compiles/SecondContract', new Map({}))
+    const res = await r.getHTTP('/api/compiles', {})
+    assert.equal( JSON.stringify(res), '{"FirstContract":{},"SecondContract":{}}')
+  })
+  
+  after(async () => {
+    fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
+    fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
+    server.stop()
+  })
 
 })
 

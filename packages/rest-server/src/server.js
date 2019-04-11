@@ -1,5 +1,5 @@
 const express = require('express')
-const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger }
+const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger, COMPILES_DIR }
 	      = require('@democracy.js/utils')
 const { Map } = require('immutable')
 const utils = require('ethereumjs-utils')
@@ -64,6 +64,12 @@ class RESTServer {
     _router.route('/links/:chainId/:deployName').get((req, res) => {
     })
 
+    // Return all compiles
+    _router.route('/compiles').get((req, res) => {
+      const compile = get(`/${COMPILES_DIR}`, new Map({}))
+      res.json(compile.toJS())
+    })
+
     _router.route('/compiles/:contractName').post((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
@@ -97,7 +103,7 @@ class RESTServer {
       set('/test', test, true)
       res.json({ message: 'Test posted!', ...req.body });
     })
-
+   
   }
 
   start() {
