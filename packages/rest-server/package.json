@@ -13,7 +13,7 @@
   "main": "src/server.js",
   "directories": {
     "src": "src",
-    "test": "tests"
+    "tests": "tests"
   },
   "files": [
     "src",
