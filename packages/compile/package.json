@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/compile",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -29,7 +29,7 @@
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "doc": "documentation build src/** -f md -o docs/Compiler.md" 
+    "doc": "documentation build src/** -f md -o docs/Compiler.md"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
@@ -40,9 +40,11 @@
     "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
+    "@democracy.js/rest-server": "file:../rest-server",
     "@democracy.js/utils": "file:../utils",
     "ethereumjs-util": "^6.1.0",
     "immutable": "4.0.0-rc.12",
+    "request": "2.88.0",
     "solc": "0.4.25"
   }
 }

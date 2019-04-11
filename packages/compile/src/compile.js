@@ -37,7 +37,7 @@ class Compiler {
   /**
    * Chain and return a (possibly asynchronous) call after the outputter,
    * also possibly asynchronous. 
-   * @param outputCallResult the result calling outputter method, will have a `then`
+   * @param outputCallResult the result of calling outputter method, will have a `then`
    *        property if it's thenable / asynchronous.
    * @param callback method, possibly asynchronous, which accepts as input the
    *        return value of the outputter method call (`outputCallResult`) 
@@ -47,6 +47,23 @@ class Compiler {
       return outputCallResult.then(afterOutput) 
     } else {
       return afterOutput(outputCallResult)
+    }
+  }
+ 
+  /**
+   * Chain and return a (possibly asynchronous) call after the inputter,
+   * also possibly asynchronous
+   * @param inputCallResult the result of calling the inputter method on some args
+   *        will have a `then` property if it's thenable / asynchronous
+   * @param callback method, possibly asynchronous, which accepts as input the
+   *        return value of the inputter method call (`inputCallResult`)
+   */
+  awaitInputter(inputCallResult, afterInput) {
+    LOGGER.info('inputCallResult', inputCallResult)
+    if (inputCallResult.then) {
+      return inputCallResult.then(afterInput)
+    } else {
+      return afterInput(inputCallResult)
     }
   }
 
@@ -66,7 +83,6 @@ class Compiler {
           ...contract
         }
       })
-
     const tuples = List(requestedOutputs.values()).map((contract) => {
            
       const now = new Date() 
@@ -95,7 +111,7 @@ class Compiler {
         )
       }
     })
-    return Promise.all(tuples).then((pairs) => { return Map(tuples) })
+    return Promise.all(tuples).then((pairs) => { return Map(pairs) })
   }
   
   /**
@@ -183,13 +199,13 @@ class Compiler {
    * @param source {string} name of source file to compile, including Solidity extension
    * @return compile output as an Immutable {Map}
    */
-  compile(source) {
+  async compile(source) {
     // Open contracts installed by npm -E zeppelin-solidity
     // Open contracts from democracy
     
     const { requestedInputs, findImports } = this.getRequestedInputsFromDisk(source)
 
-    const { contractOutputs: existingOutputs } = this.getContracts()
+    const { contractOutputs: existingOutputs } = await this.getContracts()
     const inputsToBuild = getInputsToBuild(requestedInputs, existingOutputs)
 
     const sourcesToBuild = this.getSourceMapForSolc(inputsToBuild)
@@ -211,7 +227,7 @@ class Compiler {
     return this.getCompileOutputFromSolc(outputs.contracts, requestedInputs, existingOutputs)
   }
 
-  getContracts() {
+  async getContracts() {
     const contractSources = []
     if (!fs.existsSync(this.startSourcePath)) {
       LOGGER.info(`Sources directory '${this.startSourcePath}' not found.`)
@@ -230,12 +246,16 @@ class Compiler {
         LOGGER.info(`Source ${fb}`)
       }
     )
-    const contractOutputs = getImmutableKey(COMPILES_DIR, new Map({}))
 
-    return {
-      contractSources: List(contractSources),
-      contractOutputs: contractOutputs
-    }
+    return this.awaitInputter(
+      this.inputter(COMPILES_DIR, new Map({})),
+      (contractOutputs) => {
+        return {
+          contractSources: List(contractSources),
+          contractOutputs: contractOutputs
+        }
+      }
+    )
   }
 
   /**
@@ -243,7 +263,7 @@ class Compiler {
    * @param contractName name of the compiled contract
    */
   async getContract(contractName) {
-    const { contractOutputs } = this.getContracts(false)
+    const { contractOutputs } = await this.getContracts(false)
     return contractOutputs.get(contractName)
   }
 

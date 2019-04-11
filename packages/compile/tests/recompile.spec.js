@@ -20,16 +20,16 @@ describe('Democracy recompiling on source change', () => {
   it( '(re) compiles only for changed sources / hash ', async() => {
     
     // compiles a new contract with no previous hash
-    const outputs = await compileNewFile(c)
+    const outputs = await compileNewFile(c).catch((e) => { throw e })
     LOGGER.debug('outputs', outputs)
     _inputHash = outputs.inputHash
     _timestamp = outputs.timestamp
 
     // does not recompile a source file with unchanged contents/hash
-    checkNoRecompile(c, _inputHash, _timestamp)
+    checkNoRecompile(c, _inputHash, _timestamp).catch((e) => { throw e })
 
     // recompiles a source file with changed contents/hash 
-    checkRecompile(c, _inputHash, _timestamp)
+    checkRecompile(c, _inputHash, _timestamp).catch((e) => { throw e })
 
   })
 
