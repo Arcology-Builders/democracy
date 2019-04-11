@@ -44,6 +44,8 @@ module.exports = {
   node: {
     process: false,
     Buffer: false,
+    tls: 'empty',
+    net: 'empty',
   },
   mode: 'development',
   /*

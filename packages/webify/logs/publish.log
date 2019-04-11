@@ -1,0 +1,19 @@
+npm notice 
+npm notice 📦  @democracy.js/webify@0.0.1
+npm notice === Tarball Contents === 
+npm notice 1.0kB package.json   
+npm notice 64B   index.js       
+npm notice 2.3MB dist/bundle.js 
+npm notice 656B  dist/index.html
+npm notice 1.1kB src/index.js   
+npm notice 2.4kB src/webify.js  
+npm notice === Tarball Details === 
+npm notice name:          @democracy.js/webify                    
+npm notice version:       0.0.1                                   
+npm notice package size:  636.4 kB                                
+npm notice unpacked size: 2.3 MB                                  
+npm notice shasum:        fa597f94696f08c3afb0324641147372374f1870
+npm notice integrity:     sha512-IVsNRoFUaP2ps[...]32OtCU9SQJj2Q==
+npm notice total files:   6                                       
+npm notice 
++ @democracy.js/webify@0.0.1

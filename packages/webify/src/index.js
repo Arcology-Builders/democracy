@@ -1,12 +1,9 @@
-// TODO: This could stand some cleanup so we don't see the relative interim path
+require('@babel/polyfill')
 const config = require('./config.json')
-//const BrowserFS = require('browserfs')
 const assert = require('chai').assert
 
 submodule = require('./submodule')
 console.log(`Submodule from Import  ${JSON.stringify(submodule)}`)
-//console.log(`Submodule ${JSON.stringify(submodule)}`)
-//console.log(`Config ${JSON.stringify(config)}`)
 console.log(`Hello Config ${JSON.stringify(config)}`)
 
 BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
@@ -35,3 +32,6 @@ assert(buffer.toString() === 'catcow')
 const { getImmutableKey, setImmutableKey } = require('@democracy.js/utils')
 //setImmutableKey("a/d", new List([1,2,3]))
 //console.log(getImmutableKey("a/d").toString())
+
+window.fs = fs
+window.path = path

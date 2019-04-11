@@ -1,7 +1,7 @@
 {
-  "name": "@democracy/webify",
-  "version": "0.0.0",
-  "description": "",
+  "name": "@democracy.js/webify",
+  "version": "0.0.1",
+  "description": "Generic tools to webify a distributed country",
   "keywords": "webpack",
   "author": "Paul Pham",
   "main": "index.js",
@@ -9,14 +9,20 @@
     "start": "webpack-dev-server --open --mode development",
     "build": "webpack --mode production"
   },
+  "files": [
+    "index.js",
+    "src/index.js",
+    "src/webify.js",
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@babel/polyfill": "7.2.5",
     "democracy.js": "0.2.4",
-    "@democracy.js/keys": "0.0.4",
-    "@democracy.js/utils": "0.1.2",
+    "@democracy.js/keys": "0.0.6",
+    "@democracy.js/utils": "0.1.9",
     "browserfs": "1.4.3",
     "chai": "4.2.0"
   },
