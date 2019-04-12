@@ -31,9 +31,6 @@ class RESTServer {
     this.populateRoutes(this.router)
     this.app.use('/api', this.router)
     
-    // server static files from the 'public' folder
-    this.app.use(express.static(__dirname + '/public'));
-
   }
 
   getRouter() {
