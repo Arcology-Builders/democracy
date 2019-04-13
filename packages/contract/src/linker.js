@@ -10,21 +10,22 @@ const { Logger, isNetwork, isDeploy, getImmutableKey, setImmutableKey, LIB_PATTE
              = require('@democracy.js/utils')
 const LOGGER = new Logger('Linker')
 
-const { ContractsManager, isContract } = require('./contractsManager')
+const { isContract } = require('./contractsManager')
+const { BuildsManager } = require('./buildsManager')
 const { awaitOutputter } = require('./utils')
 
 class Linker {
 
-  constructor(_eth, _inputter, _outputter, _chainId, _cm) {
+  constructor(_eth, _inputter, _outputter, _chainId, _bm) {
     assert(isNetwork(_eth))
     this.eth       = _eth
     this.inputter  = _inputter  || getImmutableKey
     this.outputter = _outputter || setImmutableKey
-    this.cm        = _cm || new ContractsManager("", this.inputter, this.outputter, _chainId)
+    this.bm        = _bm || new BuildsManager("", this.inputter, this.outputter, _chainId)
   }
 
-  getContractsManager() {
-    return this.cm
+  getBuildsManager() {
+    return this.bm
   }
 
   /**
@@ -35,7 +36,7 @@ class Linker {
    * @return the contractOutput augmented with a linkDepMap
    */
   async link(contractName, linkId, _depMap) {
-    const contractOutput = await this.cm.getContract(contractName)
+    const contractOutput = await this.bm.getContract(contractName)
     if (!isContract(contractOutput)) { throw new Error(`Compile output not found for ${contractName}`) } 
     //assert(isContract(contractOutput), `Compile output not found for ${contractName}` )
     const networkId = await this.eth.net_version() 
@@ -47,10 +48,10 @@ class Linker {
     //ensureDir(LINKS_DIR)
     //ensureDir(linksDir)
 
-    const link = await this.cm.getLink(linkName)
+    const link = await this.bm.getLink(linkName)
     assert(!isLink(link), `Link ${linkName} already exists`)
 
-    const deployMap = await this.cm.getDeploys()
+    const deployMap = await this.bm.getDeploys()
 
     let matches = Map({})
     let match

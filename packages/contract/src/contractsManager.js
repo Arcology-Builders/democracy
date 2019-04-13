@@ -7,8 +7,7 @@ const { List, Map, Set }
                  = require('immutable')
 const { awaitInputter  } = require('./utils')
 
-const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
-        getImmutableKey, setImmutableKey, Logger, isNetwork, getNetwork, LINKS_DIR, DEPLOYS_DIR }
+const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger }
                  = require('@democracy.js/utils')
 
 const LOGGER = new Logger('ContractsManager')
@@ -23,13 +22,11 @@ const LOGGER = new Logger('ContractsManager')
  */
 class ContractsManager {
   
-  constructor(_startSourcePath, _inputter, _outputter, _chainId) {
+  constructor(_startSourcePath, _inputter, _outputter) {
     this.startSourcePath = _startSourcePath
     assert((this._inputter && this._outputter) || (!this._inputter && !this.outputter))
     this.inputter = _inputter || getImmutableKey
     this.outputter = _outputter || setImmutableKey
-    if (!_chainId) { throw new Error("no chain ID passed in") }
-    this.chainId = _chainId
   }
 
   async getContracts() {
@@ -82,29 +79,6 @@ class ContractsManager {
         return this.cleanContract(compileName)
       }).values()).toJS()
     )
-  }
-
-  async getDeploys() {
-    return this.inputter(`${DEPLOYS_DIR}/${this.chainId}`, new Map({}))
-  }
-
-  async getLinks() {
-    return this.inputter(`${LINKS_DIR}/${this.chainId}`, new Map({}))
-  }
-
-  async getLink(linkName) {
-    const linksMap = await this.getLinks()
-    return linksMap.get(linkName)
-  }
-
-  async cleanLink(linkName) {
-    const fn = `${LINKS_DIR}/${this.chainId}/${linkName}`
-    return this.outputter(`${fn}`, null)
-  }
-
-  async cleanDeploy(deployName) {
-    const fn = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
-    return this.outputter(`${fn}`, null)
   }
 
 }

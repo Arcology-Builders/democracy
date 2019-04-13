@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@democracy.js/test-contracts": "0.0.1",
-    "@democracy.js/utils": "0.1.10",
+    "@democracy.js/utils": "^0.1.10",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ const should   = chai.should()
 
 const { Map, List } = require('immutable')
 
-const { Linker, Deployer, Contracts } = require('..')
+const { Linker } = require('..')
 const { getNetwork, Logger } 
                = require('@democracy.js/utils')
 const LOGGER = new Logger('link.spec')
@@ -15,14 +15,14 @@ describe('Democracy linking', () => {
 
   let networkId
   let l
-  let cm
+  let bm
 
   before(async () => {
     eth = getNetwork()
     networkId = await eth.net_version()
     l = new Linker(eth, null, null, networkId)
-    cm = l.getContractsManager()
-    await cm.cleanLink( 'TestLibrary-linkLib' )
+    bm = l.getBuildsManager()
+    await bm.cleanLink( 'TestLibrary-linkLib' )
   })
 
   // Expect error thrown from promise
@@ -33,7 +33,7 @@ describe('Democracy linking', () => {
   })
 
   it('does not produce a link file if it fails', async () => {
-    const link = await cm.getLink( ' TestLibrary3 ' )
+    const link = await bm.getLink( ' TestLibrary3 ' )
     assert.notOk(link)
   })
 
@@ -41,14 +41,14 @@ describe('Democracy linking', () => {
     const output = await l.link( 'TestLibrary', 'linkLib' )
     LOGGER.info('OUTPUT', output)
     assert(Map.isMap(output), "Linking should produce a map")
-    const output2 = await cm.getLink( 'TestLibrary-linkLib' )
+    const output2 = await bm.getLink( 'TestLibrary-linkLib' )
     assert(List.isList(output.get('abi')))
     assert(List.isList(output2.get('abi')))
     assert(output2.equals(output), 'Link output should equal the map read from link file.')
   })
 
   after(async () => {
-    await l.getContractsManager().cleanLink( 'TestLibrary-linkLib' )
+    await l.getBuildsManager().cleanLink( 'TestLibrary-linkLib' )
   })
 
 })
