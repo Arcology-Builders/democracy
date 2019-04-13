@@ -15,8 +15,14 @@
     "src": "src",
     "test": "tests"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "src"
+    "index.js",
+    "src/utils.js",
+    "src/linker.js",
+    "src/contractsManager.js"
   ],
   "repository": {
     "type": "git",
@@ -31,9 +37,11 @@
   },
   "dependencies": {
     "@democracy.js/test-contracts": "0.0.1",
-    "@democracy.js/utils": "0.1.9"
+    "@democracy.js/utils": "0.1.10",
+    "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
-    "chai": "4.2.0"
+    "chai": "4.2.0",
+    "chai-as-promised": "^7.1.1"
   }
 }

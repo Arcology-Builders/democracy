@@ -1,54 +1,54 @@
-const { Linker, Deployer, Contracts } = require('..')
-const { getNetwork } 
-               = require('@democracy.js/utils')
 const chai     = require('chai')
+chai.use(require('chai-as-promised'))
 const assert   = chai.assert
 const expect   = chai.expect
 const should   = chai.should()
 
 const { Map, List } = require('immutable')
 
+const { Linker, Deployer, Contracts } = require('..')
+const { getNetwork, Logger } 
+               = require('@democracy.js/utils')
+const LOGGER = new Logger('link.spec')
+
 describe('Democracy linking', () => {
 
   let networkId
   let l
-  let c
+  let cm
 
   before(async () => {
     eth = getNetwork()
     networkId = await eth.net_version()
-    l = new Linker(eth)
-    await l.getContractsManager().cleanContractSync("TestLibrary")
+    l = new Linker(eth, null, null, networkId)
+    cm = l.getContractsManager()
+    await cm.cleanLink( 'TestLibrary-linkLib' )
   })
 
   // Expect error thrown from promise
   // https://stackoverflow.com/a/45496509
-  it('throws an error to link without compiling', async () => {
-    await expect(contract.link('TestLibrary', 'test', 'account0', 'linkLib'))
-                 .to.be.rejectedWith(Error)
-  })
-  
-  it('does not produce a link file if it fails', () => {
-    assert.notOk(contract.getLink(networkId, 'TestLibrary'))
+  it('throws an error to link a contract without a compile', async () => {
+    const output = l.link( 'TestLibrary3', 'linkLib' )
+    await expect( output ).to.be.rejectedWith(Error)
   })
 
-  it('compiles first then links', async() => {
-    await c.compile( 'TestLibrary.sol' )
-    l.link( 'TestLibrary', 'linkLib' ).then((output) => {
-      assert(Map.isMap(output), "Linking should produce a map")
-      const output2 = contract.getLink(networkId, "TestLibrary-linkLib")
-      assert(List.isList(output.get('abi')))
-      assert(List.isList(output2.get('abi')))
-      assert(output2.equals(output), 'Link output should equal the map read from link file.')
-    }).catch((error) => {
-      assert.fail(error)
-    })
+  it('does not produce a link file if it fails', async () => {
+    const link = await cm.getLink( ' TestLibrary3 ' )
+    assert.notOk(link)
   })
 
-  after((done) => {
-    c.getContractsManager().cleanContractSync("TestLibrary")
-    l.cleanLinkSync(networkId, "TestLibrary-linkLib")
-    done()
+  it( 'links a previous compile', async() => {
+    const output = await l.link( 'TestLibrary', 'linkLib' )
+    LOGGER.info('OUTPUT', output)
+    assert(Map.isMap(output), "Linking should produce a map")
+    const output2 = await cm.getLink( 'TestLibrary-linkLib' )
+    assert(List.isList(output.get('abi')))
+    assert(List.isList(output2.get('abi')))
+    assert(output2.equals(output), 'Link output should equal the map read from link file.')
+  })
+
+  after(async () => {
+    await l.getContractsManager().cleanLink( 'TestLibrary-linkLib' )
   })
 
 })

@@ -6,17 +6,21 @@ const path   = require('path')
 const assert = require('assert')
 const { List, Map }
              = require('immutable')
-const { Logger, getLink, isDeploy, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
+const { Logger, isNetwork, isDeploy, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
              = require('@democracy.js/utils')
 const LOGGER = new Logger('Linker')
 
+const { ContractsManager, isContract } = require('./contractsManager')
+const { awaitOutputter } = require('./utils')
+
 class Linker {
 
-  constructor(_eth, _inputter, _outputter) {
+  constructor(_eth, _inputter, _outputter, _chainId, _cm) {
+    assert(isNetwork(_eth))
     this.eth       = _eth
     this.inputter  = _inputter  || getImmutableKey
     this.outputter = _outputter || setImmutableKey
-    this.cm        = new ContractsManager("", this.inputter, this.outputter)
+    this.cm        = _cm || new ContractsManager("", this.inputter, this.outputter, _chainId)
   }
 
   getContractsManager() {
@@ -24,23 +28,26 @@ class Linker {
   }
 
   /**
-   * Validate dependencies and generate appropriate metadata
+   * Link a previously compiled contract. Validate dependencies and generate appropriate metadata
    * @param eth network object connected to a local provider
    * @param contractOutput the JSON compiled output to deploy
    * @param depMap is an Immutable Map of library names to deploy IDs
    * @return the contractOutput augmented with a linkDepMap
    */
-  async link(contractOutput, linkId, depMap) {
+  async link(contractName, linkId, _depMap) {
+    const contractOutput = await this.cm.getContract(contractName)
+    if (!isContract(contractOutput)) { throw new Error(`Compile output not found for ${contractName}`) } 
+    //assert(isContract(contractOutput), `Compile output not found for ${contractName}` )
     const networkId = await this.eth.net_version() 
     const code = '0x' + contractOutput.get('code')
-    const contractName = contractOutput.get('name')
+    //const contractName = contractOutput.get('name')
     const linkName = `${contractName}-${linkId}`
 
-    linksDir = path.join(LINKS_DIR, networkId)
+    const linksDir = path.join(LINKS_DIR, networkId)
     //ensureDir(LINKS_DIR)
     //ensureDir(linksDir)
 
-    const link = await this.cm.getLink(networkId, linkName)
+    const link = await this.cm.getLink(linkName)
     assert(!isLink(link), `Link ${linkName} already exists`)
 
     const deployMap = await this.cm.getDeploys()
@@ -56,13 +63,15 @@ class Linker {
     }
     LOGGER.debug(`matches ${matches.toString()}`)
 
-    if (matches.count() === 0 && depMap && depMap.count() > 0) {
+    if (matches.count() === 0 && _depMap && _depMap.count() > 0) {
       throw new Error(`No matches to replace with link map ${JSON.stringify(depMap)}`)
     }
 
-    if (matches.count() > 0 && (!depMap || depMap.count() == 0)) {
+    if (matches.count() > 0 && (!_depMap || _depMap.count() == 0)) {
       throw new Error(`No link map found to replace ${JSON.stringify(matches)}`)
     }
+
+    const depMap = Map.isMap(_depMap) ? _depMap : new Map({})
 
     const replacedCode = depMap.reduce((codeSoFar, deployId, contractName) => {
       // The linkId to replace for the given linkName can also
@@ -107,12 +116,10 @@ class Linker {
       abi            : contractOutput.get('abi'),
     })
 
-    linkFilePath = `${linksDir}/${linkName}`
+    const linkFilePath = `${linksDir}/${linkName}`
 
     LOGGER.debug(`Writing link to ${linkFilePath}`)
-    this.outputter(linkFilePath, linkOutput)
-
-    return linkOutput
+    return awaitOutputter(this.outputter(linkFilePath, linkOutput), () => { return linkOutput })
   }
 
 }
