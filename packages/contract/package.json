@@ -1,0 +1,39 @@
+{
+  "name": "@democracy.js/contract",
+  "version": "0.0.0",
+  "description": "Contract management for a distributed country",
+  "keywords": [
+    "contract",
+    "ethereum",
+    "democracy.js"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/contract#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "directories": {
+    "src": "src",
+    "test": "tests"
+  },
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "doc": "documentation build src/** -f md -o docs/Contracts.md"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "@democracy.js/test-contracts": "0.0.1",
+    "@democracy.js/utils": "0.1.9"
+  },
+  "devDependencies": {
+    "chai": "4.2.0"
+  }
+}

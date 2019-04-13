@@ -1,3 +1,4 @@
+'use strict'
 
 // Utilities
 const fs     = require('fs')
@@ -125,7 +126,6 @@ const isBrowser = () => {
   return (typeof window != 'undefined' && window.document)
 }
 
-
 const print = (data) => {
   console.log(JSON.stringify(data, null, '  '))
 }
@@ -168,7 +168,7 @@ const traverseDirs = (startDirs, skipFilt, cb, dcb) => {
  * @param skipFilt a function that returns true for files that need to be skipped
  */
 const buildFromDirs = (f, skipFilt) => {
-  shortList = path.basename(f).split('.')
+  const shortList = path.basename(f).split('.')
   if (skipFilt(shortList)) { return null }
   if (fs.lstatSync(f).isDirectory()) {
     return new Map(List(fs.readdirSync(f)).map((f2) => {
@@ -201,32 +201,6 @@ const getLinks = (networkId) => {
   return fromJS(linkMap)
 }
 
-  /**
-   * Filter out which requested inputs are out-of-date by source hash or are new,
-   * and need to be recompiled, based on the existing outputs.
-   * @param requestedInputs Immutable {Map} of keys and values that are inputs to be built
-   * @param existingOutputs Immutable {Map} with matching keys and values that represent
-   *        built outputs, including a member `inputHash` that matches a `requestedInput`
-   *        value that will deterministically reproduce this output
-   * @return a Map of keys and values from {requestedInputs}
-   */
-  const getInputsToBuild = (requestedInputs, existingOutputs) => {
-    return new Map(requestedInputs.map((val,key) => {
-      const isNew = !existingOutputs.has(key)
-      const inputHash = util.keccak(requestedInputs.get(key)).toString('hex')
-      const isUpdated = !isNew && (existingOutputs.get(key).get('inputHash') !== inputHash)
-      if (isNew) {
-        LOGGER.info(`${key} has not been built before.`)
-      }
-      if (isUpdated) {
-        LOGGER.info(`${key} is not up-to-date with hash ${inputHash}`)
-      }
-      return val.set('isUpdated', isUpdated).set('isNew', isNew)
-    })).filter((val, key) => { 
-      return val.get('isUpdated') || val.get('isNew')
-    })
-  }
-
 const getDeploys = (networkId) => {
   const deploysDir = `${DEPLOYS_DIR}/${networkId}`
   const deployMap = getImmutableKey(deploysDir)
@@ -245,26 +219,6 @@ const getDeploys = (networkId) => {
 }
 
 /**
- * Return a link object read from a file in the `links/${networkId}` directory.
- * @param networkId name of the chain / network deployed onto
- * @param linkName the name of the contract and link ID of the form `ContractName-linkId`
- */
-const getLink = (networkId, linkName) => {
-  const linkMap = getLinks(networkId)
-  return linkMap.get(linkName)
-}
-
-/**
- * Return a deploy object read from a file
- * @param networkId name of the chain / network deployed onto
- * @param deployName the name of the contract and deploy of the form `ContractName-deployId`
- */
-const getDeploy = (networkId, deployName) => {
-  const deployMap = getDeploys(networkId)
-  return deployMap.get(deployName)
-}
-
-/**
  * @return true if the given object is an ethjs object, otherwise false
  */
 const isNetwork = (_network) => {
@@ -279,13 +233,6 @@ const isDeploy = (_deploy) => {
 }
 
 /**
- * @return true if the given object is a link output, otherwise false
- */
-const isLink = (_link) => {
-  return (_link && _link.get('type') === 'link')
-}
-
-/**
  * Return an instance from a previously deployed contract
  * @param deploy of previous
  * @return an ethjs instance that can be used to call methods on the deployed contract
@@ -297,26 +244,6 @@ const getInstance = (eth, deploy) => {
   return Contract.at(deploy.get('deployAddress'))
 } 
 
-const cleanLinkSync = (networkId, linkName) => {
-  assert.typeOf(networkId, "string")
-  const fn = `${LINKS_DIR}/${networkId}/${linkName}.json`
-  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
-}
-
-const cleanDeploySync = (networkId, deployName) => {
-  assert.typeOf(networkId, "string")
-  const fn = `${DEPLOYS_DIR}/${networkId}/${deployName}.json`
-  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
-}
-
-const cleanSync = (networkId) => {
-  //const networkId = await eth.net_version()
-  fs.rmdirSync(`${COMPILES_DIR}`)
-  // TODO Re-enable when you're written a recursive remove directory function
-  //fs.rmdirSync(`${LINKS_DIR}/${networkId}/${linkName}`)
-  //fs.rmdirSync(`${DEPLOYS_DIR}/${networkId}/${deployName}`)
-}
-
 const thenPrint = (promise) => {
   promise.then((value) => {console.log(JSON.stringify(value))})
 }
@@ -324,23 +251,15 @@ const thenPrint = (promise) => {
 module.exports = {
   isBrowser         : isBrowser,
   traverseDirs      : traverseDirs,
-  getInputsToBuild  : getInputsToBuild,
   buildFromDirs     : buildFromDirs,
   thenPrint         : thenPrint,
   print             : print,
   ensureDir         : ensureDir,
   getEndpointURL    : getEndpointURL,
   getNetwork        : getNetwork,
-  getDeploys        : getDeploys,
-  getDeploy         : getDeploy,
-  getLinks          : getLinks,
-  getLink           : getLink,
+  isNetwork         : isNetwork,
   isDeploy          : isDeploy,
-  isLink            : isLink,
   getInstance       : getInstance,
-  cleanLinkSync     : cleanLinkSync,
-  cleanDeploySync   : cleanDeploySync,
-  cleanSync         : cleanSync,
   LIB_PATTERN       : LIB_PATTERN,
   DB_DIR            : DB_DIR,
   SOURCES_DIR       : SOURCES_DIR,
