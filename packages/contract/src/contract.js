@@ -1,7 +1,7 @@
 const { getInstance } = require('@democracy.js/utils')
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
-const util = require('ethereumjs-util')
+const abi = require('ethjs-abi')
 
 let Contract = class {
   constructor(_eth, _deploy) {
@@ -22,6 +22,21 @@ let Contract = class {
   getInstance() {
     return this.instance
   }
+  
+  getABIObjectByName(_name) {
+		const abiMap = new Map(
+			List(instance.abi).map((abiObj) => { return [ abiObj.name, abiObj ] })
+		)
+		assert(abiMap.has(methodName))
+		const methodObj = abiMap.get('methodName')
+		assert(methodObj.type === 'function')
+	  return methodObj 
+  }
+
+  getMethodCallData(_name, args) {
+    const methodObj = this.getABIObjectByName(_name)
+    return abi.encodeMethod(methodObj, methodArgs)
+  }
 
   getTxReceipt(_promise) {
     return new Promise((resolve, reject) => {
@@ -37,4 +52,6 @@ let Contract = class {
 
 }
 
-module.exports = Contract
+module.exports = {
+  Contract: Contract,
+}

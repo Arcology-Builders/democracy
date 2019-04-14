@@ -11,7 +11,7 @@ describe('ContractsManager tests', () => {
   before(async () => {
     const eth = getNetwork()
     const chainId = await eth.net_version()
-    cm = new ContractsManager('contracts', null, null, chainId)
+    cm = new ContractsManager({startSourcePath: 'contracts', chainId: chainId})
   })
 
   it( 'finds a previous compile', async () => {

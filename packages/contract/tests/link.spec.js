@@ -20,7 +20,7 @@ describe('Democracy linking', () => {
   before(async () => {
     eth = getNetwork()
     networkId = await eth.net_version()
-    l = new Linker(eth, null, null, networkId)
+    l = new Linker({chainId: networkId})
     bm = l.getBuildsManager()
     await bm.cleanLink( 'TestLibrary-linkLib' )
   })

@@ -24,15 +24,24 @@ const LOGGER = new Logger('BuildsManager')
  */
 class BuildsManager extends ContractsManager {
   
-  constructor(_startSourcePath, _inputter, _outputter, _chainId) {
-    super(_startSourcePath, _inputter, _outputter)
-    if (!_chainId) { throw new Error("no chain ID passed in") }
-    this.chainId = _chainId
+  constructor({startSourcePath, inputter, outputter, chainId}) {
+    super(...arguments)
+    if (!chainId) { throw new Error("no chain ID passed in") }
+    this.chainId = chainId
+  }
+
+  getChainID() {
+    return this.chainId
   }
 
   async getDeploys() {
     return this.inputter(`${DEPLOYS_DIR}/${this.chainId}`, new Map({}))
   }
+  
+  async getDeploy(deployName) {
+    const deploysMap = await this.getDeploys()
+    return deploysMap.get(deployName)
+  } 
 
   async getLinks() {
     return this.inputter(`${LINKS_DIR}/${this.chainId}`, new Map({}))

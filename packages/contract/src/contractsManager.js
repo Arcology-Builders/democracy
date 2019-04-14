@@ -22,28 +22,30 @@ const LOGGER = new Logger('ContractsManager')
  */
 class ContractsManager {
   
-  constructor(_startSourcePath, _inputter, _outputter) {
-    this.startSourcePath = _startSourcePath
-    assert((this._inputter && this._outputter) || (!this._inputter && !this.outputter))
-    this.inputter = _inputter || getImmutableKey
-    this.outputter = _outputter || setImmutableKey
+  constructor({startSourcePath, inputter, outputter}) {
+    this.startSourcePath = startSourcePath
+    assert((inputter && outputter) || (!inputter && !outputter))
+    this.inputter = inputter || getImmutableKey
+    this.outputter = outputter || setImmutableKey
   }
 
   async getContracts() {
     const contractSources = []
     if (!fs.existsSync(this.startSourcePath)) {
       LOGGER.warn(`Sources directory '${this.startSourcePath}' not found.`)
+    } else {
+       // start out by finding all contracts rooted in current directory
+      traverseDirs(
+        [this.startSourcePath],
+        (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
+        function(source, f) {
+          const fn = List(f.split(path.sep)).last()
+          const fb = path.basename(fn.split('.')[0])
+          contractSources.push(fb)
+          LOGGER.info(`Source ${fb}`)
+        }
+      )
     }
-    traverseDirs(
-      [this.startSourcePath], // start out by finding all contracts rooted in current directory
-      (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-      function(source, f) {
-        const fn = List(f.split(path.sep)).last()
-        const fb = path.basename(fn.split('.')[0])
-        contractSources.push(fb)
-        LOGGER.info(`Source ${fb}`)
-      }
-    )
 
     return awaitInputter(
       this.inputter(COMPILES_DIR, new Map({})),
@@ -61,7 +63,7 @@ class ContractsManager {
    * @param contractName name of the compiled contract
    */
   async getContract(contractName) {
-    const { contractOutputs } = await this.getContracts(false)
+    const { contractOutputs } = await this.getContracts()
     return contractOutputs.get(contractName)
   }
 

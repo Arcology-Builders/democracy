@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/contract",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
@@ -20,9 +20,7 @@
   },
   "files": [
     "index.js",
-    "src/utils.js",
-    "src/linker.js",
-    "src/contractsManager.js"
+    "src"
   ],
   "repository": {
     "type": "git",
@@ -36,12 +34,12 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/test-contracts": "0.0.1",
-    "@democracy.js/utils": "^0.1.10",
+    "@democracy.js/utils": "0.1.10",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
+    "@democracy.js/test-contracts": "0.0.1",
     "chai": "4.2.0",
-    "chai-as-promised": "^7.1.1"
+    "chai-as-promised": "7.1.1"
   }
 }

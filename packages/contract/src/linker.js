@@ -16,12 +16,11 @@ const { awaitOutputter } = require('./utils')
 
 class Linker {
 
-  constructor(_eth, _inputter, _outputter, _chainId, _bm) {
-    assert(isNetwork(_eth))
-    this.eth       = _eth
-    this.inputter  = _inputter  || getImmutableKey
-    this.outputter = _outputter || setImmutableKey
-    this.bm        = _bm || new BuildsManager("", this.inputter, this.outputter, _chainId)
+  constructor({inputter, outputter, bm, chainId}) {
+    this.inputter  = inputter  || getImmutableKey
+    this.outputter = outputter || setImmutableKey
+    this.bm        = bm || new BuildsManager(...arguments)
+    this.chainId   = bm ? bm.getChainID() : chainId
   }
 
   getBuildsManager() {
@@ -39,12 +38,11 @@ class Linker {
     const contractOutput = await this.bm.getContract(contractName)
     if (!isContract(contractOutput)) { throw new Error(`Compile output not found for ${contractName}`) } 
     //assert(isContract(contractOutput), `Compile output not found for ${contractName}` )
-    const networkId = await this.eth.net_version() 
     const code = '0x' + contractOutput.get('code')
     //const contractName = contractOutput.get('name')
     const linkName = `${contractName}-${linkId}`
 
-    const linksDir = path.join(LINKS_DIR, networkId)
+    const linksDir = path.join(LINKS_DIR, this.chainId)
     //ensureDir(LINKS_DIR)
     //ensureDir(linksDir)
 
@@ -108,7 +106,6 @@ class Linker {
     const linkOutput = new Map({
       type           : 'link',
       name           : contractName,
-      networkId      : networkId,
       linkId         : linkId,
       linkMap        : depMap,
       linkDate       : now.toLocaleString(),
@@ -120,7 +117,8 @@ class Linker {
     const linkFilePath = `${linksDir}/${linkName}`
 
     LOGGER.debug(`Writing link to ${linkFilePath}`)
-    return awaitOutputter(this.outputter(linkFilePath, linkOutput), () => { return linkOutput })
+    return awaitOutputter(this.outputter(linkFilePath, linkOutput),
+                          () => { return linkOutput })
   }
 
 }
@@ -129,7 +127,7 @@ class Linker {
  * @return true if the given object is a link output, otherwise false
  */
 const isLink = (_link) => {
-  return (_link && _link.get('type') === 'link')
+  return (Map.isMap(_link) && _link.get('type') === 'link')
 }
 
 

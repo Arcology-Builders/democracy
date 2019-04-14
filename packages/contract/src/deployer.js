@@ -1,97 +1,116 @@
-const fs = require('fs')
-const path = require('path')
-const { traverseDirs, ensureDir, DEPLOYS_DIR } = require('@democracy.js/utils')
-
+const path   = require('path')
 const assert = require('chai').assert
-const { Map, List, Seq } = require('immutable')
-const BN = require('bn.js')
+const { Map, List, Seq }
+             = require('immutable')
 
-/**
- * Validate dependencies then deploy the given contract output to a network.
- * @param eth network object connected to a local provider
- * @param contractOutput the JSON compiled output to deploy
- */
-async function deploy(eth, link, deployId, ctorArgs) {
-  const contractName = link.get('name')
-  //console.log(`Deploying ${contractName} with id ${deployId}`)
-  const networkId = await eth.net_version() 
-  const code = link.get('code')
-  const abi = link.get('abi')
-  const deployName = `${contractName}-${deployId}`
-  const deployerAddress = link.get('deployerAddress')
-  //console.log(`ctor args ${ctorArgs.get('_abc')}`)
+const { DEPLOYS_DIR, Logger, getImmutableKey, setImmutableKey }
+             = require('@democracy.js/utils')
+const LOGGER = new Logger('Deployer')
+const { awaitOutputter } = require('./utils')
+const { BuildsManager } = require('./buildsManager')
+const { isValidAddress } = require('ethereumjs-util')
 
-  deployMap = {}
+class Deployer {
 
-  deployDir = path.join(DEPLOYS_DIR, networkId)
-  ensureDir(DEPLOYS_DIR)
-  ensureDir(deployDir)
-
-  // Load all previous deploys
-  traverseDirs(
-    [deployDir],
-    (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('json')) },
-    // Deploy names will have the form <contractName>-<deployID>, do we need to 
-    // differentiate different deploy IDs for a single contract name?
-    (source,f) => { deployMap[path.basename(f)] = JSON.parse(source) }
-  )
-
-  // Warn with multiple deploys with the same ID
-  if (deployMap[deployName]) {
-    deployError = `Contract "${contractName}" has already been deployed on this chain with ID "${deployId}"`
-    console.error(deployError)
-    return { ...deployError }
+  constructor({inputter, outputter, bm, eth, chainId, deployerAddress}) {
+    this.inputter        = inputter || getImmutableKey
+    this.outputter       = outputter || setImmutableKey
+    this.bm              = bm || new BuildsManager(...arguments)
+    this.eth             = eth
+    this.chainId         = chainId
+    assert(isValidAddress(deployerAddress), `${deployerAddress} not a valid ethereum address`)
+    this.deployerAddress = deployerAddress
   }
 
-  const ctorArgList = List(ctorArgs.values()).toJS()
-  //console.log(`ctorArgList ${JSON.stringify(ctorArgList)}`)
+  getBuildsManager() {
+    return this.bm
+  }
 
-  const Contract = eth.contract(abi.toJS(), code)
+  /**
+   * Validate dependencies then deploy the given contract output to a network.
+   * @param eth network object connected to a local provider
+   * @param contractOutput the JSON compiled output to deploy
+   */
+  async deploy(contractName, linkId, deployId, ctorArgs) {
+    const linkName   = `${contractName}-${linkId}`
+    const link       = await this.bm.getLink(linkName)
+    const code       = link.get('code')
+    const abi        = link.get('abi')
+    const deployName = `${contractName}-${deployId}`
+    const deployerAddress = link.get('deployerAddress')
+   
+    assert.equal(this.chainId, await this.eth.net_version())
 
-  deployPromise = new Promise((resolve, reject) => {
-    Contract.new(...ctorArgList, {from: deployerAddress, gas: '6700000', gasPrice: '0x21105b0'})
-      .then((txHash) => {
-        const checkTransaction = setInterval(() => {
-          eth.getTransactionReceipt(txHash).then((receipt) => {
-            if (receipt) {
-              clearInterval(checkTransaction)
-              resolve(receipt) 
-            }
+    const deployMap = await this.bm.getDeploys()
+
+    // Warn with multiple deploys with the same ID
+    if (deployMap[deployName]) {
+      deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId}"`
+      console.error(deployError)
+      return { ...deployError }
+    }
+
+    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
+    LOGGER.debug(ctorArgList)
+
+    const Contract = this.eth.contract(abi.toJS(), code)
+
+    const deployPromise = new Promise((resolve, reject) => {
+      Contract.new(...ctorArgList, {
+        from: this.deployerAddress, gas: '6700000', gasPrice: '0x21105b0'
+      }).then((txHash) => {
+          const checkTransaction = setInterval(() => {
+            this.eth.getTransactionReceipt(txHash).then((receipt) => {
+              if (receipt) {
+                clearInterval(checkTransaction)
+                resolve(receipt) 
+              }
+            })
           })
         })
-      })
-      .catch((error) => {
-        console.error(`error ${error}`)
-        reject(error)
-      })
-  })
+        .catch((error) => {
+          console.error(`error ${error}`)
+          reject(error)
+        })
+    })
 
-  const minedContract = await deployPromise.then((receipt) => { return receipt })
-  //console.log(JSON.stringify(minedContract, null, '  '))
-  const instance = Contract.at(minedContract.contractAddress)
+    const minedContract = await deployPromise.then((receipt) => { return receipt })
+    LOGGER.debug('MINED', minedContract)
+    const instance = Contract.at(minedContract.contractAddress)
 
-  const now = new Date()
+    const now = new Date()
 
-  const deployOutput = new Map({
-    type: 'deploy',
-    name: contractName,
-    networkId: networkId,
-    deployId: deployId,
-    linkId: link.get('linkId'),
-    abi: abi,
-    code: code,
-    deployTx: minedContract,
-    deployAddress: minedContract.contractAddress,
-    deployDate: now.toLocaleString(),
-    deployTime: now.getTime()
-  })
+    const deployOutput = new Map({
+      type         : 'deploy',
+      name         : contractName,
+      chainId      : this.chainId,
+      deployId     : deployId,
+      linkId       : link.get('linkId'),
+      abi          : abi,
+      code         : code,
+      deployTx     : minedContract,
+      deployAddress: minedContract.contractAddress,
+      deployDate   : now.toLocaleString(),
+      deployTime   : now.getTime()
+    })
 
-  const deployFilePath = path.join(deployDir, deployName) + '.json'
-  //console.log(`Writing deploy to ${deployFilePath}`)
-  //console.log(JSON.stringify(deployOutput, null, '  '))
-  fs.writeFileSync(deployFilePath, JSON.stringify(deployOutput.toJS(), null, '  '))
+    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
+    LOGGER.debug(`Writing deploy to ${deployFilePath}`)
+    
+    return awaitOutputter(this.outputter(deployFilePath, deployOutput),
+                          () => { return deployOutput })
+  }
 
-  return deployOutput
 }
 
-module.exports = deploy
+/**
+ * @return true if the given object is a deploy output, otherwise false
+ */
+const isDeploy = (_deploy) => {
+  return (_deploy && _deploy.get('type') === 'deploy')
+}
+
+module.exports = {
+  Deployer: Deployer,
+  isDeploy: isDeploy,
+}
