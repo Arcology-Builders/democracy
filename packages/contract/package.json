@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@democracy.js/utils": "0.1.10",
+    "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",
     "immutable": "4.0.0-rc.12"
   },
