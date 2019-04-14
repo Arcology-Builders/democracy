@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/keys",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -9,9 +9,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.1.2",
+    "@democracy.js/utils": "0.1.9",
     "@invisible-college/keythereum": "1.1.0",
     "bops": "1.0.0",
+    "chai-as-promised": "7.1.1",
     "ethereumjs-utils": "5.2.5",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",

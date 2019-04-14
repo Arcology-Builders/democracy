@@ -1,0 +1,19 @@
+npm notice 
+npm notice 📦  @democracy.js/keys@0.0.7
+npm notice === Tarball Contents === 
+npm notice 1.6kB package.json     
+npm notice 124B  index.js         
+npm notice 761B  webpack.config.js
+npm notice 0     logs/publish.log 
+npm notice 3.9kB src/keys.js      
+npm notice 2.2kB src/wallet.js    
+npm notice === Tarball Details === 
+npm notice name:          @democracy.js/keys                      
+npm notice version:       0.0.7                                   
+npm notice package size:  2.9 kB                                  
+npm notice unpacked size: 8.5 kB                                  
+npm notice shasum:        6eba196e33cd69961f0a664e93f7d8b7579f94b6
+npm notice integrity:     sha512-TGqOtLyRqGTFH[...]LOdMxGveMdCow==
+npm notice total files:   6                                       
+npm notice 
++ @democracy.js/keys@0.0.7
