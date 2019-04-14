@@ -20,14 +20,26 @@ const Wallet = class {
     this.account = (isValidAddress(_account)) ? createFromAddress(_address) : create()
     this.nonce = -1 
     this.keyPrefix = `wallets/${this.account.get('addressPrefixed')}`
-    this.noncePrefix = `${this.keyPrefix}/nonces`
-    setImmutableKey(`${this.noncePrefix}/_init`,
-                    new Map({"timestamp": Date.now()}))
+    //this.noncePrefix = `${this.keyPrefix}/nonces`
+    //setImmutableKey(`${this.noncePrefix}/_init`,
+    //                new Map({"timestamp": Date.now()}))
+  }
+  
+  getPrefixedAddress() {
+    return this.account.get('prefixedAddress')
+  }
+
+  getPrefixedPrivateKey() {
+    return this.account.get('prefixedPrivate')
+  }
+
+  getPrefixedPublicKey() {
+    return this.account.get('prefixedPublic')
   }
 
   destruct() {
-    const nonceMap = getImmutableKey(this.noncePrefix)
-    print(nonceMap)
+    //const nonceMap = getImmutableKey(this.noncePrefix)
+    //print(nonceMap)
   }
 
   /**
@@ -45,6 +57,10 @@ const Wallet = class {
       accounts: (cb) => cb(null, [addressPrefixed]),
     })
     return new Eth(provider)
+  }
+
+  createSignerEth(_url) {
+    return Wallet.createSignerEth(_url, this.account)
   }
 
 }
