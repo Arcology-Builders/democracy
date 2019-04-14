@@ -19,7 +19,8 @@
     "compiles": "compiles"
   },
   "files": [
-    "contracts"
+    "contracts",
+    "compiles"
   ],
   "publishConfig": {
     "access": "public"
@@ -32,5 +33,5 @@
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
-  },
+  }
 }
