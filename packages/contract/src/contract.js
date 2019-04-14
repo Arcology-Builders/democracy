@@ -1,7 +1,9 @@
-const { getInstance } = require('@democracy.js/utils')
+const { getInstance, Logger } = require('@democracy.js/utils')
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const abi = require('ethjs-abi')
+
+const LOGGER = new Logger('contract')
 
 let Contract = class {
   constructor(_eth, _deploy) {
@@ -25,17 +27,17 @@ let Contract = class {
   
   getABIObjectByName(_name) {
 		const abiMap = new Map(
-			List(instance.abi).map((abiObj) => { return [ abiObj.name, abiObj ] })
+			List(this.instance.abi).map((abiObj) => { return [ abiObj.name, abiObj ] })
 		)
-		assert(abiMap.has(methodName))
-		const methodObj = abiMap.get('methodName')
+		assert(abiMap.has(_name))
+		const methodObj = abiMap.get(_name)
 		assert(methodObj.type === 'function')
 	  return methodObj 
   }
 
-  getMethodCallData(_name, args) {
+  getMethodCallData(_name, _args) {
     const methodObj = this.getABIObjectByName(_name)
-    return abi.encodeMethod(methodObj, methodArgs)
+    return abi.encodeMethod(methodObj, _args)
   }
 
   getTxReceipt(_promise) {

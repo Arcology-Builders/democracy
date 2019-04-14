@@ -1,14 +1,18 @@
+const assert = require('chai').assert
+
 const { Contract, BuildsManager, Deployer, Linker, Compiler } = require('..')
-const { getNetwork } = require('@democracy.js/utils')
+const { getNetwork, Logger } = require('@democracy.js/utils')
+const LOGGER = new Logger('contract.spec')
 
 describe( 'Contract parent class', () => {
 
   let c
   let bm
+  let accounts
 
   before(async () => {
     const eth = getNetwork()
-    const accounts = await eth.accounts()
+    accounts = await eth.accounts()
     const chainId = await eth.net_version() 
     bm = new BuildsManager({
       startSourcePath: 'node_modules/@democracy.js/test-contracts/contracts',
@@ -24,7 +28,11 @@ describe( 'Contract parent class', () => {
   })
 
   it( ' gets an ABI object ', async () => {
-    })
+    const methodObj = c.getABIObjectByName('send')
+    assert(methodObj.type === 'function')
+    const data = c.getMethodCallData('send', [accounts[1]])
+    assert.equal(data, '0x3e58c58c0000000000000000000000004da976e02013ed8ff393a2d74e219cbb1f49c049')
+  })
 
   after(async () => {
     await bm.cleanLink( 'DifferentSender-link' )
