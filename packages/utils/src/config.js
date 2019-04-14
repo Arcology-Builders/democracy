@@ -75,7 +75,9 @@ const lazyEval = (env) => {
 }
 
 const getConfig = () => {
-  const env = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
+  const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ""
+  const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
+  const env = windowEnv ? windowEnv : processEnv
   LOGGER.debug(`NODE_ENV=${env}`)
   config = lazyEval(env)
   if (config) {

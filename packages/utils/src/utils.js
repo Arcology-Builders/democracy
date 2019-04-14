@@ -226,13 +226,6 @@ const isNetwork = (_network) => {
 }
 
 /**
- * @return true if the given object is a deploy output, otherwise false
- */
-const isDeploy = (_deploy) => {
-  return (_deploy && _deploy.get('type') === 'deploy')
-}
-
-/**
  * Return an instance from a previously deployed contract
  * @param deploy of previous
  * @return an ethjs instance that can be used to call methods on the deployed contract
@@ -258,7 +251,6 @@ module.exports = {
   getEndpointURL    : getEndpointURL,
   getNetwork        : getNetwork,
   isNetwork         : isNetwork,
-  isDeploy          : isDeploy,
   getInstance       : getInstance,
   LIB_PATTERN       : LIB_PATTERN,
   DB_DIR            : DB_DIR,
