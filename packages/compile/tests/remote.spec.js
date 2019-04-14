@@ -1,7 +1,9 @@
 'use strict'
-const fs = require('fs')
-const path = require('path')
-const { Compiler, isCompile, isContract } = require('..')
+const fs     = require('fs')
+const path   = require('path')
+const { Compiler } = require('..')
+const { isCompile, isContract }
+             = require('@democracy.js/contract')
 const { Logger, RemoteDB, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual }
              = require('@democracy.js/utils')
 const RESTServer = require('@democracy.js/rest-server')
@@ -9,7 +11,7 @@ const LOGGER = new Logger('remote.spec.js')
 const assert = require('chai').assert
 
 const { compileNewFile, checkNoRecompile, checkRecompile }
-  = require('./recompile')
+             = require('./recompile')
 
 describe('Democracy recompiling remotely on source change', () => {
   
@@ -41,7 +43,7 @@ describe('Democracy recompiling remotely on source change', () => {
     const compile = await c.compile( 'SomeContract.sol' )
     LOGGER.info('compile', compile.toString())
     assert(isCompile(compile))
-    const contract = await c.getContract( 'SomeContract' )
+    const contract = await c.getContractsManager().getContract( 'SomeContract' )
     assert(isContract(contract))
     LOGGER.info('CONTRACT', contract)
     LOGGER.info('COMPILE', compile.get('SomeContract'))

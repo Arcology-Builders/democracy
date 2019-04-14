@@ -2,7 +2,7 @@ const fs     = require('fs')
 const path   = require('path')
 const assert = require('chai').assert
 const { isCompile, isContract }
-             = require('..')
+             = require('@democracy.js/contract')
 const { Logger }
              = require('@democracy.js/utils')
 const LOGGER = new Logger('recompile.js')
@@ -19,7 +19,7 @@ const compileNewFile = async (c) => {
   const compileOutput = await c.compile('TestRecompile.sol')
   assert(isCompile(compileOutput))
 
-  const contract = await c.getContract('TestRecompile')
+  const contract = await c.getContractsManager().getContract('TestRecompile')
   assert(isContract(contract))
 
   const timestamp = contract.get('timestamp')
@@ -55,7 +55,7 @@ const checkRecompile = async (c, prevInputHash, prevTimestamp) => {
   const inputHash2 = util.keccak(source2)
   const compileOutput3 = await c.compile('TestRecompile.sol')
   assert(isCompile(compileOutput3))
-  const contract2 = await c.getContract('TestRecompile')
+  const contract2 = await c.getContractsManager().getContract('TestRecompile')
   assert(isContract(contract2))
   const timestamp2 = await contract2.get('timestamp')
   assert.notEqual(inputHash2, prevInputHash)

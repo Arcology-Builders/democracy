@@ -1,7 +1,7 @@
 'use strict'
 const { Compiler } = require('..')
-const { Logger }
-             = require('@democracy.js/utils')
+const { Logger } = require('@democracy.js/utils')
+const { ContractsManager } = require('@democracy.js/contract')
 const LOGGER = new Logger('recompile.spec.js')
 
 const { compileNewFile, checkNoRecompile, checkRecompile }
@@ -12,9 +12,10 @@ describe('Democracy recompiling on source change', () => {
   let _inputHash
   let _timestamp
   const c  = new Compiler( 'contracts' )
+  const cm = new ContractsManager( 'contracts' )
 
   before(async () => {
-    await c.cleanAllCompiles()
+    await cm.cleanAllCompiles()
   })
 
   it( '(re) compiles only for changed sources / hash ', async() => {

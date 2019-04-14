@@ -7,6 +7,8 @@ const assert     = require('chai').assert
 const { keccak } = require('ethereumjs-util')
 const { List, Map, Set }
                  = require('immutable')
+const { ContractsManager, awaitOutputter }
+                 = require('@democracy.js/contract')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
         getImmutableKey, setImmutableKey, Logger, getInputsToBuild }
@@ -32,39 +34,15 @@ class Compiler {
     this.inputter = _inputter || getImmutableKey
     this.outputter = _outputter || setImmutableKey
     ensureDir(this.startSourcePath)
+    this.cm = new ContractsManager(_startSourcePath, _inputter, _outputter)
   }
 
   /**
-   * Chain and return a (possibly asynchronous) call after the outputter,
-   * also possibly asynchronous. 
-   * @param outputCallResult the result of calling outputter method, will have a `then`
-   *        property if it's thenable / asynchronous.
-   * @param callback method, possibly asynchronous, which accepts as input the
-   *        return value of the outputter method call (`outputCallResult`) 
+   * Return the internal contracts manager, for cleaning and getting contracts
+   * with the same start source path, inputter, and outputter.
    */
-  awaitOutputter(outputCallResult, afterOutput) {
-    if (outputCallResult.then) {
-      return outputCallResult.then(afterOutput) 
-    } else {
-      return afterOutput(outputCallResult)
-    }
-  }
- 
-  /**
-   * Chain and return a (possibly asynchronous) call after the inputter,
-   * also possibly asynchronous
-   * @param inputCallResult the result of calling the inputter method on some args
-   *        will have a `then` property if it's thenable / asynchronous
-   * @param callback method, possibly asynchronous, which accepts as input the
-   *        return value of the inputter method call (`inputCallResult`)
-   */
-  awaitInputter(inputCallResult, afterInput) {
-    LOGGER.info('inputCallResult', inputCallResult)
-    if (inputCallResult.then) {
-      return inputCallResult.then(afterInput)
-    } else {
-      return afterInput(inputCallResult)
-    }
+  getContractsManager() {
+    return this.cm
   }
 
   /**
@@ -105,7 +83,7 @@ class Compiler {
         LOGGER.warn(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contract.name, existingOutputs.get(contract.name)]
       } else {
-        return this.awaitOutputter(
+        return awaitOutputter(
           this.outputter(compileKey, output, true),
           () => { return [ contract.name, output ] }
         )
@@ -197,6 +175,7 @@ class Compiler {
 
   /**
    * @param source {string} name of source file to compile, including Solidity extension
+   * @param contracts {Map} from a ContractsManager
    * @return compile output as an Immutable {Map}
    */
   async compile(source) {
@@ -205,7 +184,7 @@ class Compiler {
     
     const { requestedInputs, findImports } = this.getRequestedInputsFromDisk(source)
 
-    const { contractOutputs: existingOutputs } = await this.getContracts()
+    const { contractOutputs: existingOutputs } = await this.cm.getContracts()
     const inputsToBuild = getInputsToBuild(requestedInputs, existingOutputs)
 
     const sourcesToBuild = this.getSourceMapForSolc(inputsToBuild)
@@ -227,83 +206,8 @@ class Compiler {
     return this.getCompileOutputFromSolc(outputs.contracts, requestedInputs, existingOutputs)
   }
 
-  async getContracts() {
-    const contractSources = []
-    if (!fs.existsSync(this.startSourcePath)) {
-      LOGGER.info(`Sources directory '${this.startSourcePath}' not found.`)
-      return Map({
-        contractSources: List(),
-        contractOutputs: Map({}),
-      })
-    }
-    traverseDirs(
-      [this.startSourcePath], // start out by finding all contracts rooted in current directory
-      (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-      function(source, f) {
-        const fn = List(f.split(path.sep)).last()
-        const fb = path.basename(fn.split('.')[0])
-        contractSources.push(fb)
-        LOGGER.info(`Source ${fb}`)
-      }
-    )
-
-    return this.awaitInputter(
-      this.inputter(COMPILES_DIR, new Map({})),
-      (contractOutputs) => {
-        return {
-          contractSources: List(contractSources),
-          contractOutputs: contractOutputs
-        }
-      }
-    )
-  }
-
-  /**
-   * Asynchronously return a contract previously outputted at key `/compiles/`
-   * @param contractName name of the compiled contract
-   */
-  async getContract(contractName) {
-    const { contractOutputs } = await this.getContracts(false)
-    return contractOutputs.get(contractName)
-  }
-
-  async cleanContract(contract) {
-    return this.outputter(`${COMPILES_DIR}/${contract}`, null)
-  }
-
-  async cleanAllCompiles() {
-    return this.outputter(`${COMPILES_DIR}`, null)
-  }
-
-  async cleanCompile(compile) {
-    return Promise.all(List(
-      compile.map((compile, compileName) => {
-        return this.cleanContract(compileName)
-      }).values()).toJS()
-    )
-  }
-
-}
-
-/**
- * @return true if the given object is a compile output from a Compiler, otherwise false
- */
-const isCompile = (_compile) => {
-  return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
-          _compile.reduce((prev, val) => {
-    return prev && val.get('type') === 'compile'
-  }, true))
-}
-
-/**
- * @return true if the given object is a compile output retrieved from db, otherwise false
- */
-const isContract = (_contract) => {
-  return (Map.isMap(_contract) && _contract.get('type') === 'compile')
 }
 
 module.exports = {
   Compiler         : Compiler,
-  isCompile        : isCompile,
-  isContract       : isContract,
 }

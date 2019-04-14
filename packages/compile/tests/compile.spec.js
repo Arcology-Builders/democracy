@@ -2,10 +2,12 @@ const fs     = require('fs')
 const assert = require('chai').assert
 const util   = require('ethereumjs-util')
 
-const { Compiler, isCompile, isContract }
+const { Compiler }
              = require('..')
 const { Logger, ZEPPELIN_SRC_PATH, RemoteDB, getInputsToBuild }
              = require('@democracy.js/utils')
+const { ContractsManager, isCompile, isContract }
+             = require('@democracy.js/contract')
 const LOGGER = new Logger('Compiler Test')
 
 describe('Democracy compiling.', () => {
@@ -15,10 +17,12 @@ describe('Democracy compiling.', () => {
   let _inputsToBuild
   let _existingOutputs
   let _findImports
+  let _contracts
   const comp  = new Compiler( 'node_modules/@democracy.js/test-contracts/contracts' )
+  const cm = new ContractsManager( 'node_modules/@democracy.js/test-contracts/contracts' )
 
   before(async () => {
-    await comp.cleanAllCompiles()
+    await cm.cleanAllCompiles()
   })
 
   it( 'gets the correct requested inputs' , (done) => {
@@ -35,7 +39,7 @@ describe('Democracy compiling.', () => {
   })
 
   it( 'gets the correct inputs to build' , async () => {
-    const { contractOutputs: existingOutputs } = await comp.getContracts()
+    const { contractOutputs: existingOutputs } = await cm.getContracts()
     const inputsToBuild = getInputsToBuild(_requestedInputs, existingOutputs)
     assert.equal(1, inputsToBuild.count())
     assert.equal(true, inputsToBuild.get('ERC20').get('isNew'))
@@ -66,27 +70,27 @@ describe('Democracy compiling.', () => {
     compileOutput = await comp.compile( 'TestLibrary.sol' )
     LOGGER.debug('compileOutput', compileOutput)
     assert.ok(isCompile(compileOutput))
-    const contract = await comp.getContract( 'TestLibrary' )
+    const contract = await cm.getContract( 'TestLibrary' )
     assert.ok(isContract(contract), "TestLibrary should have a compile output.")
   })
 
   it( 'should *not* find a non-existent compiled contract' , async () => {
-    const nonContract = await comp.getContract('TestLooberry')
+    const nonContract = await cm.getContract('TestLooberry')
     assert.notOk(nonContract,
                  "TestLooberry is not even a real thing, dude.")
   })
   
   it( 'should compile from OpenZeppelin paths', async () => {
-    await comp.cleanContract( 'ERC20' )
-    const compile = await comp.compile('ERC20.sol')
+    await cm.cleanContract( 'ERC20' )
+    const compile = await comp.compile('ERC20.sol' )
     assert.ok(isCompile(compile))
     
-    await comp.cleanCompile(compile)
-    assert.notOk(await comp.getContract('ERC20'))
+    await cm.cleanCompile(compile)
+    assert.notOk(await cm.getContract('ERC20'))
   })
 
   after( async() => {
-    await comp.cleanAllCompiles(compileOutput)
+    await cm.cleanAllCompiles(compileOutput)
   })
 
 })

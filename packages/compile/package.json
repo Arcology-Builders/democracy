@@ -40,11 +40,11 @@
     "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
+    "@democracy.js/contract": "0.0.2",
     "@democracy.js/rest-server": "0.0.3",
     "@democracy.js/utils": "0.1.9",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
-    "request": "2.88.0",
     "solc": "0.4.25"
   }
 }
