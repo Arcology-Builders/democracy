@@ -5,8 +5,9 @@ chai.use(require('chai-as-promised'))
 
 const utils = require('ethereumjs-utils')
 const keys = require('../src/keys')
+const wallet = require('../src/wallet')
 const randombytes = require('randombytes')
-const { getImmutableKey, setImmutableKey, fromJS, Logger, deepEqual }
+const { getImmutableKey, setImmutableKey, fromJS, Logger, deepEqual, getNetwork }
   = require('@democracy.js/utils')
 const LOGGER = new Logger('keys.spec')
 
@@ -42,8 +43,8 @@ describe('Self-generated keys and signing', () => {
     const password = randombytes(32).toString('hex')
     const password2 = randombytes(32).toString('hex')
     const encryptedJSON = keys.accountToEncryptedJSON(account, password)
-    setImmutableKey('keys', fromJS(encryptedJSON))
-    const retrieved = getImmutableKey('keys', new Map({}))
+    setImmutableKey('encryptedKeys', fromJS(encryptedJSON))
+    const retrieved = getImmutableKey('encryptedKeys', new Map({}))
     const recovered = keys.encryptedJSONToAccount(retrieved.toJS(), password)
     assert.equal(recovered.get('privateString'), account.get('privateString'))
     let recovered2
@@ -61,8 +62,17 @@ describe('Self-generated keys and signing', () => {
     const account2 = keys.createFromPrivateString(randombytes(32).toString('hex'))
     keys.isAccount(account2)
   })
+  
+  it( 'saves and retrieves the same account', async () => {
+    const eth = getNetwork()
+    const account = keys.create()
+    await wallet.set(account)
+    const retrieved = await wallet.get(account.get('addressPrefixed'))
+    assert.equal(JSON.stringify(account.toJS()), JSON.stringify(retrieved.toJS()))
+  })
 
   after(() => {
+    setImmutableKey('encryptedKeys', null)
     setImmutableKey('keys', null)
   })
 

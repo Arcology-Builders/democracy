@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 
 const { Map } = require('immutable')
-const { getImmutableKey, setImmutableKey, print }
+const { getImmutableKey, setImmutableKey, getNetwork }
               = require('@democracy.js/utils')
 const SignerProvider 
               = require('ethjs-provider-signer')
@@ -65,6 +65,22 @@ const Wallet = class {
 
 }
 
+const get = async (address) => {
+  const eth = getNetwork()
+  const chainId = await eth.net_version()
+  const account = getImmutableKey(`/keys/${chainId}/${address}`, null)
+  if (!account) { throw new Error(`Account not found for ${address}`) }
+  assert(isAccount(account))
+  return account
+}
+
+const set = async (account) => {
+  const eth = getNetwork()
+  const chainId = await eth.net_version()
+  const address = account.get('addressPrefixed')
+  return setImmutableKey(`/keys/${chainId}/${address}`, account)
+}
+
 const pay = async ({eth, weiValue, fromAddress, toAddress}) => {
   const txHash = await eth.sendTransaction({
     value: weiValue,
@@ -79,4 +95,6 @@ const pay = async ({eth, weiValue, fromAddress, toAddress}) => {
 module.exports = {
   Wallet: Wallet,
   pay   : pay,
+  set   : set,
+  get   : get,
 }
