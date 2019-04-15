@@ -16,7 +16,7 @@ describe('Democracy deploying.', () => {
       const eth = getNetwork()
       const accounts = await eth.accounts()
       networkId = await eth.net_version()
-      d = new Deployer({eth: eth, chainId: networkId, deployerAddress: accounts[0] })
+      d = new Deployer({eth: eth, chainId: networkId, address: accounts[0] })
       bm = d.getBuildsManager()
       l = new Linker({bm: bm, chainId: networkId})
       await bm.cleanDeploy( 'TestLibrary-deployLib' )

@@ -16,11 +16,10 @@ const { awaitOutputter } = require('./utils')
 
 class Linker {
 
-  constructor({inputter, outputter, bm, chainId}) {
+  constructor({inputter, outputter, bm}) {
     this.inputter  = inputter  || getImmutableKey
     this.outputter = outputter || setImmutableKey
     this.bm        = bm || new BuildsManager(...arguments)
-    this.chainId   = bm ? bm.getChainID() : chainId
   }
 
   getBuildsManager() {
@@ -42,7 +41,7 @@ class Linker {
     //const contractName = contractOutput.get('name')
     const linkName = `${contractName}-${linkId}`
 
-    const linksDir = path.join(LINKS_DIR, this.chainId)
+    const linksDir = LINKS_DIR
     //ensureDir(LINKS_DIR)
     //ensureDir(linksDir)
 

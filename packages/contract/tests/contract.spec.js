@@ -20,7 +20,7 @@ describe( 'Contract parent class', () => {
     })
     await bm.cleanLink( 'DifferentSender-link' )
     await bm.cleanDeploy( 'DifferentSender-deploy' )
-    const d = new Deployer({bm: bm, eth: eth, chainId: chainId, deployerAddress: accounts[0]})
+    const d = new Deployer({bm: bm, eth: eth, chainId: chainId, address: accounts[0]})
     const l = new Linker({bm: bm, chainId: chainId})
     const link = await l.link( 'DifferentSender', 'link' ) 
     const deploy = await d.deploy( 'DifferentSender', 'link', 'deploy' ) 

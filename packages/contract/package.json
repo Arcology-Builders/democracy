@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/contract",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
