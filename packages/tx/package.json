@@ -1,0 +1,44 @@
+{
+  "name": "@democracy.js/tx",
+  "version": "0.0.0",
+  "description": "Ethereum transaction management for a distributed country",
+  "keywords": [
+    "ethereum",
+    "transaction",
+    "democracy.js"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/tx#readme",
+  "license": "MIT",
+  "main": "src/tx.js",
+  "directories": {
+    "src": "src",
+    "test": "tests"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "devDependencies": {
+    "@democracy.js/contract": "0.0.4"
+  },
+  "dependencies": {
+    "@democracy.js/keys": "0.0.9",
+    "@democracy.js/test-contracts": "0.0.2",
+    "@democracy.js/utils": "0.2.0",
+    "chai": "4.2.0",
+    "web3-utils": "1.0.0-beta.52"
+  }
+}

@@ -1,0 +1,16 @@
+npm notice 
+npm notice 📦  @democracy.js/tx@0.0.0
+npm notice === Tarball Contents === 
+npm notice 1.1kB package.json
+npm notice 99B   README.md   
+npm notice 1.8kB src/tx.js   
+npm notice === Tarball Details === 
+npm notice name:          @democracy.js/tx                        
+npm notice version:       0.0.0                                   
+npm notice package size:  1.4 kB                                  
+npm notice unpacked size: 3.0 kB                                  
+npm notice shasum:        aaafcbf869d28e97e5ab168e1ac70f5bfc3fe872
+npm notice integrity:     sha512-7o+676QNqGwCT[...]wSSeTW/my+UyQ==
+npm notice total files:   3                                       
+npm notice 
++ @democracy.js/tx@0.0.0
