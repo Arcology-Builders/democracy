@@ -65,4 +65,18 @@ const Wallet = class {
 
 }
 
-module.exports = Wallet
+const pay = async ({eth, weiValue, fromAddress, toAddress}) => {
+  const txHash = await eth.sendTransaction({
+    value: weiValue,
+    data : "0x",
+    from : fromAddress,
+    to   : toAddress,
+    nonce: await eth.getTransactionCount(fromAddress),
+  })
+  return txHash
+}
+
+module.exports = {
+  Wallet: Wallet,
+  pay   : pay,
+}

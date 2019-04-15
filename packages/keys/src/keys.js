@@ -64,8 +64,8 @@ const isAccount = (_map) => {
           _map.get('privatePrefixed') &&
           _map.get('publicPrefixed' ) &&
           _map.get('addressPrefixed') &&
-          utils.isValidPrivate(bops.from(_map.get('privateString'), 'hex')) &&
-          utils.isValidPublic(bops.from(_map.get('publicString'), 'hex'))   &&
+          utils.isValidPrivate(Buffer.from(bops.from(_map.get('privateString'), 'hex'))) &&
+          utils.isValidPublic(Buffer.from(bops.from(_map.get('publicString'), 'hex')))   &&
           utils.isValidAddress(_map.get('addressPrefixed'))
          )
 }
