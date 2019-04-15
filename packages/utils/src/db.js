@@ -116,10 +116,12 @@ const setImmutableKey = (fullKey, value, overwrite) => {
   assert(Map.isMap(value) || List.isList(value) || !value)
  
   // TODO we need the same delete key logic below for browser 
+  /*
   if (isBrowser()) {
     const valString = (value) ? JSON.stringify(value.toJS()) : value
     localStorage.setItem(fullKey, valString)
   } else {
+ */
     ensureDir(DB_DIR)
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
@@ -155,13 +157,14 @@ const setImmutableKey = (fullKey, value, overwrite) => {
     LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
     fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
     return true
+    /*
   }
-
+*/
 }
 
 function getImmutableKey(fullKey, defaultValue) {
   assert(typeof(fullKey) === 'string')
-
+/*
   if (isBrowser()) {
     const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
     if (!value) {
@@ -170,6 +173,7 @@ function getImmutableKey(fullKey, defaultValue) {
     }
     return value
   } else {
+ */
     const dbFile = getFileKeySpace(fullKey, () => {})
     if (fs.existsSync(`${dbFile}.json`)) {
       return buildFromDirs(`${dbFile}.json`, () => {return false})
@@ -180,7 +184,9 @@ function getImmutableKey(fullKey, defaultValue) {
       if (defaultValue) return defaultValue
       else { throw new Error(`Key ${dbFile} does not exist.`) }
     }
+    /*
   }
+ */
 }  
 
 module.exports = {
