@@ -44,7 +44,7 @@ class BuildsManager extends ContractsManager {
   } 
 
   async getLinks() {
-    return this.inputter(`${LINKS_DIR}/${this.chainId}`, new Map({}))
+    return this.inputter(`${LINKS_DIR}`, new Map({}))
   }
 
   async getLink(linkName) {
@@ -53,7 +53,7 @@ class BuildsManager extends ContractsManager {
   }
 
   async cleanLink(linkName) {
-    const fn = `${LINKS_DIR}/${this.chainId}/${linkName}`
+    const fn = `${LINKS_DIR}/${linkName}`
     return this.outputter(`${fn}`, null)
   }
 

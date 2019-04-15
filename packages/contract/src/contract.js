@@ -21,6 +21,10 @@ let Contract = class {
       `
   }
 
+  getAddress() {
+    return this.deploy.get('deployedAddress')
+  }
+
   getInstance() {
     return this.instance
   }
@@ -44,7 +48,7 @@ let Contract = class {
     return new Promise((resolve, reject) => {
       _promise.then((txHash) => {
         console.log(`Result ${JSON.stringify(txHash)}`)
-        resolve(eth.getTransactionReceipt(txHash))
+        resolve(this.eth.getTransactionReceipt(txHash))
 			}).catch((...error) => {
 				console.error(`Error ${error}`)
         reject(error)

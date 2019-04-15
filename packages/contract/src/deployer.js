@@ -12,14 +12,15 @@ const { isValidAddress } = require('ethereumjs-util')
 
 class Deployer {
 
-  constructor({inputter, outputter, bm, eth, chainId, deployerAddress}) {
-    this.inputter        = inputter || getImmutableKey
-    this.outputter       = outputter || setImmutableKey
-    this.bm              = bm || new BuildsManager(...arguments)
-    this.eth             = eth
-    this.chainId         = chainId
-    assert(isValidAddress(deployerAddress), `${deployerAddress} not a valid ethereum address`)
-    this.deployerAddress = deployerAddress
+  constructor({inputter, outputter, bm, eth, chainId, address}) {
+    assert(chainId)
+    this.inputter  = inputter || getImmutableKey
+    this.outputter = outputter || setImmutableKey
+    this.bm        = bm || new BuildsManager(...arguments)
+    this.eth       = eth
+    this.chainId   = chainId
+    assert(isValidAddress(address), `${address} not a valid ethereum address`)
+    this.address   = address
   }
 
   getBuildsManager() {
@@ -37,7 +38,6 @@ class Deployer {
     const code       = link.get('code')
     const abi        = link.get('abi')
     const deployName = `${contractName}-${deployId}`
-    const deployerAddress = link.get('deployerAddress')
    
     assert.equal(this.chainId, await this.eth.net_version())
 
@@ -57,7 +57,7 @@ class Deployer {
 
     const deployPromise = new Promise((resolve, reject) => {
       Contract.new(...ctorArgList, {
-        from: this.deployerAddress, gas: '6700000', gasPrice: '0x21105b0'
+        from: this.address, gas: '6700000', gasPrice: '0x21105b0'
       }).then((txHash) => {
           const checkTransaction = setInterval(() => {
             this.eth.getTransactionReceipt(txHash).then((receipt) => {
