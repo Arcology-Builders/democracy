@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/utils",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Utilities for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -13,15 +13,13 @@
     "dotenv": "7.0.0",
     "ethereumjs-util": "6.1.0",
     "ethjs": "0.4.0",
-    "immutable": "4.0.0-rc.12",
-    "request": "2.88.0",
-    "request-promise": "4.2.4"
+    "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
     "chai": "^4.2.0"
   },
   "scripts": {
-    "test": "mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "eslint demo.js js/*.js",
     "cov": "nyc/bin/nyc.js mocha tests/"
   },

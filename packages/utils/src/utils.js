@@ -10,7 +10,6 @@ const { Seq, Map, List, fromJS }
                    = require('immutable')
 const assert = require('chai').assert
 const ethjs  = require('ethjs')
-const util   = require('ethereumjs-util')
 
 const DB_DIR       = 'db'
 const SOURCES_DIR  = 'contracts'

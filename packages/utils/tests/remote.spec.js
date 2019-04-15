@@ -7,7 +7,7 @@ const Logger       = require('../src/logger')
 
 const delayedGet = async (remoteDB, expected, resolve) => {
   const res = await remoteDB.getHTTP('/api/test')
-  assert.equal(expected, JSON.stringify(res))
+  assert.equal(res, expected)
   resolve()
 }
 
@@ -23,7 +23,7 @@ describe('Remote DB tests', () => {
   it( 'posts a test object', async () => {
     const res = await remoteDB.postHTTP('/api/test', { 'a': randInt } )
     const expected = `{"message":"Test posted!","a":${randInt}}`
-    assert.equal(expected, JSON.stringify(res))
+    assert.equal(res, expected)
   })
 
   it( 'gets back the test object', async() => {
@@ -38,7 +38,7 @@ describe('Remote DB tests', () => {
   it( 'posts a deeply nested object', async () => {
     const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }] )
     const expected = `{"0":{"a":[{"b":${randInt}}]},"message":"Test posted!"}`
-    assert.equal(expected, JSON.stringify(res))
+    assert.equal(res, expected)
   })
 
   it( 'gets back a deeply nested object', async () => {
@@ -54,6 +54,8 @@ describe('Remote DB tests', () => {
     await r2.postHTTP('/api/test', { 'a': randInt } )
       .then((v) => { assert.fail(`Should have failed to connect, instead ${v}`) })
       .catch((e) => { assert.equal(JSON.stringify(e),
+        '{"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect","address":"127.0.0.1","port":36666}'
+                                   /* the more decadent error message from request library 
         '{"name":"RequestError","message":"Error: connect ECONNREFUSED 127.0.0.1:36666",'+
         '"cause":{"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect",' +
         '"address":"127.0.0.1","port":36666},"error":{"errno":"ECONNREFUSED","code":' +
@@ -61,6 +63,7 @@ describe('Remote DB tests', () => {
         `"options":{"uri":"http://localhost:36666/api/test","body":{"a":${randInt}},`+
         '"json":true,"method":"POST","headers":{"Content-Length":7},"simple":true,'+
         '"resolveWithFullResponse":false,"transform2xxOnly":false}}'
+       */
      ) })
   })
 
