@@ -5,7 +5,6 @@ const { List, Map }
                   = require('immutable')
 const http        = require('http')
 const url         = require('url')
-const querystring = require('querystring')
 const Logger      = require('./logger')
 const LOGGER      = new Logger('RemoteDB')
 const { isBrowser, ensureDir, DB_DIR, buildFromDirs } = require('./utils')
@@ -179,7 +178,9 @@ function getImmutableKey(fullKey, defaultValue) {
       return buildFromDirs(`${dbFile}.json`, () => {return false})
     } else if (fs.existsSync(dbFile)) {
       return buildFromDirs(dbFile,
-        (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) })
+        // Return undeleted keys like a.json but not deleted keys a.json.1
+        (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) ||
+                              fnParts.length > 2 })
     } else {
       if (defaultValue) return defaultValue
       else { throw new Error(`Key ${dbFile} does not exist.`) }

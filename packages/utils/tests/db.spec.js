@@ -52,6 +52,17 @@ describe('Database tests for key/value store', () => {
     setImmutableKey('someSpace/b', new Map({"c":3}), true)
   })
 
+  it( 'retrieves only undeleted keys', () => {
+    assert(setImmutableKey('anotherSpace/a', new Map({"c":1})))
+    assert(setImmutableKey('anotherSpace/b', new Map({"d":2})))
+    const val = getImmutableKey('anotherSpace')
+    assert(val.count() === 2)
+    assert(setImmutableKey('anotherSpace/b', null))
+    const val2 = getImmutableKey('anotherSpace')
+    assert.equal(val2.count(), 1)
+    assert.equal(val2.get('a').get('c'), 1)
+  })
+
   it('overwrites a directory with a null', () => {
     // such as happens when cleaning compile keys
     assert.ok(fs.lstatSync('db/someSpace').isDirectory())
