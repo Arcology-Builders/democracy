@@ -2,16 +2,21 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const expect = require('chai').expect
 const should = require('chai').should()
+//const { traverseDirs, buildFromDirs, DB_DIR,
+//        setFS, setPath, setImmutableKey, getImmutableKey } = require('..')
 const { traverseDirs, buildFromDirs, DB_DIR,
-        setImmutableKey, getImmutableKey } = require('..')
-const path = require('path')
+        setFS, setPath, setImmutableKey, getImmutableKey } = require('..')
+
 const fs = require('fs')
+setFS(fs)
 
 describe('Database tests for key/value store', () => {
 
+  utils.setPath(require('path'))
+
   before(() => {
     if (fs.existsSync('db')) {
-      traverseDirs(['db'], () => {return false},
+      utils.traverseDirs(['db'], () => {return false},
                    (source, fn) => { fs.unlinkSync(fn) })
       const dirs = []
       traverseDirs(['db'], () => {return false},

@@ -1,7 +1,6 @@
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const path         = require('path')
-const fs           = require('fs')
 const { RemoteDB } = require('../src/db')
 const Logger       = require('../src/logger')
 

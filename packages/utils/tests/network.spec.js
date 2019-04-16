@@ -2,10 +2,12 @@ const { List, Map }
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
-const { getNetwork, getEndpointURL }
+const { getNetwork, getEndpointURL, setFS }
              = require('..')
 const Logger = require('../src/logger')
 const { isNetName } = require('../src/config')
+
+setFS(require('fs'))
 
 describe('network and tx sending', () => {
 

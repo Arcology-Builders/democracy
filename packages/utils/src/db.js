@@ -104,13 +104,19 @@ const getFileKeySpace = (key, cb) => {
   return path.join(dbDir, `${keyBase}`)
 }
 
+const store = {}
+
+store.setStoreFS = (_fs) => {
+  store.fs = _fs
+}
+
 /**
  * set an immutable key, possibly moving aside previous immutable values
  * @param {fullKey} the full path to the key, separated by `/`
  * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
  * @param {overwrite} true if are allowed to move aside previous immutable keys
  */
-const setImmutableKey = (fullKey, value, overwrite) => {
+store.setImmutableKey = (fullKey, value, overwrite) => {
   assert(typeof(fullKey) === 'string')
   assert(Map.isMap(value) || List.isList(value) || !value)
  
@@ -126,10 +132,10 @@ const setImmutableKey = (fullKey, value, overwrite) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
     const now = Date.now()
 
-    if (fs.existsSync(`${dbFile}.json`)) {
+    if (store.fs.existsSync(`${dbFile}.json`)) {
       if (!value || overwrite) {
         // We never delete, only move to the side
-        fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
+        store.fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
         if (overwrite) {
           LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
           // don't return here b/c we need to write the new key file below
@@ -140,10 +146,10 @@ const setImmutableKey = (fullKey, value, overwrite) => {
       } else {
         throw new Error(`Key ${dbFile}.json exists and is read-only.`)
       }
-    } else if (fs.existsSync(dbFile)) {
+    } else if (store.fs.existsSync(dbFile)) {
       if (!value) {
         LOGGER.debug(`Deleting sub-key ${dbFile}`)
-        fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+        store.fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
         return true
       } else { 
         throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
@@ -154,14 +160,14 @@ const setImmutableKey = (fullKey, value, overwrite) => {
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
     LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-    fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
+    store.fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
     return true
     /*
   }
 */
 }
 
-function getImmutableKey(fullKey, defaultValue) {
+store.getImmutableKey = (fullKey, defaultValue) => {
   assert(typeof(fullKey) === 'string')
 /*
   if (isBrowser()) {
@@ -174,9 +180,9 @@ function getImmutableKey(fullKey, defaultValue) {
   } else {
  */
     const dbFile = getFileKeySpace(fullKey, () => {})
-    if (fs.existsSync(`${dbFile}.json`)) {
+    if (store.fs.existsSync(`${dbFile}.json`)) {
       return buildFromDirs(`${dbFile}.json`, () => {return false})
-    } else if (fs.existsSync(dbFile)) {
+    } else if (store.fs.existsSync(dbFile)) {
       return buildFromDirs(dbFile,
         // Return undeleted keys like a.json but not deleted keys a.json.1
         (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) ||
@@ -192,6 +198,5 @@ function getImmutableKey(fullKey, defaultValue) {
 
 module.exports = {
   RemoteDB       : RemoteDB,
-  setImmutableKey: setImmutableKey,
-  getImmutableKey: getImmutableKey,
+  ...store,
 }

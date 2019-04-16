@@ -1,4 +1,7 @@
-const { traverseDirs } = require('..')
+const { setFS, setPath, traverseDirs } = require('..')
+
+setFS(require('fs'))
+setPath(require('path'))
 
 describe('Traverse directories', () => {
 
