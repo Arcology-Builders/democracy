@@ -7,9 +7,11 @@ const should   = chai.should()
 const { Map, List } = require('immutable')
 
 const { Linker } = require('..')
-const { getNetwork, Logger } 
+const { getNetwork, Logger, setFS } 
                = require('@democracy.js/utils')
 const LOGGER = new Logger('link.spec')
+
+setFS(require('fs'))
 
 describe('Democracy linking', () => {
 

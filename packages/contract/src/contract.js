@@ -1,15 +1,19 @@
-const { getInstance, Logger } = require('@democracy.js/utils')
+const { Logger, isNetwork } = require('@democracy.js/utils')
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const abi = require('ethjs-abi')
 
 const LOGGER = new Logger('contract')
 
-let Contract = class {
+const { isDeploy } = require('./deployer')
+
+const contracts = {}
+
+contracts.Contract = class {
   constructor(_eth, _deploy) {
     this.deploy = _deploy
     this.eth = _eth
-    this.instance = getInstance(_eth, _deploy)
+    this.instance = contracts.getInstance(_eth, _deploy)
     this.address = this.deploy.get('deployAddress')
     assert(this.instance)
   }
@@ -58,6 +62,16 @@ let Contract = class {
 
 }
 
-module.exports = {
-  Contract: Contract,
-}
+/**
+ * Return an instance from a previously deployed contract
+ * @param deploy of previous
+ * @return an ethjs instance that can be used to call methods on the deployed contract
+ */
+contracts.getInstance = (eth, deploy) => {
+  assert(isNetwork(eth), 'First parameter is not an Ethereum network.')
+  assert(isDeploy(deploy), 'Second parameter is not a deploy output.')
+  const Contract = eth.contract(deploy.get('abi').toJS(), deploy.get('code'))
+  return Contract.at(deploy.get('deployAddress'))
+} 
+
+module.exports = contracts
