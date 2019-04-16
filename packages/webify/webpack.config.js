@@ -44,16 +44,7 @@ module.exports = {
   node: {
     process: false,
     Buffer: false,
-    tls: 'empty',
-    net: 'empty',
   },
-  mode: 'development',
-  /*
-  externals: {
-    'config': require('config'),
-    'path': require('path')
-  },
- */
 	resolve: {
     alias: {
       'fs': 'browserfs/dist/shims/fs.js',
@@ -62,7 +53,6 @@ module.exports = {
       'processGlobal': 'browserfs/dist/shims/process.js',
       'bufferGlobal': 'browserfs/dist/shims/bufferGlobal.js',
       'bfsGlobal': require.resolve('browserfs'),
-      ...npm_package._moduleAliases
     }
   },
   plugins: [ 

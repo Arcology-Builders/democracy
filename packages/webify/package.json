@@ -20,11 +20,12 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.2.5",
-    "democracy.js": "0.2.4",
-    "@democracy.js/keys": "0.0.6",
-    "@democracy.js/utils": "0.1.9",
+    "@democracy.js/keys": "0.1.1",
+    "@democracy.js/utils": "0.2.3",
     "browserfs": "1.4.3",
-    "chai": "4.2.0"
+    "chai": "4.2.0",
+    "democracy.js": "0.2.4",
+    "dotenv": "7.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.3.3",
