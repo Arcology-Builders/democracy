@@ -7,11 +7,14 @@ const utils = require('ethereumjs-utils')
 const keys = require('../src/keys')
 const wallet = require('../src/wallet')
 const randombytes = require('randombytes')
-const { getImmutableKey, setImmutableKey, fromJS, Logger, deepEqual, getNetwork }
-  = require('@democracy.js/utils')
+const { getImmutableKey, setImmutableKey, fromJS, Logger, deepEqual, getNetwork,
+  setFS, setPath } = require('@democracy.js/utils')
 const LOGGER = new Logger('keys.spec')
 
 const { Map } = require('immutable')
+
+setFS(require('fs'))
+setPath(require('path'))
 
 describe('Self-generated keys and signing', () => {
  
