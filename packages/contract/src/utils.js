@@ -3,6 +3,11 @@
 const { Logger } = require('@democracy.js/utils')
 const LOGGER = new Logger('contract/utils')
 
+const { keccak } = require('ethereumjs-util')
+const { Map } = require('immutable')
+
+const utils = {}
+
 /**
  * Chain and return a (possibly asynchronous) call after the outputter,
  * also possibly asynchronous. 
@@ -11,7 +16,7 @@ const LOGGER = new Logger('contract/utils')
  * @param callback method, possibly asynchronous, which accepts as input the
  *        return value of the outputter method call (`outputCallResult`) 
  */
-const awaitOutputter = (outputCallResult, afterOutput) => {
+utils.awaitOutputter = (outputCallResult, afterOutput) => {
   if (outputCallResult.then) {
     return outputCallResult.then(afterOutput) 
   } else {
@@ -27,7 +32,7 @@ const awaitOutputter = (outputCallResult, afterOutput) => {
  * @param callback method, possibly asynchronous, which accepts as input the
  *        return value of the inputter method call (`inputCallResult`)
  */
-const awaitInputter = (inputCallResult, afterInput) => {
+utils.awaitInputter = (inputCallResult, afterInput) => {
   LOGGER.info('inputCallResult', inputCallResult)
   if (inputCallResult.then) {
     return inputCallResult.then(afterInput)
@@ -39,7 +44,7 @@ const awaitInputter = (inputCallResult, afterInput) => {
 /**
  * @return true if the given object is a compile output from a Compiler, otherwise false
  */
-const isCompile = (_compile) => {
+utils.isCompile = (_compile) => {
   return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
           _compile.reduce((prev, val) => {
     return prev && val.get('type') === 'compile'
@@ -49,7 +54,7 @@ const isCompile = (_compile) => {
 /**
  * @return true if the given object is a compile output retrieved from db, otherwise false
  */
-const isContract = (_contract) => {
+utils.isContract = (_contract) => {
   return (Map.isMap(_contract) && _contract.get('type') === 'compile')
 }
 
@@ -62,10 +67,11 @@ const isContract = (_contract) => {
  *        value that will deterministically reproduce this output
  * @return a Map of keys and values from {requestedInputs}
  */
-const getInputsToBuild = (requestedInputs, existingOutputs) => {
+utils.getInputsToBuild = (requestedInputs, existingOutputs) => {
   return new Map(requestedInputs.map((val,key) => {
     const isNew = !existingOutputs.has(key)
-    const inputHash = util.keccak(requestedInputs.get(key)).toString('hex')
+    // We take the hash of content before it has the field 'inputHash'
+    const inputHash = keccak(JSON.stringify(val.toJS())).toString('hex')
     const isUpdated = !isNew && (existingOutputs.get(key).get('inputHash') !== inputHash)
     if (isNew) {
       LOGGER.info(`${key} has not been built before.`)
@@ -79,10 +85,4 @@ const getInputsToBuild = (requestedInputs, existingOutputs) => {
   })
 }
 
-module.exports = {
-  getInputsToBuild : getInputsToBuild,
-  awaitInputter    : awaitInputter,
-  awaitOutputter   : awaitOutputter,
-  isCompile        : isCompile,
-  isContract       : isContract,
-}
+module.exports = utils
