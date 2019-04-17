@@ -1,5 +1,3 @@
-const fs          = require('fs')
-const path        = require('path')
 const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
@@ -96,18 +94,22 @@ const getFileKeySpace = (key, cb) => {
   const dirSpaces = keySpaces.slice(0,-1)
   dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
   const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+  const dbDir = store.path.join(`${DB_DIR}`, ...dirSpaces.toJS())
 
   // Return the base filename and don't add .json extension
   // b/c the latter is only correct behavior for setImmutableKey
   // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+  return store.path.join(dbDir, `${keyBase}`)
 }
 
 const store = {}
 
 store.setStoreFS = (_fs) => {
   store.fs = _fs
+}
+
+store.setStorePath = (_path) => {
+  store.path = _path
 }
 
 /**
@@ -129,7 +131,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
  */
     ensureDir(DB_DIR)
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-      ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
+      ensureDir(store.path.join(DB_DIR, ...keyPrefixes)) })
     const now = Date.now()
 
     if (store.fs.existsSync(`${dbFile}.json`)) {

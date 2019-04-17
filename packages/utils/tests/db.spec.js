@@ -9,10 +9,9 @@ const { traverseDirs, buildFromDirs, DB_DIR,
 
 const fs = require('fs')
 setFS(fs)
+setPath(require('path'))
 
 describe('Database tests for key/value store', () => {
-
-  utils.setPath(require('path'))
 
   before(() => {
     if (fs.existsSync('db')) {

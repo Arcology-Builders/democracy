@@ -1,11 +1,14 @@
+const { getConfig, setEnvVars } = require('../src/config')
+require('dotenv').config()
+setEnvVars(process.env)
+
+const { getNetwork, getEndpointURL, arraysEqual } = require('..')
 const { List, Map } 
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
-const { getNetwork, getEndpointURL, arraysEqual }
-             = require('..')
 const Logger = require('../src/logger')
-const { getConfig } = require('../src/config')
+const LOGGER = new Logger('config.spec')
 
 describe('config has correct members', () => {
 

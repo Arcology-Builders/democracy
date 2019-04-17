@@ -23,7 +23,7 @@ utils.setUtilsFS = (_fs) => {
   utils.fs = _fs
 }
 
-utils.setPath = (_path) => {
+utils.setUtilsPath = (_path) => {
   utils.path = _path
 }
 
