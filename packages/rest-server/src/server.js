@@ -1,5 +1,6 @@
 const express = require('express')
-const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger, COMPILES_DIR }
+const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger,
+  COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR }
 	      = require('@democracy.js/utils')
 const { Map } = require('immutable')
 const utils = require('ethereumjs-utils')
@@ -59,22 +60,48 @@ class RESTServer {
         next() // make sure we go to the next routes and don't stop here
     });
 
-    _router.route('/deploys/:chainId/:deployName').get((req, res) => {
+    _router.route('/deploys/:chainId').get((req, res) => {
+      const chainId = req.params.chainId
+      const deploys = get(`/${DEPLOYS_DIR}/${chainId}`, new Map({}))
+      res.json(deploys.toJS())
     })
 
-    _router.route('/links/:chainId/:deployName').get((req, res) => {
+    _router.route('/deploy/:chainId/:deployName').get((req, res) => {
+      const chainId = req.params.chainId
+      const deployName = req.params.deployName
+      const deploy = get(`/${DEPLOYS_DIR}/${chainId}/${deployName}`, new Map({}))
+      res.json(deploy.toJS())
+    })
+
+    _router.route('/deploy/:chainId/:deployName').put((req, res) => {
+      const chainId = req.params.chainId
+      const deployName = req.params.deployName
+      const jsBody = fromJS(req.body)
+      const result = set(`/${DEPLOYS_DIR}/${chainId}/${deployName}`, jsBody)
+      res.json({result: result, body: jsBody})
+    })
+
+    _router.route('/links').get((req, res) => {
+      const links = get(`/${LINKS_DIR}`, new Map({}))
+      res.json(links.toJS())
+    })
+
+    _router.route('/link/:linkName').put((req, res) => {
+      const linkName = req.params.linkName
+      const jsBody = fromJS(req.body)
+      const result = set(`/${LINKS_DIR}/${linkName}`, jsBody)
+      res.json({result: result, body: jsBody})
     })
 
     // Return all compiles
     _router.route('/compiles').get((req, res) => {
-      const compile = get(`/${COMPILES_DIR}`, new Map({}))
-      res.json(compile.toJS())
+      const compiles = get(`/${COMPILES_DIR}`, new Map({}))
+      res.json(compiles.toJS())
     })
 
     _router.route('/compiles/:contractName').post((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
-      console.log(req.body)
       set(`/compiles/${cn}`, fromJS(req.body))
       res.json(req.body) 
     })
