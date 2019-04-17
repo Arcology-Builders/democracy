@@ -1,8 +1,5 @@
 // Linking command, for detecting library dependencies and generating
 // link metadata as an input to deploying
-const fs     = require('fs')
-const path   = require('path')
-
 const assert = require('assert')
 const { List, Map }
              = require('immutable')
