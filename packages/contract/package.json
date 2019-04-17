@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/contract",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
@@ -34,7 +34,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.2.3",
+    "@democracy.js/utils": "0.2.4",
     "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",
     "immutable": "4.0.0-rc.12"
