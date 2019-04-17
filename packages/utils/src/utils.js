@@ -1,7 +1,7 @@
 'use strict'
 
-const Logger = require('./logger')
-const LOGGER = new Logger('@democracy.js/utils/utils.js')
+const { Logger } = require('./logger')
+const LOGGER = new Logger('utils/utils')
 const { Seq, Map, List, fromJS } 
                    = require('immutable')
 const assert = require('chai').assert

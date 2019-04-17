@@ -15,7 +15,7 @@ describe('Database tests for key/value store', () => {
 
   before(() => {
     if (fs.existsSync('db')) {
-      utils.traverseDirs(['db'], () => {return false},
+      traverseDirs(['db'], () => {return false},
                    (source, fn) => { fs.unlinkSync(fn) })
       const dirs = []
       traverseDirs(['db'], () => {return false},

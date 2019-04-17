@@ -5,7 +5,9 @@ const { Map, List } = require('immutable')
 const assert = require('chai').assert
 const colors = require('colors')
 
-const Logger = function(prefix, enabled) {
+const logger = []
+
+logger.Logger = function(prefix, enabled) {
   if (this.prefix) { console.trace(); throw `prefix predefined to ${this.prefix}` }
  
   // Only use config if we are not provided a list, to avoid self-loop in ./config.js 
@@ -50,4 +52,4 @@ const Logger = function(prefix, enabled) {
 
 }
 
-module.exports = Logger
+module.exports = logger

@@ -1,9 +1,10 @@
+'use strict'
 const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
 const http        = require('http')
 const url         = require('url')
-const Logger      = require('./logger')
+const { Logger }  = require('./logger')
 const LOGGER      = new Logger('RemoteDB')
 const { isBrowser, ensureDir, DB_DIR, buildFromDirs } = require('./utils')
 

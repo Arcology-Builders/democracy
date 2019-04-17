@@ -1,6 +1,6 @@
 // Environment-controlled configuration to choose network and deploy parameters
 
-const Logger = require('./logger')
+const { Logger } = require('./logger')
 const LOGGER = new Logger('config', [ 'info', 'debug', 'warn', 'error' ])
 const assert = require('chai').assert
 

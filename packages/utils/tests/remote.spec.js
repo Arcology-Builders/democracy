@@ -2,7 +2,7 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const path         = require('path')
 const { RemoteDB } = require('../src/db')
-const Logger       = require('../src/logger')
+const { Logger }   = require('../src/logger')
 
 const delayedGet = async (remoteDB, expected, resolve) => {
   const res = await remoteDB.getHTTP('/api/test')

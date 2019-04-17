@@ -1,10 +1,11 @@
+'use strict'
 const { List, Map } 
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
 const { fromJS }
              = require('..')
-const Logger = require('../src/logger')
+const { Logger } = require('../src/logger')
 
 describe('logger facility', () => {
 

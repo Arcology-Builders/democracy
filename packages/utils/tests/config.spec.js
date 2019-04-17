@@ -7,7 +7,7 @@ const { List, Map }
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
-const Logger = require('../src/logger')
+const { Logger } = require('../src/logger')
 const LOGGER = new Logger('config.spec')
 
 describe('config has correct members', () => {
