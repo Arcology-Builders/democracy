@@ -2,8 +2,8 @@
 
 const assert = require('chai').assert
 
-const { getNetwork, isNetwork } = require('@democracy.js/utils')
-const { isAccount }      = require('@democracy.js/keys')
+const { getNetwork, isNetwork, getEndpointURL } = require('@democracy.js/utils')
+const { isAccount, Wallet }      = require('@democracy.js/keys')
 const { toHex, toWei }   = require('web3-utils')
 
 const eth = getNetwork()
@@ -19,8 +19,10 @@ class Transactor {
    * @param _gasPrice a string number indicating the desired gas price for this network in gwei
    */
   constructor({ethSender, gasPrice}) {
-    assert(isNetwork(ethSender))
+    //this.senderAccount = senderAccount
+    //assert(isNetwork(ethSender))
     this.eth = ethSender
+    //Wallet.createSignerEth(getEndpointURL(), senderAccount)
     this.gasPrice = gasPrice
   }
 
@@ -49,6 +51,13 @@ class Transactor {
       chainId : toHex(chainId),
     }
   }
+
+  async sendSignedTxFromArgs({fromAddress, toAddress, value, data}) {
+    const rawTx = createRawTx(arguments)
+    const txPromise = this.eth.sendTransaction(rawTx)
+    const txHash = await txPromise
+    return txHash
+  } 
 
   /**
    * Send this given raw TX signed from this transactor's sender account

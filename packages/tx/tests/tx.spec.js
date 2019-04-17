@@ -1,11 +1,14 @@
+const { getConfig, getNetwork, getEndpointURL, Logger, setFS, setPath }
+             = require('@democracy.js/utils')
+setFS(require('fs'))
+setPath(require('path'))
+
 const { Transactor } = require('../src/tx')
 const { Wallet, create, pay }
              = require('@democracy.js/keys')
 const assert = require('chai').assert
 const { BuildsManager, Linker, Deployer, isDeploy, Contract }
              = require('@democracy.js/contract')
-const { getConfig, getNetwork, getEndpointURL, Logger }
-             = require('@democracy.js/utils')
 const LOGGER = new Logger('tx.spec')
 const { toWei } = require('web3-utils')
 const BN = require('bn.js')
@@ -25,7 +28,6 @@ describe( 'transaction sender', () => {
     eth = getNetwork()
     const chainId = await eth.net_version()
     accounts = await eth.accounts()
-    LOGGER.debug('ACCOUNTS', accounts)
     senderAccount = create()
     const ethSigner = Wallet.createSignerEth(getEndpointURL(), senderAccount)
     txor = new Transactor({ethSender: ethSigner, gasPrice: '21000'})
@@ -90,7 +92,6 @@ describe( 'transaction sender', () => {
     const lastValue = await contract.instance.lastValue()
     assert.equal(lastValue['0'].toString(), toWei('0.001', 'ether'))
     const lastSender = await contract.instance.lastSender()
-    LOGGER.info('lastSender', lastSender)
     assert.equal(lastSender['0'], senderAccount.get('addressPrefixed'))
   })
 
