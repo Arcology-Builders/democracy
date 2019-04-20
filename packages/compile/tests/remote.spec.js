@@ -1,12 +1,15 @@
-'use strict'
 const fs     = require('fs')
 const path   = require('path')
+const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual, setFS, setPath }
+             = require('@democracy.js/utils')
+const utils = require('@democracy.js/utils')
+utils.setFS(fs)
+utils.setPath(path)
+
 const { Compiler } = require('..')
 const { isCompile, isContract }
              = require('@democracy.js/contract')
-const { Logger, RemoteDB, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual }
-             = require('@democracy.js/utils')
-const RESTServer = require('@democracy.js/rest-server')
+const { RESTServer, RemoteDB } = require('@democracy.js/rest')
 const LOGGER = new Logger('remote.spec.js')
 const assert = require('chai').assert
 
@@ -19,12 +22,14 @@ describe('Democracy recompiling remotely on source change', () => {
   let _timestamp
   const server = new RESTServer(6666, true)
   const r = new RemoteDB( 'localhost', 6666 )
-  const postCompile = async (subKey, val) => {
+  const postCompile = async (_subKey, val, overwrite) => {
+    const subKey = _subKey.replace(COMPILES_DIR, 'compile')
     LOGGER.info('postCompile', JSON.stringify(toJS(val)))
-    const compile = await r.postHTTP('/api/' + subKey, toJS(val))
+    const compile = await r.postHTTP('/api/' + subKey, toJS(val), overwrite)
     return fromJS(compile)
   }
-  const getCompile = async (subKey, defaultVal) => {
+  const getCompile = async (_subKey, defaultVal) => {
+    const subKey = _subKey.replace(COMPILES_DIR, 'compile')
     const compiles = await r.getHTTP('/api/' + subKey, defaultVal)
     LOGGER.info('getCompile', subKey)
     LOGGER.info('getCompile', compiles)
@@ -50,7 +55,7 @@ describe('Democracy recompiling remotely on source change', () => {
     assert.equal(JSON.stringify(compile.get('SomeContract').toJS()),
                  JSON.stringify(contract.toJS()))
   })
-/*
+
   it( '' , async () => {
     // '*remotely* compiles a new contract with no previous hash'
     const outputs = await compileNewFile(c).catch((e) => { throw e } )
@@ -64,7 +69,7 @@ describe('Democracy recompiling remotely on source change', () => {
     // 'recompiles a source file with changed contents/hash '
     await checkRecompile(c, _inputHash, _timestamp).catch((e) => { throw e })
   })
-*/
+
   after(async () => {
     server.stop()
   })

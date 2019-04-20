@@ -1,17 +1,16 @@
 'use strict'
 // Compile with solcjs
-const fs         = require('fs')
 const path       = require('path')
 const solc       = require('solc')
 const assert     = require('chai').assert
 const { keccak } = require('ethereumjs-util')
 const { List, Map, Set }
                  = require('immutable')
-const { ContractsManager, awaitOutputter }
+const { ContractsManager, awaitOutputter, getInputsToBuild }
                  = require('@democracy.js/contract')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
-        getImmutableKey, setImmutableKey, Logger, getInputsToBuild }
+        getImmutableKey, setImmutableKey, Logger }
                  = require('@democracy.js/utils')
 
 const LOGGER = new Logger('Compiler')
@@ -49,6 +48,7 @@ class Compiler {
    * Format the output from `solc` compiler into an Immutable {Map}
    */
   getCompileOutputFromSolc(solcOutputContracts, requestedInputs, existingOutputs) {
+    // Filter compiled outputs to those in the requested set, and add contractName
     const requestedOutputs = Map(solcOutputContracts).filter(
       (contract, contractLongName) => {
         const contractName = path.basename(contractLongName).split(':')[1]
@@ -65,16 +65,16 @@ class Compiler {
            
       const now = new Date() 
       const inputHash = requestedInputs.get(contract.name).get('inputHash') 
-      const output = Map({
+      const preHash = Map({
         type       : 'compile',
         name       : contract.name,
         code       : contract.bytecode,
         abi        : fromJS(JSON.parse(contract.interface)),
-        contentHash: keccak(JSON.stringify(contract)).toString('hex'),
         inputHash  : inputHash,
         timestamp  : now.getTime(),
         dateTime   : now.toUTCString(),
       })
+      const output = preHash.set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
       const compileKey = `${COMPILES_DIR}/${contract.name}`

@@ -1,6 +1,9 @@
 'use strict'
+const { Logger, setFS, setPath } = require('@democracy.js/utils')
+setFS(require('fs'))
+setPath(require('path'))
+
 const { Compiler } = require('..')
-const { Logger } = require('@democracy.js/utils')
 const { ContractsManager } = require('@democracy.js/contract')
 const LOGGER = new Logger('recompile.spec.js')
 

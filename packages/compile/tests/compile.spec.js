@@ -1,13 +1,15 @@
-const fs     = require('fs')
-const assert = require('chai').assert
-const util   = require('ethereumjs-util')
+const fs         = require('fs')
+const assert     = require('chai').assert
 
-const { Compiler }
-             = require('..')
-const { Logger, ZEPPELIN_SRC_PATH, RemoteDB, getInputsToBuild }
-             = require('@democracy.js/utils')
-const { ContractsManager, isCompile, isContract }
+const { keccak } = require('ethereumjs-util')
+const utils      = require('@democracy.js/utils')
+const { Logger, ZEPPELIN_SRC_PATH, toJS } = utils
+utils.setFS(fs)
+utils.setPath(require('path'))
+
+const { ContractsManager, isCompile, isContract, getInputsToBuild }
              = require('@democracy.js/contract')
+const { Compiler } = require('..')
 const LOGGER = new Logger('Compiler Test')
 
 describe('Democracy compiling.', () => {
@@ -48,7 +50,7 @@ describe('Democracy compiling.', () => {
     _inputsToBuild = inputsToBuild
     _existingOutputs = existingOutputs
   })
-
+  
   it( 'formats the correct sourceMap for solc' , async () => {
     const sourcesToBuild = comp.getSourceMapForSolc(_inputsToBuild)
     assert.ok(sourcesToBuild.has('ERC20.sol'), 'ERC20.sol is a filename to be built')
@@ -64,6 +66,20 @@ describe('Democracy compiling.', () => {
     const outputMap =
       await comp.getCompileOutputFromSolc(outputs.contracts, _requestedInputs, _existingOutputs)
     assert.ok(outputMap.get('ERC20'))
+  })
+
+  it( 'inputs have the correct members and hash', async () => {
+    const inputSource = fs.readFileSync(
+      'node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol')
+    const inputHash = keccak(inputSource).toString('hex')
+    const contract = await cm.getContract('ERC20')
+    const contractJS = toJS(contract)
+    const actualContentHash = contractJS['contentHash']
+    assert(actualContentHash)
+    delete(contractJS['contentHash'])
+    const contentHash = keccak(JSON.stringify(contractJS)).toString('hex')
+    assert.equal(contract.get('inputHash'), inputHash)
+    assert.equal(actualContentHash, contentHash)
   })
 
   it( 'should find a previously compiled contract' , async () => {
