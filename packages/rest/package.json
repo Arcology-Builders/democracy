@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/rest",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
@@ -10,7 +10,7 @@
   "author": "Paul Pham <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/rest-server#readme",
   "license": "MIT",
-  "main": "src/server.js",
+  "main": "index.js",
   "directories": {
     "src": "src",
     "tests": "tests"

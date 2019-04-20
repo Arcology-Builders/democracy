@@ -1,5 +1,8 @@
-RESTServer = require('./src/server')
+'use strict'
+const server = require('./src/server')
+const client = require('./src/client')
 
 module.exports = {
-  RESTServer: RESTServer
+  ...client,
+  ...server,
 }
