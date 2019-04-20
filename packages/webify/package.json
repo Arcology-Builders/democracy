@@ -18,7 +18,7 @@
     "@babel/polyfill": "7.2.5",
     "@democracy.js/contract": "0.0.5",
     "@democracy.js/keys": "0.1.1",
-    "@democracy.js/utils": "0.2.3",
+    "@democracy.js/utils": "0.2.4",
     "browserfs": "1.4.3",
     "chai": "4.2.0",
     "democracy.js": "0.2.4",

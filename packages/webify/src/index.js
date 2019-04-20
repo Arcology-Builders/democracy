@@ -15,12 +15,15 @@ BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
 
 require('dotenv').config()
 const utils = require('@democracy.js/utils')
+const fs = require('fs')
+const path = require('path')
+utils.setFS(fs)
+utils.setPath(path)
 const contract = require('@democracy.js/contract')
 const util = require('ethereumjs-utils')
 const keys = require('@democracy.js/keys')
+const tx = require('@democracy.js/tx')
 
-const fs = require('fs')
-const path = require('path')
 const { List } = require('immutable')
 if (!fs.existsSync('a')) { fs.mkdirSync('a') }
 
@@ -31,3 +34,4 @@ assert(buffer.toString() === 'catcow')
 
 window.fs = fs
 window.path = path
+window.utils = utils

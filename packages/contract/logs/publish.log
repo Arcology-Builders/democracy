@@ -1,5 +1,5 @@
 npm notice 
-npm notice 📦  @democracy.js/contract@0.0.6
+npm notice 📦  @democracy.js/contract@0.0.7
 npm notice === Tarball Contents === 
 npm notice 1.2kB package.json           
 npm notice 357B  index.js               
@@ -13,11 +13,11 @@ npm notice 4.8kB src/linker.js
 npm notice 3.3kB src/utils.js           
 npm notice === Tarball Details === 
 npm notice name:          @democracy.js/contract                  
-npm notice version:       0.0.6                                   
+npm notice version:       0.0.7                                   
 npm notice package size:  6.3 kB                                  
 npm notice unpacked size: 21.6 kB                                 
-npm notice shasum:        a0696cca4ffe22e353520e7da4c65a48e123382d
-npm notice integrity:     sha512-1K7rAq3VWrsTp[...]uhMswHQBYVsdQ==
+npm notice shasum:        c860d8fbcccb67aadfc30d776d3924d00b92461f
+npm notice integrity:     sha512-H+qv1XUkcORi8[...]nExRENBgf+0wg==
 npm notice total files:   10                                      
 npm notice 
-+ @democracy.js/contract@0.0.6
++ @democracy.js/contract@0.0.7

@@ -6,8 +6,16 @@ const npm_package = require('./package.json')
 
 console.log(JSON.stringify(npm_package._moduleAliases));
 
-module.exports = {
-  module: {
+module.exports = (env, argv) => {
+  const min = (argv.mode === 'production') ? '.min' : ''
+  const version = npm_package.version
+  const bundleName = `democracy.${version}${min}`
+  const entry = {}
+  entry[bundleName] = [
+       './src/index.js',
+       path.resolve(__dirname, 'node_modules/browserfs/dist/browserfs.min.js'),
+     ]
+  return { module: {
     noParse: /browserfs\.js/,
     rules: [
       {
@@ -29,15 +37,9 @@ module.exports = {
       }
     ]
   },
-  entry: {
-    'bundle.js': [
-       './src/index.js',
-       path.resolve(__dirname, 'node_modules/browserfs/dist/browserfs.min.js'),
-       //path.resolve(__dirname, './node_modules/ethjs/dist/ethjs.min.js'), 
-     ]
-  },
+  entry: entry,
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
   target: 'web',
@@ -71,4 +73,5 @@ module.exports = {
         (context) => { console.log(JSON.stringify(context)) }
     )*/
   ]
-};
+}
+}
