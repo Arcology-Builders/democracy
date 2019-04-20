@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/tx",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Ethereum transaction management for a distributed country",
   "keywords": [
     "ethereum",
@@ -39,6 +39,7 @@
     "@democracy.js/test-contracts": "0.0.2",
     "@democracy.js/utils": "0.2.5",
     "chai": "4.2.0",
+    "immutable": "4.0.0-rc.12",
     "web3-utils": "1.0.0-beta.52"
   }
 }
