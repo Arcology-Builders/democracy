@@ -1,4 +1,3 @@
-'use strict'
 // Compile with solcjs
 const path       = require('path')
 const solc       = require('solc')
@@ -26,14 +25,16 @@ const LOGGER = new Logger('Compiler')
  */
 class Compiler {
   
-  constructor(_startSourcePath, _inputter, _outputter) {
-    this.startSourcePath = (_startSourcePath && typeof(_startSourcePath) === 'string') ?
-      _startSourcePath : DEMO_SRC_PATH
-    assert((this._inputter && this._outputter) || (!this._inputter && !this.outputter))
-    this.inputter = _inputter || getImmutableKey
-    this.outputter = _outputter || setImmutableKey
+  constructor({startSourcePath, inputter, outputter}) {
+    this.startSourcePath = (startSourcePath && typeof(startSourcePath) === 'string') ?
+      startSourcePath : DEMO_SRC_PATH
+    LOGGER.info('START SOURCE PATH', this.startSourcePath)
+    assert((inputter && outputter) || (!inputter && !outputter),
+           `Inputter and outputter should be defined together or not at all.`)
+    this.inputter = inputter || getImmutableKey
+    this.outputter = outputter || setImmutableKey
     ensureDir(this.startSourcePath)
-    this.cm = new ContractsManager(_startSourcePath, _inputter, _outputter)
+    this.cm = new ContractsManager(arguments)
   }
 
   /**
