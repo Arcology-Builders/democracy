@@ -3,6 +3,7 @@ const assert = require('chai').assert
 const { Contract, BuildsManager, Deployer, Linker, Compiler } = require('..')
 const { getNetwork, Logger } = require('@democracy.js/utils')
 const LOGGER = new Logger('contract.spec')
+const abi = require('ethjs-abi')
 
 describe( 'Contract parent class', () => {
 
@@ -31,7 +32,9 @@ describe( 'Contract parent class', () => {
     const methodObj = c.getABIObjectByName('send')
     assert(methodObj.type === 'function')
     const data = c.getMethodCallData('send', [accounts[1]])
-    assert.equal(data, '0x3e58c58c0000000000000000000000004da976e02013ed8ff393a2d74e219cbb1f49c049')
+    const expected = abi.encodeMethod(methodObj, [accounts[1]])
+    assert.equal(data, expected)
+    //'0x3e58c58c0000000000000000000000004da976e02013ed8ff393a2d74e219cbb1f49c049')
   })
 
   after(async () => {
