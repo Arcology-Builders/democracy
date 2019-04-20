@@ -20,11 +20,18 @@ describe('Democracy compiling.', () => {
   let _existingOutputs
   let _findImports
   let _contracts
-  const comp  = new Compiler( 'node_modules/@democracy.js/test-contracts/contracts' )
-  const cm = new ContractsManager( 'node_modules/@democracy.js/test-contracts/contracts' )
+  const SOURCE_PATH = '../../node_modules/@democracy.js/test-contracts/contracts'
+  const comp  = new Compiler({startSourcePath: SOURCE_PATH})
+  const cm = comp.getContractsManager()
+  //new ContractsManager( '../../node_modules/@democracy.js/test-contracts/contracts' )
 
   before(async () => {
     await cm.cleanAllCompiles()
+  })
+
+  it( 'compiler has correct start source path', () => {
+    assert.equal(comp.startSourcePath, SOURCE_PATH,
+    `Incorrect source path ${comp.startSourcePath}`)
   })
 
   it( 'gets the correct requested inputs' , (done) => {
@@ -33,7 +40,7 @@ describe('Democracy compiling.', () => {
     assert.equal(1, requestedInputs.count())
     assert.equal('ERC20.sol', requestedInputs.get('ERC20').get('filename'))
     const safeMath = fs.readFileSync(
-      'node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol').toString()
+      '../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol').toString()
     assert.equal(findImports('SafeMath.sol').contents, safeMath)
     _requestedInputs = requestedInputs
     _findImports = findImports
@@ -55,7 +62,7 @@ describe('Democracy compiling.', () => {
     const sourcesToBuild = comp.getSourceMapForSolc(_inputsToBuild)
     assert.ok(sourcesToBuild.has('ERC20.sol'), 'ERC20.sol is a filename to be built')
     const erc20 = fs.readFileSync(
-      'node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol').toString()
+      '../../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol').toString()
     assert.equal(erc20, sourcesToBuild.get('ERC20.sol'))
     const solc = require('solc')
     const outputs = solc.compile({sources: sourcesToBuild.toJS()}, 0, _findImports)
@@ -70,7 +77,7 @@ describe('Democracy compiling.', () => {
 
   it( 'inputs have the correct members and hash', async () => {
     const inputSource = fs.readFileSync(
-      'node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol')
+      '../../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol')
     const inputHash = keccak(inputSource).toString('hex')
     const contract = await cm.getContract('ERC20')
     const contractJS = toJS(contract)
@@ -82,7 +89,15 @@ describe('Democracy compiling.', () => {
     assert.equal(actualContentHash, contentHash)
   })
 
-  it( 'should find a previously compiled contract' , async () => {
+  it( 'finds an existing contract on disk', async () => {
+    const { findImports, requestedInputs } = comp.getRequestedInputsFromDisk( 'TestLibrary.sol' )
+    const source = fs.readFileSync(
+      '../../node_modules/@democracy.js/test-contracts/contracts/TestLibrary.sol').toString()
+    assert.equal(requestedInputs.get('TestLibrary').get('source'), source)
+    assert(findImports('TestLibrary.sol'), source)
+  })
+
+  it( 'compiles all the way through the pipeline' , async () => {
     compileOutput = await comp.compile( 'TestLibrary.sol' )
     LOGGER.debug('compileOutput', compileOutput)
     assert.ok(isCompile(compileOutput))
