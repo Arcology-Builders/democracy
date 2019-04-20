@@ -17,7 +17,7 @@ utils.DEPLOYS_DIR  = 'deploys'
 utils.LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
 
 utils.DEMO_SRC_PATH = 'contracts'
-utils.ZEPPELIN_SRC_PATH = 'node_modules/openzeppelin-solidity/contracts'
+utils.ZEPPELIN_SRC_PATH = '../../node_modules/openzeppelin-solidity/contracts'
 
 utils.setUtilsFS = (_fs) => {
   utils.fs = _fs
