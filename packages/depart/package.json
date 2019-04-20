@@ -1,0 +1,47 @@
+{
+  "name": "@democracy.js/depart",
+  "version": "0.0.0",
+  "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
+  "keywords": [
+    "ethereum",
+    "orchestration",
+    "compile",
+    "link",
+    "deploy",
+    "javascript"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/depart#readme",
+  "license": "MIT",
+  "bin": {
+    "depart": "./bin.js"
+  },
+  "main": "./index.js",
+  "directories": {
+    "src": "src",
+    "tests": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "@democracy.js/compile": "0.0.6",
+    "@democracy.js/contract": "0.0.7",
+    "@democracy.js/utils": "0.2.5",
+    "immutable": "4.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@democracy.js/test-contracts": "0.0.2",
+    "chai": "^4.2.0"
+  }
+}

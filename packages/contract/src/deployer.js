@@ -13,7 +13,7 @@ const { isValidAddress } = require('ethereumjs-util')
 class Deployer {
 
   constructor({inputter, outputter, bm, eth, chainId, address}) {
-    assert(chainId)
+    assert(chainId, `chainId param is empty.`)
     this.inputter  = inputter || getImmutableKey
     this.outputter = outputter || setImmutableKey
     this.bm        = bm || new BuildsManager(...arguments)
