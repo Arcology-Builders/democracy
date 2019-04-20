@@ -1,7 +1,7 @@
-const { getConfig, getNetwork, getEndpointURL, Logger, setFS, setPath }
-             = require('@democracy.js/utils')
-setFS(require('fs'))
-setPath(require('path'))
+const utils = require('@democracy.js/utils')
+const { getConfig, getNetwork, getEndpointURL, Logger } = utils
+utils.setFS(require('fs'))
+utils.setPath(require('path'))
 
 const { Transactor } = require('../src/tx')
 const { Wallet, create, pay }
@@ -23,10 +23,11 @@ describe( 'transaction sender', () => {
   let tx
   let senderAccount
   let eth
+  let chainId
 
   before(async () => {
     eth = getNetwork()
-    const chainId = await eth.net_version()
+    chainId = await eth.net_version()
     accounts = await eth.accounts()
     senderAccount = create()
     const ethSigner = Wallet.createSignerEth(getEndpointURL(), senderAccount)
@@ -66,11 +67,12 @@ describe( 'transaction sender', () => {
       value      : toWei('0.001', 'ether'),
       data       : data,
     })
+    const hexChainId = '0x' + Number(chainId).toString(16)
     assert.equal(JSON.stringify(tx),
       '{"nonce":"0","gas":"1668b","gasPrice":"0x1319718a5000","data":'+
-      '"0x3e58c58c000000000000000000000000f25df8a55254fccd3d1a69ef6ab3d23084a6ac2d",'+
-      '"from":"0x4da976e02013ed8ff393a2d74e219cbb1f49c049","to":'+
-      `"${deployAddress}","value":"1000000000000000","chainId":"0x16a177237f5"}`
+      '"0x3e58c58c000000000000000000000000dea7e4f55aaf24b723a35f41f9881c370af3da09",'+
+      `"from":"${accounts[1]}","to":`+
+      `"${deployAddress}","value":"1000000000000000","chainId":"${hexChainId}"}`
     )
   })
 

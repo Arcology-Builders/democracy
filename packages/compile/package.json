@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/compile",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -41,7 +41,7 @@
     "@democracy.js/rest": "0.0.6"
   },
   "dependencies": {
-    "@democracy.js/contract": "0.0.6",
+    "@democracy.js/contract": "0.0.7",
     "@democracy.js/utils": "0.2.5",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
