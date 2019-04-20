@@ -40,9 +40,7 @@ client.RemoteDB = class {
 				const data = []
 				res.on('data', (chunk) => {
 					data.push(Buffer.from(chunk))
-          LOGGER.debug('data', data)
 				}).on('end', () => {
-          LOGGER.debug('data', data)
 					const body = Buffer.concat(data)
           resolve(body.toString())
 				}).on('error', (err) => {

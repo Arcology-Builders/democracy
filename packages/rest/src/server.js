@@ -9,7 +9,9 @@ const LOGGER = new Logger('rest-server')
 
 var bodyParser = require('body-parser')
 
-class RESTServer {
+const server = {}
+
+server.RESTServer = class {
 
   constructor(_port, _allowCORS) {
     this.port = _port || 7000
@@ -73,12 +75,18 @@ class RESTServer {
       res.json(deploy.toJS())
     })
 
-    _router.route('/deploy/:chainId/:deployName').put((req, res) => {
+    _router.route('/deploy/:chainId/:deployName').post((req, res) => {
       const chainId = req.params.chainId
       const deployName = req.params.deployName
       const jsBody = fromJS(req.body)
-      const result = set(`/${DEPLOYS_DIR}/${chainId}/${deployName}`, jsBody)
-      res.json({result: result, body: jsBody})
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      try {
+        const result = set(`/${DEPLOYS_DIR}/${chainId}/${deployName}`, jsBody, overwrite)
+        res.json({result: result, body: jsBody})
+      } catch(e) {
+        LOGGER.error('Failed to set key:', e, chainId, deployName)
+        res.json({result: false, error: e})
+      }
     })
 
     _router.route('/links').get((req, res) => {
@@ -86,11 +94,23 @@ class RESTServer {
       res.json(links.toJS())
     })
 
-    _router.route('/link/:linkName').put((req, res) => {
+    _router.route('/link/:linkName').get((req, res) => {
+      const linkName = req.params.linkName
+      const link = get(`/${LINKS_DIR}/${linkName}`, new Map({}))
+      res.json(link.toJS())
+    })
+
+    _router.route('/link/:linkName').post((req, res) => {
       const linkName = req.params.linkName
       const jsBody = fromJS(req.body)
-      const result = set(`/${LINKS_DIR}/${linkName}`, jsBody)
-      res.json({result: result, body: jsBody})
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      try {
+        const result = set(`/${LINKS_DIR}/${linkName}`, jsBody, overwrite)
+        res.json({result: result, body: jsBody})
+      } catch(e) {
+        LOGGER.error('Failed to set key:', e, linkName)
+        res.json({result: false, error: e})
+      }
     })
 
     // Return all compiles
@@ -99,14 +119,15 @@ class RESTServer {
       res.json(compiles.toJS())
     })
 
-    _router.route('/compiles/:contractName').post((req, res) => {
+    _router.route('/compile/:contractName').post((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
-      set(`/compiles/${cn}`, fromJS(req.body))
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      set(`/compiles/${cn}`, fromJS(req.body), overwrite)
       res.json(req.body) 
     })
 
-    _router.route('/compiles/:contractName').get((req, res) => {
+    _router.route('/compile/:contractName').get((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
       const compile = get(`/compiles/${cn}`, new Map({}))
@@ -128,7 +149,8 @@ class RESTServer {
       const test = Map({
         body: req.body,
       })
-      set('/test', test, true)
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      set('/test', test, overwrite)
       res.json({ message: 'Test posted!', ...req.body });
     })
    
@@ -153,4 +175,4 @@ class RESTServer {
 
 }
 
-module.exports = RESTServer
+module.exports = server

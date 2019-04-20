@@ -6,7 +6,7 @@ common.delayedGet = async (getCall, expected) => {
       const res = await getCall()
       if (res === expected) { resolve(res) }
       else { reject(res, expected) }
-    }, 2000)
+    }, 1000)
   })
 }
 

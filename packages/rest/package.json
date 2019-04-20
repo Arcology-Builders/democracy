@@ -1,7 +1,7 @@
 {
-  "name": "@democracy.js/rest-server",
-  "version": "0.0.4",
-  "description": "a REST server for the Democracy immutable key store",
+  "name": "@democracy.js/rest",
+  "version": "0.0.5",
+  "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
     "server",
@@ -17,6 +17,7 @@
   },
   "files": [
     "src",
+    "server.js",
     "index.js"
   ],
   "publishConfig": {
@@ -27,24 +28,22 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "start": "npx pm2 start src/server.js --watch",
+    "start": "npx pm2 start ./server.js --watch",
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.2.3",
+    "@democracy.js/utils": "0.2.5",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "ethereumjs-utils": "5.2.5",
     "express": "4.16.4",
-    "immutable": "4.0.0-rc.12",
-    "request": "2.88.0"
+    "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
     "chai-as-promised": "7.1.1",
-    "pm2": "3.3.1",
-    "rimraf": "^2.6.3"
+    "pm2": "3.3.1"
   }
 }

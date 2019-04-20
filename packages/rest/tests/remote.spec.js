@@ -15,47 +15,38 @@ describe('Remote DB tests', () => {
 
   const randInt  = Math.round(Math.random() * 10)
   
-  it( 'posts a test object', (done) => {
-    syncify(async () => {
-      const res = await remoteDB.postHTTP('/api/test', { 'a': randInt } )
-      const expected = `{"message":"Test posted!","a":${randInt}}`
-      assert.equal(res, expected)
-    }, done)
+  it( 'posts a test object', async () => {
+    const res = await remoteDB.postHTTP('/api/test', { 'a': randInt } )
+    const expected = `{"message":"Test posted!","a":${randInt}}`
+    assert.equal(res, expected)
   })
 
-  it( 'gets back the test object', (done) => {
-    syncify(async () => {
-      const expected = `{"val":{"body":{"a":${randInt}}}}`
-      await delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'), expected)
-    }, done)
+  it( 'gets back the test object', async () => {
+    const expected = `{"val":{"body":{"a":${randInt}}}}`
+    return delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'), expected)
   })
 
-/*
-  it( 'posts a deeply nested object', (done) => {
-    syncify(async () => {
-      const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }] )
-      const expected = `{"0":{"a":[{"b":${randInt}}]},"message":"Test posted!"}`
-      assert.equal(res, expected)
-    }, done)
+  it( 'posts a deeply nested object', async () => {
+    const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }] )
+    const expected = `{"0":{"a":[{"b":${randInt}}]},"message":"Test posted!"}`
+    assert.equal(res, expected)
   })
- */
-/*
-  it( 'gets back a deeply nested object', (done) => {
-    syncify(async () => {
-      const expected = `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`
-      return delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'), expected)
-    }, done)
+
+  it( 'gets back a deeply nested object', async () => {
+    const expected = `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`
+    return delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'), expected)
   })
-*/
-/*
-  it( 'fails to overwrite accidentally', (done) => {
-    syncify(async () => {
-      const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }] )
-      const expected = `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`
-    }, done)
+
+  it( 'fails to overwrite accidentally', async () => {
+    const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }] )
+    return delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'),
+                      `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`)
   })
-*/
+
   it( 'succeeds in overwriting', async () => {
+    const res = await remoteDB.postHTTP('/api/test', [{ 'a': [ {'b': randInt } ] }], true )
+    return delayedGet(remoteDB.getHTTP.bind(remoteDB, '/api/test'),
+                      `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`)
   })
 
   it( 'fails to connect to a non-existent server', (done) => {

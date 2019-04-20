@@ -1,17 +1,19 @@
 npm notice 
-npm notice 📦  @democracy.js/rest-server@0.0.4
+npm notice 📦  @democracy.js/rest@0.0.5
 npm notice === Tarball Contents === 
 npm notice 1.3kB package.json 
 npm notice 84B   index.js     
 npm notice 125B  README.md    
-npm notice 4.5kB src/server.js
+npm notice 200B  server.js    
+npm notice 2.1kB src/client.js
+npm notice 5.4kB src/server.js
 npm notice === Tarball Details === 
-npm notice name:          @democracy.js/rest-server               
-npm notice version:       0.0.4                                   
-npm notice package size:  2.2 kB                                  
-npm notice unpacked size: 6.0 kB                                  
-npm notice shasum:        013e047288b10581041971274ae5f11efbb89b4a
-npm notice integrity:     sha512-fUtOD2R0+AQBW[...]0+q+kbDOe/gag==
-npm notice total files:   4                                       
+npm notice name:          @democracy.js/rest                      
+npm notice version:       0.0.5                                   
+npm notice package size:  3.0 kB                                  
+npm notice unpacked size: 9.1 kB                                  
+npm notice shasum:        d3f4294224e60cc4637a84abf6e132b3fde06062
+npm notice integrity:     sha512-87f6hAefCo86q[...]5yATQ736Na5nQ==
+npm notice total files:   6                                       
 npm notice 
-+ @democracy.js/rest-server@0.0.4
++ @democracy.js/rest@0.0.5

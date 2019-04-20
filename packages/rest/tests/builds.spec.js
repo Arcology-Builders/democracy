@@ -3,7 +3,6 @@ const utils = require('@democracy.js/utils')
 utils.setFS(require('fs'))
 utils.setPath(path)
 const { setImmutableKey, getNetwork, DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR } = utils
-
 const chai   = require('chai')
 chai.use(require('chai-as-promised'))
 const assert = chai.assert
@@ -37,126 +36,98 @@ describe( 'Remote builds ', () => {
     utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'SecondDeploy.json'))
   })
 
-  it( 'starts a REST server that handles a test request' , (done) => {
-    syncify(async () => {
-      const res = await r.postHTTP('/api/test', { 'a': randInt }, true)
-      const expected = `{"message":"Test posted!","a":${randInt}}`
-      assert.equal(res, expected)
-    }, done)
+  it( 'starts a REST server that handles a test request' , async () => {
+    const res = await r.postHTTP('/api/test', { 'a': randInt }, true)
+    const expected = `{"message":"Test posted!","a":${randInt}}`
+    assert.equal(res, expected)
   })
 
-  it( 'posting to a non-listening server times out and fails' , (done) => {
+  it( 'posting to a non-listening server times out and fails' , async () => {
     //await expect( r.postHTTP('/api/test', { 'a': randInt }) )
     //  .to.be.rejectedWith(Error)
-    syncify(async() => {
-      return r.postHTTP('/api/test', { 'a': randInt }, true)
-      .then((v) => { assert.fail('Should have failed to connect to a non-existent server') })
-      .catch((e) => {
-        LOGGER.info('ERROR', e)
-      })
-    }, done) 
+    return r.postHTTP('/api/test', { 'a': randInt }, true)
+    .then((v) => { assert.fail('Should have failed to connect to a non-existent server') })
+    .catch((e) => {
+      LOGGER.info('ERROR', e)
+    })
   })
 
-  it( 'adds a new route', (done) => {
-    syncify(async () => {
-      const router = server.getRouter()
-      router.route('/someRoute').get((req, res) => {
-        res.json({ 'a': randInt+1 })
-      })
-      const res = await r.getHTTP('/api/someRoute', {})
-      assert.equal( res, `{"a":${randInt+1}}`)
-    }, done)
+  it( 'adds a new route', async () => {
+    const router = server.getRouter()
+    router.route('/someRoute').get((req, res) => {
+      res.json({ 'a': randInt+1 })
+    })
+    const res = await r.getHTTP('/api/someRoute', {})
+    assert.equal( res, `{"a":${randInt+1}}`)
   }) 
   
-  it( 'get all empty compiles', (done) => {
-    syncify(async () => {
-      const res = await r.getHTTP('/api/compiles', {})
-      assert.equal( res, `{}`)
-    }, done)
+  it( 'get all empty compiles', async () => {
+    const res = await r.getHTTP('/api/compiles', {})
+    assert.equal( res, `{}`)
   })
 
-  it( 'get all compiles', (done) => {
-    syncify(async () => { 
-      setImmutableKey('/compiles/FirstContract', new Map({}))
-      setImmutableKey('/compiles/SecondContract', new Map({}))
-      const res = await r.getHTTP('/api/compiles', {})
-      assert.equal( res, '{"FirstContract":{},"SecondContract":{}}')
-    }, done)
+  it( 'get all compiles', async () => {
+    setImmutableKey('/compiles/FirstContract', new Map({}))
+    setImmutableKey('/compiles/SecondContract', new Map({}))
+    const res = await r.getHTTP('/api/compiles', {})
+    assert.equal( res, '{"FirstContract":{},"SecondContract":{}}')
   })
 
-  it( 'get all empty links', (done) => {
-    syncify(async () => {
-      const res = await r.getHTTP('/api/links', {})
-      assert.equal( res, `{}`)
-    }, done)
+  it( 'get all empty links', async () => {
+    const res = await r.getHTTP('/api/links', {})
+    assert.equal( res, `{}`)
   })
 
-  it( 'get all links', (done) => {
-    syncify(async () => {
-      const result = await r.postHTTP('/api/link/FirstLink', new Map({'a':1}))
-      assert.equal(result, '{"result":true,"body":{"a":1}}')
-      const result2 = await r.postHTTP('/api/link/SecondLink', new Map({'b': 2}))
-      assert.equal(result2, '{"result":true,"body":{"b":2}}')
-      const res = await r.getHTTP('/api/links', {})
-      assert.equal( res, '{"FirstLink":{"a":1},"SecondLink":{"b":2}}')
-    }, done)
+  it( 'get all links', async () => {
+    const result = await r.postHTTP('/api/link/FirstLink', new Map({'a':1}))
+    assert.equal(result, '{"result":true,"body":{"a":1}}')
+    const result2 = await r.postHTTP('/api/link/SecondLink', new Map({'b': 2}))
+    assert.equal(result2, '{"result":true,"body":{"b":2}}')
+    const res = await r.getHTTP('/api/links', {})
+    assert.equal( res, '{"FirstLink":{"a":1},"SecondLink":{"b":2}}')
   })
 
-  it( 'fail to overwrite a link', (done) => {
-    syncify(async () => {
-      await r.postHTTP('/api/link/FirstLink', new Map({'c':3}))
-        .then((val) => assert.fail("Should not have been able to overwrite /api/link/FirstLink"))
-        .catch((err) => LOGGER.info("Correctly failed to overwrite link /api/link/FirstLink"))
-    }, done) 
+  it( 'fail to overwrite a link', async () => {
+    await r.postHTTP('/api/link/FirstLink', new Map({'c':3}))
+      .then((val) => assert.fail("Should not have been able to overwrite /api/link/FirstLink"))
+      .catch((err) => LOGGER.info("Correctly failed to overwrite link /api/link/FirstLink"))
     // expect (await r.postHTTP('/api/link/FirstLink', new Map({'c':3})))
     //   .to.be.rejectedWith(Error)
   })
 
-  it( 'succeeds in overwriting a link', (done) => {
-    syncify(async () => {
-      const result = await r.postHTTP('/api/link/FirstLink', new Map({'d':4}), true)
-      await delayedGet(r.getHTTP.bind(r, '/api/link/FirstLink'), '{"d":4}')
-    }, done)
+  it( 'succeeds in overwriting a link', async () => {
+    const result = await r.postHTTP('/api/link/FirstLink', new Map({'d':4}), true)
+    await delayedGet(r.getHTTP.bind(r, '/api/link/FirstLink'), '{"d":4}')
   })
 
-  it( 'get all empty deploys', (done) => {
-    syncify(async() => {
-      const res = await r.getHTTP(`/api/deploys/${networkId}`, {})
-      assert.equal( res, `{}`)
-    }, done)
+  it( 'get all empty deploys', async () => {
+    const res = await r.getHTTP(`/api/deploys/${networkId}`, {})
+    assert.equal( res, `{}`)
   })
   
-  it( 'get all deploys', (done) => {
-    syncify(async() => {
-      r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'z':22}))
-      r.postHTTP(`/api/deploy/${networkId}/SecondDeploy`, new Map({'y':23}))
-      const res = await r.getHTTP(`/api/deploys/${networkId}`, {})
-      assert.equal( res, '{"FirstDeploy":{"z":22},"SecondDeploy":{"y":23}}')
-    }, done)
+  it( 'get all deploys', async () => {
+    r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'z':22}))
+    r.postHTTP(`/api/deploy/${networkId}/SecondDeploy`, new Map({'y':23}))
+    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${networkId}`),
+                     '{"FirstDeploy":{"z":22},"SecondDeploy":{"y":23}}')
   })
 
-  it( 'get deploy', (done) => {
-    syncify(async () => {
-      const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
-    }, done)
+  it( 'get deploy', async () => {
+    const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
   })
 
-  it( 'fail to overwrite a deploy', (done) => {
-    syncify(async () => {
-      const result =  await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':21}))
-      assert.equal(result, '{"result":false,"error":{}}')
+  it( 'fail to overwrite a deploy', async () => {
+    const result =  await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':21}))
+    assert.equal(result, '{"result":false,"error":{}}')
       //await expect (
       //  await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':21}))
       //).to.be.rejectedWith(Error)
-    }, done)
   })
 
-  it( 'succeeds in overwriting a deploy', (done) => {
-    syncify(async () => {
-      await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':4}), true)
-      const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
-      assert.equal( res, '{"x":4}')
-    }, done)
+  it( 'succeeds in overwriting a deploy', async () => {
+    await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':4}), true)
+    const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
+    assert.equal( res, '{"x":4}')
   })
 
   after( () => {
