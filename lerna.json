@@ -2,5 +2,7 @@
   "packages": [
     "packages/*"
   ],
+  "npmClient": "yarn",
+  "npmClientArgs": ["--no-optional"],
   "version": "0.0.0"
 }
