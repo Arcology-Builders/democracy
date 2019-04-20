@@ -33,7 +33,6 @@ utils.awaitOutputter = (outputCallResult, afterOutput) => {
  *        return value of the inputter method call (`inputCallResult`)
  */
 utils.awaitInputter = (inputCallResult, afterInput) => {
-  LOGGER.info('inputCallResult', inputCallResult)
   if (inputCallResult.then) {
     return inputCallResult.then(afterInput)
   } else {

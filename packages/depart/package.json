@@ -13,6 +13,9 @@
   "author": "Paul Pham <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/depart#readme",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "depart": "./bin.js"
   },
@@ -22,7 +25,8 @@
     "tests": "tests"
   },
   "files": [
-    "lib"
+    "src",
+    "index.js"
   ],
   "repository": {
     "type": "git",

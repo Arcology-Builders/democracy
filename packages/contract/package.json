@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/contract",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
@@ -10,9 +10,6 @@
   "author": "Paul Pham <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/contract#readme",
   "license": "MIT",
-  "bin": {
-    "depart": "./src/departure.js"
-  },
   "main": "index.js",
   "directories": {
     "src": "src",
