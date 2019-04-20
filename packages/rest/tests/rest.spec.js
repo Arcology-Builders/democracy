@@ -6,14 +6,15 @@ const assert = chai.assert
 const expect = chai.expect
 const { Map } = require('immutable')
 
-const { RemoteDB, Logger, setImmutableKey, DB_DIR, COMPILES_DIR, setFS, setPath }
+const { Logger, setImmutableKey, DB_DIR, COMPILES_DIR, setFS, setPath }
                  = require('@democracy.js/utils')
 const LOGGER     = new Logger('rest.spec')
+const { RemoteDB } = require('../src/client')
 
 setFS(fs)
 setPath(path)
 
-const RESTServer = require('../src/server')
+const { RESTServer } = require('../src/server')
 
 describe('Runs a REST server', () => {
 
@@ -27,22 +28,24 @@ describe('Runs a REST server', () => {
   })
 
   it( 'starts a REST server that handles a test request' , async () => {
-    const res = await r.postHTTP('/api/test', { 'a': randInt })
+    const res = await r.postHTTP('/api/test', { 'a': randInt }, true)
     const expected = `{"message":"Test posted!","a":${randInt}}`
     assert.equal( res, expected )
   })
 
   it( 'posting to a non-listening server times out and fails' , async () => {
+    server.stop()
     /*
     await expect( r.postHTTP('/api/test', { 'a': randInt }) )
       .to.be.rejectedWith(Error)
      */
-    return r.postHTTP('/api/test', { 'a': randInt })
+    await r.postHTTP('/api/test', { 'a': randInt }, true)
     .then((v) => { assert.fail('Should have failed to connect to a non-existent server') })
     .catch((e) => {
       LOGGER.info('ERROR', e)
     })
    
+    server.start()
   })
 
   it( 'adds a new route', async () => {
@@ -67,6 +70,7 @@ describe('Runs a REST server', () => {
   })
   
   after(async () => {
+    fs.unlinkSync(path.join(DB_DIR, 'test.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
     server.stop()
