@@ -46,6 +46,10 @@ describe('Democracy deploying.', () => {
     LOGGER.info('CHAIN ID', bm.getChainID())
     assert(isDeploy(await bm.getDeploy( 'TestLibrary-deployLib' )),
         "TestLibrary-deployLib not found")
+  })
+
+  it( 'should deploy again with no error', async () => {
+    const deploy = await d.deploy('TestLibrary', 'linkLib', 'deployLib')
     await bm.cleanLink( 'TestLibrary-linkLib' )
     await bm.cleanDeploy( 'TestLibrary-deployLib' )
   })

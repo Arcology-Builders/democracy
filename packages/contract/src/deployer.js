@@ -8,7 +8,7 @@ const { DEPLOYS_DIR, Logger, getImmutableKey, setImmutableKey }
 const LOGGER = new Logger('Deployer')
 const { awaitOutputter } = require('./utils')
 const { BuildsManager } = require('./buildsManager')
-const { isValidAddress } = require('ethereumjs-util')
+const { isValidAddress, keccak } = require('ethereumjs-util')
 
 class Deployer {
 
@@ -43,11 +43,15 @@ class Deployer {
 
     const deployMap = await this.bm.getDeploys()
 
+    const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
-    if (deployMap[deployName]) {
-      deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId}"`
-      console.error(deployError)
-      return { ...deployError }
+    const deploy = deployMap[deployName]
+    if (deploy && deploy.get('inputHash') === inputHash) {
+      deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
+      LOGGER.warn(deployError)
+      return deployMap[deployName]
+    } else {
+      LOGGER.info(`Deploy ${deployName} is out-of-date with hash ${inputHash}`)
     }
 
     const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
@@ -91,13 +95,14 @@ class Deployer {
       deployTx     : minedContract,
       deployAddress: minedContract.contractAddress,
       deployDate   : now.toLocaleString(),
-      deployTime   : now.getTime()
+      deployTime   : now.getTime(),
+      inputHash    : inputHash,
     })
 
     const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
     LOGGER.debug(`Writing deploy to ${deployFilePath}`)
     
-    return awaitOutputter(this.outputter(deployFilePath, deployOutput),
+    return awaitOutputter(this.outputter(deployFilePath, deployOutput, true),
                           () => { return deployOutput })
   }
 

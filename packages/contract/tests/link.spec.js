@@ -7,11 +7,12 @@ const should   = chai.should()
 const { Map, List } = require('immutable')
 
 const { Linker } = require('..')
-const { getNetwork, Logger, setFS } 
+const { getNetwork, Logger, setFS, setPath }
                = require('@democracy.js/utils')
 const LOGGER = new Logger('link.spec')
 
 setFS(require('fs'))
+setPath(require('path'))
 
 describe('Democracy linking', () => {
 
@@ -41,13 +42,16 @@ describe('Democracy linking', () => {
 
   it( 'links a previous compile', async() => {
     const output = await l.link( 'TestLibrary', 'linkLib' )
-    LOGGER.info('OUTPUT', output)
     assert(Map.isMap(output), "Linking should produce a map")
     const output2 = await bm.getLink( 'TestLibrary-linkLib' )
     assert(List.isList(output.get('abi')))
     assert(List.isList(output2.get('abi')))
     assert(output2.equals(output), 'Link output should equal the map read from link file.')
   })
+
+  it( 'doesnt fail on a relink', async() => {
+    const output = await l.link( 'TestLibrary', 'linkLib' )
+  }) 
 
   after(async () => {
     await l.getBuildsManager().cleanLink( 'TestLibrary-linkLib' )

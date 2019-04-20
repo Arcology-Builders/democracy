@@ -10,6 +10,7 @@ const LOGGER = new Logger('Linker')
 const { isContract } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
 const { awaitOutputter } = require('./utils')
+const { keccak } = require('ethereumjs-util')
 
 class Linker {
 
@@ -43,6 +44,13 @@ class Linker {
     //ensureDir(linksDir)
 
     const link = await this.bm.getLink(linkName)
+    const inputHash = keccak(JSON.stringify(contractOutput.toJS())).toString('hex')
+    if (link && link.get('inputHash') === inputHash) {
+      LOGGER.info(`Link ${linkName} is up-to-date with hash ${inputHash}`)
+      return link
+    } else {
+      LOGGER.info(`Link ${linkName} out-of-date with hash ${inputHash}`)
+    }
     assert(!isLink(link), `Link ${linkName} already exists`)
 
     const deployMap = await this.bm.getDeploys()
@@ -108,6 +116,7 @@ class Linker {
       linkTime       : now.getTime(),
       code           : replacedCode,
       abi            : contractOutput.get('abi'),
+      inputHash      : inputHash,
     })
 
     const linkFilePath = `${linksDir}/${linkName}`
