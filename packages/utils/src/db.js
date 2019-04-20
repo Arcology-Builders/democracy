@@ -5,87 +5,8 @@ const { List, Map }
 const http        = require('http')
 const url         = require('url')
 const { Logger }  = require('./logger')
-const LOGGER      = new Logger('RemoteDB')
+const LOGGER      = new Logger('db')
 const { isBrowser, ensureDir, DB_DIR, buildFromDirs } = require('./utils')
-
-const RemoteDB = class {
-
-  constructor(_host, _port) {
-    this.host = _host
-    this.port = _port
-    this.url  = `http://${_host}:${_port}`
-  } 
-
-  async config() {
-    return getHTTP('/api/config')
-  } 
-
-  async postHTTP(_apiPath, bodyObj) {
-    const post_data = JSON.stringify(bodyObj) //querystring.stringify(bodyObj)
-    const post_options = {
-      host: this.host,
-      port: this.port,
-      path: _apiPath,
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(post_data),
-      }
-    }
-    return new Promise((resolve, reject) => {
-			const post_req = http.request(post_options, (res) => {
-				res.setEncoding('utf8')
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(Buffer.from(chunk))
-          LOGGER.debug('data', data)
-				}).on('end', () => {
-          LOGGER.debug('data', data)
-					const body = Buffer.concat(data)
-          resolve(body.toString())
-				}).on('error', (err) => {
-          LOGGER.error('res error', err)
-          reject(err)
-        })
-			})
-
-      post_req.on('error', (err) => {
-        LOGGER.error('req error', err)
-        reject(err)
-      })
-			post_req.write(post_data)
-			post_req.end()
-    })
-  }
- 
-  async getHTTP(_apiPath) {
-    return new Promise((resolve, reject) => {
-      http.get(url.parse(this.url + _apiPath), (res) => {
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(chunk);
-				}).on('end', () => {
-					const body = Buffer.concat(data)
-				  resolve(body.toString())	
-				}).on('error', (err) => {
-					reject(err)
-        })
-      })
-    }) 
-  }
-
-  /**
-   * Asynchronous function for writing a key-value pair to a remote REST interface.
-   * @param key
-   * @param value
-   */
-  async set(key, value) {
-  }
-
-  async get(key, defaultValue) {
-  }
-
-}
 
 /**
  * Take the callback action for every level in a hierarchical key space
@@ -134,6 +55,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
       ensureDir(store.path.join(DB_DIR, ...keyPrefixes)) })
     const now = Date.now()
+    LOGGER.info(`overwrite ${overwrite}`)
 
     if (store.fs.existsSync(`${dbFile}.json`)) {
       if (!value || overwrite) {
@@ -147,6 +69,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
           return true
         }
       } else {
+        LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
         throw new Error(`Key ${dbFile}.json exists and is read-only.`)
       }
     } else if (store.fs.existsSync(dbFile)) {
@@ -199,7 +122,4 @@ store.getImmutableKey = (fullKey, defaultValue) => {
  */
 }  
 
-module.exports = {
-  RemoteDB       : RemoteDB,
-  ...store,
-}
+module.exports = store

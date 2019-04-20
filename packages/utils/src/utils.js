@@ -126,7 +126,7 @@ utils.typedArraysEqual = (_a, _b) => {
 }
 
 /**
- * Use this to perform different actions based on whether we are in browser or not
+ * @return true if we are in a browser (tests for present of `window` and `window.document`
  */
 utils.isBrowser = () => {
   return (typeof window != 'undefined' && window.document)
@@ -134,6 +134,13 @@ utils.isBrowser = () => {
 
 utils.ensureDir = (dirName) => {
   if (!utils.fs.existsSync(dirName)) { utils.fs.mkdirSync(dirName, { recursive: true } ) }
+}
+
+/**
+ * Remove a file (not a directory) if it exists
+ */
+utils.rimRafFileSync = (fn) => {
+  if (utils.fs.existsSync(fn)) { utils.fs.unlinkSync(fn) }
 }
 
 /**

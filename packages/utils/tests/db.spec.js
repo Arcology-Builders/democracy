@@ -4,12 +4,12 @@ const expect = require('chai').expect
 const should = require('chai').should()
 //const { traverseDirs, buildFromDirs, DB_DIR,
 //        setFS, setPath, setImmutableKey, getImmutableKey } = require('..')
-const { traverseDirs, buildFromDirs, DB_DIR,
-        setFS, setPath, setImmutableKey, getImmutableKey } = require('..')
+const utils = require('..')
 
 const fs = require('fs')
-setFS(fs)
-setPath(require('path'))
+utils.setFS(fs)
+utils.setPath(require('path'))
+const { traverseDirs, buildFromDirs, DB_DIR, setImmutableKey, getImmutableKey } = utils
 
 describe('Database tests for key/value store', () => {
 
@@ -37,6 +37,7 @@ describe('Database tests for key/value store', () => {
   it('deletes a subkey by moving it to the side', () => {
     assert(setImmutableKey('someSpace/a', null), 'Deleting an existing key should succeed')
     assert.notOk(fs.existsSync(`${DB_DIR}/someSpace/a.json`), 'JSON file should not exist.')
+    utils.rimRafFileSync(`${DB_DIR}/someSpace/a.json`) 
   })
 
   it('sets hierarchical keys', () => {
