@@ -3,5 +3,6 @@
   "dependencies": {
     "demo.js": "^0.0.0"
   },
-  "private": true
+  "private": true,
+  "version": "0.0.1"
 }

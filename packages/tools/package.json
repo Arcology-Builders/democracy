@@ -1,6 +1,6 @@
 {
   "name": "demo-tools",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Dev dependencies for other Democracy packages, not publishable",
   "keywords": [
     "devtools",
@@ -13,10 +13,8 @@
   "author": "cryptogoth <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/tools#readme",
   "license": "MIT",
-  "directories": {
-  },
-  "files": [
-  ],
+  "directories": {},
+  "files": [],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
@@ -29,13 +27,13 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "@babel/polyfill": "7.2.5",
-    "browserfs": "1.4.3",
-    "chai": "4.2.0",
     "@babel/core": "7.3.3",
+    "@babel/polyfill": "7.2.5",
     "@babel/preset-env": "7.3.1",
     "@babel/preset-react": "7.0.0",
     "babel-loader": "8.0.5",
+    "browserfs": "1.4.3",
+    "chai": "4.2.0",
     "html-loader": "0.5.5",
     "html-webpack-plugin": "3.2.0",
     "prop-types": "15.7.2",
