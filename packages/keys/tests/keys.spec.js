@@ -8,7 +8,7 @@ const keys = require('../src/keys')
 const wallet = require('../src/wallet')
 const randombytes = require('randombytes')
 const { getImmutableKey, setImmutableKey, fromJS, Logger, deepEqual, getNetwork,
-  setFS, setPath } = require('@democracy.js/utils')
+  setFS, setPath } = require('demo-utils')
 const LOGGER = new Logger('keys.spec')
 
 const { Map } = require('immutable')

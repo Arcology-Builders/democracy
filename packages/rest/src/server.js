@@ -1,7 +1,7 @@
 const express = require('express')
 const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger,
   COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR }
-	      = require('@democracy.js/utils')
+	      = require('demo-utils')
 const { Map } = require('immutable')
 const utils = require('ethereumjs-utils')
 const http = require('http')

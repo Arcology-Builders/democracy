@@ -4,7 +4,7 @@ const assert = require('assert')
 const { List, Map }
              = require('immutable')
 const { Logger, isNetwork, isDeploy, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
-             = require('@democracy.js/utils')
+             = require('demo-utils')
 const LOGGER = new Logger('Linker')
 
 const { isContract } = require('./contractsManager')

@@ -6,11 +6,11 @@ const { keccak } = require('ethereumjs-util')
 const { List, Map, Set }
                  = require('immutable')
 const { ContractsManager, awaitOutputter, getInputsToBuild }
-                 = require('@democracy.js/contract')
+                 = require('demo-contract')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
         getImmutableKey, setImmutableKey, Logger }
-                 = require('@democracy.js/utils')
+                 = require('demo-utils')
 
 const LOGGER = new Logger('Compiler')
 

@@ -8,7 +8,7 @@ const { Map, List } = require('immutable')
 
 const { Linker } = require('..')
 const { getNetwork, Logger, setFS, setPath }
-               = require('@democracy.js/utils')
+               = require('demo-utils')
 const LOGGER = new Logger('link.spec')
 
 setFS(require('fs'))

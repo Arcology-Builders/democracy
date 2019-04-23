@@ -2,13 +2,13 @@ const fs         = require('fs')
 const assert     = require('chai').assert
 
 const { keccak } = require('ethereumjs-util')
-const utils      = require('@democracy.js/utils')
+const utils      = require('demo-utils')
 const { Logger, ZEPPELIN_SRC_PATH, toJS } = utils
 utils.setFS(fs)
 utils.setPath(require('path'))
 
 const { ContractsManager, isCompile, isContract, getInputsToBuild }
-             = require('@democracy.js/contract')
+             = require('demo-contract')
 const { Compiler } = require('..')
 const LOGGER = new Logger('Compiler Test')
 

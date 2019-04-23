@@ -9,7 +9,7 @@ const { awaitInputter  } = require('./utils')
 const { ContractsManager  } = require('./contractsManager')
 
 const { Logger, LINKS_DIR, DEPLOYS_DIR }
-                 = require('@democracy.js/utils')
+                 = require('demo-utils')
 
 const LOGGER = new Logger('BuildsManager')
 

@@ -1,5 +1,5 @@
 const { Deployer, Linker, isLink, isDeploy } = require('..')
-const { getNetwork, Logger } = require('@democracy.js/utils')
+const { getNetwork, Logger } = require('demo-utils')
 const LOGGER = new Logger('deployer.spec')
 
 const chai = require('chai').use(require('chai-as-promised'));

@@ -42,6 +42,6 @@
   "devDependencies": {
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "demo-test-contracts": "^0.0.2"
+    "demo-test-contracts": "^0.0.1"
   }
 }

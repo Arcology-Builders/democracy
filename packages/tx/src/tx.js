@@ -2,8 +2,8 @@
 
 const assert = require('chai').assert
 
-const { getNetwork, isNetwork, getEndpointURL } = require('@democracy.js/utils')
-const { isAccount, Wallet }      = require('@democracy.js/keys')
+const { getNetwork, isNetwork, getEndpointURL } = require('demo-utils')
+const { isAccount, Wallet }      = require('demo-keys')
 const { toHex, toWei }   = require('web3-utils')
 
 const eth = getNetwork()

@@ -1,14 +1,14 @@
-const utils = require('@democracy.js/utils')
+const utils = require('demo-utils')
 const { getConfig, getNetwork, getEndpointURL, Logger } = utils
 utils.setFS(require('fs'))
 utils.setPath(require('path'))
 
 const { Transactor } = require('../src/tx')
 const { Wallet, create, pay }
-             = require('@democracy.js/keys')
+             = require('demo-keys')
 const assert = require('chai').assert
 const { BuildsManager, Linker, Deployer, isDeploy, Contract }
-             = require('@democracy.js/contract')
+             = require('demo-contract')
 const LOGGER = new Logger('tx.spec')
 const { toWei } = require('web3-utils')
 const BN = require('bn.js')
@@ -62,8 +62,9 @@ describe( 'transaction sender', () => {
   it( 'creates a raw tx' , async () => {
     const data = contract.getMethodCallData('send', [accounts[2]])
     const deployAddress = deploy.get('deployAddress')
+    const senderAddress = senderAccount.get('addressPrefixed')
     tx = await txor.createRawTx({
-      fromAddress: accounts[1],
+      fromAddress: senderAddress,
       toAddress  : deployAddress,
       value      : toWei('0.001', 'ether'),
       data       : data,
@@ -71,11 +72,13 @@ describe( 'transaction sender', () => {
     const hexChainId = '0x' + Number(chainId).toString(16)
     const methodObj = contract.getABIObjectByName('send')
     const expected = abi.encodeMethod(methodObj, [accounts[2]])
+    const nonce = await eth.getTransactionCount(senderAddress)
+    const value = toWei("0.001", "ether")
     assert.equal(JSON.stringify(tx),
-      '{"nonce":"0","gas":"1668b","gasPrice":"0x1319718a5000","data":'+
+      `{"nonce":"${nonce}","gas":"1668b","gasPrice":"0x1319718a5000","data":`+
       `"${expected}",`+
-      `"from":"${accounts[1]}","to":`+
-      `"${deployAddress}","value":"1000000000000000","chainId":"${hexChainId}"}`
+      `"from":"${senderAddress}","to":`+
+      `"${deployAddress}","value":"${value}","chainId":"${hexChainId}"}`
     )
   })
 

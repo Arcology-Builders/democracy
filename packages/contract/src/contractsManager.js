@@ -8,7 +8,7 @@ const { List, Map, Set }
 const { awaitInputter  } = require('./utils')
 
 const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger }
-                 = require('@democracy.js/utils')
+                 = require('demo-utils')
 
 const LOGGER = new Logger('ContractsManager')
 

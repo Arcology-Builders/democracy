@@ -1,5 +1,5 @@
 const path = require('path')
-const utils = require('@democracy.js/utils')
+const utils = require('demo-utils')
 utils.setFS(require('fs'))
 utils.setPath(path)
 const { setImmutableKey, getNetwork, DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR } = utils

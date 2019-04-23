@@ -1,4 +1,4 @@
-const { Logger, isNetwork } = require('@democracy.js/utils')
+const { Logger, isNetwork } = require('demo-utils')
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const abi = require('ethjs-abi')

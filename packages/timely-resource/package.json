@@ -1,7 +1,7 @@
 {
   "name": "timely-resource",
   "dependencies": {
-    "demo.js": "^0.0.0"
+    "democracy.js": "^0.2.5"
   },
   "private": true,
   "version": "0.0.1"

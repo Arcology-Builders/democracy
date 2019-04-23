@@ -4,7 +4,7 @@ const { Map, List, Seq }
              = require('immutable')
 
 const { DEPLOYS_DIR, Logger, getImmutableKey, setImmutableKey }
-             = require('@democracy.js/utils')
+             = require('demo-utils')
 const LOGGER = new Logger('Deployer')
 const { awaitOutputter } = require('./utils')
 const { BuildsManager } = require('./buildsManager')

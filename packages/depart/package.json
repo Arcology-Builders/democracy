@@ -39,13 +39,13 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/compile": "0.0.6",
-    "@democracy.js/contract": "0.0.7",
+    "demo-compile": "^0.0.1",
+    "demo-contract": "^0.0.1",
     "@democracy.js/utils": "0.2.5",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
-    "@democracy.js/test-contracts": "0.0.2",
+    "demo-test-contracts": "^0.0.1",
     "chai": "^4.2.0"
   }
 }

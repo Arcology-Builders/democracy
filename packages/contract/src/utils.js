@@ -1,6 +1,6 @@
 'use strict'
 
-const { Logger } = require('@democracy.js/utils')
+const { Logger } = require('demo-utils')
 const LOGGER = new Logger('contract/utils')
 
 const { keccak } = require('ethereumjs-util')
