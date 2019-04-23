@@ -12,6 +12,7 @@ const { BuildsManager, Linker, Deployer, isDeploy, Contract }
 const LOGGER = new Logger('tx.spec')
 const { toWei } = require('web3-utils')
 const BN = require('bn.js')
+const abi = require('ethjs-abi')
 
 describe( 'transaction sender', () => {
 
@@ -68,9 +69,11 @@ describe( 'transaction sender', () => {
       data       : data,
     })
     const hexChainId = '0x' + Number(chainId).toString(16)
+    const methodObj = contract.getABIObjectByName('send')
+    const expected = abi.encodeMethod(methodObj, [accounts[2]])
     assert.equal(JSON.stringify(tx),
       '{"nonce":"0","gas":"1668b","gasPrice":"0x1319718a5000","data":'+
-      '"0x3e58c58c000000000000000000000000dea7e4f55aaf24b723a35f41f9881c370af3da09",'+
+      `"${expected}",`+
       `"from":"${accounts[1]}","to":`+
       `"${deployAddress}","value":"1000000000000000","chainId":"${hexChainId}"}`
     )
