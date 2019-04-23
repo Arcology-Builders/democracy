@@ -1,21 +1,11 @@
 {
   "name": "democracy",
   "version": "0.0.1",
-  "description": "Democracy: a minimalist framework for distributed countries",
-  "directories": {
-    "test": "test"
-  },
-  "publishConfig": {
-    "access": "private"
-  },
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
-  "scripts": {
-  },
-  "_moduleAliases": {
-  },
+  "description": "Monorepo for Democracy: a minimalist framework for distributed countries",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
