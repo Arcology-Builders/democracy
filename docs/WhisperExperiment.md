@@ -7,6 +7,32 @@ enabled. This document describes our investigation into using Whisper for an in-
 private messenger for an encrypted sidechannel coordinating Ethereum on-chain activities,
 as well as understanding its guarantees for darkness.
 
+## Public Node
+
+Democracy is now running the following public Whisper Rinkeby nodes, which you are free
+to use with `web3.js` in your dapps.
+
+#### http://eth.arcology.nyc:8545
+#### ws://eth.arcology.nyc:8546
+
+Starting at `web3@1.0.0.beta52`, the Javascript syntax is
+```
+const Web3 = require('web3')
+const web3 = new Web3( new Web3.providers.WebsocketProvider('ws://eth.arcology.nyc:8546',
+                                           {headers: {Origin: "mychat"}})
+    )
+// Any `shh method like
+const main = async () => {
+  let keyPairID = await web3.shh.newKeyPair()
+}
+```
+
+Running a Whisper node is a great way to learn and test the protocol, give back to the community,
+increase the chances that your messages get routed, and guarantee that your users are
+able to query a node with the `shh` module in order to power any UIs.
+
+More notes on how to do this to come.
+
 ## Tools
 
 `wnode` is a command-line diagnostic tool that allows one to run a bare Whisper-only node
@@ -38,11 +64,12 @@ These are rare birds, and no one advertises that they have them.
 
 ### Testnet
 
-As far as I can tell, these are indistinguishable from mainnet nodes, and independent of
-Ethereum on-chain transactions. So it should just form one big DHT over both "testnet"
-and "mainnet" messages, and would be an interesting way to bridge the two.
+Testnet and mainnet whisper nodes appear to work identically, except messages are not
+routed in between them. It might be desirable to bridge the two, or other networks,
+for cross-chain coordination.
 
-* `enode://f0fa95ee17a42b4cf5fee104c5ad61115ff63b2f720c027b1246188afc93a61ba1d67121ea9ebfa78678e796a562a5d949ed5265549f0a4936b7f3bd8d5d2706@35.170.55.156:30303`
+
+* Advertised on `ethereum/whisper` gitter   `enode://f0fa95ee17a42b4cf5fee104c5ad61115ff63b2f720c027b1246188afc93a61ba1d67121ea9ebfa78678e796a562a5d949ed5265549f0a4936b7f3bd8d5d2706@35.170.55.156:30303`
 
 ## Projects Using Whisper
 
