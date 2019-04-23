@@ -59,6 +59,9 @@ ethereum/whisper gitter
 How to run a Status/Whisper docker image, with external configuration
 * https://dev.status.im/docs/run_status_node.html
 
+Bloom State Channels using Whisper
+* https://blog.hellobloom.io/introducing-bloom-payment-channels-enabled-by-ethereum-whisper-1fec8ba10a03
+
 Building Status (I hand it to them, it is all open source)
 * https://status.im/build_status/status_go.html
 
