@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
+  "_moduleAliases": {
+    "@root": "./packages/democracy.js"
+  },
   "keywords": [
     "ethereum",
     "ssb",
