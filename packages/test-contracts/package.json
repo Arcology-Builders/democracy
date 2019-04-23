@@ -1,6 +1,6 @@
 {
-  "name": "@democracy.js/test-contracts",
-  "version": "0.0.2",
+  "name": "demo-test-contracts",
+  "version": "0.0.3",
   "description": "Test contracts for Democracy, a distributed country framework",
   "keywords": [
     "democracy",

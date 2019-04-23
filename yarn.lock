@@ -675,6 +675,16 @@
     ethjs-abi "0.2.1"
     immutable "4.0.0-rc.12"
 
+"@democracy.js/contract@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@democracy.js/contract/-/contract-0.0.7.tgz#c860d8fbcccb67aadfc30d776d3924d00b92461f"
+  integrity sha512-H+qv1XUkcORi8odG0oEQanAfGFrENRhta3MFiyCoYfUbygpxTBv73a4nFmzbsOvcr+0buHohynExRENBgf+0wg==
+  dependencies:
+    "@democracy.js/utils" "0.2.5"
+    ethereumjs-util "6.1.0"
+    ethjs-abi "0.2.1"
+    immutable "4.0.0-rc.12"
+
 "@democracy.js/utils@0.0.7":
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/@democracy.js/utils/-/utils-0.0.7.tgz#6a2e7337f1e9f1621b439c9b669926320d9c153e"
@@ -1750,7 +1760,7 @@ chai-as-promised@7.1.1:
   dependencies:
     check-error "^1.0.2"
 
-chai@4.2.0:
+chai@4.2.0, chai@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.2.0.tgz#760aa72cf20e3795e84b12877ce0e83737aa29e5"
   integrity sha512-XQU3bhBukrOsQCuwZndwGcCVQHyZi53fQ6Ys1Fym7E4olpIqqZZhhoFJoaKVvV17lWQoXYwgWN2nF5crA8J2jw==

@@ -1,7 +1,7 @@
 {
-  "name": "@democracy.js/compile",
-  "version": "0.0.6",
-  "description": "Compiling for Democracy, tool for a distributed country",
+  "name": "demo-compile",
+  "version": "0.0.7",
+  "description": "Ethereum compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
     "ethereum",
@@ -35,14 +35,14 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "@democracy.js/test-contracts": "0.0.2",
+    "demo-test-contracts": "0.0.2",
     "chai": "4.2.0",
     "openzeppelin-solidity": "2.0.0",
-    "@democracy.js/rest": "0.0.6"
+    "demo-rest": "^0.0.7"
   },
   "dependencies": {
-    "@democracy.js/contract": "0.0.7",
-    "@democracy.js/utils": "0.2.5",
+    "demo-contract": "^0.0.8",
+    "demo-utils": "^0.2.6",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
     "solc": "0.4.25"

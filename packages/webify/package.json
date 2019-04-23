@@ -1,8 +1,8 @@
 {
-  "name": "@democracy.js/webify",
-  "version": "0.0.3",
+  "name": "demo-webify",
+  "version": "0.0.4",
   "description": "Generic tools to webify a distributed country",
-  "keywords": "webpack",
+  "keywords": "democracy ethereum webpack",
   "author": "Paul Pham",
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
@@ -15,27 +15,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@babel/polyfill": "7.2.5",
-    "@democracy.js/contract": "0.0.5",
-    "@democracy.js/keys": "0.1.1",
-    "@democracy.js/utils": "0.2.4",
-    "browserfs": "1.4.3",
-    "chai": "4.2.0",
-    "democracy.js": "0.2.4",
-    "dotenv": "7.0.0"
+    "demo-contract": "^0.0.0",
+    "demo-keys": "^0.0.0",
+    "demo-utils": "^0.0.0",
+    "demo.js": "^0.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.3.3",
-    "@babel/preset-env": "7.3.1",
-    "@babel/preset-react": "7.0.0",
-    "babel-loader": "8.0.5",
-    "html-loader": "0.5.5",
-    "html-webpack-plugin": "3.2.0",
-    "prop-types": "15.7.2",
-    "react": "16.8.2",
-    "react-dom": "16.8.2",
+    "demo-tools": "^0.0.0",
     "webpack": "4.29.4",
-    "webpack-cli": "3.2.1",
     "webpack-dev-server": "3.1.14"
   }
 }

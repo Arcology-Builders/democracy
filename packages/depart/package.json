@@ -1,6 +1,6 @@
 {
-  "name": "@democracy.js/depart",
-  "version": "0.0.0",
+  "name": "demo-depart",
+  "version": "0.0.1",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
     "ethereum",

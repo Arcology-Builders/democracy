@@ -3,6 +3,7 @@ const utils = require('@democracy.js/utils')
 utils.setFS(require('fs'))
 utils.setPath(require('path'))
 
+const { Map } = require('immutable')
 const assert = require('chai').assert
 
 const { depart } = require('..')
@@ -21,11 +22,11 @@ describe( 'Departures', () => {
       name: "simple-departure",
       cleanAfter: true,
       address: accounts[1],
-      sourcePath: "node_modules/@democracy.js/test-contracts/contracts",
-      callback: async (compile, link, deploy) => {
+      sourcePath: "../../node_modules/@democracy.js/test-contracts/contracts",
+      callback: async (compile, link, deploy, c, l, d) => {
         await compile( 'DifferentSender', 'DifferentSender.sol' )
         await link( 'DifferentSender', 'link' )
-        await deploy( 'DifferentSender', 'link', 'deploy' )
+        await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
       }
     })
   })

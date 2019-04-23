@@ -1,6 +1,7 @@
 {
-  "name": "@democracy.js/timely-resource",
+  "name": "timely-resource",
   "dependencies": {
-    "@invisible-college/democracy": "^0.1.5"
-  }
+    "demo.js": "^0.0.0"
+  },
+  "private": true
 }

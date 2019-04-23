@@ -1,5 +1,5 @@
 {
-  "name": "tools",
+  "name": "demo-tools",
   "version": "0.0.0",
   "description": "Dev dependencies for other Democracy packages, not publishable",
   "keywords": [
@@ -9,6 +9,7 @@
     "node",
     "ethereum"
   ],
+  "private": true,
   "author": "cryptogoth <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/tools#readme",
   "license": "MIT",

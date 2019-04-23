@@ -1,6 +1,6 @@
 {
-  "name": "@democracy.js/tx",
-  "version": "0.0.2",
+  "name": "demo-tx",
+  "version": "0.0.3",
   "description": "Ethereum transaction management for a distributed country",
   "keywords": [
     "ethereum",
@@ -32,12 +32,12 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "@democracy.js/contract": "0.0.7"
+    "demo-contract": "^0.0.8"
   },
   "dependencies": {
-    "@democracy.js/keys": "0.1.1",
-    "@democracy.js/test-contracts": "0.0.2",
-    "@democracy.js/utils": "0.2.5",
+    "demo-keys": "^0.1.2",
+    "demo-test-contracts": "^0.0.3",
+    "demo-utils": "^0.2.6",
     "chai": "4.2.0",
     "immutable": "4.0.0-rc.12",
     "web3-utils": "1.0.0-beta.52"

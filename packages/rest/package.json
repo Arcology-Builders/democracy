@@ -1,6 +1,6 @@
 {
-  "name": "@democracy.js/rest",
-  "version": "0.0.6",
+  "name": "demo-rest",
+  "version": "0.0.7",
   "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
@@ -35,7 +35,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.2.5",
+    "demo-utils": "^0.2.5",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "ethereumjs-utils": "5.2.5",

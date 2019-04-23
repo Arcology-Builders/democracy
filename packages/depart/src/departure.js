@@ -22,7 +22,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
   let accounts = await eth.accounts()
   let chainId = await eth.net_version()
   let bm = new BuildsManager({startSourcePath: sourcePath, chainId: chainId})
-  let c = new Compiler(sourcePath)
+  let c = new Compiler({startSourcePath:sourcePath})
   let cm = c.getContractsManager()
   let l = new Linker({bm:bm})
   let d = new Deployer({bm:bm, chainId: chainId, eth: eth, address: address})
@@ -58,7 +58,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     assert(contractName, 'contractName param not given')
     assert(linkId, 'linkId param not given')
     assert(deployId, 'deployId param not given')
-    const output = await d.deploy( contractName, linkId, deployId, ctorArgList )
+    const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
     assert( isDeploy(output) )
     deploys = deploys.get(contractName, output)
   }
@@ -69,7 +69,9 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     deploys.forEach( (d) => { bm.cleanDeploySync(d.get('name')) })
   }
 
-  return callback(compile, link, deploy)
+  return callback(compile, link, deploy, c, l, d).then(() => {
+    if (cleanAfter) { return clean() }
+  })
 
 }
 
