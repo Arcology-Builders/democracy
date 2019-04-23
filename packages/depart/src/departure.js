@@ -32,25 +32,24 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     assert(sourceFile && sourceFile.endsWith('.sol'),
            'sourceFile param not given or does not end with .sol extension')
     const output = await c.compile( sourceFile )
-    LOGGER.debug("COMPILE OUTPUT", output)
     assert(isCompile(output))
     assert.equal( output.get(contractName).get('name'), contractName )
     const contract = await cm.getContract(contractName)
-    LOGGER.debug("COMPILE OUTPUT", contract)
     assert(isContract(contract))
-    compiles = compiles.set(contractName, output)
+    compiles = compiles.set(contractName, output.get(contractName))
   }
 
   let links = new Map()
   const link = async ( contractName, linkId, depMap ) => {
     assert(contractName, 'contractName param not given')
     assert(linkId, 'link name not given')
-    let output = await bm.getLink( `${contractName}-${linkId}` )
-    if (!link) {
+    const linkName = `${contractName}-${linkId}`
+    let output = await bm.getLink( linkName )
+    if (!isLink(output)) {
       output = await l.link( contractName, linkId, depMap )
     }
     assert(isLink(output))
-    links = links.set(contractName, output)
+    links = links.set(linkName, output)
   }
 
   let deploys = new Map()
@@ -58,15 +57,28 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     assert(contractName, 'contractName param not given')
     assert(linkId, 'linkId param not given')
     assert(deployId, 'deployId param not given')
+    const deployName = `${contractName}-${deployId}`
     const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
     assert( isDeploy(output) )
-    deploys = deploys.set(contractName, output)
+    deploys = deploys.set(deployName, output)
   }
 
   const clean = async () => {
-    await Promise.all(List(compiles.map((c) => { return cm.cleanContract(c.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean compiles', values) })
-    await Promise.all(List(links.map(   (l) => { return bm.cleanLink(    l.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean links'   , values) })
-    await Promise.all(List(deploys.map( (d) => { return bm.cleanDeploy(  d.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean deploys' , values) })
+    const compileList = List(compiles.map((c, name) => {
+      LOGGER.debug('CONTRACT NAME', name, c)
+      return cm.cleanContract( name )
+    }).values()).toJS()
+    await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
+
+    const linkList = List(links.map((l, name) => {
+      return bm.cleanLink( name )
+    }).values()).toJS()
+    await Promise.all( linkList ).then((vals) => { LOGGER.info( 'Clean links', vals) })
+
+    const deployList = List(deploys.map((d, name) => {
+      return bm.cleanDeploy( name )
+    }).values()).toJS()
+    await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
   }
 
   return callback(compile, link, deploy, c, l, d).then(() => {

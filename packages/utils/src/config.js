@@ -45,7 +45,6 @@ const ENVIRONMENTS = {
   'DEVELOPMENT': createDevEnv,
   'DEV'        : createDevEnv,
   'TEST'       : () => {
-    LOGGER.info('TEST.DB_URL', process.env['TEST.DB_URL'])
     return createEnv({
     'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
     'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
@@ -83,16 +82,16 @@ const lazyEval = (env) => {
   return config
 }
 
-configs.getConfig = () => {
+configs.getConfig = (printDebug) => {
   const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ""
   const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
   const env = windowEnv ? windowEnv : processEnv
-  LOGGER.debug(`NODE_ENV=${env}`)
+  printDebug && LOGGER.debug(`NODE_ENV=${env}`)
   config = lazyEval(env)
   if (config) {
    return config
   } else {
-   LOGGER.info('NODE_ENV not defined, using TEST')
+   printDebug && LOGGER.debug('NODE_ENV not defined, using TEST')
    return lazyEval('TEST')
   }
 }
