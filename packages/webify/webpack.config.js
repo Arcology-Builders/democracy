@@ -4,16 +4,18 @@ const HtmlWebPackPlugin = require('html-webpack-plugin')
 const path = require('path');
 const npm_package = require('./package.json')
 
-console.log(JSON.stringify(npm_package._moduleAliases));
+const toolsConfig = require('../tools/webpack.config')
 
 module.exports = (env, argv) => {
+  const baseConfig = toolsConfig(env, argv, 'democracy')
+
   const min = (argv.mode === 'production') ? '.min' : ''
   const version = npm_package.version
   const bundleName = `democracy.${version}${min}`
   const entry = {}
   entry[bundleName] = [
        './src/index.js',
-       path.resolve(__dirname, 'node_modules/browserfs/dist/browserfs.min.js'),
+       path.resolve(__dirname, '../../node_modules/browserfs/dist/browserfs.min.js'),
      ]
   return { module: {
     noParse: /browserfs\.js/,

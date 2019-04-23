@@ -1,1 +1,0 @@
-var addresses={"timelyAddress":"0x9d5cdb102b90a89f5722e51cc8001e508fe49f94","tokenAddress":"0xe82d1545fff64f546e9202b05d8c29f98162b62e"}

@@ -1,1 +1,0 @@
-var address='0x1234'

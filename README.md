@@ -4,28 +4,41 @@ democracy
 Tools for running a distributed country, currently on Ethereum.
 
 With reusable components for general development.
-Note: we have change our NPM package name from `@invisible-college/democracy`
-to `democracy.js`.
+*Note*: we are changing our top-level NPM package name from `democracy.js` to `demo.js`,
+and all our subpackages from `@democracy.js/blah` to `demo-blah`
+because we are tired of typing so much. This is a [lerna](http://lernajs.org)-managed
+monorepo.
 
-[![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js) `democracy.js` our main framework package and command interface, built on `ethjs`
+If you are just joining us, use `demo.js`, which will auto-import all our subpackages as
+well. It does not have as many cool command-line features as the old `democracy.js`,
+but worry not. We will bring over all that goodness and more.
 
-[![npm version](https://badge.fury.io/js/%40democracy.js%2Futils.svg)](https://badge.fury.io/js/%40democracy.js%2Futils) `@democracy.js/utils` a browser-friendly key/value store and functions for managing build outputs / dependencies
+Here are all our packages listed in descending order of coolness.
 
-[![npm version](https://badge.fury.io/js/%40democracy.js%2Fkeys.svg)](https://badge.fury.io/js/%40democracy.js%2Fkeys) `@democracy.js/keys` 
-key and wallet management 
+[![npm version](https://badge.fury.io/js/demo.js.svg)](https://badge.fury.io/js/demo.js) `demo.js` our main framework package, built on `ethjs`
+
+[![npm version](https://badge.fury.io/js/demo-utils.svg)](https://badge.fury.io/js/demo-utils) `demo-utils` a browser-friendly key/value store and functions for managing build outputs / dependencies
+
+[![npm version](https://badge.fury.io/js/demo-keys.svg)](https://badge.fury.io/js/demo-keys) `demo-keys` key management, using the wonderful `keythereum`.
+
+[![npm version](https://badge.fury.io/js/demo-contract.svg)](https://badge.fury.io/js/demo-contract) `demo-contract` contract building, linking, and deploying, possibly remotely.
+
+[![npm version](https://badge.fury.io/js/demo-rest.svg)](https://badge.fury.io/js/demo-rest) `demo-rest` a simple REST server and client for remote key-value storage, useful for browser-only dapps so you don't need to webpack in your ABIs / contract addresses like a Neanderthal (no offense, Neanderthals).
+
+[![npm version](https://badge.fury.io/js/demo-compile.svg)](https://badge.fury.io/js/demo-compile) `demo-compile` it's sad but true, the compiler is the least cool module because Solidity, but it's still very necessary.
 
 [![CircleCI](https://circleci.com/gh/invisible-college/democracy.svg?style=svg)](https://circleci.com/gh/invisible-college/democracy)
 
 ## Install with npm
 
 ```
-npm i democracy.js
+npm i demo.js
 ```
 
 Then in your modules
 
 ```
-const demo = require('democracy.js')
+const demo = require('demo.js')
 ```
 
 ## Get the Source Code to Play Around and Run Tests
@@ -43,43 +56,11 @@ lerna bootstrap
 lerna run test
 ```
 
-## Roadmap
+# Where Are We Going?
 
-This is a tentative roadmap to guide our exploration.
-To the future!
+Curious about what a future democracy holds? Us too!
 
-[Design](Design)
-  
-* ~0.1 Release - basic subcommands and libraries for testing~
-  * commands for deploying and interacting with contracts, use json files for now
-  
-* 0.2 Release - build dependency management, webify tests
-  * add tx signing support, nonce management
-  * clean up console.logging, add a decent logger
-  * allow getting the latest undeleted key in a keyspace
-  * show mocha runs inside a browser
-  * improve documentation and tutorial
-
-* 0.3 Release - whisper support
-  [Whisper Design](Whisper Design)
-  * commands for sending and listening to messages
-
-* 0.4 Release - ssb config
-  [SSB Design](SSB Design)
-  * switch to using an ssb alternet for storing configs, artifacts, and messages
-  * including sharing reproducible builds across the manyverse
-
-* 0.5 Release - web-based Eth client / interface using BrowserFS, mobile friendly
-  
-* 0.6 Release - cross-chain swaps between Ethereum networks
-
-* 0.7 Release - beginning work on a unified, isomorphic JS / EVM language
-
-* 0.8 Release - a txpool for broadcasting and sponsoring unsigned raw transactions
-
-* 0.9 Release - a nascent DAO
-
-* 1.0 Release - zero-knowledge playground, certifying arbitrary data on SSB via on-chain ETH hashes
+Check out our current [RoadMap](./docs/RoadMap.md)
 
 ## REPL
 
@@ -89,10 +70,11 @@ of the public testnets (Ropsten, Kovan, Rinkeby).
 
 An example session looks like
 ```
-node
-> demo = require('democracy.js')
-> eth = demo.getNetwork('test') # see config/default.json for other networks
-> demo.doBalances(eth)          # show balances of available accounts
+NODE_ENV=TEST node
+> demo = require('demo.js')
+> eth = demo.getNetwork()       # you'll hit our public node at http://ganache.arcology.nyc
+> eth.accounts().then((val) => accounts = vals)
+                                # anything you would normally do (asyncly) with an Eth
 ```
 
 If you cloned the repo above, you can get started with our test contracts.
@@ -109,30 +91,7 @@ The four steps of Ethereum development operate on an automatic contract (sometim
 The first three tasks we'll show you how to do below by interacting with Democracy in a console.
 However, Democracy's real power comes in automating complicated builds and deploys, and then operating on it.
 
-You can get a help message and then compile a Solidity contract, in this case `TestLibrary.sol`
-in a local directory called `contracts`.
-
-```
-> demo.compile()
-  [0 sourcePath]=?, <1 ContractName>=?
-> demo.compile('contracts', 'TestLibrary.sol')
-```
-
-```
-> demo.link()
-<0 ContractName>=?, <1 netName>=?, <2 deployerAccount>=?, <3 linkId>=?, [4 depLink1=depDeploy1 depLink2=depDeploy2 ... ]=?
-```
-
-```
-demo.deploy()
-  <0 ContractName>=?, <1 netName>=?, <2 linkId>=?, <3 deployId>=?, [4 ctorArgs]=?
-```
-
-```
-demo.deploy()
-  <0 ContractName>=?, <1 netName>=?, <2 linkId>=?, <3 deployId>=?, [4 ctorArgs]=?
-```
-
+We'll add a blow-by-blow console below when our dust has settled from above.
 
 ## How to Contribute
 
