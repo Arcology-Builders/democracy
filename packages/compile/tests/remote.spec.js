@@ -1,15 +1,13 @@
 const fs     = require('fs')
 const path   = require('path')
-const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual, setFS, setPath }
-             = require('@democracy.js/utils')
-const utils = require('@democracy.js/utils')
+const utils = require('demo-utils')
+const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual, setFS, setPath } = utils
 utils.setFS(fs)
 utils.setPath(path)
 
 const { Compiler } = require('..')
-const { isCompile, isContract }
-             = require('@democracy.js/contract')
-const { RESTServer, RemoteDB } = require('@democracy.js/rest')
+const { isCompile, isContract } = require('demo-contract')
+const { RESTServer, RemoteDB } = require('demo-rest')
 const LOGGER = new Logger('remote.spec.js')
 const assert = require('chai').assert
 

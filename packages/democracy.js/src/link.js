@@ -7,7 +7,7 @@ const assert = require('assert')
 const { List, Map }
              = require('immutable')
 const { print, ensureDir, traverseDirs, getDeploys, getLink, isDeploy, LIB_PATTERN, LINKS_DIR }
-             = require('@democracy.js/utils')
+             = require('demo-utils')
 
 /**
  * Validate dependencies and generate appropriate metadata

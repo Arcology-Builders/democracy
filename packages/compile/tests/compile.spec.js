@@ -20,7 +20,7 @@ describe('Democracy compiling.', () => {
   let _existingOutputs
   let _findImports
   let _contracts
-  const SOURCE_PATH = '../../node_modules/@democracy.js/test-contracts/contracts'
+  const SOURCE_PATH = '../../node_modules/demo-test-contracts/contracts'
   const comp  = new Compiler({startSourcePath: SOURCE_PATH})
   const cm = comp.getContractsManager()
   //new ContractsManager( '../../node_modules/@democracy.js/test-contracts/contracts' )
@@ -92,7 +92,7 @@ describe('Democracy compiling.', () => {
   it( 'finds an existing contract on disk', async () => {
     const { findImports, requestedInputs } = comp.getRequestedInputsFromDisk( 'TestLibrary.sol' )
     const source = fs.readFileSync(
-      '../../node_modules/@democracy.js/test-contracts/contracts/TestLibrary.sol').toString()
+      '../../node_modules/demo-test-contracts/contracts/TestLibrary.sol').toString()
     assert.equal(requestedInputs.get('TestLibrary').get('source'), source)
     assert(findImports('TestLibrary.sol'), source)
   })

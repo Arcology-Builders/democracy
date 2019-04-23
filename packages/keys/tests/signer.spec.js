@@ -3,7 +3,7 @@ const utils  = require('ethereumjs-utils')
 const { toWei } = require('web3-utils')
 
 const { getNetwork, print }
-             = require('@democracy.js/utils') 
+             = require('demo-utils') 
 const keys   = require('../src/keys')
 const { Wallet, pay} = require('../src/wallet')
 const BN     = require('bn.js')

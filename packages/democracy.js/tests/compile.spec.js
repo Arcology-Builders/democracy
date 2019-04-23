@@ -2,7 +2,7 @@ const demo = require('..')
 
 const chai = require('chai').use(require('chai-as-promised'));
 const assert = chai.assert
-const { isCompile, isContract } = require('@democracy.js/utils')
+const { isCompile, isContract } = require('demo-utils')
 
 describe('Democracy compiling.', () => {
   

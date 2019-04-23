@@ -2,7 +2,7 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const path         = require('path')
 const { RemoteDB } = require('../src/client')
-const { Logger }   = require('@democracy.js/utils')
+const { Logger }   = require('demo-utils')
 
 const { delayedGet, syncify } = require('./common')
 

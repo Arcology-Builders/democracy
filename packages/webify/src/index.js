@@ -14,15 +14,15 @@ BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
 });
 
 require('dotenv').config()
-const utils = require('@democracy.js/utils')
+const utils = require('demo-utils')
 const fs = require('fs')
 const path = require('path')
 utils.setFS(fs)
 utils.setPath(path)
-const contract = require('@democracy.js/contract')
+const contract = require('demo-contract')
 const util = require('ethereumjs-utils')
-const keys = require('@democracy.js/keys')
-const tx = require('@democracy.js/tx')
+const keys = require('demo-keys')
+const tx = require('demo-tx')
 
 const { List } = require('immutable')
 if (!fs.existsSync('a')) { fs.mkdirSync('a') }

@@ -34,7 +34,7 @@ describe( 'transaction sender', () => {
     const ethSigner = Wallet.createSignerEth(getEndpointURL(), senderAccount)
     txor = new Transactor({ethSender: ethSigner, gasPrice: '21000'})
     bm = new BuildsManager({
-      startSourcePath: 'node_modules/@democracy.js/test-contracts/contracts',
+      startSourcePath: 'node_modules/demo-test-contracts/contracts',
       chainId: chainId
     })
     const d = new Deployer({

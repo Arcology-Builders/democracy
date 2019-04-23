@@ -1,7 +1,8 @@
+// Utility script to fund new Rinkeby accounts from old ones, for easy testing
 const assert = require('chai').assert
 const { toWei } = require('web3-utils')
 const { getNetwork, getEndpointURL, print }
-             = require('@democracy.js/utils') 
+             = require('demo-utils') 
 const keys   = require('../src/keys')
 const BN     = require('bn.js')
 const Wallet = require('../src/wallet')

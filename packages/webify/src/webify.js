@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { traverseDirs, ensureDir, Logger } = require('@democracy.js/utils')
+const { traverseDirs, ensureDir, Logger } = require('demo-utils')
 const LOGGER = new Logger('webify')
 const { List } = require('immutable')
 const assert = require('chai').assert

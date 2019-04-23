@@ -2,7 +2,7 @@ const assert = require('chai').assert
 
 const { Map } = require('immutable')
 const { getImmutableKey, setImmutableKey, getNetwork }
-              = require('@democracy.js/utils')
+              = require('demo-utils')
 const SignerProvider 
               = require('ethjs-provider-signer')
 const ethsign = require('ethjs-signer').sign

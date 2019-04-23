@@ -8,7 +8,7 @@ const { List, Map, Set }
        = require('immutable')
 
 const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS }
-       = require('@democracy.js/utils')
+       = require('demo-utils')
 
 function compile(sourceStartPath, sources) {
   console.log(`Sources ${sources}`)

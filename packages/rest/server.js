@@ -1,4 +1,4 @@
-const { setFS, setPath } = require('@democracy.js/utils')
+const { setFS, setPath } = require('demo-utils')
 setFS(require('fs'))
 setPath(require('path'))
 

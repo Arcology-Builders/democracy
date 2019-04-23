@@ -2,9 +2,9 @@ const fs     = require('fs')
 const path   = require('path')
 const assert = require('chai').assert
 const { isCompile, isContract }
-             = require('@democracy.js/contract')
+             = require('demo-contract')
 const { Logger }
-             = require('@democracy.js/utils')
+             = require('demo-utils')
 const LOGGER = new Logger('recompile.js')
 const util   = require('ethereumjs-util')
 

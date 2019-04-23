@@ -4,7 +4,7 @@ const { List, Map }
                   = require('immutable')
 const http        = require('http')
 const url         = require('url')
-const { Logger }  = require('@democracy.js/utils')
+const { Logger }  = require('demo-utils')
 const LOGGER      = new Logger('rest/client')
 
 const client = {}

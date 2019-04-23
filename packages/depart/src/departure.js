@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-const { List } = require('immutable')
+const { List, Map } = require('immutable')
 const assert = require('chai').assert
-const utils = require('@democracy.js/utils')
+const utils = require('demo-utils')
 utils.setFS(require('fs'))
 utils.setPath(require('path')) 
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract }
-  = require('@democracy.js/contract')
-const { Compiler } = require('@democracy.js/compile')
+  = require('demo-contract')
+const { Compiler } = require('demo-compile')
 
 const LOGGER = new utils.Logger('departure')
 
@@ -60,13 +60,13 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     assert(deployId, 'deployId param not given')
     const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
     assert( isDeploy(output) )
-    deploys = deploys.get(contractName, output)
+    deploys = deploys.set(contractName, output)
   }
 
   const clean = async () => {
-    compiles.forEach((c) => { cm.cleanContractSync(c.get('name')) })
-    links.forEach(   (l) => { bm.cleanLinkSync(l.get('name')) })
-    deploys.forEach( (d) => { bm.cleanDeploySync(d.get('name')) })
+    await Promise.all(List(compiles.map((c) => { return cm.cleanContract(c.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean compiles', values) })
+    await Promise.all(List(links.map(   (l) => { return bm.cleanLink(    l.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean links'   , values) })
+    await Promise.all(List(deploys.map( (d) => { return bm.cleanDeploy(  d.get('name')) }).keys()).toJS()).then((values) => { LOGGER.info('Clean deploys' , values) })
   }
 
   return callback(compile, link, deploy, c, l, d).then(() => {
