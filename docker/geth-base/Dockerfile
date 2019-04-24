@@ -23,9 +23,7 @@ RUN . ~/.nvm/nvm.sh && nvm install v11.14.0 && npm i -g lerna
 RUN . ~/.nvm/nvm.sh && npm i -g yarn
 RUN cd /src/democracy; . ~/.nvm/nvm.sh && lerna bootstrap
 
-ENTRYPOINT ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" && \
-  geth --rinkeby --syncmode=light --ws --wsorigins=mychat --shh --wsapi=web3,shh,net --rpc --rpcaddr 0.0.0.0 --rpcport 8545 --rpcapi web,shh,net
+ENTRYPOINT ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" && /bin/bash
 
 EXPOSE 8545
-EXPOSE 8546
 EXPOSE 30303
