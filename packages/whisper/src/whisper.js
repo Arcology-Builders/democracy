@@ -97,7 +97,7 @@ whispers.Whisperer = class {
    * @return message hash
    */
   async sendPublic({ message, channelTopic, ttl, powTime, powTarget }) {
-    const msgHash = await this.shh.post({
+    const rawMsg = {
       symKeyID : this.channelSymKey,
       sig      : this.keyPairId,
       ttl      : ttl || this.defaultTTL,
@@ -105,7 +105,8 @@ whispers.Whisperer = class {
       payload  : this.web3.utils.fromAscii(message),
       powTime  : powTime || this.defaultPOWTime,
       powTarget: powTarget || this.defaultPOWTarget,
-    })
+    }
+    const msgHash = await this.shh.post(rawMsg)
     return msgHash
   }
 

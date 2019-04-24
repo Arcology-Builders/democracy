@@ -65,18 +65,7 @@ describe( 'The Whisper Whisperer', () => {
       message: randomMsg,
       channelTopic: topics[1]
     })*/
-    const msgHash = await w2.shh.post({
-      symKeyID: w2.channelSymKey,
-      sig: w2.keyPairId,
-      ttl: w2.defaultTTL,
-      topic: topics[1],
-      payload: w2.web3.utils.fromAscii(randomMsg),
-      powTime: w2.defaultPOWTime,
-      powTarget: w2.defaultPOWTarget,
-    })
-    LOGGER.debug('msgHash', msgHash)
-      
-    return new Promise((resolve, reject) => {
+    const subProm = new Promise((resolve, reject) => {
       w2.shh.subscribe('messages', {
         topics: [topics[1]],
         minPow: w2.powTarget,
@@ -89,6 +78,17 @@ describe( 'The Whisper Whisperer', () => {
         reject(err)
       })
     })
+    const msgHash = await w2.shh.post({
+      symKeyID: w2.channelSymKey,
+      sig: w2.keyPairId,
+      ttl: w2.defaultTTL,
+      topic: topics[1],
+      payload: w2.web3.utils.fromAscii(randomMsg),
+      powTime: w2.defaultPOWTime,
+      powTarget: w2.defaultPOWTarget,
+    })
+    LOGGER.debug('msgHash', msgHash)
+    return subProm  
     /*
     .then((subscribeProm) => {
       return subscribeProm.id

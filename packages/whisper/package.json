@@ -33,9 +33,11 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
+    "@babel/runtime-corejs2": "^7.4.3",
     "demo-tools": "^0.0.1",
     "demo-utils": "^0.0.1",
     "ethjs": "0.4.0",
+    "status-js-api": "^1.2.11",
     "web3": "^1.0.0-beta.52",
     "web3-shh": "^1.0.0-beta.52"
   },
