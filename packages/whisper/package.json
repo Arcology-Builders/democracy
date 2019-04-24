@@ -1,0 +1,47 @@
+{
+  "name": "demo-shh",
+  "version": "0.0.0",
+  "description": "Distributed private messaging for a distributed country",
+  "keywords": [
+    "ethereum",
+    "whisper",
+    "distributed",
+    "messaging",
+    "javascript"
+  ],
+  "author": "Paul Pham <paul@invisible.college>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/whisper#readme",
+  "license": "MIT",
+  "main": "src/whisper.js",
+  "directories": {
+    "lib": "lib",
+    "tests": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --open --mode development",
+    "build": "NODE_ENV=TEST webpack --mode development --env.NODE_ENV=TEST",
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 30000"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "demo-tools": "^0.0.1",
+    "demo-utils": "^0.0.1",
+    "ethjs": "0.4.0",
+    "web3": "^1.0.0-beta.52",
+    "web3-shh": "^1.0.0-beta.52"
+  },
+  "devDependencies": {
+    "webpack": "4.29.4",
+    "webpack-cli": "3.2.1",
+    "webpack-dev-server": "3.1.14"
+  }
+}
