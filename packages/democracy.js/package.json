@@ -8,9 +8,7 @@
   "directories": {
     "test": "test"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "dependencies": {
     "@democracy.js/utils": "0.1.2",
     "ethjs": "0.3.9",
