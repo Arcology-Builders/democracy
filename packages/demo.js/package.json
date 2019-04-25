@@ -17,18 +17,17 @@
     "access": "public"
   },
   "directories": {
-    "src": "src",
     "tests": "tests"
   },
   "files": [
-    "src"
+    "index.js"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "exit 0"
+    "test": "mocha tests -t 10000 --reporter spec"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
