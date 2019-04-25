@@ -37,6 +37,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     const contract = await cm.getContract(contractName)
     assert(isContract(contract))
     compiles = compiles.set(contractName, output.get(contractName))
+    return output
   }
 
   let links = new Map()
@@ -50,6 +51,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     }
     assert(isLink(output))
     links = links.set(linkName, output)
+    return output
   }
 
   let deploys = new Map()
@@ -61,6 +63,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
     assert( isDeploy(output) )
     deploys = deploys.set(deployName, output)
+    return output
   }
 
   const clean = async () => {
@@ -81,9 +84,9 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
   }
 
-  return callback(compile, link, deploy, c, l, d).then(() => {
-    if (cleanAfter) { return clean() }
-  })
+  await callback(compile, link, deploy)
+  
+  return clean
 
 }
 
