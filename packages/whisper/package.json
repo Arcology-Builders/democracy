@@ -27,7 +27,7 @@
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
     "build": "NODE_ENV=TEST webpack --mode development --env.NODE_ENV=TEST",
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 30000"
+    "test": "NODE_ENV=TEST mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 30000"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"

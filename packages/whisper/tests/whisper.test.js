@@ -2,6 +2,7 @@
 const assert        = require('chai').assert
 const randombytes   = require('randombytes')
 const { Whisperer } = require('..')
+const { getConfig } = require('demo-utils')
 const { Range }     = require('immutable')
 const utils         = require('web3-utils')
 const { Logger }    = require('demo-utils')
@@ -9,23 +10,28 @@ const LOGGER        = new Logger('whisper.spec')
 
 describe( 'The Whisper Whisperer', () => {
   
-  let w = new Whisperer({
-    defaultTTL: 60,
-    defaultPOWTarget: 1,
-    defaultPOWTime: 1,
-  })
-  let w2 = new Whisperer({
-    defaultTTL: 60,
-    defaultPOWTarget: 1,
-    defaultPOWTime: 1,
-  })
+  let w
+  let w2
 
   const topics = Range(0,4).map(
     (i) => '0x' + utils.padLeft(randombytes(4).toString('hex'), 8)).toJS()
   const randomMsg = randombytes(24).toString('hex')
 
   before(async () => {
-    assert.equal(w2.whisperNodeURL, 'ws://localhost:8546')
+    process.env.NODE_ENV='TEST'
+    w = new Whisperer({
+      defaultTTL: 60,
+      defaultPOWTarget: 2,
+      defaultPOWTime: 2,
+    })
+    w2 = new Whisperer({
+      defaultTTL: 60,
+      defaultPOWTarget: 2,
+      defaultPOWTime: 2,
+    })
+
+    process.env.NODE_ENV='TEST'
+    assert.equal(w2.whisperNodeURL, 'ws://eth.arcology.nyc:8546')
     await w2.init("default")
   })
 

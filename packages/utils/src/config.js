@@ -14,7 +14,8 @@ configs.setEnvVars = (_env) => {
 
 // TODO: corresponds to eth.arcology.nyc but our Whisper node is not accepting
 // packets addresses to this hostname for some reason.
-const SHH_IP = "ws://54.69.190.230:8546"
+//const SHH_IP = "ws://54.69.190.230:8546"
+const SHH_IP = "ws://eth.arcology.nyc:8546"
 const createEnv = ({ ethURL, dbURL, shhURL, gp, db, ll }) => {
   return {
     'DB_URL'      : dbURL,

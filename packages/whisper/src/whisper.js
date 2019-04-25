@@ -14,6 +14,7 @@ const whispers = {}
 whispers.Whisperer = class {
 
   constructor({defaultTTL, defaultPOWTarget, defaultPOWTime}) {
+    LOGGER.info('NODE_ENV', process.env.NODE_ENV)
     this.whisperNodeURL = getConfig()['SHH_URL']
     this.defaultTTL = defaultTTL
     this.defaultPOWTarget = defaultPOWTarget
