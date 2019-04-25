@@ -36,13 +36,13 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "demo-rest": "^0.2.7-alpha.0",
-    "demo-test-contracts": "^0.2.7-alpha.0",
+    "demo-rest": "^0.2.6",
+    "demo-test-contracts": "^0.2.6",
     "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
-    "demo-contract": "^0.2.7-alpha.0",
-    "demo-utils": "^0.2.7-alpha.0",
+    "demo-contract": "^0.2.6",
+    "demo-utils": "^0.2.6",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
     "solc": "0.4.25"

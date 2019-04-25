@@ -39,7 +39,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/utils": "0.2.5",
+    "demo-utils": "^0.2.6",
     "demo-compile": "^0.2.7-alpha.0",
     "demo-contract": "^0.2.7-alpha.0",
     "immutable": "4.0.0-rc.12"
