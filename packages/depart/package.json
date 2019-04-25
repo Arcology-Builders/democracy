@@ -16,9 +16,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "depart": "./bin.js"
-  },
   "main": "./index.js",
   "directories": {
     "src": "src",
