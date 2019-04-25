@@ -41,5 +41,6 @@
     "demo-utils": "^0.2.6",
     "immutable": "4.0.0-rc.12",
     "web3-utils": "1.0.0-beta.52"
-  }
+  },
+  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }

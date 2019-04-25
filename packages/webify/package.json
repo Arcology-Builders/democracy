@@ -24,5 +24,6 @@
     "demo-tools": "^0.2.6",
     "webpack": "4.29.4",
     "webpack-dev-server": "3.1.14"
-  }
+  },
+  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }

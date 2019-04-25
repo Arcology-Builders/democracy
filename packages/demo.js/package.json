@@ -1,5 +1,5 @@
 {
-  "name": "demo.js",
+  "name": "democracy.js",
   "version": "0.2.6",
   "description": "Democracy, an minimalist Ethereum framework for a distributed country",
   "keywords": [
@@ -13,6 +13,9 @@
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/demo.js#readme",
   "license": "MIT",
   "main": "lib/demo.js.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "src": "src",
     "tests": "tests"
@@ -36,5 +39,6 @@
     "demo-depart": "^0.2.6",
     "demo-keys": "^0.2.6",
     "demo-utils": "^0.2.6"
-  }
+  },
+  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }

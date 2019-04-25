@@ -45,5 +45,6 @@
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
   },
-  "homepage": "https://github.com/invisible-college/democracy#readme"
+  "homepage": "https://github.com/invisible-college/democracy#readme",
+  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }

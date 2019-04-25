@@ -46,5 +46,6 @@
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
     "solc": "0.4.25"
-  }
+  },
+  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }
