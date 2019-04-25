@@ -2,9 +2,7 @@
 
 const assert = require('chai').assert
 const { ContractsManager, isContract } = require('..');
-const { getNetwork, setPath } = require('demo-utils')
-
-setPath(require('path'))
+const { getNetwork } = require('demo-utils')
 
 describe('ContractsManager tests', () => {
   

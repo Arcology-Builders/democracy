@@ -1,4 +1,6 @@
 'use strict'
+const fs          = require('fs')
+const path        = require('path')
 const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
@@ -16,23 +18,15 @@ const getFileKeySpace = (key, cb) => {
   const dirSpaces = keySpaces.slice(0,-1)
   dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
   const keyBase = keySpaces.get(-1)
-  const dbDir = store.path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
 
   // Return the base filename and don't add .json extension
   // b/c the latter is only correct behavior for setImmutableKey
   // and this method is also used by getImmutableKey
-  return store.path.join(dbDir, `${keyBase}`)
+  return path.join(dbDir, `${keyBase}`)
 }
 
 const store = {}
-
-store.setStoreFS = (_fs) => {
-  store.fs = _fs
-}
-
-store.setStorePath = (_path) => {
-  store.path = _path
-}
 
 /**
  * set an immutable key, possibly moving aside previous immutable values
@@ -53,14 +47,14 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
  */
     ensureDir(DB_DIR)
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-      ensureDir(store.path.join(DB_DIR, ...keyPrefixes)) })
+      ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
     const now = Date.now()
     LOGGER.info(`overwrite ${overwrite}`)
 
-    if (store.fs.existsSync(`${dbFile}.json`)) {
+    if (fs.existsSync(`${dbFile}.json`)) {
       if (!value || overwrite) {
         // We never delete, only move to the side
-        store.fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
+        fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
         if (overwrite) {
           LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
           // don't return here b/c we need to write the new key file below
@@ -72,10 +66,10 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
         LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
         throw new Error(`Key ${dbFile}.json exists and is read-only.`)
       }
-    } else if (store.fs.existsSync(dbFile)) {
+    } else if (fs.existsSync(dbFile)) {
       if (!value) {
         LOGGER.debug(`Deleting sub-key ${dbFile}`)
-        store.fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+        fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
         return true
       } else { 
         throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
@@ -86,7 +80,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
     LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-    store.fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
+    fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
     return true
     /*
   }
@@ -106,9 +100,9 @@ store.getImmutableKey = (fullKey, defaultValue) => {
   } else {
  */
     const dbFile = getFileKeySpace(fullKey, () => {})
-    if (store.fs.existsSync(`${dbFile}.json`)) {
+    if (fs.existsSync(`${dbFile}.json`)) {
       return buildFromDirs(`${dbFile}.json`, () => {return false})
-    } else if (store.fs.existsSync(dbFile)) {
+    } else if (fs.existsSync(dbFile)) {
       return buildFromDirs(dbFile,
         // Return undeleted keys like a.json but not deleted keys a.json.1
         (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) ||

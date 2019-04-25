@@ -2,8 +2,6 @@
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
-utils.setFS(require('fs'))
-utils.setPath(require('path')) 
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract }
   = require('demo-contract')
 const { Compiler } = require('demo-compile')

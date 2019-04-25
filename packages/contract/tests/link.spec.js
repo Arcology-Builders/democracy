@@ -7,12 +7,9 @@ const should   = chai.should()
 const { Map, List } = require('immutable')
 
 const { Linker } = require('..')
-const { getNetwork, Logger, setFS, setPath }
+const { getNetwork, Logger }
                = require('demo-utils')
 const LOGGER = new Logger('link.spec')
-
-setFS(require('fs'))
-setPath(require('path'))
 
 describe('Democracy linking', () => {
 

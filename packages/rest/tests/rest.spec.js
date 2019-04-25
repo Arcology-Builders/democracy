@@ -6,13 +6,10 @@ const assert = chai.assert
 const expect = chai.expect
 const { Map } = require('immutable')
 
-const { Logger, setImmutableKey, DB_DIR, COMPILES_DIR, setFS, setPath }
+const { Logger, setImmutableKey, DB_DIR, COMPILES_DIR }
                  = require('demo-utils')
 const LOGGER     = new Logger('rest.spec')
 const { RemoteDB } = require('../src/client')
-
-setFS(fs)
-setPath(path)
 
 const { RESTServer } = require('../src/server')
 

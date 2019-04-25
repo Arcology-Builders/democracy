@@ -1,9 +1,7 @@
 const fs     = require('fs')
 const path   = require('path')
 const utils = require('demo-utils')
-const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual, setFS, setPath } = utils
-utils.setFS(fs)
-utils.setPath(path)
+const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual } = utils
 
 const { Compiler } = require('..')
 const { isCompile, isContract } = require('demo-contract')

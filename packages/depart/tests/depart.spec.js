@@ -2,8 +2,6 @@
 const fs    = require('fs')
 const path  = require('path')
 const utils = require('demo-utils')
-utils.setFS(fs)
-utils.setPath(path)
 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR } = utils
 const { isCompile, isLink, isDeploy } = require('demo-contract')

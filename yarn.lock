@@ -2540,44 +2540,6 @@ delegates@^1.0.0:
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
   integrity sha1-hMbhWbgZBP3KWaDvRM2HDTElD5o=
 
-demo-contract@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/demo-contract/-/demo-contract-0.2.6.tgz#263ab5569976590f7fa85f89df56a085a4b2c43c"
-  integrity sha512-sEBlmcjhjzUbae24KLX6YF74tMiJpU4m9Zb+e68dRewesuKOYsrh3P9O1AJIw7X7SRUUAVOHFeLTq7HeSODOHQ==
-  dependencies:
-    demo-utils "^0.2.6"
-    ethereumjs-util "6.1.0"
-    ethjs-abi "0.2.1"
-    immutable "4.0.0-rc.12"
-
-demo-rest@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/demo-rest/-/demo-rest-0.2.6.tgz#a1bc48434bf5be68eef661f4541230cd1d15a263"
-  integrity sha512-pkoQXoEBTLUsf4OIUSDWrb7MDaELrGwj8KHON4+zD78T9A33PJFKT3C6DmkAH3rMrRDa8wNMk4VXKzSIDK2bCA==
-  dependencies:
-    body-parser "1.18.3"
-    chai "4.2.0"
-    demo-utils "^0.2.6"
-    ethereumjs-utils "5.2.5"
-    express "4.16.4"
-    immutable "4.0.0-rc.12"
-
-demo-test-contracts@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/demo-test-contracts/-/demo-test-contracts-0.2.6.tgz#22ff459984535593f06c329b764b92dbfdfa6d04"
-  integrity sha512-bnvkjIhLYG5jNac/Rg0gzfQR8ydz6vbVR5XcXI6stV+ome+TsERqTQ4Ygf0Os5CkEfAk87Z5WlISW4Q1Uio7uA==
-
-demo-utils@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/demo-utils/-/demo-utils-0.2.6.tgz#f5115eb313e59afb1c7f0f53aad8c35a6072374d"
-  integrity sha512-a6Wod3H1tzxqfBp0ieNJ/jhYSYwy96Ij83wVnFdvYAFal2EGOm4QKq+BOsy8gJ7xr52Q5yEFcEHdfR7cl6fASw==
-  dependencies:
-    colors "1.3.3"
-    dotenv "7.0.0"
-    ethereumjs-util "6.1.0"
-    ethjs "0.4.0"
-    immutable "4.0.0-rc.12"
-
 depd@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"

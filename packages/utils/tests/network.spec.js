@@ -1,6 +1,6 @@
 require('dotenv').config()
 const { setEnvVars } = require('../src/config')
-const { getNetwork, getEndpointURL, setFS } = require('..')
+const { getNetwork, getEndpointURL } = require('..')
 setEnvVars(process.env)
 
 const { List, Map } 
@@ -8,7 +8,6 @@ const { List, Map }
 const chai   = require('chai')
 const assert = chai.assert
 
-setFS(require('fs'))
 const { isNetName } = require('../src/config')
 
 describe('network and tx sending', () => {

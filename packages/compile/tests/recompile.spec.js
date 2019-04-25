@@ -1,7 +1,5 @@
 'use strict'
-const { Logger, setFS, setPath } = require('demo-utils')
-setFS(require('fs'))
-setPath(require('path'))
+const { Logger } = require('demo-utils')
 
 const { Compiler } = require('..')
 const { ContractsManager } = require('demo-contract')

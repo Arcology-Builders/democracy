@@ -4,8 +4,6 @@ const assert     = require('chai').assert
 const { keccak } = require('ethereumjs-util')
 const utils      = require('demo-utils')
 const { Logger, ZEPPELIN_SRC_PATH, toJS } = utils
-utils.setFS(fs)
-utils.setPath(require('path'))
 
 const { ContractsManager, isCompile, isContract, getInputsToBuild }
              = require('demo-contract')

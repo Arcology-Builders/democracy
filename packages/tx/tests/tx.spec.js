@@ -1,7 +1,5 @@
 const utils = require('demo-utils')
 const { getConfig, getNetwork, getEndpointURL, Logger } = utils
-utils.setFS(require('fs'))
-utils.setPath(require('path'))
 
 const { Transactor } = require('../src/tx')
 const { Wallet, create, pay }

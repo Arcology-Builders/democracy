@@ -1,4 +1,6 @@
 'use strict'
+const fs = require('fs')
+const path = require('path')
 
 const { Logger } = require('./logger')
 const LOGGER = new Logger('utils/utils')
@@ -18,14 +20,6 @@ utils.LIB_PATTERN  = /__(([a-zA-Z0-9])+\/*)+\.sol:[a-zA-Z0-9]+_+/g
 
 utils.DEMO_SRC_PATH = 'contracts'
 utils.ZEPPELIN_SRC_PATH = '../../node_modules/openzeppelin-solidity/contracts'
-
-utils.setUtilsFS = (_fs) => {
-  utils.fs = _fs
-}
-
-utils.setUtilsPath = (_path) => {
-  utils.path = _path
-}
 
 utils.getEndpointURL = () => {
   const { getConfig } = require('./config.js')
@@ -133,14 +127,14 @@ utils.isBrowser = () => {
 }
 
 utils.ensureDir = (dirName) => {
-  if (!utils.fs.existsSync(dirName)) { utils.fs.mkdirSync(dirName, { recursive: true } ) }
+  if (!fs.existsSync(dirName)) { fs.mkdirSync(dirName, { recursive: true } ) }
 }
 
 /**
  * Remove a file (not a directory) if it exists
  */
 utils.rimRafFileSync = (fn) => {
-  if (utils.fs.existsSync(fn)) { utils.fs.unlinkSync(fn) }
+  if (fs.existsSync(fn)) { fs.unlinkSync(fn) }
 }
 
 /**
@@ -154,17 +148,17 @@ utils.traverseDirs = (startDirs, skipFilt, cb, dcb) => {
   const queue = startDirs
   while (queue.length > 0) {
     const f = queue.pop()
-    const shortList = utils.path.basename(f).split('.')
+    const shortList = path.basename(f).split('.')
     if (skipFilt(shortList, f)) { continue }
-    if (!utils.fs.existsSync(f)) {
+    if (!fs.existsSync(f)) {
       LOGGER.warn(`Directory ${f} does not exist, skipping.`)
       continue
     }
-    if (utils.fs.lstatSync(f).isDirectory()) {
-      utils.fs.readdirSync(f).forEach((f2) => queue.push(utils.path.join(f,f2)))
+    if (fs.lstatSync(f).isDirectory()) {
+      fs.readdirSync(f).forEach((f2) => queue.push(path.join(f,f2)))
       if (dcb) { dcb(f) }
     } else {
-      const source = utils.fs.readFileSync(f).toString()
+      const source = fs.readFileSync(f).toString()
       cb(source, f)
     }
   }
@@ -177,17 +171,17 @@ utils.traverseDirs = (startDirs, skipFilt, cb, dcb) => {
  * @param skipFilt a function that returns true for files that need to be skipped
  */
 utils.buildFromDirs = (f, skipFilt) => {
-  const shortList = utils.path.basename(f).split('.')
+  const shortList = path.basename(f).split('.')
   if (skipFilt(shortList)) { return null }
-  if (utils.fs.lstatSync(f).isDirectory()) {
-    return new Map(List(utils.fs.readdirSync(f)).map((f2) => {
-      const builtValues = utils.buildFromDirs(utils.path.join(f,f2), skipFilt)
-      const baseKey = utils.path.basename(f2)
+  if (fs.lstatSync(f).isDirectory()) {
+    return new Map(List(fs.readdirSync(f)).map((f2) => {
+      const builtValues = utils.buildFromDirs(path.join(f,f2), skipFilt)
+      const baseKey = path.basename(f2)
       const key = (baseKey.endsWith('.json')) ? baseKey.split('.')[0] : baseKey
       return builtValues ? [key, builtValues] : null
     }))
   } else {
-    return utils.fromJS(JSON.parse(utils.fs.readFileSync(f)))
+    return utils.fromJS(JSON.parse(fs.readFileSync(f)))
   }
 }
 
