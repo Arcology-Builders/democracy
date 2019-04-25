@@ -1,4 +1,4 @@
-const { fromJS } = require('@democracy.js/utils')
+const { fromJS } = require('demo-utils')
 const { getInputsToBuild } = require('../src/utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert

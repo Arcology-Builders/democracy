@@ -41,7 +41,7 @@
   "dependencies": {
     "demo-compile": "^0.2.7-alpha.3",
     "demo-contract": "^0.2.7-alpha.0",
-    "demo-utils": "^0.2.6",
+    "demo-utils": "^0.2.7-alpha.0",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {

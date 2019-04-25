@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 
 const { Contract, BuildsManager, Deployer, Linker, Compiler } = require('..')
-const { getNetwork, Logger } = require('@democracy.js/utils')
+const { getNetwork, Logger } = require('demo-utils')
 const LOGGER = new Logger('contract.spec')
 const abi = require('ethjs-abi')
 
