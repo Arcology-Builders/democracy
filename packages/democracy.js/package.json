@@ -1,6 +1,6 @@
 {
   "name": "democracy.js.old",
-  "version": "0.2.6",
+  "version": "0.2.7-alpha.0",
   "description": "Democracy: a minimalist framework for distributed countries",
   "bin": {
     "demo": "./demo.js"

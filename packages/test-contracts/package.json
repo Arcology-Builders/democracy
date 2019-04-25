@@ -1,6 +1,6 @@
 {
   "name": "demo-test-contracts",
-  "version": "0.2.6",
+  "version": "0.2.7-alpha.0",
   "description": "Test contracts for Democracy, a distributed country framework",
   "keywords": [
     "democracy",
