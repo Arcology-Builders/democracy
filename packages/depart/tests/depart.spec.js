@@ -18,6 +18,7 @@ describe( 'Departures', () => {
   let chainId
   let accounts
   let cleaner
+  let result
 
   before(async () => {
    accounts = await eth.accounts()
@@ -25,7 +26,7 @@ describe( 'Departures', () => {
   })
 
   it( 'executing a simple departure', async () => {
-    cleaner = await depart({
+    result = await depart({
       name: "simple-departure",
       address: accounts[1],
       sourcePath: "../../node_modules/demo-test-contracts/contracts",
@@ -36,16 +37,22 @@ describe( 'Departures', () => {
         isLink(lout)
         const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
         isDeploy(dout)
+        return true
       }
     })
-    assert.typeOf(cleaner, 'function')
+    assert(Map.isMap(result.compiles))
+    assert(Map.isMap(result.links))
+    assert(Map.isMap(result.deploys))
+    assert.typeOf(result.result, 'boolean')
+    assert(result.result)
+    assert.typeOf(result.cleaner, 'function')
     assert(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
     assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
     assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')))
   })
 
   it( 'cleans', async () => {
-    await cleaner()
+    await result.cleaner()
   })
 
   it( 'cleaning happens', async () => {

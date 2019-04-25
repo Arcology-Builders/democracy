@@ -84,9 +84,15 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
   }
 
-  await callback(compile, link, deploy)
+  const result = await callback(compile, link, deploy)
   
-  return clean
+  return {
+    cleaner : clean,
+    deploys : deploys,
+    links   : links,
+    compiles: compiles,
+    result  : result,
+  }
 
 }
 
