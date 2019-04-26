@@ -34,7 +34,7 @@ class Compiler {
     this.inputter = inputter || getImmutableKey
     this.outputter = outputter || setImmutableKey
     ensureDir(this.startSourcePath)
-    this.cm = new ContractsManager(arguments)
+    this.cm = new ContractsManager(...arguments)
   }
 
   /**
