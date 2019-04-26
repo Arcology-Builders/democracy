@@ -30,6 +30,8 @@ const buffer = fs.readFileSync("a/b.json")
 console.log(buffer.toString())
 assert(buffer.toString() === 'catcow')
 
-window.fs = fs
-window.path = path
-window.utils = utils
+module.exports = {
+  fs: fs,
+  path: path,
+  utils: utils,
+}

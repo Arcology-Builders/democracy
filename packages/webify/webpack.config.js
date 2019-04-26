@@ -10,13 +10,19 @@ module.exports = (env, argv) => {
   const baseConfig = toolsConfig(env, argv, 'democracy')
 
   const min = (argv.mode === 'production') ? '.min' : ''
-  const version = npm_package.version
+  const version = npm_package.version.replace('-', '_')
   const bundleName = `democracy.${version}${min}`
   const entry = {}
+  
+  /*
   entry[bundleName] = [
        './src/index.js',
        path.resolve(__dirname, '../../node_modules/browserfs/dist/browserfs.min.js'),
      ]
+    */
+  entry[bundleName] = [
+       './exports/demo.js',
+  ]
   return { module: {
     noParse: /browserfs\.js/,
     rules: [
@@ -42,7 +48,9 @@ module.exports = (env, argv) => {
   entry: entry,
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: 'var',
+    library: 'demo',
   },
   target: 'web',
   node: {
@@ -69,11 +77,6 @@ module.exports = (env, argv) => {
       process: 'processGlobal',
       Buffer: 'bufferGlobal'
     }),
-    /*
-    new webpack.ContextReplacementPlugin(
-      /\.\*\/,
-        (context) => { console.log(JSON.stringify(context)) }
-    )*/
   ]
 }
 }
