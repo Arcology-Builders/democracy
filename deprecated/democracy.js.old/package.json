@@ -1,0 +1,49 @@
+{
+  "name": "democracy.js.old",
+  "version": "0.2.7-alpha.5",
+  "description": "Democracy: a minimalist framework for distributed countries",
+  "bin": {
+    "demo": "./demo.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "private": true,
+  "dependencies": {
+    "demo-utils": "^0.2.7-alpha.5",
+    "ethjs": "0.3.9",
+    "ethjs-query": "0.3.8",
+    "immutable": "4.0.0-rc.12",
+    "module-alias": "2.2.0",
+    "openzeppelin-solidity": "2.0.0",
+    "solc": "0.4.25"
+  },
+  "devDependencies": {
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1"
+  },
+  "scripts": {
+    "test": "exit 0",
+    "lint": "eslint demo.js js/*.js",
+    "cov": "nyc mocha tests/"
+  },
+  "_moduleAliases": {
+    "@root": "."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "keywords": [
+    "ethereum",
+    "ssb",
+    "javascript",
+    "framework"
+  ],
+  "author": "Paul Pham",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "homepage": "https://github.com/invisible-college/democracy#readme"
+}
