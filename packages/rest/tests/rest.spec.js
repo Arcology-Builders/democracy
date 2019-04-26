@@ -67,10 +67,10 @@ describe('Runs a REST server', () => {
   })
   
   after(async () => {
+    server.stop()
     fs.unlinkSync(path.join(DB_DIR, 'test.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
-    server.stop()
   })
 
 })

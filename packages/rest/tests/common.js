@@ -1,11 +1,13 @@
 const common = {}
 
-common.delayedGet = async (getCall, expected) => {
+common.delayedGet = async (getCall, expected, logger) => {
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       const res = await getCall()
       if (res === expected) { resolve(res) }
-      else { reject(res, expected) }
+      else {
+        if (logger) { logger.error(`Expected ${res} to equal ${expected}`) }
+        reject(res, expected) }
     }, 1000)
   })
 }

@@ -15,15 +15,15 @@ const { delayedGet, syncify } = require('./common')
 
 describe( 'Remote builds ', () => {
 
-  const server = new RESTServer(6667, true)
-  const r = new RemoteDB('localhost', 6667)
+  const server = new RESTServer(6668, true)
+  const r = new RemoteDB('localhost', 6668)
 
   const randInt = Math.round(Math.random() * 100)
+  const eth = getNetwork()
   let networkId
 
   before(async () => {
     server.start()
-    const eth = getNetwork()
     networkId = await eth.net_version()
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
@@ -54,8 +54,7 @@ describe( 'Remote builds ', () => {
     router.route('/someRoute').get((req, res) => {
       res.json({ 'a': randInt+1 })
     })
-    const res = await r.getHTTP('/api/someRoute', {})
-    assert.equal( res, `{"a":${randInt+1}}`)
+    await delayedGet(r.getHTTP.bind(r, '/api/someRoute'), `{"a":${randInt+1}}`, LOGGER)
   }) 
   
   it( 'get all empty compiles', async () => {
@@ -128,13 +127,13 @@ describe( 'Remote builds ', () => {
   })
 
   after( () => {
+  server.stop()
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'FirstLink.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'SecondLink.json'))
     utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'FirstDeploy.json'))
     utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'SecondDeploy.json'))
-    server.stop()
   })
 
 })

@@ -157,6 +157,7 @@ server.RESTServer = class {
   }
 
   start() {
+    LOGGER.debug(`Starting server on  port ${this.port}`)
     this.server = http.createServer(this.app).listen(this.port)
   }
   
@@ -169,7 +170,10 @@ server.RESTServer = class {
 
   stop() {
     if (this.server) {
+      LOGGER.debug(`Stopping server on  port ${this.port}`)
       this.server.close()
+    } else {
+      LOGGER.debug(`Trying to stop server that's not started.`)
     }
   }
 
