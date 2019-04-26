@@ -1,5 +1,6 @@
 const { Deployer, Linker, isLink, isDeploy } = require('..')
 const { getNetwork, Logger } = require('demo-utils')
+const { Map } = require('immutable')
 const LOGGER = new Logger('deployer.spec')
 
 const chai = require('chai').use(require('chai-as-promised'));
@@ -51,6 +52,13 @@ describe('Democracy deploying.', () => {
   it( 'should deploy again with no error', async () => {
     const deploy = await d.deploy('TestLibrary', 'linkLib', 'deployLib')
     await bm.cleanLink( 'TestLibrary-linkLib' )
+    // Wait to clean deploy until the next test has run
+  })
+
+  it( 'links a previous deploy', async () => {
+    const link = await l.link('TestUseLibrary','link', new Map({'TestLibrary': 'deployLib'}))
+    await bm.cleanLink( 'TestUseLibrary-link' )
+    // Now clean it
     await bm.cleanDeploy( 'TestLibrary-deployLib' )
   })
 

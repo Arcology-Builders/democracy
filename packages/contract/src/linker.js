@@ -3,12 +3,13 @@
 const assert = require('assert')
 const { List, Map }
              = require('immutable')
-const { Logger, isNetwork, isDeploy, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
+const { Logger, isNetwork, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
              = require('demo-utils')
 const LOGGER = new Logger('Linker')
 
 const { isContract } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
+const { isDeploy } = require('./deployer')
 const { awaitOutputter } = require('./utils')
 const { keccak } = require('ethereumjs-util')
 
@@ -83,7 +84,6 @@ class Linker {
       // instead of `TestInterface-deploy`
       const deployName = (deployId.startsWith('deploy')) ?
         `${contractName}-${deployId}` : deployId
-      //console.log(`deployName ${deployName}`)
       const linkPlaceholder = matches.get(contractName)
       if (!linkPlaceholder) {
         throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
@@ -91,7 +91,7 @@ class Linker {
 
       const deployObject = deployMap.get(deployName)
       if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
-      print(deployObject)
+      LOGGER.debug('DEPLOY OBJECT', deployObject)
 
       const deployAddress = deployObject.get('deployAddress')
       assert(deployAddress)
