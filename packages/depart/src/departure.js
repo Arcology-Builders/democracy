@@ -109,6 +109,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
   const result = await callback({ compile: compile, link: link, deploy: deploy, bm: bm })
   
   return {
+    name    : name,
     cleaner : clean,
     deploys : deploys,
     links   : links,

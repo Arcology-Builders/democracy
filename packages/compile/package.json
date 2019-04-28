@@ -16,6 +16,9 @@
     "src": "src",
     "test": "tests"
   },
+  "bin": [
+    "bin/compile.js"
+  ],
   "files": [
     "index.js",
     "src"

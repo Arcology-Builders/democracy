@@ -3,8 +3,8 @@
 const assert = require('chai').assert
 
 const { getNetwork, isNetwork, getEndpointURL } = require('demo-utils')
-const { isAccount, Wallet }      = require('demo-keys')
-const { toHex, toWei }   = require('web3-utils')
+const { isAccount, Wallet } = require('demo-keys')
+const { toHex, toWei } = require('web3-utils')
 
 const eth = getNetwork()
 const { Map } = require('immutable')
@@ -19,10 +19,8 @@ class Transactor {
    * @param _gasPrice a string number indicating the desired gas price for this network in gwei
    */
   constructor({ethSender, gasPrice}) {
-    //this.senderAccount = senderAccount
     //assert(isNetwork(ethSender))
     this.eth = ethSender
-    //Wallet.createSignerEth(getEndpointURL(), senderAccount)
     this.gasPrice = gasPrice
   }
 

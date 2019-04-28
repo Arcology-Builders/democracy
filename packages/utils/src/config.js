@@ -1,5 +1,7 @@
+'use strict'
 // Environment-controlled configuration to choose network and deploy parameters
 
+require('dotenv').config()
 const { Logger } = require('./logger')
 const LOGGER = new Logger('config', [ 'info', 'debug', 'warn', 'error' ])
 const assert = require('chai').assert
@@ -36,14 +38,19 @@ const checkEnv = (config, vars) => {
   return config
 }
 
+configs.parseLogLevels = (string) => {
+  return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
+}
+
 const createDevEnv = () => {
   return createEnv({
-    'dbURL' : 'http://localhost:7000',
-    'ethURL': 'http://localhost:8545',
-    'shhURL': 'ws://localhost:8546',
+    'dbURL' : process.env[ 'DEVELOPMENT.DB_URL'  ] || 'http://localhost:7000',
+    'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
+    'shhURL': process.env[ 'DEVELOPMENT.SHH_URL' ] || 'ws://localhost:8546',
     'gp'    : 5,
     'db'    : 'dev',
-    'll'    : [ 'info', 'debug', 'warn', 'error' ],
+    'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
+              [ 'info', 'debug', 'warn', 'error' ],
   })
 }
 	
@@ -58,7 +65,8 @@ const ENVIRONMENTS = {
     'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
     'db'     : 'test',
-    'll'     : ['info', 'warn', 'error'],
+    'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
+               [ 'info', 'warn', 'error' ],
   }) },
   'RINKEBY'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
@@ -66,7 +74,8 @@ const ENVIRONMENTS = {
     'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
     'db'     : 'rinkeby',
-    'll'     : ['warn', 'error'],
+    'll'     : configs.parseLogLevels(process.env[ 'RINKEBY.LOG_LEVELS' ]) ||
+               [ 'warn', 'error' ],
   }), ['INFURA_PROJECT_ID']) },
   'MAINNET'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
@@ -74,7 +83,8 @@ const ENVIRONMENTS = {
     'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
     'db'     : 'mainnet',
-    'll'     : ['warn', 'error'],
+    'll'     : configs.parseLogLevels(process.env[ 'MAINNET.LOG_LEVELS' ]) ||
+               [ 'warn', 'error' ],
   }), ['INFURA_PROJECT_ID']) },
 }
 
@@ -84,7 +94,7 @@ configs.isNetName = (_name) => {
 }
 
 const lazyEval = (env) => {
-  config = ENVIRONMENTS[env]
+  let config = ENVIRONMENTS[env]
   if (typeof(config) === 'function') {
     ENVIRONMENTS[env] = config()
     config = ENVIRONMENTS[env]
@@ -97,7 +107,7 @@ configs.getConfig = (debugPrint) => {
   const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
   const env = windowEnv ? windowEnv : processEnv
   debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
-  config = lazyEval(env)
+  let config = lazyEval(env)
   if (config) {
    return config
   } else {

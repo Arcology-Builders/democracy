@@ -41,7 +41,7 @@ class ContractsManager {
           const fn = List(f.split(path.sep)).last()
           const fb = path.basename(fn.split('.')[0])
           contractSources.push(fb)
-          LOGGER.info(`Source ${fb}`)
+          LOGGER.debug(`Source ${fb}`)
         }
       )
     }
