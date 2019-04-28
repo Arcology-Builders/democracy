@@ -46,6 +46,7 @@ module.exports = (env, argv) => {
     ]
   },
   entry: entry,
+  externals: { demo: "demo" },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),

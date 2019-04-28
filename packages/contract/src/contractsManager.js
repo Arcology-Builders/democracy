@@ -5,8 +5,7 @@ const path       = require('path')
 const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
-const { awaitInputter  } = require('./utils')
-
+const { awaitInputter  } = require('./utils') 
 const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger }
                  = require('demo-utils')
 

@@ -18,7 +18,8 @@ const utils = {}
  */
 utils.awaitOutputter = (outputCallResult, afterOutput) => {
   if (outputCallResult.then) {
-    return outputCallResult.then(afterOutput) 
+    return outputCallResult.then((val) => {
+      return afterOutput(val) }) 
   } else {
     return afterOutput(outputCallResult)
   }
@@ -34,7 +35,8 @@ utils.awaitOutputter = (outputCallResult, afterOutput) => {
  */
 utils.awaitInputter = (inputCallResult, afterInput) => {
   if (inputCallResult.then) {
-    return inputCallResult.then(afterInput)
+    return inputCallResult.then((val) => {
+      return afterInput(val) })
   } else {
     return afterInput(inputCallResult)
   }
@@ -76,7 +78,8 @@ utils.getInputsToBuild = (requestedInputs, existingOutputs) => {
       LOGGER.info(`${key} has not been built before.`)
     }
     if (isUpdated) {
-      LOGGER.info(`${key} is not up-to-date with hash ${inputHash}`)
+      const oldHash = existingOutputs.get(key).get('inputHash')
+      LOGGER.info(`${key} with inputHash ${inputHash} is not up-to-date with old ${oldHash}`)
     }
     return val.set('isUpdated', isUpdated).set('isNew', isNew)
   })).filter((val, key) => { 

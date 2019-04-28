@@ -2,28 +2,53 @@
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
+const { toJS, fromJS } = utils
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract }
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
+const { RemoteDB } = require('demo-rest')
 
 const LOGGER = new utils.Logger('departure')
 
 const departs = {}
 
-departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
+departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPort,
+                        callback}) => {
   assert(address, " `address` param needed to deploy from.")
   assert(callback, " `callback` param needed to run departure function.")
 
   LOGGER.info(`Now departing: ${name}`)
 
-  let eth = utils.getNetwork()
-  let accounts = await eth.accounts()
-  let chainId = await eth.net_version()
-  let bm = new BuildsManager({startSourcePath: sourcePath, chainId: chainId})
-  let c = new Compiler({startSourcePath:sourcePath})
-  let cm = c.getContractsManager()
-  let l = new Linker({bm:bm})
-  let d = new Deployer({bm:bm, chainId: chainId, eth: eth, address: address})
+  const eth = utils.getNetwork()
+  const accounts = await eth.accounts()
+  const chainId = await eth.net_version()
+  let inputter = null
+  let outputter = null
+
+  if (bmHostName && bmPort) {
+    const r = new RemoteDB(bmHostName, bmPort)
+    inputter = async (key, def) => {
+      return r.getHTTP(`/api/${key}`, def).then((val) => {
+        const mapVal = fromJS(JSON.parse(val))
+        return mapVal
+      }) }
+    //  .then((val) => {return fromJS(val)} ) }
+    outputter = async (key, val, ow) => {
+      if (!val) { throw Error(`No cleaning of remote build ${val} allowed.`) }
+      return r.postHTTP(`/api/${key}`, toJS(val), ow) }
+  }
+
+  const bm = new BuildsManager({
+      startSourcePath: sourcePath,
+      chainId: chainId,
+      inputter: inputter,
+      outputter: outputter,
+    })
+  const c = new Compiler({
+    startSourcePath: sourcePath, inputter: inputter, outputter: outputter })
+  const cm = c.getContractsManager()
+  const l = new Linker({bm:bm})
+  const d = new Deployer({bm:bm, chainId: chainId, eth: eth, address: address})
 
   let compiles = new Map()
   const compile = async ( contractName, sourceFile ) => {
@@ -66,7 +91,6 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
 
   const clean = async () => {
     const compileList = List(compiles.map((c, name) => {
-      LOGGER.debug('CONTRACT NAME', name, c)
       return cm.cleanContract( name )
     }).values()).toJS()
     await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
@@ -82,7 +106,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, callback}) => {
     await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
   }
 
-  const result = await callback(compile, link, deploy)
+  const result = await callback({ compile: compile, link: link, deploy: deploy, bm: bm })
   
   return {
     cleaner : clean,
@@ -104,4 +128,3 @@ if (require.main === module) {
     console.log("Departure complete.")
   }
 }
-

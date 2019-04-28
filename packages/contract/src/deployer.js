@@ -92,7 +92,7 @@ class Deployer {
       linkId       : link.get('linkId'),
       abi          : abi,
       code         : code,
-      deployTx     : minedContract,
+      deployTx     : new Map(minedContract),
       deployAddress: minedContract.contractAddress,
       deployDate   : now.toLocaleString(),
       deployTime   : now.getTime(),

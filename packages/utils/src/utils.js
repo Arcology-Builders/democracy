@@ -119,6 +119,10 @@ utils.typedArraysEqual = (_a, _b) => {
   }
 }
 
+utils.immEqual = (_a, _b) => {
+  return JSON.stringify(_a.toJS()) === JSON.stringify(_b.toJS())
+}
+
 /**
  * @return true if we are in a browser (tests for present of `window` and `window.document`
  */

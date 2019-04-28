@@ -20,17 +20,17 @@ describe( 'Remote builds ', () => {
 
   const randInt = Math.round(Math.random() * 100)
   const eth = getNetwork()
-  let networkId
+  let chainId
 
   before(async () => {
     server.start()
-    networkId = await eth.net_version()
+    chainId = await eth.net_version()
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'FirstLink.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'SecondLink.json'))
-    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'FirstDeploy.json'))
-    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'SecondDeploy.json'))
+    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , chainId, 'FirstDeploy.json'))
+    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , chainId, 'SecondDeploy.json'))
   })
 
   it( 'starts a REST server that handles a test request' , async () => {
@@ -75,54 +75,54 @@ describe( 'Remote builds ', () => {
   })
 
   it( 'get all links', async () => {
-    const result = await r.postHTTP('/api/link/FirstLink', new Map({'a':1}))
+    const result = await r.postHTTP('/api/links/FirstLink', new Map({'a':1}))
     assert.equal(result, '{"result":true,"body":{"a":1}}')
-    const result2 = await r.postHTTP('/api/link/SecondLink', new Map({'b': 2}))
+    const result2 = await r.postHTTP('/api/links/SecondLink', new Map({'b': 2}))
     assert.equal(result2, '{"result":true,"body":{"b":2}}')
     const res = await r.getHTTP('/api/links', {})
     assert.equal( res, '{"FirstLink":{"a":1},"SecondLink":{"b":2}}')
   })
 
   it( 'fail to overwrite a link', async () => {
-    await r.postHTTP('/api/link/FirstLink', new Map({'c':3}))
-      .then((val) => assert.fail("Should not have been able to overwrite /api/link/FirstLink"))
-      .catch((err) => LOGGER.info("Correctly failed to overwrite link /api/link/FirstLink"))
+    await r.postHTTP('/api/links/FirstLink', new Map({'c':3}))
+      .then((val) => assert.fail("Should not have been able to overwrite /api/links/FirstLink"))
+      .catch((err) => LOGGER.info("Correctly failed to overwrite link /api/links/FirstLink"))
     // expect (await r.postHTTP('/api/link/FirstLink', new Map({'c':3})))
     //   .to.be.rejectedWith(Error)
   })
 
   it( 'succeeds in overwriting a link', async () => {
-    const result = await r.postHTTP('/api/link/FirstLink', new Map({'d':4}), true)
-    await delayedGet(r.getHTTP.bind(r, '/api/link/FirstLink'), '{"d":4}')
+    const result = await r.postHTTP('/api/links/FirstLink', new Map({'d':4}), true)
+    await delayedGet(r.getHTTP.bind(r, '/api/links/FirstLink'), '{"d":4}')
   })
 
   it( 'get all empty deploys', async () => {
-    const res = await r.getHTTP(`/api/deploys/${networkId}`, {})
+    const res = await r.getHTTP(`/api/deploys/${chainId}`, {})
     assert.equal( res, `{}`)
   })
   
   it( 'get all deploys', async () => {
-    r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'z':22}))
-    r.postHTTP(`/api/deploy/${networkId}/SecondDeploy`, new Map({'y':23}))
-    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${networkId}`),
+    r.postHTTP(`/api/deploys/${chainId}/FirstDeploy`, new Map({'z':22}))
+    r.postHTTP(`/api/deploys/${chainId}/SecondDeploy`, new Map({'y':23}))
+    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${chainId}`),
                      '{"FirstDeploy":{"z":22},"SecondDeploy":{"y":23}}')
   })
 
   it( 'get deploy', async () => {
-    const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
+    const res = await r.getHTTP(`/api/deploys/${chainId}/FirstDeploy`, {})
   })
 
   it( 'fail to overwrite a deploy', async () => {
-    const result =  await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':21}))
+    const result =  await r.postHTTP(`/api/deploys/${chainId}/FirstDeploy`, new Map({'x':21}))
     assert.equal(result, '{"result":false,"error":{}}')
       //await expect (
-      //  await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':21}))
+      //  await r.postHTTP(`/api/deploy/${chainId}/FirstDeploy`, new Map({'x':21}))
       //).to.be.rejectedWith(Error)
   })
 
   it( 'succeeds in overwriting a deploy', async () => {
-    await r.postHTTP(`/api/deploy/${networkId}/FirstDeploy`, new Map({'x':4}), true)
-    const res = await r.getHTTP(`/api/deploy/${networkId}/FirstDeploy`, {})
+    await r.postHTTP(`/api/deploys/${chainId}/FirstDeploy`, new Map({'x':4}), true)
+    const res = await r.getHTTP(`/api/deploys/${chainId}/FirstDeploy`, {})
     assert.equal( res, '{"x":4}')
   })
 
@@ -132,8 +132,8 @@ describe( 'Remote builds ', () => {
     utils.rimRafFileSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'FirstLink.json'))
     utils.rimRafFileSync(path.join(DB_DIR, LINKS_DIR   , 'SecondLink.json'))
-    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'FirstDeploy.json'))
-    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , networkId, 'SecondDeploy.json'))
+    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , chainId, 'FirstDeploy.json'))
+    utils.rimRafFileSync(path.join(DB_DIR, DEPLOYS_DIR , chainId, 'SecondDeploy.json'))
   })
 
 })

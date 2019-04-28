@@ -68,14 +68,14 @@ server.RESTServer = class {
       res.json(deploys.toJS())
     })
 
-    _router.route('/deploy/:chainId/:deployName').get((req, res) => {
+    _router.route('/deploys/:chainId/:deployName').get((req, res) => {
       const chainId = req.params.chainId
       const deployName = req.params.deployName
       const deploy = get(`/${DEPLOYS_DIR}/${chainId}/${deployName}`, new Map({}))
       res.json(deploy.toJS())
     })
 
-    _router.route('/deploy/:chainId/:deployName').post((req, res) => {
+    _router.route('/deploys/:chainId/:deployName').post((req, res) => {
       const chainId = req.params.chainId
       const deployName = req.params.deployName
       const jsBody = fromJS(req.body)
@@ -94,13 +94,13 @@ server.RESTServer = class {
       res.json(links.toJS())
     })
 
-    _router.route('/link/:linkName').get((req, res) => {
+    _router.route('/links/:linkName').get((req, res) => {
       const linkName = req.params.linkName
       const link = get(`/${LINKS_DIR}/${linkName}`, new Map({}))
       res.json(link.toJS())
     })
 
-    _router.route('/link/:linkName').post((req, res) => {
+    _router.route('/links/:linkName').post((req, res) => {
       const linkName = req.params.linkName
       const jsBody = fromJS(req.body)
       const overwrite = (req.headers['democracy-overwrite'] === 'true')
@@ -119,15 +119,17 @@ server.RESTServer = class {
       res.json(compiles.toJS())
     })
 
-    _router.route('/compile/:contractName').post((req, res) => {
+    _router.route('/compiles/:contractName').post((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
       const overwrite = (req.headers['democracy-overwrite'] === 'true')
-      set(`/compiles/${cn}`, fromJS(req.body), overwrite)
+      LOGGER.debug('req.body', req.body)
+      const val = (req.body === 'null') ? null : fromJS(req.body)
+      set(`/compiles/${cn}`, val, overwrite)
       res.json(req.body) 
     })
 
-    _router.route('/compile/:contractName').get((req, res) => {
+    _router.route('/compiles/:contractName').get((req, res) => {
       const cn = req.params.contractName
       const cxt = req.params.context
       const compile = get(`/compiles/${cn}`, new Map({}))
