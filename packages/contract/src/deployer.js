@@ -16,8 +16,6 @@ deploys.Deployer = class {
 
   constructor({inputter, outputter, bm, eth, chainId, address}) {
     assert(chainId, `chainId param is empty.`)
-    this.inputter  = inputter || getImmutableKey
-    this.outputter = outputter || setImmutableKey
     this.bm        = bm || new BuildsManager(...arguments)
     this.eth       = eth
     this.chainId   = chainId
@@ -105,7 +103,7 @@ deploys.Deployer = class {
     const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
     LOGGER.debug(`Writing deploy to ${deployFilePath}`)
     
-    return awaitOutputter(this.outputter(deployFilePath, deployOutput, true),
+    return awaitOutputter(this.bm.outputter(deployFilePath, deployOutput, true),
                           () => { return deployOutput })
   }
 

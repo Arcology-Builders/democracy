@@ -16,8 +16,6 @@ const linker = {}
 linker.Linker = class {
 
   constructor({inputter, outputter, bm}) {
-    this.inputter  = inputter  || getImmutableKey
-    this.outputter = outputter || setImmutableKey
     this.bm        = bm || new BuildsManager(...arguments)
   }
 
@@ -36,7 +34,7 @@ linker.Linker = class {
   async link(contractName, linkId, _depMap) {
     const contract = await this.bm.getContract(contractName)
     assert( isContract(contract),
-           `Compile output for ${contractName} invalid: ${JSON.stringify(contract.toJS())}` )
+           `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
     const code = '0x' + contract.get('code')
     const linkName = `${contractName}-${linkId}`
 
@@ -125,7 +123,7 @@ linker.Linker = class {
     const linkFilePath = `${linksDir}/${linkName}`
 
     LOGGER.debug(`Writing link to ${linkFilePath}`)
-    return awaitOutputter(this.outputter(linkFilePath, linkOutput),
+    return awaitOutputter(this.bm.outputter(linkFilePath, linkOutput),
                           () => { return linkOutput })
   }
 

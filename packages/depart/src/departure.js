@@ -19,23 +19,36 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
 
   LOGGER.info(`Now departing: ${name}`)
 
-  const eth = utils.getNetwork()
+  const eth      = utils.getNetwork()
   const accounts = await eth.accounts()
-  const chainId = await eth.net_version()
-  let inputter = null
-  let outputter = null
+  const chainId  = await eth.net_version()
+  let inputter   = null
+  let outputter  = null
 
   if (bmHostName && bmPort) {
     const r = new RemoteDB(bmHostName, bmPort)
     inputter = async (key, def) => {
-      return r.getHTTP(`/api/${key}`, def).then((val) => {
-        const mapVal = fromJS(JSON.parse(val))
-        return mapVal
-      }) }
-    //  .then((val) => {return fromJS(val)} ) }
+      LOGGER.debug('INPUTTER', key, def)
+      return new Promise((resolve, reject) => {
+        setTimeout( () => {
+          resolve(
+            r.getHTTP(`/api/${key}`, def).then((val) => {
+              const mapVal = fromJS(JSON.parse(val))
+              return mapVal
+            })
+          )
+        }, 500)
+      })
+    }
     outputter = async (key, val, ow) => {
+      LOGGER.debug('OUTPUTTER', key, val, ow)
       if (!val) { throw Error(`No cleaning of remote build ${val} allowed.`) }
-      return r.postHTTP(`/api/${key}`, toJS(val), ow) }
+      return new Promise((resolve, reject) => {
+        setTimeout( () => {
+          resolve(r.postHTTP(`/api/${key}`, toJS(val), ow))
+        }, 500 )
+      })
+    }
   }
 
   const bm = new BuildsManager({
@@ -45,10 +58,16 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
       outputter: outputter,
     })
   const c = new Compiler({
-    startSourcePath: sourcePath, inputter: inputter, outputter: outputter })
+    startSourcePath: sourcePath, inputter: inputter, outputter: outputter
+  })
   const cm = c.getContractsManager()
-  const l = new Linker({bm:bm})
-  const d = new Deployer({bm:bm, chainId: chainId, eth: eth, address: address})
+  const l = new Linker({
+    bm: bm, inputter: inputter, outputter: outputter
+  })
+  const d = new Deployer({
+    bm: bm, inputter: inputter, outputter: outputter, chainId: chainId,
+    eth: eth, address: address
+  })
 
   let compiles = new Map()
   const compile = async ( contractName, sourceFile ) => {
@@ -58,7 +77,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
     assert(isCompile(output))
     assert.equal( output.get(contractName).get('name'), contractName )
     const contract = await cm.getContract(contractName)
-    assert(isContract(contract))
+    assert(isContract(contract), `Contract ${contractName} not found`)
     compiles = compiles.set(contractName, output.get(contractName))
     return output
   }
@@ -114,6 +133,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
     deploys : deploys,
     links   : links,
     compiles: compiles,
+    bm      : bm,
     result  : result,
   }
 

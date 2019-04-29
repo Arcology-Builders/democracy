@@ -6,6 +6,7 @@ const utils = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
 const LOGGER = new Logger('depart.spec')
 const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
+const { getImmutableKey, setImmutableKey } = require('demo-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert
 
@@ -26,23 +27,33 @@ describe( 'Departures', () => {
 
   it( 'executing a simple departure', async () => {
     result = await depart({
-      name: "simple-departure",
-      address: accounts[1],
-      sourcePath: "../../node_modules/demo-test-contracts/contracts",
-      callback: async ({ compile, link, deploy, bm }) => {
+      name       : "simple-departure",
+      address    : accounts[1],
+      sourcePath : "../../node_modules/demo-test-contracts/contracts",
+      callback   : async ({ compile, link, deploy, bm }) => {
+        
+        LOGGER.info( 'Compiling', Date.now() )
         const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
         assert( isCompile(cout) )
         const contract = await bm.getContract( 'DifferentSender' )
         assert( isContract(contract) )
         assert( immEqual(contract, cout.get('DifferentSender')) )
+
+        assert( bm.inputter == getImmutableKey )
+        assert( bm.outputter == setImmutableKey )
+
+        LOGGER.info( 'Linking', Date.now() )
         const lout = await link( 'DifferentSender', 'link' )
         assert( isLink(lout) )
         const rLink = await bm.getLink('DifferentSender-link')
         assert( immEqual(lout, rLink) )
+        
+        LOGGER.info( 'Deploying', Date.now() )
         const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
         const rDeploy = await bm.getDeploy('DifferentSender-deploy')
         assert( isDeploy(dout) )
         assert( immEqual(dout, rDeploy) )
+       
         return true
       }
     })
