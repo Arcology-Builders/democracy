@@ -1,19 +1,19 @@
-// Linking command, for detecting library dependencies and generating
-// link metadata as an input to deploying
-const assert = require('assert')
-const { List, Map }
-             = require('immutable')
+'use strict'
+
+const assert = require('chai').assert
+const { List, Map } = require('immutable')
 const { Logger, isNetwork, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
              = require('demo-utils')
 const LOGGER = new Logger('Linker')
 
 const { isContract } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
-const { isDeploy } = require('./deployer')
-const { awaitOutputter } = require('./utils')
+const { awaitOutputter, isDeploy, isLink } = require('./utils')
 const { keccak } = require('ethereumjs-util')
 
-class Linker {
+const linker = {}
+
+linker.Linker = class {
 
   constructor({inputter, outputter, bm}) {
     this.inputter  = inputter  || getImmutableKey
@@ -28,16 +28,16 @@ class Linker {
   /**
    * Link a previously compiled contract. Validate dependencies and generate appropriate metadata
    * @param eth network object connected to a local provider
-   * @param contractOutput the JSON compiled output to deploy
+   * @param contractName {String} the name of the contract to link.
+   * @param linkId {String} the link ID to output the new link as.
    * @param depMap is an Immutable Map of library names to deploy IDs
    * @return the contractOutput augmented with a linkDepMap
    */
   async link(contractName, linkId, _depMap) {
-    const contractOutput = await this.bm.getContract(contractName)
-    if (!isContract(contractOutput)) { throw new Error(`Compile output not found for ${contractName}`) } 
-    //assert(isContract(contractOutput), `Compile output not found for ${contractName}` )
-    const code = '0x' + contractOutput.get('code')
-    //const contractName = contractOutput.get('name')
+    const contract = await this.bm.getContract(contractName)
+    assert( isContract(contract),
+           `Compile output for ${contractName} invalid: ${JSON.stringify(contract.toJS())}` )
+    const code = '0x' + contract.get('code')
     const linkName = `${contractName}-${linkId}`
 
     const linksDir = LINKS_DIR
@@ -45,14 +45,17 @@ class Linker {
     //ensureDir(linksDir)
 
     const link = await this.bm.getLink(linkName)
-    const inputHash = keccak(JSON.stringify(contractOutput.toJS())).toString('hex')
-    if (link && link.get('inputHash') === inputHash) {
+    const inputHash = keccak(JSON.stringify(contract.toJS())).toString('hex')
+    if ( link && link.get('inputHash') === inputHash ) {
       LOGGER.info(`Link ${linkName} is up-to-date with hash ${inputHash}`)
       return link
     } else {
       LOGGER.info(`Link ${linkName} out-of-date with hash ${inputHash}`)
     }
-    assert(!isLink(link), `Link ${linkName} already exists`)
+    if ( isLink(link) ) {
+      LOGGER.info(`Link ${linkName} already exists, returning.`)
+      return link
+    }
 
     const deployMap = await this.bm.getDeploys()
 
@@ -115,7 +118,7 @@ class Linker {
       linkDate       : now.toLocaleString(),
       linkTime       : now.getTime(),
       code           : replacedCode,
-      abi            : contractOutput.get('abi'),
+      abi            : contract.get('abi'),
       inputHash      : inputHash,
     })
 
@@ -128,15 +131,4 @@ class Linker {
 
 }
 
-/**
- * @return true if the given object is a link output, otherwise false
- */
-const isLink = (_link) => {
-  return (Map.isMap(_link) && _link.get('type') === 'link')
-}
-
-
-module.exports = {
-  Linker: Linker,
-  isLink: isLink,
-}
+module.exports = linker

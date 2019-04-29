@@ -87,4 +87,18 @@ utils.getInputsToBuild = (requestedInputs, existingOutputs) => {
   })
 }
 
+/**
+ * @return true if the given object is a link output, otherwise false
+ */
+utils.isLink = (_link) => {
+  return (Map.isMap(_link) && _link.get('type') === 'link')
+}
+
+/**
+ * @return true if the given object is a deploy output, otherwise false
+ */
+utils.isDeploy = (_deploy) => {
+  return (Map.isMap(_deploy) && _deploy.get('type') === 'deploy')
+}
+
 module.exports = utils

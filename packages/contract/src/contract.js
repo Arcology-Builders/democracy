@@ -5,7 +5,7 @@ const abi = require('ethjs-abi')
 
 const LOGGER = new Logger('contract')
 
-const { isDeploy } = require('./deployer')
+const { isDeploy } = require('./utils')
 
 const contracts = {}
 

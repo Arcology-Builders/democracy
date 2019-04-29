@@ -6,11 +6,13 @@ const { Map, List, Seq }
 const { DEPLOYS_DIR, Logger, getImmutableKey, setImmutableKey }
              = require('demo-utils')
 const LOGGER = new Logger('Deployer')
-const { awaitOutputter } = require('./utils')
+const { awaitOutputter, isLink } = require('./utils')
 const { BuildsManager } = require('./buildsManager')
 const { isValidAddress, keccak } = require('ethereumjs-util')
 
-class Deployer {
+const deploys = {}
+
+deploys.Deployer = class {
 
   constructor({inputter, outputter, bm, eth, chainId, address}) {
     assert(chainId, `chainId param is empty.`)
@@ -35,6 +37,7 @@ class Deployer {
   async deploy(contractName, linkId, deployId, ctorArgs) {
     const linkName   = `${contractName}-${linkId}`
     const link       = await this.bm.getLink(linkName)
+    assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
     const code       = link.get('code')
     const abi        = link.get('abi')
     const deployName = `${contractName}-${deployId}`
@@ -108,14 +111,4 @@ class Deployer {
 
 }
 
-/**
- * @return true if the given object is a deploy output, otherwise false
- */
-const isDeploy = (_deploy) => {
-  return (_deploy && _deploy.get('type') === 'deploy')
-}
-
-module.exports = {
-  Deployer: Deployer,
-  isDeploy: isDeploy,
-}
+module.exports = deploys
