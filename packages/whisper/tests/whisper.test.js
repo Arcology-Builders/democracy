@@ -21,12 +21,12 @@ describe( 'The Whisper Whisperer', () => {
     process.env.NODE_ENV='TEST'
     w = new Whisperer({
       defaultTTL: 60,
-      defaultPOWTarget: 2,
+      defaultPOWTarget: 3,
       defaultPOWTime: 2,
     })
     w2 = new Whisperer({
       defaultTTL: 60,
-      defaultPOWTarget: 2,
+      defaultPOWTarget: 3,
       defaultPOWTime: 2,
     })
 
