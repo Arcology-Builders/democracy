@@ -1,6 +1,6 @@
 {
   "name": "demo-utils",
-  "version": "0.2.7-alpha.8",
+  "version": "0.2.7-alpha.9",
   "description": "Utilities for a distributed country on Ethereum",
   "directories": {
     "tests": "tests"
