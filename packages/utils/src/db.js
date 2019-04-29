@@ -55,11 +55,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
       if (!value || overwrite) {
         // We never delete, only move to the side
         fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
-        if (overwrite) {
-          LOGGER.debug(`Overwriting key ${fullKey} with ${value}`)
-          // don't return here b/c we need to write the new key file below
-        } else {
-          LOGGER.debug(`Marking key ${fullKey} deleted at time ${now}`)
+        if (!overwrite) {
           return true
         }
       } else {
@@ -75,11 +71,11 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
         throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
       }
     } else if (!value) {
-      LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
+      //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
       return true
     }
     const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-    LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
+    //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
     fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
     return true
     /*
