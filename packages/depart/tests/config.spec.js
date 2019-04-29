@@ -9,7 +9,7 @@ describe( 'Configs for departures', () => {
   
   const config = getConfig()
   it( 'picks up log levels from .env', async () => {
-    assert( deepEqual( config['LOG_LEVELS'], ['warn', 'error']) )
+    assert( deepEqual( config['LOG_LEVELS'], ['info', 'warn', 'error']) )
   })
 
   it( 'picks up db url from .env', async () => {

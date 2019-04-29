@@ -9,6 +9,39 @@ const LOGGER      = new Logger('rest/client')
 
 const client = {}
 
+const RETRY_COUNT = 5
+const BACKOFF_START = 100 // 100 ms to start
+
+const retryPromise = async (promCreator, bmHostName, bmPort, tag) => {
+  const delayPromCreator = async (delay) => {
+    return new Promise((resolve, reject) => {
+      setTimeout( () => {
+        promCreator(resolve, reject).then((val) => resolve(val))
+      }, delay )
+    }) 
+  }
+  let _success = false
+  let _result
+  let retry = RETRY_COUNT
+  let delay = BACKOFF_START
+  while (!_success && retry > 0) {
+    const perturb = Math.round(Math.random() * delay)
+    if (tag) { LOGGER.debug('TAG', tag) }
+    LOGGER.debug(`Attempting ${bmHostName}:${bmPort} after delay ${delay+perturb} with ${retry} retries left`)
+    let {success: _success, result: _result} = await delayPromCreator(delay + perturb)
+    if (_success) {
+     return _result
+    }
+    retry -= 1
+    delay *= 2
+  }
+  // We've exhaused all retries
+  if (tag) { LOGGER.debug('TAG', tag) }
+  LOGGER.error(tag, "Exchausted all retries")
+  throw new Error(`Unable to connect to ${bmHostName}:${bmPort} after ${RETRY_COUNT} retries`)
+}
+
+
 client.RemoteDB = class {
 
   constructor(_host, _port) {
@@ -34,44 +67,76 @@ client.RemoteDB = class {
           'Content-Length'      : Buffer.byteLength(post_data),
       }
     }
-    return new Promise((resolve, reject) => {
-			const post_req = http.request(post_options, (res) => {
-				res.setEncoding('utf8')
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(Buffer.from(chunk))
-				}).on('end', () => {
-					const body = Buffer.concat(data)
-          resolve(body.toString())
-				}).on('error', (err) => {
-          LOGGER.error('res error', err)
+    const postPromCreator = (resolve, reject) => {
+      return new Promise((resolve, reject) => {
+        const post_req = http.request(post_options, (res) => {
+          res.setEncoding('utf8')
+          const data = []
+          res.on('data', (chunk) => {
+            data.push(Buffer.from(chunk))
+          }).on('end', () => {
+            const body = Buffer.concat(data)
+            resolve(body.toString())
+          }).on('error', (err) => {
+            LOGGER.error('res error', err)
+            reject(err)
+          })
+        })
+
+        post_req.on('error', (err) => {
+          LOGGER.error('post req error', err)
           reject(err)
         })
-			})
-
-      post_req.on('error', (err) => {
-        LOGGER.error('req error', err)
-        reject(err)
+        post_req.on('socket', function(socket) { 
+          socket.setTimeout(2000, function () {   // set short timeout so discovery fails fast
+              var e = new Error ('Timeout connecting to ' + this.host)
+              e.name = 'Timeout';
+             reject(e)
+          })
+        })
+        post_req.write(post_data)
+        post_req.end()
       })
-			post_req.write(post_data)
-			post_req.end()
-    })
+      .then((val) => { resolve({success: true, result: val }) })
+      .catch((e) => { resolve({success: false, result: e }) }) 
+    }
+    if (!_bodyObj) { throw Error(`No deleting of remote key ${_apiPath} allowed.`) }
+    return retryPromise(postPromCreator, this.host, this.port, 'POST')
   }
  
   async getHTTP(_apiPath) {
-    return new Promise((resolve, reject) => {
-      http.get(url.parse(this.url + _apiPath), (res) => {
-				const data = []
-				res.on('data', (chunk) => {
-					data.push(chunk);
-				}).on('end', () => {
-					const body = Buffer.concat(data)
-				  resolve(body.toString())	
-				}).on('error', (err) => {
-					reject(err)
+    const getPromCreator = (resolve, reject) => {
+      return new Promise((resolve, reject) => {
+        const getURL = url.parse(this.url + _apiPath)
+        const req = http.get(getURL, (res) => {
+          const data = []
+          res.on('data', (chunk) => {
+            data.push(chunk);
+          }).on('end', () => {
+            const body = Buffer.concat(data)
+            resolve(body.toString())	
+          }).on('error', (err) => {
+            reject(err)
+          })
         })
-      })
-    }) 
+        req.on('socket', function(socket) { 
+          socket.setTimeout(2000, function () {   // set short timeout so discovery fails fast
+              var e = new Error ('Timeout connecting to ' + this.host)
+              e.name = 'Timeout';
+              //req.abort();  // kill socket
+             reject(e)
+          })
+        })
+        req.on('error', (err) => {
+          LOGGER.error('get req error', err)
+          reject(err)
+        })
+
+      }) 
+      .then((val) => { resolve({success: true, result: val }) })
+      .catch((e) => { resolve({success: false}) })
+    }
+    return retryPromise(getPromCreator, this.host, this.port, 'GET')
   }
 
 }

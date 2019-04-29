@@ -27,28 +27,8 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
 
   if (bmHostName && bmPort) {
     const r = new RemoteDB(bmHostName, bmPort)
-    inputter = async (key, def) => {
-      LOGGER.debug('INPUTTER', key, def)
-      return new Promise((resolve, reject) => {
-        setTimeout( () => {
-          resolve(
-            r.getHTTP(`/api/${key}`, def).then((val) => {
-              const mapVal = fromJS(JSON.parse(val))
-              return mapVal
-            })
-          )
-        }, 500)
-      })
-    }
-    outputter = async (key, val, ow) => {
-      LOGGER.debug('OUTPUTTER', key, val, ow)
-      if (!val) { throw Error(`No cleaning of remote build ${val} allowed.`) }
-      return new Promise((resolve, reject) => {
-        setTimeout( () => {
-          resolve(r.postHTTP(`/api/${key}`, toJS(val), ow))
-        }, 500 )
-      })
-    }
+    inputter = async (key, def) => { return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) }
+    outputter = async (key, val, ow) => { return r.postHTTP(`/api/${key}`, toJS(val), ow) }
   }
 
   const bm = new BuildsManager({

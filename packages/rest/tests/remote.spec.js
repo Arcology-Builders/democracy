@@ -5,7 +5,6 @@ const { RemoteDB } = require('../src/client')
 const { Logger }   = require('demo-utils')
 
 const { delayedGet, syncify } = require('./common')
-
 describe('Remote DB tests', () => {
 
   const LOGGER   = new Logger('RemoteDB Test')
@@ -49,14 +48,11 @@ describe('Remote DB tests', () => {
                       `{"val":{"body":[{"a":[{"b":${randInt}}]}]}}`)
   })
 
-  it( 'fails to connect to a non-existent server', (done) => {
-    syncify(async () => {
-      await r2.postHTTP('/api/test', { 'a': randInt } )
-        .then((v) => { assert.fail(`Should have failed to connect, instead ${v}`) })
-        .catch((e) => { assert.equal(JSON.stringify(e),
-          '{"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect","address":"127.0.0.1","port":36666}'
-       ) })
-    }, done)
+  it( 'fails to connect to a non-existent server', async () => {
+    await r2.postHTTP('/api/test', { 'a': randInt } )
+      .then((v) => { assert.fail(`Should have failed to connect, instead ${v}`) })
+      .catch((e) => { assert.equal( e.message,
+        'Unable to connect to localhost:36666 after 5 retries') })
   })
 
 })
