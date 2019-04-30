@@ -28,7 +28,8 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "start": "npx pm2 start ./server.js --watch",
+    "start": "pm2 start ./server.js --watch",
+    "stop": "pm2 stop 0; pm2 del 0",
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
   },
   "bugs": {
