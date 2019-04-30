@@ -62,6 +62,12 @@ server.RESTServer = class {
         next() // make sure we go to the next routes and don't stop here
     });
 
+    _router.route('/deploys').get((req, res) => {
+      const chainId = req.params.chainId
+      const deploys = get(`/${DEPLOYS_DIR}`, new Map({}))
+      res.json(deploys.toJS())
+    })
+
     _router.route('/deploys/:chainId').get((req, res) => {
       const chainId = req.params.chainId
       const deploys = get(`/${DEPLOYS_DIR}/${chainId}`, new Map({}))

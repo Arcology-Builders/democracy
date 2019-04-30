@@ -25,16 +25,12 @@ const LOGGER = new Logger('Compiler')
  */
 class Compiler {
   
-  constructor({startSourcePath, inputter, outputter}) {
+  constructor({startSourcePath, bm}) {
     this.startSourcePath = (startSourcePath && typeof(startSourcePath) === 'string') ?
       startSourcePath : DEMO_SRC_PATH
-    LOGGER.info('START SOURCE PATH', this.startSourcePath)
-    assert((inputter && outputter) || (!inputter && !outputter),
-           `Inputter and outputter should be defined together or not at all.`)
-    this.inputter = inputter || getImmutableKey
-    this.outputter = outputter || setImmutableKey
+    LOGGER.debug('START SOURCE PATH', this.startSourcePath)
     ensureDir(this.startSourcePath)
-    this.cm = new ContractsManager(...arguments)
+    this.cm = bm || new ContractsManager(...arguments)
   }
 
   /**
@@ -85,7 +81,7 @@ class Compiler {
         return [contract.name, existingOutputs.get(contract.name)]
       } else {
         return awaitOutputter(
-          this.outputter(compileKey, output, true),
+          this.cm.outputter(compileKey, output, true),
           () => { return [ contract.name, output ] }
         )
       }

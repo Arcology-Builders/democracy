@@ -8,10 +8,11 @@ const expect = chai.expect
 const { Map } = require('immutable')
 
 assert(utils.rimRafFileSync)
-const { RESTServer, RemoteDB } = require('..')
-const LOGGER     = new utils.Logger('rest.spec')
+const { RESTServer } = require('..')
+const { RemoteDB }   = require('demo-client')
+const LOGGER         = new utils.Logger('rest.spec')
 
-const { delayedGet, syncify } = require('./common')
+const { delayedGet } = require('demo-client')
 
 describe( 'Remote builds ', () => {
 

@@ -38,7 +38,7 @@
   "dependencies": {
     "demo-compile": "^0.2.7-alpha.9",
     "demo-contract": "^0.2.7-alpha.9",
-    "demo-rest": "^0.2.7-alpha.9",
+    "demo-client": "^0.2.7-alpha.9",
     "demo-utils": "^0.2.7-alpha.9",
     "immutable": "4.0.0-rc.12"
   },

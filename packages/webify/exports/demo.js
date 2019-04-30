@@ -1,8 +1,9 @@
 require('@babel/polyfill')
-utils     = require('demo-utils')
-keys      = require('demo-keys')
-contract  = require('demo-contract')
-immutable = require('immutable')
+const utils     = require('demo-utils')
+const keys      = require('demo-keys')
+const contract  = require('demo-contract')
+const client    = require('demo-client')
+const immutable = require('immutable')
 
 module.exports = {
   BrowserFS: BrowserFS,
@@ -10,6 +11,7 @@ module.exports = {
   path     : require('path'),
   utils    : utils,
   keys     : keys,
+  client   : client,
   contract : contract,
   immutable: immutable,
 }

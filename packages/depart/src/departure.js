@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
@@ -6,7 +5,7 @@ const { toJS, fromJS } = utils
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract }
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
-const { RemoteDB } = require('demo-rest')
+const { RemoteDB, createBM } = require('demo-client')
 
 const LOGGER = new utils.Logger('departure')
 
@@ -22,30 +21,22 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
   const eth      = utils.getNetwork()
   const accounts = await eth.accounts()
   const chainId  = await eth.net_version()
-  let inputter   = null
-  let outputter  = null
 
-  if (bmHostName && bmPort) {
-    const r = new RemoteDB(bmHostName, bmPort)
-    inputter = async (key, def) => { return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) }
-    outputter = async (key, val, ow) => { return r.postHTTP(`/api/${key}`, toJS(val), ow) }
-  }
-
-  const bm = new BuildsManager({
-      startSourcePath: sourcePath,
-      chainId: chainId,
-      inputter: inputter,
-      outputter: outputter,
-    })
-  const c = new Compiler({
-    startSourcePath: sourcePath, inputter: inputter, outputter: outputter
+  const bm = createBM({
+    sourcePath: sourcePath,
+    chainId   : chainId,
+    hostname  : bmHostName,
+    port      : bmPort,
   })
-  const cm = c.getContractsManager()
+
+  const c = new Compiler({
+    startSourcePath: sourcePath, bm: bm
+  })
   const l = new Linker({
-    bm: bm, inputter: inputter, outputter: outputter
+    bm: bm
   })
   const d = new Deployer({
-    bm: bm, inputter: inputter, outputter: outputter, chainId: chainId,
+    bm: bm, chainId: chainId,
     eth: eth, address: address
   })
 
@@ -56,8 +47,8 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
     const output = await c.compile( sourceFile )
     assert(isCompile(output))
     assert.equal( output.get(contractName).get('name'), contractName )
-    const contract = await cm.getContract(contractName)
-    assert(isContract(contract), `Contract ${contractName} not found`)
+    const contract = await bm.getContract(contractName)
+    assert( isContract(contract), `Contract ${contractName} not found` )
     compiles = compiles.set(contractName, output.get(contractName))
     return output
   }
@@ -90,7 +81,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
 
   const clean = async () => {
     const compileList = List(compiles.map((c, name) => {
-      return cm.cleanContract( name )
+      return bm.cleanContract( name )
     }).values()).toJS()
     await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
 

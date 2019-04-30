@@ -9,7 +9,7 @@ const { Map } = require('immutable')
 const { Logger, setImmutableKey, DB_DIR, COMPILES_DIR }
                  = require('demo-utils')
 const LOGGER     = new Logger('rest.spec')
-const { RemoteDB } = require('../src/client')
+const { RemoteDB } = require('demo-client')
 
 const { RESTServer } = require('../src/server')
 

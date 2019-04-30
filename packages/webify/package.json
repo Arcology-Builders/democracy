@@ -19,6 +19,8 @@
     "demo-contract": "^0.2.7-alpha.9",
     "demo-keys": "^0.2.7-alpha.9",
     "demo-utils": "^0.2.7-alpha.9",
+    "demo-client": "^0.2.7-alpha.9",
+    "@democracy.js/depart": "^0.2.7-alpha.9",
     "democracy.js": "^0.2.7-alpha.9"
   },
   "devDependencies": {

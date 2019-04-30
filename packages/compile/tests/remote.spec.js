@@ -5,7 +5,8 @@ const { Logger, fromJS, toJS, COMPILES_DIR, DB_DIR, deepEqual } = utils
 
 const { Compiler } = require('..')
 const { isCompile, isContract } = require('demo-contract')
-const { RESTServer, RemoteDB } = require('demo-rest')
+const { RemoteDB } = require('demo-client')
+const { RESTServer } = require('demo-rest')
 const LOGGER = new Logger('remote.spec.js')
 const assert = require('chai').assert
 

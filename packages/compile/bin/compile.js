@@ -1,30 +1,27 @@
 #!/usr/bin/env node
 'use strict'
-const { Logger, fromJS, toJS } = require('demo-utils')
+const { getNetwork, Logger, fromJS, toJS } = require('demo-utils')
 const { RemoteDB } = require('demo-rest')
 const { Compiler } = require('demo-compile')
+const { createBM } = require('demo-client')
 const LOGGER = new Logger('compile.bin')
 
+const eth = getNetwork()
+
 const main = async(sourceFile, hostname, port) => {
-  let inputter
-  let outputter
+  const chainId = await eth.net_version()
+  let bm
   if (hostname && port) {
-    const r = new RemoteDB(hostname, port)
-    inputter = async (key, def) => {
-      return r.getHTTP(`/api/${key}`, def).then((val) => {
-        const mapVal = fromJS(JSON.parse(val))
-        return mapVal
-      }) }
-    //  .then((val) => {return fromJS(val)} ) }
-    outputter = async (key, val, ow) => {
-      LOGGER.info('Outputting ', key, val, ow)
-      if (!val) { throw Error(`No cleaning of remote build ${val} allowed.`) }
-      return r.postHTTP(`/api/${key}`, toJS(val), ow) }
+    bm = createBM({
+      sourcePath : 'contracts',
+      hostname   : hostname,
+      port       : port,
+      chainId    : chainId,
+    }) 
   }
   const c = new Compiler({
     startSourcePath: 'contracts',
-    inputter       : inputter,
-    outputter      : outputter
+    bm             : bm,
   })
   const result = await c.compile(sourceFile)
   LOGGER.info(result)

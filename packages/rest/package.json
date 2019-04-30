@@ -38,6 +38,7 @@
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "demo-utils": "^0.2.7-alpha.9",
+    "demo-client": "^0.2.7-alpha.9",
     "ethereumjs-utils": "5.2.5",
     "express": "4.16.4",
     "immutable": "4.0.0-rc.12"
