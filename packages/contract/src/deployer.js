@@ -3,7 +3,7 @@ const assert = require('chai').assert
 const { Map, List, Seq }
              = require('immutable')
 
-const { DEPLOYS_DIR, Logger, getImmutableKey, setImmutableKey }
+const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
              = require('demo-utils')
 const LOGGER = new Logger('Deployer')
 const { awaitOutputter, isLink } = require('./utils')
@@ -52,7 +52,8 @@ deploys.Deployer = class {
       LOGGER.warn(deployError)
       return deployMap[deployName]
     } else {
-      LOGGER.info(`Deploy ${deployName} is out-of-date with hash ${inputHash}`)
+      LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
+      LOGGER.debug(`with hash ${inputHash}`)
     }
 
     const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
@@ -60,9 +61,14 @@ deploys.Deployer = class {
 
     const Contract = this.eth.contract(abi.toJS(), code)
 
+    const gasPrice = getConfig()[ 'GAS_PRICE' ]
+    const gasLimit = getConfig()[ 'GAS_LIMIT' ]
+    LOGGER.debug(`gasPrice`, gasPrice)
+    LOGGER.debug(`gasLimit`, gasLimit)
+
     const deployPromise = new Promise((resolve, reject) => {
       Contract.new(...ctorArgList, {
-        from: this.address, gas: '6700000', gasPrice: '0x21105b0'
+        from: this.address, gas: gasLimit, gasPrice: gasPrice,
       }).then((txHash) => {
           const checkTransaction = setInterval(() => {
             this.eth.getTransactionReceipt(txHash).then((receipt) => {

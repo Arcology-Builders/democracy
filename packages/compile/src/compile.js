@@ -77,7 +77,7 @@ class Compiler {
       const compileKey = `${COMPILES_DIR}/${contract.name}`
       if (existingOutputs.has(contract.name) &&
           existingOutputs.get(contract.name).get('inputHash') === inputHash) {
-        LOGGER.warn(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
+        LOGGER.debug(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contract.name, existingOutputs.get(contract.name)]
       } else {
         return awaitOutputter(

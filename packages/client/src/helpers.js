@@ -1,18 +1,30 @@
 'use strict'
 
-const { Logger, fromJS, toJS } = require('demo-utils')
+const { Logger, fromJS, toJS, getConfig } = require('demo-utils')
 const LOGGER = new Logger('client/helpers')
+
 const { RemoteDB } = require('./client')
 const { BuildsManager } = require('demo-contract')
+const assert = require('chai').assert
 
 const helpers = {}
 
-helpers.createBM = ({sourcePath, chainId, hostname, port}) => {
-  const r = new RemoteDB(hostname, port)
+helpers.createBM = ({sourcePath, chainId, hostname, port, autoConfig}) => {
+  let _hostname = hostname
+  let _port = port
+  if (autoConfig) {
+    const url = getConfig()['DB_URL']
+    const urlParts = url.split('://')[1].split(':')
+    assert.equal(urlParts.length, 2)
+    LOGGER.debug('Creating BM with', url)
+    _hostname = urlParts[0]
+    _port     = urlParts[1]
+  }
+  const r = new RemoteDB(_hostname, _port)
   let inputter
   let outputter
 
-  if (hostname && port) {
+  if (_hostname && _port) {
     inputter = async (key, def) => {
       return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) }
     outputter = async (key, val, ow) => {

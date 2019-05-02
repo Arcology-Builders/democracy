@@ -7,22 +7,24 @@ const colors = require('colors')
 
 const logger = []
 
-logger.Logger = function(prefix, enabled) {
+logger.Logger = function(prefix, enabled, getConfig) {
   if (this.prefix) { console.trace(); throw `prefix predefined to ${this.prefix}` }
+
+  this.getConfig = getConfig ? getConfig : require('./config').getConfig
  
   // Only use config if we are not provided a list, to avoid self-loop in ./config.js 
-  this.enabled = (enabled) ? enabled : require('./config')['getConfig']()['LOG_LEVELS']
+  this.enabled = (enabled) ? enabled : this.getConfig()['LOG_LEVELS']
   assert(this.enabled.indexOf('error'))
+  this.out = (this.getConfig()['LOG_OUT'] === 'console') ? console.log : () => {}
 
   this.prefix = prefix
 
-  this.printMsgs = (type, msgs, _out) => {
-    const out = _out || console.log
+  this.printMsgs = (type, msgs) => {
     if (this.enabled.indexOf(type) !== -1) {
       msgs.forEach((msg) => {
        const str = (Map.isMap(msg) || List.isList(msg)) ?
          msg.toString() : JSON.stringify(msg)
-       out(`[${this.prefix}]`.magenta + `[${type}]`.green +`${str}`) })
+       this.out(`[${this.prefix}]`.magenta + `[${type}]`.green +`${str}`) })
     }
   }
 

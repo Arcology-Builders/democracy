@@ -37,7 +37,7 @@ const retryPromise = async (promCreator, bmHostName, bmPort, tag) => {
   }
   // We've exhaused all retries
   if (tag) { LOGGER.debug('TAG', tag) }
-  LOGGER.error(tag, "Exchausted all retries")
+  LOGGER.debug(tag, "Exchausted all retries")
   throw new Error(`Unable to connect to ${bmHostName}:${bmPort} after ${RETRY_COUNT} retries`)
 }
 
@@ -78,13 +78,13 @@ client.RemoteDB = class {
             const body = Buffer.concat(data)
             resolve(body.toString())
           }).on('error', (err) => {
-            LOGGER.error('res error', err)
+            LOGGER.debug('res error', err)
             reject(err)
           })
         })
 
         post_req.on('error', (err) => {
-          LOGGER.error('post req error', err)
+          LOGGER.debug('post req error', err)
           reject(err)
         })
         post_req.on('socket', function(socket) { 
@@ -128,7 +128,7 @@ client.RemoteDB = class {
           })
         })
         req.on('error', (err) => {
-          LOGGER.error('get req error', err)
+          LOGGER.debug('get req error', err)
           reject(err)
         })
 

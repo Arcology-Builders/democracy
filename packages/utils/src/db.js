@@ -49,12 +49,13 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
     const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
       ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
     const now = Date.now()
-    LOGGER.info(`overwrite ${overwrite}`)
 
     if (fs.existsSync(`${dbFile}.json`)) {
       if (!value || overwrite) {
         // We never delete, only move to the side
-        fs.renameSync(`${dbFile}.json`, `${dbFile}.json.${now}`) 
+        const newFile = `${dbFile}.json.${now}` 
+        fs.renameSync( `${dbFile}.json`, newFile ) 
+        LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
         if (!overwrite) {
           return true
         }

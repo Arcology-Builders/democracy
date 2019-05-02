@@ -79,7 +79,7 @@ utils.getInputsToBuild = (requestedInputs, existingOutputs) => {
     }
     if (isUpdated) {
       const oldHash = existingOutputs.get(key).get('inputHash')
-      LOGGER.info(`${key} with inputHash ${inputHash} is not up-to-date with old ${oldHash}`)
+      LOGGER.debug(`${key} with inputHash ${inputHash} is not up-to-date with old ${oldHash}`)
     }
     return val.set('isUpdated', isUpdated).set('isNew', isNew)
   })).filter((val, key) => { 

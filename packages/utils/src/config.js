@@ -3,7 +3,7 @@
 
 require('dotenv').config()
 const { Logger } = require('./logger')
-const LOGGER = new Logger('config', [ 'info', 'debug', 'warn', 'error' ])
+// Pass in log-levels explicitly because this LOGGER cannot include itself
 const assert = require('chai').assert
 
 const { Map } = require('immutable')
@@ -18,13 +18,15 @@ configs.setEnvVars = (_env) => {
 // packets addresses to this hostname for some reason.
 //const SHH_IP = "ws://54.69.190.230:8546"
 const SHH_IP = "ws://eth.arcology.nyc:8546"
-const createEnv = ({ ethURL, dbURL, shhURL, gp, db, ll }) => {
+const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll }) => {
   return {
     'DB_URL'      : dbURL,
     'ETH_URL'     : ethURL,
     'SHH_URL'     : shhURL,
     'DB_NAMESPACE': db,
     'GAS_PRICE'   : gp,
+    'GAS_LIMIT'   : gl,
+    'LOG_OUT'     : lo,
     'LOG_LEVELS'  : ll,
   }
 }
@@ -48,9 +50,11 @@ const createDevEnv = () => {
     'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
     'shhURL': process.env[ 'DEVELOPMENT.SHH_URL' ] || 'ws://localhost:8546',
     'gp'    : 5,
+    'gl'    : '670000',
     'db'    : 'dev',
+    'lo'    : process.env[ 'DEVELOPMENT.LOG_OUT' ],
     'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
-              [ 'info', 'debug', 'warn', 'error' ],
+              [ 'info', 'warn', 'error' ],
   })
 }
 	
@@ -58,13 +62,14 @@ const ENVIRONMENTS = {
   'DEVELOPMENT': createDevEnv,
   'DEV'        : createDevEnv,
   'TEST'       : () => {
-    LOGGER.info('TEST.DB_URL', process.env['TEST.DB_URL'])
     return createEnv({
     'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
     'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
     'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
+    'gl'     : '670000',
     'db'     : 'test',
+    'lo'     : process.env[ 'TEST.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
                [ 'info', 'warn', 'error' ],
   }) },
@@ -73,7 +78,9 @@ const ENVIRONMENTS = {
     'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
+    'gl'     : '670000',
     'db'     : 'rinkeby',
+    'lo'     : process.env[ 'RINKEBY.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'RINKEBY.LOG_LEVELS' ]) ||
                [ 'warn', 'error' ],
   }), ['INFURA_PROJECT_ID']) },
@@ -82,7 +89,9 @@ const ENVIRONMENTS = {
     'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
+    'gl'     : '670000',
     'db'     : 'mainnet',
+    'lo'     : process.env[ 'MAINNET.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'MAINNET.LOG_LEVELS' ]) ||
                [ 'warn', 'error' ],
   }), ['INFURA_PROJECT_ID']) },
@@ -115,5 +124,7 @@ configs.getConfig = (debugPrint) => {
    return lazyEval('TEST')
   }
 }
+
+const LOGGER = new Logger('config', [ 'warn', 'error' ], configs.getConfig)
 
 module.exports = configs

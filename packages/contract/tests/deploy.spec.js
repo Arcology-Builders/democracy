@@ -44,7 +44,6 @@ describe('Democracy deploying.', () => {
     const deploy = await d.deploy('TestLibrary', 'linkLib', 'deployLib')
     assert(isLink(await bm.getLink( 'TestLibrary-linkLib' )),
       "TestLibrary-linkLib not found")
-    LOGGER.info('CHAIN ID', bm.getChainID())
     assert(isDeploy(await bm.getDeploy( 'TestLibrary-deployLib' )),
         "TestLibrary-deployLib not found")
   })

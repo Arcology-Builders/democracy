@@ -44,15 +44,13 @@ linker.Linker = class {
 
     const link = await this.bm.getLink(linkName)
     const inputHash = keccak(JSON.stringify(contract.toJS())).toString('hex')
-    if ( link && link.get('inputHash') === inputHash ) {
-      LOGGER.info(`Link ${linkName} is up-to-date with hash ${inputHash}`)
+    if ( isLink(link) && link.get('inputHash') === inputHash ) {
+      LOGGER.info(`Link ${linkName} is up-to-date`)
+      LOGGER.debug(`with hash ${inputHash}`)
       return link
     } else {
-      LOGGER.info(`Link ${linkName} out-of-date with hash ${inputHash}`)
-    }
-    if ( isLink(link) ) {
-      LOGGER.info(`Link ${linkName} already exists, returning.`)
-      return link
+      LOGGER.debug(`Link ${linkName} out-of-date, re-linking`)
+      LOGGER.debug(`with hash ${inputHash}`)
     }
 
     const deployMap = await this.bm.getDeploys()

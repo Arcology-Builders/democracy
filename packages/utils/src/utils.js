@@ -24,7 +24,6 @@ utils.ZEPPELIN_SRC_PATH = '../../node_modules/openzeppelin-solidity/contracts'
 utils.getEndpointURL = () => {
   const { getConfig } = require('./config.js')
   const config = getConfig()
-  assert(config['ETH_URL'])
   return config['ETH_URL']
 }
 
@@ -155,7 +154,7 @@ utils.traverseDirs = (startDirs, skipFilt, cb, dcb) => {
     const shortList = path.basename(f).split('.')
     if (skipFilt(shortList, f)) { continue }
     if (!fs.existsSync(f)) {
-      LOGGER.warn(`Directory ${f} does not exist, skipping.`)
+      LOGGER.debug(`Skipping traversal directory ${f} which does not exist.`)
       continue
     }
     if (fs.lstatSync(f).isDirectory()) {
