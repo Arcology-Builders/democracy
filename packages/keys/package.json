@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.2.7-alpha.9",
+  "version": "0.2.7",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -12,7 +12,7 @@
     "@invisible-college/keythereum": "1.1.0",
     "bops": "1.0.0",
     "chai-as-promised": "7.1.1",
-    "demo-utils": "^0.2.7-alpha.9",
+    "demo-utils": "^0.2.7",
     "ethereumjs-utils": "5.2.5",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
