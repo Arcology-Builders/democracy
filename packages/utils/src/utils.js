@@ -47,6 +47,13 @@ utils.toJS = (imm) => {
     (Map.isMap(imm)) ? imm.map((val) => {return utils.toJS(val)}).toJS() :
     imm
 }
+
+utils.equal = (a,b) => {
+  if (Map.isMap(a) && Map.isMap(b)) { return utils.immEqual(a,b) }
+  if (List.isList(a) && List.isList(b)) { return utils.immEqual(a,b) }
+  return utils.deepEqual(a,b)
+}
+
 /*
  * Deep JS object equality testing from https://stackoverflow.com/a/10316616
  */
@@ -89,7 +96,7 @@ utils.objectsEqual = (a,b) => {
     if (aKeys[i]!=bKeys[i]) { // keys must be strings
 			return false
     }
-    return deepEqual(aKeys.map(k=>a[k]), aKeys.map(k=>b[k]))
+    return utils.deepEqual(aKeys.map(k=>a[k]), aKeys.map(k=>b[k]))
   }
 }
 
