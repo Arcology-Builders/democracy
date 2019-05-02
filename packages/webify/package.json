@@ -12,9 +12,7 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "dependencies": {
     "@democracy.js/depart": "^0.2.7-alpha.10",
     "demo-client": "^0.2.7-alpha.10",
