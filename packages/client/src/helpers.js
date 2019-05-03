@@ -1,6 +1,6 @@
 'use strict'
 
-const { Logger, fromJS, toJS, getConfig } = require('demo-utils')
+const { Logger, fromJS, toJS, equal, getConfig } = require('demo-utils')
 const LOGGER = new Logger('client/helpers')
 
 const { RemoteDB } = require('./client')
@@ -39,14 +39,16 @@ helpers.createBM = ({sourcePath, chainId, hostname, port, autoConfig}) => {
   })
 }
 
-helpers.delayedGet = async (getCall, expected, logger) => {
+helpers.delayedGet = (getCall, expected, eq) => {
+  const _eq = (eq) ? eq : equal 
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       const res = await getCall()
-      if (res === expected) { resolve(res) }
+      if ( _eq(res, expected) ) { resolve(res) }
       else {
-        if (logger) { logger.error(`Expected ${res} to equal ${expected}`) }
-        reject(res, expected) }
+        LOGGER.debug("res", typeof(res), res)
+        const e = new Error(`Expected ${res} to equal ${expected}`)
+        reject(e) }
     }, 1000)
   })
 }

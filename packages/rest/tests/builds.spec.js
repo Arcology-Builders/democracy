@@ -35,7 +35,7 @@ describe( 'Remote builds ', () => {
   })
 
   it( 'starts a REST server that handles a test request' , async () => {
-    const res = await r.postHTTP('/api/test', { 'a': randInt }, true)
+    const res = await r.postHTTP('/api/test/builds', { 'a': randInt }, true)
     const expected = `{"message":"Test posted!","a":${randInt}}`
     assert.equal(res, expected)
   })
@@ -43,7 +43,7 @@ describe( 'Remote builds ', () => {
   it( 'posting to a non-listening server times out and fails' , async () => {
     //await expect( r.postHTTP('/api/test', { 'a': randInt }) )
     //  .to.be.rejectedWith(Error)
-    return r.postHTTP('/api/test', { 'a': randInt }, true)
+    return r.postHTTP('/api/test/builds', { 'a': randInt }, true)
     .then((v) => { assert.fail('Should have failed to connect to a non-existent server') })
     .catch((e) => {
       LOGGER.info('ERROR', e)

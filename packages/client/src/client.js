@@ -114,8 +114,10 @@ client.RemoteDB = class {
             data.push(chunk);
           }).on('end', () => {
             const body = Buffer.concat(data)
+            LOGGER.debug('get data', body.toString())
             resolve(body.toString())	
           }).on('error', (err) => {
+            LOGGER.debug('get req error', err)
             reject(err)
           })
         })
@@ -124,6 +126,7 @@ client.RemoteDB = class {
               var e = new Error ('Timeout connecting to ' + this.host)
               e.name = 'Timeout';
               //req.abort();  // kill socket
+              LOGGER.debug('get socket error', e)
              reject(e)
           })
         })

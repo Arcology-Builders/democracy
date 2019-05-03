@@ -143,22 +143,30 @@ server.RESTServer = class {
     })
 
     _router.route('/keys/:chainId/:ethAddress').put((req, res) => {
+      const chainId = req.params.chainId
+      const ethAddress = req.params.ethAddress
     })
 
     _router.route('/keys/:chainId/:ethAddress').get((req, res) => {
+      const chainId = req.params.chainId
+      const ethAddress = req.params.ethAddress
+      const keyDump = get(`/keys/${chainId}/${ethAddress}`, new Map({}))
+      res.json(keyDump.toJS())
     })
 
-    _router.route('/test').get((req, res) => {
-      const val = get('/test', '')
-      res.json({ val: val })
+    _router.route('/test/:testSpace').get((req, res) => {
+      const testSpace = req.params.testSpace
+      const val = get(`/test/${testSpace}`, '')
+      res.json({ ...val.toJS() })
     })
 
-    _router.route('/test').post((req, res) => {
-      const test = Map({
-        body: req.body,
-      })
+    _router.route('/test/:testSpace').post((req, res) => {
+      const testSpace = req.params.testSpace
+      LOGGER.debug('BODY', req.body)
+      const testVal = fromJS(req.body)
+      // Always allow overwriting on tests, so we can reset the state
       const overwrite = (req.headers['democracy-overwrite'] === 'true')
-      set('/test', test, overwrite)
+      set(`/test/${testSpace}`, testVal, overwrite)
       res.json({ message: 'Test posted!', ...req.body });
     })
    

@@ -25,7 +25,7 @@ describe('Runs a REST server', () => {
   })
 
   it( 'starts a REST server that handles a test request' , async () => {
-    const res = await r.postHTTP('/api/test', { 'a': randInt }, true)
+    const res = await r.postHTTP('/api/test/rest', { 'a': randInt }, true)
     const expected = `{"message":"Test posted!","a":${randInt}}`
     assert.equal( res, expected )
   })
@@ -36,7 +36,7 @@ describe('Runs a REST server', () => {
     await expect( r.postHTTP('/api/test', { 'a': randInt }) )
       .to.be.rejectedWith(Error)
      */
-    await r.postHTTP('/api/test', { 'a': randInt }, true)
+    await r.postHTTP('/api/test/rest', { 'a': randInt }, true)
     .then((v) => { assert.fail('Should have failed to connect to a non-existent server') })
     .catch((e) => {
       LOGGER.info('ERROR', e)
@@ -68,7 +68,7 @@ describe('Runs a REST server', () => {
   
   after(async () => {
     server.stop()
-    fs.unlinkSync(path.join(DB_DIR, 'test.json'))
+    fs.unlinkSync(path.join(DB_DIR, 'test', 'rest.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'FirstContract.json'))
     fs.unlinkSync(path.join(DB_DIR, COMPILES_DIR, 'SecondContract.json'))
   })

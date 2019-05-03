@@ -6,7 +6,7 @@
   "author": "Paul Pham",
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production --json | tee logs/webpack.detailed.log",
     "clean": "rimraf -f dist"
   },
   "files": [
