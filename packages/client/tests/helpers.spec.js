@@ -1,5 +1,6 @@
 const { createBM, delayedGet } = require('..')
-const { setImmutableKey, getImmutableKey } = require('demo-utils')
+const { setImmutableKey, getImmutableKey, immEqual } = require('demo-utils')
+const { Map } = require('immutable')
 const assert = require('chai').assert
 
 describe( 'client helper', () => {
@@ -14,7 +15,7 @@ describe( 'client helper', () => {
 
   it( 'creates a BM from default DB URL', async () => {
     await remoteBM.outputter('test/bm', {"a": 1}, true)
-    delayedGet( remoteBM.inputter.bind(null, 'test/bm'), '{"a":1}' )
+    delayedGet( remoteBM.inputter.bind(null, 'test/bm'), new Map({"a":1}), immEqual )
     assert.notEqual( remoteBM.inputter, getImmutableKey )
     assert.notEqual( remoteBM.outputter, setImmutableKey )
   })

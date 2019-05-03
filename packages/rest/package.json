@@ -29,6 +29,8 @@
   },
   "scripts": {
     "start": "pm2 start ./server.js --watch",
+    "monit": "pm2 monit",
+    "log": "pm2 log 0",
     "stop": "pm2 stop 0; pm2 del 0",
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
   },
