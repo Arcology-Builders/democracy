@@ -15,7 +15,7 @@ but worry not. We will bring over all that goodness and more.
 
 Here are all our packages listed in descending order of coolness.
 
-[![npm version](https://badge.fury.io/js/demo.js.svg)](https://badge.fury.io/js/demo.js) `demo.js` our main framework package, built on `ethjs`
+[![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js) `democracy.js` our main framework package, built on `ethjs`
 
 [![npm version](https://badge.fury.io/js/demo-utils.svg)](https://badge.fury.io/js/demo-utils) `demo-utils` a browser-friendly key/value store and functions for managing build outputs / dependencies
 
@@ -32,13 +32,13 @@ Here are all our packages listed in descending order of coolness.
 ## Install with npm
 
 ```
-npm i demo.js
+npm i democracy.js
 ```
 
 Then in your modules
 
 ```
-const demo = require('demo.js')
+const demo = require('democracy.js')
 ```
 
 ## Get the Source Code to Play Around and Run Tests
