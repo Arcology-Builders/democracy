@@ -1,19 +1,11 @@
 democracy
 =========
 
-Tools for running a distributed country, currently on Ethereum.
+Minimalist tools for running a distributed country, currently on Ethereum.
 
-With reusable components for general development.
-*Note*: we are changing our top-level NPM package name from `democracy.js` to `demo.js`,
-and all our subpackages from `@democracy.js/blah` to `demo-blah`
-because we are tired of typing so much. This is a [lerna](http://lernajs.org)-managed
-monorepo.
+This is a [lerna](http://lernajs.org)-managed monorepo.
 
-If you are just joining us, use `demo.js`, which will auto-import all our subpackages as
-well. It does not have as many cool command-line features as the old `democracy.js`,
-but worry not. We will bring over all that goodness and more.
-
-Here are all our packages listed in descending order of coolness.
+You can include the top-level npm package `democracy.js` or just include the sub-packages you need.
 
 [![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js) `democracy.js` our main framework package, built on `ethjs`
 
