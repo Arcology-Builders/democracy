@@ -32,7 +32,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "doc": "documentation build src/** -f md -o docs/Compiler.md"
+    "doc:html": "documentation build src/** -f html -o ../../docs/compile.html",
+    "doc:md": "documentation build src/** -f md -o docs/compile.md",
+    "doc": "yarn doc:md doc:html"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
