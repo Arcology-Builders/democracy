@@ -1,6 +1,6 @@
 {
   "name": "@democracy.js/depart",
-  "version": "0.2.7",
+  "version": "0.2.8-alpha.0",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
     "ethereum",
@@ -36,10 +36,10 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-client": "^0.2.7",
-    "demo-compile": "^0.2.7",
-    "demo-contract": "^0.2.7",
-    "demo-utils": "^0.2.7",
+    "demo-client": "^0.2.8-alpha.0",
+    "demo-compile": "^0.2.8-alpha.0",
+    "demo-contract": "^0.2.8-alpha.0",
+    "demo-utils": "^0.2.8-alpha.0",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
