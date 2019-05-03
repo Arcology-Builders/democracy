@@ -55,7 +55,7 @@ describe( 'Remote builds ', () => {
     router.route('/someRoute').get((req, res) => {
       res.json({ 'a': randInt+1 })
     })
-    await delayedGet(r.getHTTP.bind(r, '/api/someRoute'), `{"a":${randInt+1}}`, LOGGER)
+    await delayedGet(r.getHTTP.bind(r, '/api/someRoute'), `{"a":${randInt+1}}`)
   }) 
   
   it( 'get all empty compiles', async () => {
