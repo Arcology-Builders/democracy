@@ -2,17 +2,17 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
 const { toJS, fromJS } = utils
-const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract }
+const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract, createBM }
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
-const { RemoteDB, createBM } = require('demo-client')
+const { RemoteDB } = require('demo-client')
 
 const LOGGER = new utils.Logger('departure')
 
 const departs = {}
 
 departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPort,
-                        callback}) => {
+                        autoConfig, callback}) => {
   assert(address, " `address` param needed to deploy from.")
   assert(callback, " `callback` param needed to run departure function.")
 
@@ -22,9 +22,10 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
   const accounts = await eth.accounts()
   const chainId  = await eth.net_version()
 
-  const bm = createBM({
+  const bm = await createBM({
     sourcePath: sourcePath,
     chainId   : chainId,
+    autoConfig: autoConfig,
     hostname  : bmHostName,
     port      : bmPort,
   })
@@ -47,10 +48,14 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
     const output = await c.compile( sourceFile )
     assert(isCompile(output))
     assert.equal( output.get(contractName).get('name'), contractName )
-    const contract = await bm.getContract(contractName)
-    assert( isContract(contract), `Contract ${contractName} not found` )
-    compiles = compiles.set(contractName, output.get(contractName))
-    return output
+    return new Promise((resolve, reject) => {
+      setTimeout( async () => {
+        const contract = await bm.getContract(contractName)
+        assert( isContract(contract), `Contract ${contractName} not found` )
+        compiles = compiles.set(contractName, output.get(contractName))
+        resolve(output)
+      }, 2000)
+    })
   }
 
   let links = new Map()

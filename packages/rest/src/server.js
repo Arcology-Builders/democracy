@@ -26,7 +26,7 @@ server.RESTServer = class {
       // Allow CORS for development use
       this.app.use((req, res, next) => {
         res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.header("Access-Control-Allow-Headers", "Democracy-Overwrite, Origin, X-Requested-With, Content-Type, Accept");
         next();
       })
     }
@@ -142,9 +142,11 @@ server.RESTServer = class {
       res.json(compile.toJS())
     })
 
-    _router.route('/keys/:chainId/:ethAddress').put((req, res) => {
+    _router.route('/keys/:chainId/:ethAddress').post((req, res) => {
       const chainId = req.params.chainId
       const ethAddress = req.params.ethAddress
+      set(`/keys/${chainId}/${ethAddress}`, fromJS(req.body))
+      res.json(req.body)
     })
 
     _router.route('/keys/:chainId/:ethAddress').get((req, res) => {

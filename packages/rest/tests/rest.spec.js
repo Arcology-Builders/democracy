@@ -50,6 +50,8 @@ describe('Runs a REST server', () => {
     router.route('/someRoute').get((req, res) => {
       res.json({ 'a': randInt+1 })
     })
+    server.stop()
+    server.start()
     const res = await r.getHTTP('/api/someRoute', {})
     assert.equal( res, `{"a":${randInt+1}}` )
   }) 

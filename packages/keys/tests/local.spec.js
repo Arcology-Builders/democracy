@@ -24,13 +24,13 @@ describe('Local wallet store for accounts', () => {
   })
 
   it( 'retrieving a key before init fails', async () => {
-    expect( wallet.loadEncryptedAccount(account.get('addressPrefixed')) )
+    expect( wallet.loadEncryptedAccount({ address: account.get('addressPrefixed') }) )
       .to.be.rejectedWith(Error)
   })
 
   it( 'retrieving non-existent key before saving fails', async () => {
     await wallet.init({ autoConfig: false })
-    expect( wallet.loadEncryptedAccount(account.get('addressPrefixed')) )
+    expect( wallet.loadEncryptedAccount({ address: account.get('addressPrefixed') }) )
       .to.be.rejectedWith(Error)
   })
 
@@ -41,11 +41,13 @@ describe('Local wallet store for accounts', () => {
 
   it( 'retrieving gets back the same key saved', async () => {
     const password = randombytes(32).toString('hex')
-    await wallet.saveEncryptedAccount( address,
-                                       keys.accountToEncryptedJSON(account, password) )
+    const encryptedJSON = keys.accountToEncryptedJSON({ account: account, password: password })
+    await wallet.saveEncryptedAccount({
+      address: address, encryptedAccount: encryptedJSON })
     LOGGER.debug( 'Encrypted account', wallet.accountsMap[address] )
-    const encryptedAccount2 = await wallet.loadEncryptedAccount( address, password )
-    const account2 = keys.encryptedJSONToAccount( toJS(encryptedAccount2), password )
+    const encryptedAccount2 = await wallet.loadEncryptedAccount({ address: address })
+    const account2 = keys.encryptedJSONToAccount({
+      encryptedJSON: toJS(encryptedAccount2), password: password })
     assert( immEqual(account2, account), `Different account retrieved ${account2.toJS()}`)
   })
 

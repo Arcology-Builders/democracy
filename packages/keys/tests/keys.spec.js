@@ -43,14 +43,16 @@ describe('Self-generated keys and signing', () => {
   it( 'dumps a password and recovers it', async () => {
     const password = randombytes(32).toString('hex')
     const password2 = randombytes(32).toString('hex')
-    const encryptedJSON = keys.accountToEncryptedJSON(account, password)
+    const encryptedJSON = keys.accountToEncryptedJSON({ account: account, password: password })
     setImmutableKey('encryptedKeys', fromJS(encryptedJSON))
     const retrieved = getImmutableKey('encryptedKeys', new Map({}))
-    const recovered = keys.encryptedJSONToAccount(retrieved.toJS(), password)
+    const recovered = keys.encryptedJSONToAccount({ encryptedJSON: retrieved.toJS(),
+                                                    password: password })
     assert.equal(recovered.get('privateString'), account.get('privateString'))
     let recovered2
     try {
-      recovered2 = keys.encryptedJSONToAccount(retrieved.toJS(), password2)
+      recovered2 = keys.encryptedJSONToAccount({ encryptedJSON: retrieved.toJS(),
+                                                 password: password2 })
       assert.fail()
     } catch(e) {
     }

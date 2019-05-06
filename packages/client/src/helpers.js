@@ -40,6 +40,7 @@ helpers.createInOut = ({hostname, port, autoConfig}) => {
 
 helpers.delayedGet = (getCall, expected, eq) => {
   const _eq = (eq) ? eq : equal 
+  assert.typeOf(equal, 'function')
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       const res = await getCall()

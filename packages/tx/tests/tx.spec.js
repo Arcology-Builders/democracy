@@ -2,7 +2,7 @@ const utils = require('demo-utils')
 const { getConfig, getNetwork, getEndpointURL, Logger } = utils
 
 const { Transactor } = require('../src/tx')
-const { Wallet, create, pay }
+const { wallet, create, pay }
              = require('demo-keys')
 const assert = require('chai').assert
 const { BuildsManager, Linker, Deployer, isDeploy, Contract }
@@ -11,6 +11,7 @@ const LOGGER = new Logger('tx.spec')
 const { toWei } = require('web3-utils')
 const BN = require('bn.js')
 const abi = require('ethjs-abi')
+const { isValidAddress } = require('ethereumjs-utils')
 
 describe( 'transaction sender', () => {
 
@@ -21,6 +22,8 @@ describe( 'transaction sender', () => {
   let accounts
   let tx
   let senderAccount
+  let senderPassword
+  let senderAddress
   let eth
   let chainId
 
@@ -28,8 +31,14 @@ describe( 'transaction sender', () => {
     eth = getNetwork()
     chainId = await eth.net_version()
     accounts = await eth.accounts()
-    senderAccount = create()
-    const ethSigner = Wallet.createSignerEth(getEndpointURL(), senderAccount)
+    await wallet.init({autoConfig: false})
+    let { address, password } = await wallet.createEncryptedAccount()
+    assert( wallet.accountsMap[address], `Newly created account is not mapped to address ${address}`)
+    senderAddress = address
+    senderPassword = password
+    assert( isValidAddress(senderAddress),
+           `Newly created account has invalid address ${senderAddress}` )
+    const ethSigner = await wallet.createSignerEth({url: getEndpointURL(), address: senderAddress})
     txor = new Transactor({ethSender: ethSigner, gasPrice: '21000'})
     bm = new BuildsManager({
       startSourcePath: 'node_modules/demo-test-contracts/contracts',
@@ -60,7 +69,6 @@ describe( 'transaction sender', () => {
   it( 'creates a raw tx' , async () => {
     const data = contract.getMethodCallData('send', [accounts[2]])
     const deployAddress = deploy.get('deployAddress')
-    const senderAddress = senderAccount.get('addressPrefixed')
     tx = await txor.createRawTx({
       fromAddress: senderAddress,
       toAddress  : deployAddress,
@@ -81,12 +89,12 @@ describe( 'transaction sender', () => {
   })
 
   it( 'sends a signed tx', async () => {
-    await pay({
-      eth         : eth,
+    await wallet.payTest({
       weiValue    : toWei('2', 'ether'),
       fromAddress : accounts[7],
-      toAddress   : senderAccount.get('addressPrefixed'),
+      toAddress   : senderAddress,
     })
+    await wallet.unlockEncryptedAccount({ address: senderAddress, password: senderPassword })
     const txHash = await txor.sendSignedTx(tx)
   }) 
 
@@ -98,7 +106,7 @@ describe( 'transaction sender', () => {
     const lastValue = await contract.instance.lastValue()
     assert.equal(lastValue['0'].toString(), toWei('0.001', 'ether'))
     const lastSender = await contract.instance.lastSender()
-    assert.equal(lastSender['0'], senderAccount.get('addressPrefixed'))
+    assert.equal(lastSender['0'], senderAddress)
   })
 
   it( 'send an official transaction', async () => {

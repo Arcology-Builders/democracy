@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 
 const { Map } = require('immutable')
-const { getNetwork, getConfig, Logger, toJS, fromJS } = require('demo-utils')
+const { getNetwork, getConfig, Logger, toJS, fromJS, deepEqual } = require('demo-utils')
 const LOGGER = new Logger('wallet')
 
 const BN = require('bn.js')
@@ -32,7 +32,7 @@ const wallet = {}
 wallet.createSignerEth = ({url, address}) => {
     assert( isValidAddress(address), `Invalid Ethereum address ${address}` )
     const provider = new SignerProvider(url, {
-      signTransaction: (rawTx, cb) => {
+      signTransaction: async (rawTx, cb) => {
         let account = wallet.accountsMap[address]
         if ( isAccount(account) ) {
           cb(null, ethsign(rawTx, account.get('privatePrefixed') ) )
@@ -54,6 +54,8 @@ wallet.signersMap = {}
 wallet.eth = getNetwork()
 
 wallet.UNLOCK_TIMEOUT_SECONDS = 600
+// The measured gas costs of transferring 100 ETH
+wallet.OVERAGE_100_ETH = toWei('0.0134', 'ether')
 wallet.unlock_seconds
 
 wallet.init = async ({autoConfig, unlockSeconds}) => {
@@ -73,32 +75,40 @@ wallet.createEncryptedAccount = async () => {
   const account = create()
   const address = account.get('addressPrefixed')
   const password = randombytes(32).toString('hex')
-  const encryptedAccount = accountToEncryptedJSON(account, password)
-  await wallet.saveEncryptedAccount( address, encryptedAccount )
+  const encryptedAccount = accountToEncryptedJSON({ account: account, password: password })
+  const result = await wallet.saveEncryptedAccount({ address: address, encryptedAccount: encryptedAccount })
+  assert( result, `Saving encrypted account for ${address} ${encryptedAccount} failed` )
   return {
     address: address,
     password: password,
+    result: result,
+    encryptedAccount: encryptedAccount,
   }
 } 
 
-wallet.loadEncryptedAccount = async (address, password) => {
+/**
+ * Retrieves encrypted account for this address from a (possibly remote) persistent store.
+ * @param address {String} `0x`-prefixed Ethereum address associated with desired account.
+ * @return encrypted JSON account for the given address.
+ */
+wallet.loadEncryptedAccount = async ({ address }) => {
   if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
   return awaitInputter(
     wallet.inputter(`keys/${wallet.chainId}/${address}`, null),
     (encryptedAccount) => {
       if (!encryptedAccount) { throw new Error(`Account not found for ${address}`) }
-      const account = encryptedJSONToAccount( toJS(encryptedAccount), password )
-      assert( isAccount(account), `Invalid account retrieved ${account}` )
-      const _address = account.get('addressPrefixed')
-      assert.equal( _address, address,
-                   `Recovered address ${_address} doesn't match ${address}`)
-      wallet.accountsMap[address] = encryptedAccount
-      return encryptedAccount
+      //const account = encryptedJSONToAccount( toJS(encryptedAccount), password )
+      //assert( isAccount(account), `Invalid account retrieved ${account}` )
+      //const _address = account.get('addressPrefixed')
+      //assert.equal( _address, address,
+      //             `Recovered address ${_address} doesn't match ${address}`)
+      wallet.accountsMap[address] = toJS( encryptedAccount )
+      return toJS( encryptedAccount )
     }
   )
 }
 
-wallet.saveEncryptedAccount = async ( address, encryptedAccount ) => {
+wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
   if (wallet.accountsMap[address]) {
     throw new Error(`Attempting to overwrite existing account at ${address}`)
@@ -106,26 +116,31 @@ wallet.saveEncryptedAccount = async ( address, encryptedAccount ) => {
   wallet.accountsMap[address] = encryptedAccount
   return awaitOutputter(
     wallet.outputter( `keys/${wallet.chainId}/${address}`, fromJS(encryptedAccount) ),
-    (output) => { return output }
+    (output) => {return output }
   )
 }
 
-wallet.unlockEncryptedAccount = async ( address, password ) => {
+wallet.unlockEncryptedAccount = async ({ address, password }) => {
   const encryptedAccount = wallet.accountsMap[address]
   if ( isAccount(encryptedAccount) ) {
     throw new Error(`Account ${address} already unlocked`)
   }
-  wallet.accountsMap[address] = encryptedJSONToAccount( toJS(encryptedAccount), password )
+  if (!address || !password) {
+    throw new Error(`Empty address ${address} or password`)
+  }
+  LOGGER.debug('ENCRYPTED ACCOUNT', encryptedAccount)
+  wallet.accountsMap[address] =
+    encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password: password })
   LOGGER.debug('Unlocked', address, isAccount(wallet.accountsMap[address]))
   const relockFunc = () => { wallet.accountsMap[address] = encryptedAccount } 
   setTimeout(relockFunc, wallet.unlockSeconds * 1000)
   return relockFunc
 }
 
-wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage}) => {
+wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage, label}) => {
   const signer = wallet.signersMap[fromAddress]
   if (!signer) { throw new Error(`No signer created for address ${fromAddress}`) }
-  return wallet.payTest({eth: signer, fromAddress: fromAddress, payAll: payAll, toAddress: toAddress, weiValue: weiValue, overage: overage}) 
+  return wallet.payTest({eth: signer, fromAddress: fromAddress, payAll: payAll, toAddress: toAddress, weiValue: weiValue, overage: overage, label: label}) 
 }
 
 /**
@@ -134,20 +149,24 @@ wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage}) => {
  * @param fromAddress {String} Ethereum address of payer/sender
  * @param toAddress {String} Ethereum address of recipient
  */
-wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage}) => {
-  const gasLimit = getConfig()['GAS_LIMIT']
+wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage, label}) => {
+  LOGGER.debug('LABEL', label)
+  const gasLimit = new BN(getConfig()['GAS_LIMIT'])
+  const gasPrice = new BN(getConfig()['GAS_PRICE'])
+  const _overage = (overage) ? overage : wallet.OVERAGE_100_ETH
   if (payAll) {
-    LOGGER.debug('OVERAGE', fromWei(overage, 'ether'))
+    LOGGER.debug('OVERAGE', fromWei(_overage, 'ether'))
+    LOGGER.debug('fromAddress', fromAddress)
+    LOGGER.debug('toAddress', toAddress)
     const balance = await wallet.eth.getBalance(fromAddress)
     LOGGER.debug(`payAll for balance of ${fromWei(balance, 'ether')}`)
     const gasEstimate = await wallet.eth.estimateGas({
       from: fromAddress, to: toAddress, value: balance, data: '0x'})
     //LOGGER.debug(`Gas estimate for payAll is ${gasEstimate}`)
-    const gasPrice = getConfig()['GAS_PRICE']
     //LOGGER.debug(`Gas price is ${gasPrice} Gwei`)
     const gasAmount = new BN(gasEstimate).mul(new BN(gasPrice)).mul(new BN(toWei('10', 'gwei')))
     //LOGGER.debug(`Gas amount is ${gasAmount}`)
-    weiValue = new BN(balance).sub(new BN(overage)).toString(10)
+    weiValue = new BN(balance).sub(new BN(_overage)).toString(10)
     LOGGER.debug(`Sendable wei value is ${fromWei(weiValue, 'ether')} ETH`)
   }
   const _eth = (eth) ? eth : wallet.eth
@@ -158,6 +177,7 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage}
     from : fromAddress,
     to   : toAddress,
     gas  : gasLimit,
+    gasPrice: gasPrice,
     nonce: await wallet.eth.getTransactionCount(fromAddress),
   })
 }

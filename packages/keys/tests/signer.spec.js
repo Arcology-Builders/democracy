@@ -1,5 +1,8 @@
-const assert = require('chai').assert
-const expect = require('chai').expect
+const chai   = require('chai')
+const assert = chai.assert
+const expect = chai.expect
+chai.use(require('chai-as-promised'))
+
 const utils  = require('ethereumjs-utils')
 
 const { getNetwork, print, Logger }
@@ -44,18 +47,21 @@ describe('Signing and spending transactions', () => {
   it( 'creates a Signer Eth', async () => {
     const account = keys.createFromPrivateString(newAccounts.get(0).get('privateString'))
     const address = account.get('addressPrefixed')
-    const encryptedAccount = keys.accountToEncryptedJSON( account, password )
-    await wallet.saveEncryptedAccount( address, encryptedAccount ) 
-    await wallet.unlockEncryptedAccount( address, password ) 
-    const ethSender = wallet.createSignerEth({ url: 'http://localhost:8545', address: address })
-    wallet.createSignerEth({ url: 'http://localhost:8545', address: newAccounts.get(1).get('addressPrefixed') })
+    const encryptedAccount = keys.accountToEncryptedJSON({ account: account, password: password })
+    await wallet.saveEncryptedAccount({ address: address, encryptedAccount: encryptedAccount }) 
+    await wallet.unlockEncryptedAccount({ address: address, password: password }) 
+    const ethSender = wallet.createSignerEth({
+      url: 'http://localhost:8545', address: address })
+    wallet.createSignerEth({
+      url: 'http://localhost:8545', address: newAccounts.get(1).get('addressPrefixed') })
   })
 
   it( 'can transfer money from a testAccount to a new account', async () => {
 
     // We create the signer just to register testAccounts[9] but then discard
     // it, since we don't need to sign transactions sent from test accounts
-    const ethSender = wallet.createSignerEth({ url: 'http://localhost:8545', address: testAccounts[9] })
+    const ethSender = wallet.createSignerEth({
+      url: 'http://localhost:8545', address: testAccounts[9] })
     /*
     const txHash = await wallet.pay({
       eth        : eth,
@@ -94,7 +100,8 @@ describe('Signing and spending transactions', () => {
     const fromAddr = newAccounts.get(0).get('addressPrefixed')
     const oldFromBalance = await eth.getBalance(fromAddr)
 
-    const ethSender = wallet.createSignerEth({ url: 'http://localhost:8545', address: fromAddr })
+    const ethSender = wallet.createSignerEth({
+      url: 'http://localhost:8545', address: fromAddr })
     const txHash = await ethSender.sendTransaction(
       { value: toWei('0.333', 'ether'),
         data : "0x",
@@ -119,31 +126,39 @@ describe('Signing and spending transactions', () => {
     const actualBalance = new BN(newFromBalance)
     assert.equal(expectedBalance.toString(10), actualBalance.toString(10))
   })
-
+/*
   it( 'tries to transfer all money to get the gas overage', async () => {
     const toAddress = newAccounts.get(0).get('addressPrefixed')
 
     wallet.payTest({
       eth        : eth,
       payAll     : true,
+      overage    : '0',
       fromAddress: bigSpender,
       toAddress  : toAddress,
     }).catch((e) => {
       console.error('ERROR', e.message)
-      const upfrontCost = e.message.match('The upfront cost is: ([0-9]+)')[1]
-      const onlyHas = e.message.match('only has: ([0-9]+)')[1]
+      const upfrontCostMatch = e.message.match('The upfront cost is: ([0-9]+)')
+      assert.equal(upfrontCostMatch.length, 2,
+                   `"Upfront cost" match was not 2, instead ${upfrontCostMatch.length}`)
+      const onlyHasMatch = e.message.match('only has: ([0-9]+)')
+      assert.equal(onlyHasCostMatch.length, 2,
+                   `"only has" match was not 2, instead ${onlyHasMatch.length}`)
+      const upfrontCost = upfrontCostMatch[1]
+      const onlyHas = onlyHasCostMatch[1]
       overage = new BN(upfrontCost).sub(new BN(onlyHas))
       LOGGER.info(`Gas overage is ${fromWei(overage, 'ether')} ether`)
     })
 
   })
-
+*/
   it( 'can transfer all money from one account to another', async () => {
 
     const toAddress = newAccounts.get(0).get('addressPrefixed')
     const oldFromBalance = await eth.getBalance(bigSpender)
     const oldToBalance = await eth.getBalance(toAddress)
     LOGGER.debug('overage', overage ? overage.toString(10) : '')
+// Start commenting here, to transfer back all funds to bigSpender in case of an error
 
     const txHash = await wallet.payTest({
       eth        : eth,
@@ -151,17 +166,19 @@ describe('Signing and spending transactions', () => {
       overage    : OVERAGE_100_ETH,
       fromAddress: bigSpender,
       toAddress  : toAddress,
+      label      : 'First',
     })
 
     const newFromBalance = await eth.getBalance(bigSpender)
     const newToBalance = await eth.getBalance(toAddress)
     LOGGER.debug('newToBalance', fromWei(newToBalance, 'gwei'))
-    assert.equal(newFromBalance, toWei('0.01298', 'ether'),
+    assert(new BN(newFromBalance).lt(new BN(OVERAGE_100_ETH)),
                  `newFromBalance should be zero, instead ${fromWei(newFromBalance, 'ether')} ETH`)
     const expected = new BN(oldToBalance).add(new BN(oldFromBalance)).sub(new BN(OVERAGE_100_ETH)).toString(10)
     assert.equal(newToBalance, expected,
                  `newToBalance should receive all funds ${expected}, instead ${newToBalance}`)
- 
+   
+// Stop commenting here, to transfer back all funds to bigSpender in case of an error 
     // Pay the money back so tests above are repeatable
     const txHash2 = await wallet.pay({
       eth        : eth,
@@ -169,44 +186,8 @@ describe('Signing and spending transactions', () => {
       overage    : OVERAGE_100_ETH,
       fromAddress: toAddress,
       toAddress  : bigSpender,
+      label      : 'Second',
     })
   })
- 
-  it( 'wallet relocks and is unspendable', async() => {
-    const fromAddress = newAccounts.get(1).get('addressPrefixed')
-    expect( new Promise((resolve, reject) => {
-      setTimeout( () => {
-        wallet.pay({
-          payAll     : true,
-          overage    : OVERAGE_100_ETH,
-          fromAddress: fromAddress,
-          toAddress  : bigSpender,
-        })
-        .then((val) => { LOGGER.error('VAL', val); reject(new Error(val))})
-        .catch((err) => { LOGGER.info('ERR', err.message); resolve(err.message)})
-      }, 1000)
-    }) ).to.be.rejectedWith(Error)
-  })
-/*
-  it( 'unlocking wallet first makes it spendable', async() => {
-    return new Promise((resolve, reject) => {
-      setTimeout( async () => {
-        const address = newAccounts.get(1).get('addressPrefixed')
-        const encryptedAccount = keys.accountToEncryptedJSON( newAccounts.get(1), password )
-        LOGGER.debug("SAVING", address, password)
-        await wallet.saveEncryptedAccount( address, encryptedAccount ) 
-        LOGGER.debug("UNLOCKING", address, password)
-        await wallet.unlockEncryptedAccount( address, password ) 
-        return wallet.pay({
-          payAll     : true,
-          overage    : OVERAGE_100_ETH,
-          fromAddress: address,
-          toAddress  : bigSpender,
-        })
-        .then((val) => { LOGGER.error('VAL', val); resolve(val)})
-        .catch((err) => { LOGGER.info('ERR', err.message); reject(err.message)})
-      }, 2000)
-    })
-  })
-*/
+
 })

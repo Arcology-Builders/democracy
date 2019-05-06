@@ -4,7 +4,6 @@ const assert = require('chai').assert
 
 const keys = {}
 keys.keythereum = require('keythereum')
-keys.bops = require('bops')
 keys.randombytes = require('randombytes')
 keys.Buffer = Buffer
 
@@ -45,7 +44,7 @@ keys.bufferToMap =
 }
 
 keys.createFromPrivateString = (_privateString) => {
-  const privateBuffer = Buffer.from(keys.bops.from(_privateString, 'hex'))
+  const privateBuffer = Buffer.from(_privateString, 'hex')
   const publicBuffer = utils.privateToPublic(privateBuffer)
   const addressBuffer = utils.privateToAddress(privateBuffer)
   const ivBuffer = keys.randombytes(keys.PARAMS.ivBytes)
@@ -68,8 +67,8 @@ keys.isAccount = (_map) => {
           _map.get('privatePrefixed') &&
           _map.get('publicPrefixed' ) &&
           _map.get('addressPrefixed') &&
-          utils.isValidPrivate(Buffer.from(keys.bops.from(_map.get('privateString'), 'hex'))) &&
-          utils.isValidPublic(Buffer.from(keys.bops.from(_map.get('publicString'), 'hex')))   &&
+          utils.isValidPrivate(Buffer.from(_map.get('privateString'), 'hex')) &&
+          utils.isValidPublic(Buffer.from(_map.get('publicString'), 'hex'))   &&
           utils.isValidAddress(_map.get('addressPrefixed'))
          )
 }
@@ -84,18 +83,18 @@ keys.OPTIONS = {
   }
 }
 
-keys.accountToEncryptedJSON = (_account, _password) => {
-  return keys.keythereum.dump( _password,
-    keys.buffer(_account.get('privateString')),
-    keys.buffer(_account.get('saltString')),
-    keys.buffer(_account.get('ivString')), keys.OPTIONS)
+keys.accountToEncryptedJSON = ({ account, password }) => {
+  return keys.keythereum.dump( password,
+    keys.buffer(account.get('privateString')),
+    keys.buffer(account.get('saltString')),
+    keys.buffer(account.get('ivString')), keys.OPTIONS)
 }
 
-keys.encryptedJSONToAccount = (_keyObject, _password) => {
-  const privateBuffer = keys.keythereum.recover(_password, _keyObject)
-  const ivString = _keyObject.crypto.cipherparams.iv
+keys.encryptedJSONToAccount = ({ encryptedJSON, password }) => {
+  const privateBuffer = keys.keythereum.recover(password, encryptedJSON)
+  const ivString = encryptedJSON.crypto.cipherparams.iv
   assert.equal(ivString.length, keys.PARAMS.ivBytes * 2)
-  const saltString = _keyObject.crypto.kdfparams.salt 
+  const saltString = encryptedJSON.crypto.kdfparams.salt 
   assert.equal(saltString.length, keys.PARAMS.keyBytes * 2)
   return keys.createFromPrivateBuffer(
     privateBuffer, keys.buffer(ivString), keys.buffer(saltString))
@@ -107,7 +106,6 @@ keys.hex = (_buffer) => {
 
 keys.buffer = (_hex) => {
   return keys.keythereum.str2buf(_hex, 'hex')
-  //return (keys.bops.from(_hex, 'hex'))
 }
 
 keys.prefix = (_str) => {
