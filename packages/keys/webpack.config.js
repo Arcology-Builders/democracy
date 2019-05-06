@@ -3,7 +3,10 @@ const npm_package = require('./package.json')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: './src/index.js',
+  entry: [
+    './src/index.js',
+   // path.resolve(__dirname, 'dist', 'keythereum.min.js')
+  ],
   module: {
     rules: [
       {
@@ -29,8 +32,16 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
+  externals: {
+    "keythereum": "keythereum"
+  },
   node: {
     fs: "empty"
+  },
+  resolve: {
+    alias: {
+     //'keythereum': require.resolve('keythereum'),
+    }
   },
   plugins: [
     new HtmlWebPackPlugin({

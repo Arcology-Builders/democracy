@@ -9,27 +9,30 @@
     "access": "public"
   },
   "dependencies": {
-    "@invisible-college/keythereum": "1.1.0",
-    "bops": "1.0.0",
     "chai-as-promised": "7.1.1",
     "demo-utils": "^0.2.8-alpha.0",
+    "demo-client": "^0.2.8-alpha.0",
     "ethereumjs-utils": "5.2.5",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
     "ethjs-signer": "0.1.1",
     "immutable": "4.0.0-rc.12",
+    "keythereum": "^1.0.4",
     "randombytes": "2.1.0",
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
     "demo-tools": "^0.2.6",
-    "webpack": "4.29.5"
+    "webpack": "4.29.5",
+    "webpack-dev-server": "3.1.14"
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "eslint demo.js js/*.js",
     "cov": "nyc/bin/nyc.js mocha tests/",
-    "web": "webpack && open dist/index.html"
+    "web": "webpack && open dist/index.html",
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server --open --mode development"
   },
   "repository": {
     "type": "git",

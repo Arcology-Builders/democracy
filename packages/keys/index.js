@@ -3,5 +3,5 @@ const wallet = require('./src/wallet')
 
 module.exports = {
   ...keys,
-  ...wallet,
+  wallet: wallet,
 }

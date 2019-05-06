@@ -35,8 +35,10 @@ const store = {}
  * @param {overwrite} true if are allowed to move aside previous immutable keys
  */
 store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert(typeof(fullKey) === 'string')
-  assert(Map.isMap(value) || List.isList(value) || !value)
+  assert.typeOf(fullKey, 'string',
+                `fullKey should be a string, instead was ${typeof(fullKey)}`)
+  assert(Map.isMap(value) || List.isList(value) || !value, 
+         `Value is not a Map or List or null ${value}` )
  
   // TODO we need the same delete key logic below for browser 
   /*

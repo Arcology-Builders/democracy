@@ -6,12 +6,15 @@ const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
 const { awaitInputter  } = require('./utils')
-const { ContractsManager  } = require('./contractsManager')
+const { ContractsManager } = require('./contractsManager')
+const { BuildsManager } = require('./buildsManager')
 
-const { Logger, LINKS_DIR, DEPLOYS_DIR }
+const { Logger, LINKS_DIR, DEPLOYS_DIR, getNetwork }
                  = require('demo-utils')
 
 const LOGGER = new Logger('BuildsManager')
+
+const bm = {}
 
 /**
  * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles, also
@@ -22,7 +25,7 @@ const LOGGER = new Logger('BuildsManager')
  *        If missing, _outputter defaults to `setImmutableKey`
  *        to a local file-based DB store.
  */
-class BuildsManager extends ContractsManager {
+bm.BuildsManager = class extends ContractsManager {
   
   constructor({startSourcePath, inputter, outputter, chainId}) {
     super(...arguments)
@@ -64,6 +67,16 @@ class BuildsManager extends ContractsManager {
 
 }
 
-module.exports = {
-  BuildsManager : BuildsManager,
+bm.createBM = async ({sourcePath, chainId, hostname, port, autoConfig}) => {
+  const { createInOut } = require('demo-client')
+  const { inputter, outputter } = createInOut({hostname, port, autoConfig}) 
+  const _chainId = (autoConfig) ? (await getNetwork().net_version()) : chainId
+  return new bm.BuildsManager({
+    startSourcePath: sourcePath,
+    chainId        : _chainId,
+    inputter       : inputter,
+    outputter      : outputter,
+  })
 }
+
+module.exports = bm

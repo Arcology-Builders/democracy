@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "demo-utils": "^0.2.8-alpha.0",
+    "demo-client": "^0.2.8-alpha.0",
     "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",
     "immutable": "4.0.0-rc.12"

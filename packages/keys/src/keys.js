@@ -1,32 +1,36 @@
-const keythereum = require('@invisible-college/keythereum')
 const utils = require('ethereumjs-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert
-const bops = require('bops')
-const randombytes = require('randombytes')
 
-const PARAMS = { keyBytes: 32, ivBytes: 16 };
+const keys = {}
+keys.keythereum = require('keythereum')
+keys.bops = require('bops')
+keys.randombytes = require('randombytes')
+keys.Buffer = Buffer
 
-const create = () => {
-  const account = keythereum.create(PARAMS)
+keys.PARAMS = { keyBytes: 32, ivBytes: 16 };
+
+keys.create = () => {
+  const account = keys.keythereum.create(keys.PARAMS)
   const privateBuffer = account.privateKey
   const publicBuffer = utils.privateToPublic(account.privateKey)
   const addressBuffer = utils.privateToAddress(account.privateKey)
 
-  return bufferToMap(privateBuffer, publicBuffer, addressBuffer, account.iv, account.salt)
+  return keys.bufferToMap(privateBuffer, publicBuffer, addressBuffer,
+                          account.iv, account.salt)
 }
 
-const bufferToMap =
+keys.bufferToMap =
   (_privateBuffer, _publicBuffer, _addressBuffer, _ivBuffer, _saltBuffer) => {
  
-  assert.equal(_ivBuffer.length, PARAMS.ivBytes)
-  assert.equal(_saltBuffer.length, PARAMS.keyBytes)
+  assert.equal(_ivBuffer.length, keys.PARAMS.ivBytes)
+  assert.equal(_saltBuffer.length, keys.PARAMS.keyBytes)
 
-  const privateString = hex(_privateBuffer)
-  const publicString  = hex(_publicBuffer)
-  const addressString = hex(_addressBuffer)
-  const ivString      = hex(_ivBuffer)
-  const saltString    = hex(_saltBuffer)
+  const privateString = keys.hex(_privateBuffer)
+  const publicString  = keys.hex(_publicBuffer)
+  const addressString = keys.hex(_addressBuffer)
+  const ivString      = keys.hex(_ivBuffer)
+  const saltString    = keys.hex(_saltBuffer)
 
   return new Map({
     privateString   : privateString,
@@ -34,28 +38,28 @@ const bufferToMap =
     addressString   : addressString,
     ivString        : ivString,
     saltString      : saltString,
-    privatePrefixed : prefix(privateString),
-    publicPrefixed  : prefix(publicString),
-    addressPrefixed : prefix(addressString),
+    privatePrefixed : keys.prefix(privateString),
+    publicPrefixed  : keys.prefix(publicString),
+    addressPrefixed : keys.prefix(addressString),
   })
 }
 
-const createFromPrivateString = (_privateString) => {
-  const privateBuffer = Buffer.from(bops.from(_privateString, 'hex'))
+keys.createFromPrivateString = (_privateString) => {
+  const privateBuffer = Buffer.from(keys.bops.from(_privateString, 'hex'))
   const publicBuffer = utils.privateToPublic(privateBuffer)
   const addressBuffer = utils.privateToAddress(privateBuffer)
-  const ivBuffer = randombytes(PARAMS.ivBytes)
-  const keyBuffer = randombytes(PARAMS.keyBytes)
-  return bufferToMap(privateBuffer, publicBuffer, addressBuffer, ivBuffer, keyBuffer)
+  const ivBuffer = keys.randombytes(keys.PARAMS.ivBytes)
+  const keyBuffer = keys.randombytes(keys.PARAMS.keyBytes)
+  return keys.bufferToMap(privateBuffer, publicBuffer, addressBuffer, ivBuffer, keyBuffer)
 }
 
-const createFromPrivateBuffer = (_privateBuffer, _ivBuffer, _saltBuffer) => {
+keys.createFromPrivateBuffer = (_privateBuffer, _ivBuffer, _saltBuffer) => {
   const publicBuffer = utils.privateToPublic(_privateBuffer)
   const addressBuffer = utils.privateToAddress(_privateBuffer)
-  return bufferToMap(_privateBuffer, publicBuffer, addressBuffer, _ivBuffer, _saltBuffer)
+  return keys.bufferToMap(_privateBuffer, publicBuffer, addressBuffer, _ivBuffer, _saltBuffer)
 }
 
-const isAccount = (_map) => {
+keys.isAccount = (_map) => {
 
   return (Map.isMap(_map)             &&
           _map.get('privateString'  ) &&
@@ -64,13 +68,13 @@ const isAccount = (_map) => {
           _map.get('privatePrefixed') &&
           _map.get('publicPrefixed' ) &&
           _map.get('addressPrefixed') &&
-          utils.isValidPrivate(Buffer.from(bops.from(_map.get('privateString'), 'hex'))) &&
-          utils.isValidPublic(Buffer.from(bops.from(_map.get('publicString'), 'hex')))   &&
+          utils.isValidPrivate(Buffer.from(keys.bops.from(_map.get('privateString'), 'hex'))) &&
+          utils.isValidPublic(Buffer.from(keys.bops.from(_map.get('publicString'), 'hex')))   &&
           utils.isValidAddress(_map.get('addressPrefixed'))
          )
 }
 
-var OPTIONS = {
+keys.OPTIONS = {
   kdf: "pbkdf2",
   cipher: "aes-128-ctr",
   kdfparams: {
@@ -80,36 +84,34 @@ var OPTIONS = {
   }
 }
 
-const accountToEncryptedJSON = (_account, _password) => {
-  return keythereum.dump(_password, buffer(_account.get('privateString')),
-    buffer(_account.get('saltString')), buffer(_account.get('ivString')), OPTIONS)
+keys.accountToEncryptedJSON = (_account, _password) => {
+  return keys.keythereum.dump( _password,
+    keys.buffer(_account.get('privateString')),
+    keys.buffer(_account.get('saltString')),
+    keys.buffer(_account.get('ivString')), keys.OPTIONS)
 }
 
-const encryptedJSONToAccount = (_keyObject, _password) => {
-  const privateBuffer = keythereum.recover(_password, _keyObject)
+keys.encryptedJSONToAccount = (_keyObject, _password) => {
+  const privateBuffer = keys.keythereum.recover(_password, _keyObject)
   const ivString = _keyObject.crypto.cipherparams.iv
-  assert.equal(ivString.length, PARAMS.ivBytes * 2)
+  assert.equal(ivString.length, keys.PARAMS.ivBytes * 2)
   const saltString = _keyObject.crypto.kdfparams.salt 
-  assert.equal(saltString.length, PARAMS.keyBytes * 2)
-  return createFromPrivateBuffer(privateBuffer, buffer(ivString), buffer(saltString))
+  assert.equal(saltString.length, keys.PARAMS.keyBytes * 2)
+  return keys.createFromPrivateBuffer(
+    privateBuffer, keys.buffer(ivString), keys.buffer(saltString))
 }
 
-const hex = (_buffer) => {
+keys.hex = (_buffer) => {
   return _buffer.toString('hex')
 }
 
-const buffer = (_hex) => {
-  return bops.from(_hex, 'hex')
+keys.buffer = (_hex) => {
+  return keys.keythereum.str2buf(_hex, 'hex')
+  //return (keys.bops.from(_hex, 'hex'))
 }
 
-const prefix = (_str) => {
+keys.prefix = (_str) => {
   return '0x' + _str
 }
 
-module.exports = {
-  isAccount              : isAccount,
-  create                 : create,
-  createFromPrivateString: createFromPrivateString,
-  accountToEncryptedJSON : accountToEncryptedJSON,
-  encryptedJSONToAccount : encryptedJSONToAccount,
-}
+module.exports = keys

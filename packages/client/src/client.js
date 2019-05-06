@@ -44,10 +44,10 @@ const retryPromise = async (promCreator, bmHostName, bmPort, tag) => {
 
 client.RemoteDB = class {
 
-  constructor(_host, _port) {
-    this.host = _host
-    this.port = _port
-    this.url  = `http://${_host}:${_port}`
+  constructor(host, port) {
+    this.host = host
+    this.port = port
+    this.url  = `http://${host}:${port}`
   } 
 
   async config() {

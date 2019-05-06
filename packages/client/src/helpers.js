@@ -1,42 +1,41 @@
 'use strict'
 
-const { Logger, fromJS, toJS, equal, getConfig } = require('demo-utils')
+const { Logger, fromJS, toJS, equal, getConfig, getImmutableKey, setImmutableKey }
+  = require('demo-utils')
 const LOGGER = new Logger('client/helpers')
 
 const { RemoteDB } = require('./client')
-const { BuildsManager } = require('demo-contract')
 const assert = require('chai').assert
 
 const helpers = {}
 
-helpers.createBM = ({sourcePath, chainId, hostname, port, autoConfig}) => {
-  let _hostname = hostname
-  let _port = port
-  if (autoConfig) {
-    const url = getConfig()['DB_URL']
-    const urlParts = url.split('://')[1].split(':')
-    assert.equal(urlParts.length, 2)
-    LOGGER.debug('Creating BM with', url)
-    _hostname = urlParts[0]
-    _port     = urlParts[1]
-  }
+helpers.createInOut = ({hostname, port, autoConfig}) => {
+  
+  // Autoconfig'd URL and host
+  const autoURL = getConfig()['DB_URL']
+  const [ autoHostname, autoPort ] = autoURL.split('://')[1].split(':')
+  assert(autoHostname && autoPort, `Invalid autoconfig URL ${autoURL}`)
+  LOGGER.debug('createInOut autoconfig URL', autoConfig, autoHostname, autoPort)
+
+  const _hostname = (autoConfig) ? autoHostname : hostname
+  const _port     = (autoConfig) ? autoPort     : port
+
   const r = new RemoteDB(_hostname, _port)
-  let inputter
-  let outputter
 
-  if (_hostname && _port) {
-    inputter = async (key, def) => {
-      return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) }
-    outputter = async (key, val, ow) => {
-      return r.postHTTP(`/api/${key}`, toJS(val), ow) }
+  const useHostAndPort = (_hostname && _port)
+  const remoteInputter = async (key, def) => {
+    return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) } 
+  const remoteOutputter = async (key, val, ow) => {
+    return r.postHTTP(`/api/${key}`, toJS(val), ow) } 
+  LOGGER.debug('useHostAndPort', useHostAndPort)
+
+  const inputter = (useHostAndPort) ? remoteInputter : getImmutableKey
+  const outputter = (useHostAndPort) ? remoteOutputter : setImmutableKey
+
+  return {
+    inputter: inputter,
+    outputter: outputter,
   }
-
-  return new BuildsManager({
-    startSourcePath: sourcePath,
-    chainId        : chainId,
-    inputter       : inputter,
-    outputter      : outputter,
-  })
 }
 
 helpers.delayedGet = (getCall, expected, eq) => {

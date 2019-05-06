@@ -19,6 +19,9 @@ configs.setEnvVars = (_env) => {
 //const SHH_IP = "ws://54.69.190.230:8546"
 const SHH_IP = "ws://eth.arcology.nyc:8546"
 const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll }) => {
+  if (!lo) {
+    console.error('Create a `.env` file with at least  ${NODE_ENV}.LOG_OUT defined.')
+  }
   return {
     'DB_URL'      : dbURL,
     'ETH_URL'     : ethURL,

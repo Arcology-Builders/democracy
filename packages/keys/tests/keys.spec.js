@@ -18,6 +18,7 @@ describe('Self-generated keys and signing', () => {
   let account
 
   before(() => {
+    //setImmutableKey('encryptedKeys', null, true)
     account = keys.create()
   })
  
@@ -63,17 +64,8 @@ describe('Self-generated keys and signing', () => {
     keys.isAccount(account2)
   })
   
-  it( 'saves and retrieves the same account', async () => {
-    const eth = getNetwork()
-    const account = keys.create()
-    await wallet.set(account)
-    const retrieved = await wallet.get(account.get('addressPrefixed'))
-    assert.equal(JSON.stringify(account.toJS()), JSON.stringify(retrieved.toJS()))
-  })
-
   after(() => {
     setImmutableKey('encryptedKeys', null)
-    setImmutableKey('keys', null)
   })
 
 })

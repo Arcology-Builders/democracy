@@ -1,29 +1,32 @@
-const { createBM, delayedGet } = require('..')
+const { createInOut, delayedGet } = require('..')
 const { setImmutableKey, getImmutableKey, immEqual } = require('demo-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert
 
 describe( 'client helper', () => {
  
-  let remoteBM
+  let inputter
+  let outputter
 
   before( async () => {
-    remoteBM = createBM({chainId: '22', autoConfig: true})
+    inout = await createInOut({ autoConfig: true})
+    inputter = inout.inputter
+    outputter = inout.outputter
     // Reset it so we can see the change
-    await remoteBM.outputter('test/bm', {"a": 2}, true)
+    await outputter('test/bm', {"a": 2}, true)
   })
 
   it( 'creates a BM from default DB URL', async () => {
-    await remoteBM.outputter('test/bm', {"a": 1}, true)
-    delayedGet( remoteBM.inputter.bind(null, 'test/bm'), new Map({"a":1}), immEqual )
-    assert.notEqual( remoteBM.inputter, getImmutableKey )
-    assert.notEqual( remoteBM.outputter, setImmutableKey )
+    await outputter('test/bm', {"a": 1}, true)
+    delayedGet( inputter.bind(null, 'test/bm'), new Map({"a":1}), immEqual )
+    assert.notEqual( inputter, getImmutableKey )
+    assert.notEqual( outputter, setImmutableKey )
   })
 
   it( 'creates a BM from local get/set', async () => {
-    const BM = createBM({chainId: '22' })
-    assert.equal( BM.inputter, getImmutableKey )
-    assert.equal( BM.outputter, setImmutableKey )
+    const { inputter, outputter } = await createInOut({ autoConfig: false })
+    assert.equal( inputter, getImmutableKey )
+    assert.equal( outputter, setImmutableKey )
   })
 
 })
