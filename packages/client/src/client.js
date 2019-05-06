@@ -5,7 +5,7 @@ const { List, Map }
 const http        = require('http')
 const url         = require('url')
 const { Logger }  = require('demo-utils')
-const LOGGER      = new Logger('rest/client')
+const LOGGER      = new Logger('client')
 
 const client = {}
 
