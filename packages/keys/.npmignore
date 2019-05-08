@@ -7,5 +7,6 @@ tests
 scraps
 webpack.log
 dist
+exports
 src/index.html
 src/index.js

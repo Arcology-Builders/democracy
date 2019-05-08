@@ -1,12 +1,14 @@
 const path = require('path');
 const npm_package = require('./package.json')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
-
-module.exports = {
-  entry: [
-    './src/index.js',
-   // path.resolve(__dirname, 'dist', 'keythereum.min.js')
-  ],
+const version = npm_package.version
+module.exports = (env) => {
+  const min = (process.argv.mode === 'production') ? '.min' : ''
+  const entry = {}
+  entry[`demo-keys-${version}${min}`] = [
+    './src/index.js'
+  ]
+  return {
   module: {
     rules: [
       {
@@ -28,8 +30,9 @@ module.exports = {
       }
     ]
   },
+  entry: entry,
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
   externals: {
@@ -46,7 +49,9 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       template: "./src/index.html",
-      filename: "./index.html"
+      filename: "./index.html",
+      inject: "head",
     }),
   ]
-};
+}
+}

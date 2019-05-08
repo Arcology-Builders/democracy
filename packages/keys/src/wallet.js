@@ -159,7 +159,8 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
     LOGGER.debug('fromAddress', fromAddress)
     LOGGER.debug('toAddress', toAddress)
     const balance = await wallet.eth.getBalance(fromAddress)
-    LOGGER.debug(`payAll for balance of ${fromWei(balance, 'ether')}`)
+    LOGGER.debug(`payAll for balance of ${fromWei(balance.toString(), 'ether')}`)
+    
     const gasEstimate = await wallet.eth.estimateGas({
       from: fromAddress, to: toAddress, value: balance, data: '0x'})
     //LOGGER.debug(`Gas estimate for payAll is ${gasEstimate}`)
@@ -181,5 +182,8 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
     nonce: await wallet.eth.getTransactionCount(fromAddress),
   })
 }
+
+wallet.fromWei = fromWei
+wallet.toWei   = toWei
 
 module.exports = wallet

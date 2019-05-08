@@ -1,4 +1,92 @@
-<body>
+<head>
+  <title>Democracy.js Key Management</title>
+
+  <style media="screen" type="text/css">
+    .daySquare {
+      width: 20px;
+      height: 20px;
+      margin: 5px;
+      float: left;
+    }
+
+    .daySquareEmpty {
+      border-color: navy;
+    }
+
+    .daySquareApproved {
+      background-color: paleturquoise;
+    }
+    
+    .daySquareConfirmed {
+      background-color: deepskyblue;
+    }
+
+    .metamaskAccount {
+      float: left;
+      position: relative;
+      background-color: skyblue;
+      width: 400px;
+      font-family: Courier;
+      font-size: 10px;
+      padding: 2px;
+    }
+
+    .metamaskBalance {
+      float: left;
+      position: relative;
+      font-style: italic;
+      padding-left: 10px;
+      width: 200px;
+    }
+
+    .metamaskRow {
+      clear: both;
+      padding: 5px;
+    }
+
+    .metamaskClear {
+      clear: both;
+    }
+
+    .resourceLine {
+      width: 5000px;
+    }
+    .securitySymbol {
+      background-color: skyblue;
+      font-size: 10px;
+    }
+  </style>
+
   <script type="text/javascript" src="http://arcology.nyc:7000/keythereum-1.0.4.min.js">
   </script>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+
+</head>
+
+<body>
+
+<h1>Democracy.js Key Management</h1>
+
+<section>
+  <header>Accounts</header>
+  <button id="createButton"></button>
+  <div id="accountsContainer"></div>
+</section>
+
+<section>
+  <header>Payout Recipient</header>
+  <input id="recipient" type="text" width="40"></input>
+</section>
+
+<section>
+  <h3>Current Block Number</h3>
+  <span id="blockNumber"></span>
+</section>
+
+<section id="metamask" style="display: none;">
+  <h3>Metamask Detected</h3>
+  <p>The following accounts and balances were detected.</p>
+  <h4> Wallets Available</h4>
+</section>
+
 </body>
