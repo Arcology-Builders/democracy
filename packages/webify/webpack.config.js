@@ -21,7 +21,7 @@ module.exports = (env, argv) => {
      ]
     */
   entry[bundleName] = [
-       './exports/demo.js',
+       './exports/api.js',
   ]
   return { module: {
     noParse: /browserfs\.js/,
@@ -46,7 +46,9 @@ module.exports = (env, argv) => {
     ]
   },
   entry: entry,
-  externals: { demo: "demo" },
+  externals: {
+    keythereum: "keythereum"
+  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
@@ -70,7 +72,7 @@ module.exports = (env, argv) => {
   },
   plugins: [ 
     new HtmlWebPackPlugin({
-      template: "./src/index.html",
+      template: "./exports/index.html",
       filename: "./index.html"
     }),
     new webpack.ProvidePlugin({

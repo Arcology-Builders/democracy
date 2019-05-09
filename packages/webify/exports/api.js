@@ -1,38 +1,37 @@
 require('@babel/polyfill')
-const assert = require('chai').assert
 
-BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
-  BrowserFS.FileSystem.InMemory.Create(function(e, inMemory) {
-		BrowserFS.FileSystem.MountableFileSystem.Create({
-			'/tmp': inMemory,
-			'/': lsfs
-		}, function(e, mfs) {
-			BrowserFS.initialize(mfs);
-			// BFS is now ready to use!
-		});
-  });
-});
+const BrowserFS = require('browserfs')
+const api = {}
+
+api.initFS = (listingHTTP) => {
+  BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
+    BrowserFS.FileSystem.InMemory.Create(function(e, inMemory) {
+      BrowserFS.FileSystem.XmlHttpRequest.Create({
+        index: listingHTTP || {},
+        baseUrl: api.config.DB_URL + '/api',
+      }, (e, httpFS) => {
+        BrowserFS.FileSystem.MountableFileSystem.Create({
+          '/tmp': inMemory,
+          '/': lsfs
+        }, function(e, mfs) {
+          BrowserFS.initialize(mfs)
+          // BFS is now ready to use!
+        })
+      })
+    })
+  })
+}
 
 require('dotenv').config()
-const utils = require('demo-utils')
-const fs = require('fs')
-const path = require('path')
-const contract = require('demo-contract')
-const { createBM } = require('demo-depart')
-const util = require('ethereumjs-utils')
-const keys = require('demo-keys')
-const tx = require('demo-tx')
+api.utils    = require('demo-utils')
+api.config   = api.utils.getConfig()
+api.eth      = api.utils.getNetwork()
+api.fs       = require('fs')
+api.path     = require('path')
+api.contract = require('demo-contract')
+//api.depart   = require('@democracy.js/depart')
+api.keys      = require('demo-keys')
+api.tx        = require('demo-tx')
+api.immutable = require('immutable')
 
-const { List } = require('immutable')
-if (!fs.existsSync('a')) { fs.mkdirSync('a') }
-
-fs.writeFileSync(path.join('a', 'b.json'), "catcow")
-const buffer = fs.readFileSync("a/b.json")
-console.log(buffer.toString())
-assert(buffer.toString() === 'catcow')
-
-module.exports = {
-  fs: fs,
-  path: path,
-  utils: utils,
-}
+module.exports = api

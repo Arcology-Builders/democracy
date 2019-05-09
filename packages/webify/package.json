@@ -5,8 +5,10 @@
   "keywords": "democracy ethereum webpack",
   "author": "Paul Pham",
   "scripts": {
-    "start": "webpack-dev-server --open --mode development",
-    "build": "webpack --mode production --json | tee logs/webpack.detailed.log",
+    "start:dev": "NODE_ENV=DEVELOPMENT webpack-dev-server --open --mode development --env.NODE_ENV=DEVELOPMENT",
+    "start:test": "NODE_ENV=TEST webpack-dev-server --open --mode production --env.NODE_ENV=TEST",
+    "build": "webpack --mode production --json -p 2>&1 > logs/webpack.detailed.log",
+    "sizes": "webpack-bundle-size-analyzer logs/webpack.detailed.log 2>&1 | tee logs/webpack.size.log",
     "clean": "rimraf -f dist"
   },
   "files": [
