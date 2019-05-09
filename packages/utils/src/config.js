@@ -18,19 +18,18 @@ configs.setEnvVars = (_env) => {
 // packets addresses to this hostname for some reason.
 //const SHH_IP = "ws://54.69.190.230:8546"
 const SHH_IP = "ws://eth.arcology.nyc:8546"
-const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll }) => {
-  if (!lo) {
-    console.error('Create a `.env` file with at least  ${NODE_ENV}.LOG_OUT defined.')
-  }
+const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
   return {
-    'DB_URL'      : dbURL,
-    'ETH_URL'     : ethURL,
-    'SHH_URL'     : shhURL,
-    'DB_NAMESPACE': db,
-    'GAS_PRICE'   : gp,
-    'GAS_LIMIT'   : gl,
-    'LOG_OUT'     : lo,
-    'LOG_LEVELS'  : ll,
+    'DB_URL'            : dbURL,
+    'ETH_URL'           : ethURL,
+    'SHH_URL'           : shhURL,
+    'DB_NAMESPACE'      : db,
+    'GAS_PRICE'         : gp,
+    'GAS_LIMIT'         : gl,
+    'LOG_OUT'           : lo,
+    'LOG_LEVELS'        : ll,
+    'DEPLOYER_ADDRESS'  : da,
+    'DEPLOYER_PASSWORD' : dp,
   }
 }
 
@@ -58,6 +57,8 @@ const createDevEnv = () => {
     'lo'    : process.env[ 'DEVELOPMENT.LOG_OUT' ],
     'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
               [ 'info', 'warn', 'error' ],
+    'da'    : process.env[ 'DEVELOPMENT.DEPLOYER_ADDRESS' ],
+    'dp'    : process.env[ 'DEVELOPMENT.DEPLOYER_PASSWORD' ],
   })
 }
 	
@@ -75,6 +76,8 @@ const ENVIRONMENTS = {
     'lo'     : process.env[ 'TEST.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
                [ 'info', 'warn', 'error' ],
+    'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
   }) },
   'RINKEBY'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
@@ -86,6 +89,8 @@ const ENVIRONMENTS = {
     'lo'     : process.env[ 'RINKEBY.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'RINKEBY.LOG_LEVELS' ]) ||
                [ 'warn', 'error' ],
+    'da'    : process.env[ 'RINKEBY.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'RINKEBY.DEPLOYER_PASSWORD' ],
   }), ['INFURA_PROJECT_ID']) },
   'MAINNET'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
@@ -97,6 +102,8 @@ const ENVIRONMENTS = {
     'lo'     : process.env[ 'MAINNET.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'MAINNET.LOG_LEVELS' ]) ||
                [ 'warn', 'error' ],
+    'da'    : process.env[ 'MAINNET.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'MAINNET.DEPLOYER_PASSWORD' ],
   }), ['INFURA_PROJECT_ID']) },
 }
 
