@@ -32,7 +32,7 @@ describe('Signing and spending transactions', () => {
     eth = getNetwork()
     testAccounts = await eth.accounts()
     bigSpender = testAccounts[4]
-    await wallet.init({autoConfig: false, unlockSeconds: 1})
+    await wallet.init({autoConfig: false, unlockSeconds: 2})
   })
 
   it( 'make sure that we have > 99 ETH for old accounts', async () => {
@@ -158,7 +158,7 @@ describe('Signing and spending transactions', () => {
     const oldFromBalance = await eth.getBalance(bigSpender)
     const oldToBalance = await eth.getBalance(toAddress)
     LOGGER.debug('overage', overage ? overage.toString(10) : '')
-// Start commenting here, to transfer back all funds to bigSpender in case of an error
+    // Start commenting here, to transfer back all funds to bigSpender in case of an error
 
     const txHash = await wallet.payTest({
       eth        : eth,
@@ -178,7 +178,7 @@ describe('Signing and spending transactions', () => {
     assert.equal(newToBalance, expected,
                  `newToBalance should receive all funds ${expected}, instead ${newToBalance}`)
    
-// Stop commenting here, to transfer back all funds to bigSpender in case of an error 
+    // Stop commenting here, to transfer back all funds to bigSpender in case of an error 
     // Pay the money back so tests above are repeatable
     const txHash2 = await wallet.pay({
       eth        : eth,
