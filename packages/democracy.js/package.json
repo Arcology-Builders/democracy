@@ -1,6 +1,6 @@
 {
   "name": "democracy.js",
-  "version": "0.2.8-alpha.2",
+  "version": "0.2.8-alpha.3",
   "description": "Democracy, an minimalist Ethereum framework for a distributed country",
   "keywords": [
     "democracy",
@@ -33,11 +33,11 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/depart": "^0.2.8-alpha.2",
-    "demo-compile": "^0.2.8-alpha.2",
-    "demo-contract": "^0.2.8-alpha.2",
-    "demo-keys": "^0.2.8-alpha.2",
-    "demo-utils": "^0.2.8-alpha.2"
+    "@democracy.js/depart": "^0.2.8-alpha.3",
+    "demo-compile": "^0.2.8-alpha.3",
+    "demo-contract": "^0.2.8-alpha.3",
+    "demo-keys": "^0.2.8-alpha.3",
+    "demo-utils": "^0.2.8-alpha.3"
   },
   "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
 }
