@@ -27,10 +27,10 @@ describe( 'Departures', () => {
 
   it( 'executing a simple departure', async () => {
     result = await depart({
-      name       : "simple-departure",
-      address    : accounts[1],
-      sourcePath : "../../node_modules/demo-test-contracts/contracts",
-      callback   : async ({ compile, link, deploy, bm }) => {
+      name            : "simple-departure",
+      deployerAddress : accounts[1],
+      sourcePath      : "../../node_modules/demo-test-contracts/contracts",
+      callback        : async ({ compile, link, deploy, bm }) => {
         
         LOGGER.info( 'Compiling', Date.now() )
         const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )

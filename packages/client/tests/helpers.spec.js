@@ -13,11 +13,11 @@ describe( 'client helper', () => {
     inputter = inout.inputter
     outputter = inout.outputter
     // Reset it so we can see the change
-    await outputter('test/bm', {"a": 2}, true)
+    await outputter('test/bm', new Map({"a": 2}), true)
   })
 
   it( 'creates a BM from default DB URL', async () => {
-    await outputter('test/bm', {"a": 1}, true)
+    await outputter('test/bm', new Map({"a": 1}), true)
     delayedGet( inputter.bind(null, 'test/bm'), new Map({"a":1}), immEqual )
     assert.notEqual( inputter, getImmutableKey )
     assert.notEqual( outputter, setImmutableKey )

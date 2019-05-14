@@ -1,17 +1,20 @@
 'use strict'
 const fs    = require('fs')
 const path  = require('path')
-const utils = require('demo-utils')
 
-const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
-const LOGGER = new Logger('remote.spec')
-const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { Map } = require('immutable')
-const chai = require('chai')
-const expect = require('chai').expect
-const assert = chai.assert
+const chai    = require('chai')
+const expect  = require('chai').expect
+const assert  = chai.assert
 chai.use(require('chai-as-promised'))
 
+const { toWei } = require('web3-utils')
+const utils = require('demo-utils')
+const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
+const LOGGER = new Logger('remote.spec')
+
+const { wallet } = require('demo-keys')
+const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
 const { depart } = require('..')
 
@@ -23,21 +26,45 @@ describe( 'Remote departures', () => {
   let cleaner
   let result
   let bm
+  //const deployerAddress = utils.getConfig()['DEPLOYER_ADDRESS']
+  //const deployerPassword = utils.getConfig()['DEPLOYER_PASSWORD']
+  let deployerAddress
+  let deployerPassword
+  let deployerEth
   const s = new RESTServer(6969, true)
   s.start()
 
   before(async () => {
-   accounts = await eth.accounts()
-   chainId = await eth.net_version()
+    chainId = await eth.net_version()
+    const testAccounts = await eth.accounts()
+
+    await wallet.init({ autoConfig: true, unlockSeconds: 10 })
+
+    // We create the spenderEth here and not in the departure
+    // because we need to fund it from test accounts 
+    const result = await wallet.createSpenderEth({
+      autoConfig : true,
+      autoCreate : true,
+      autoInit   : false,
+    })
+    deployerAddress = result.address
+    deployerPassword = result.password
+    LOGGER.debug('Deployer Address and Password', deployerAddress, deployerPassword)
+    deployerEth = result.spenderEth
+    await wallet.payTest({
+      fromAddress: testAccounts[5],
+      toAddress: deployerAddress,
+      weiValue: toWei('0.1', 'ether'),
+    }) 
   })
 
   it( 'executing a remote departure', async () => {
     result = await depart({
-      name: "remote-departure",
-      address: accounts[1],
-      sourcePath: "../../node_modules/demo-test-contracts/contracts",
-      bmHostName: "arcology.nyc",
-      bmPort: 7000,
+      name            : "remote-departure",
+      autoConfig      : true,
+      deployerEth     : deployerEth,
+      deployerAddress : deployerAddress,
+      sourcePath      : "../../node_modules/demo-test-contracts/contracts",
       callback: async ({compile, link, deploy, bm}) => {
         
         //LOGGER.info( 'Compiling', Date.now() )

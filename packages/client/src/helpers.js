@@ -24,6 +24,7 @@ helpers.createInOut = ({hostname, port, autoConfig}) => {
 
   const useHostAndPort = (_hostname && _port)
   const remoteInputter = async (key, def) => {
+    LOGGER.debug('getKey', key)
     return fromJS(JSON.parse(await r.getHTTP(`/api/${key}`, def))) } 
   const remoteOutputter = async (key, val, ow) => {
     return r.postHTTP(`/api/${key}`, toJS(val), ow) } 
@@ -33,9 +34,10 @@ helpers.createInOut = ({hostname, port, autoConfig}) => {
   const outputter = (useHostAndPort) ? remoteOutputter : setImmutableKey
 
   return {
-    inputter: inputter,
-    outputter: outputter,
+    inputter  : inputter,
+    outputter : outputter,
   }
+
 }
 
 helpers.delayedGet = (getCall, expected, eq) => {

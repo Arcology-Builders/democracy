@@ -1,7 +1,8 @@
 const assert = require('chai').assert
 
 const { Map } = require('immutable')
-const { getNetwork, getConfig, Logger, toJS, fromJS, deepEqual } = require('demo-utils')
+const { getNetwork, getConfig, getEndpointURL, Logger, toJS, fromJS, deepEqual }
+  = require('demo-utils')
 const LOGGER = new Logger('wallet')
 
 const BN = require('bn.js')
@@ -22,6 +23,45 @@ const { awaitInputter, awaitOutputter } = require('demo-contract')
 const OVERAGE = toWei('0.00075', 'ether')
 
 const wallet = {}
+
+/**
+ * Convenience method to initialize wallet, load and unlock the given address
+ * from the (remote) store, and prepare a spender eth.
+ * Equivalent to calling
+ * `wallet.init`, `wallet.loadEncryptedAccount`, `wallet.unlockEncryptedAccount`,
+ * and `wallet.createSignerEth` in sequence.
+ * @param autoConfig {boolean} true to take wallet store hostname/port from config.
+ * @param hostname {String} hostname for autoconfig
+ * @param port {Number} port number
+ */
+wallet.createSpenderEth = async ({ autoConfig, autoInit, autoCreate, unlockSeconds,
+                                   hostname, port, address, password }) => {
+  if (autoInit) {
+    await wallet.init({
+      autoConfig    : autoConfig,
+      unlockSeconds : unlockSeconds,
+      hostname      : hostname,
+      port          : port
+    })
+  }
+  let autoAddress
+  let autoPassword
+  let autoPair
+  if (autoCreate) {
+    autoPair = await wallet.createEncryptedAccount() 
+  }
+  const _address  = (autoCreate) ? autoPair.address  : address
+  const _password = (autoCreate) ? autoPair.password : password
+  LOGGER.debug('AUTO', _address, _password)
+
+  const encryptedAccount = await wallet.loadEncryptedAccount({ address: _address })
+  await wallet.unlockEncryptedAccount({ address: _address, password: _password })
+  return {
+    address   : _address,
+    password  : _password,
+    spenderEth: wallet.createSignerEth({ url: getEndpointURL(), address: _address })
+  }
+}
 
 /**
  * Create a signer provider given the current URL and account.
@@ -72,6 +112,7 @@ wallet.init = async ({autoConfig, unlockSeconds}) => {
 }
 
 wallet.createEncryptedAccount = async () => {
+  if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
   const account = create()
   const address = account.get('addressPrefixed')
   const password = randombytes(32).toString('hex')
@@ -103,6 +144,7 @@ wallet.loadEncryptedAccount = async ({ address }) => {
       //assert.equal( _address, address,
       //             `Recovered address ${_address} doesn't match ${address}`)
       wallet.accountsMap[address] = toJS( encryptedAccount )
+      LOGGER.debug(`Loaded encrypted account for ${address}`)
       return toJS( encryptedAccount )
     }
   )
@@ -116,7 +158,11 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   wallet.accountsMap[address] = encryptedAccount
   return awaitOutputter(
     wallet.outputter( `keys/${wallet.chainId}/${address}`, fromJS(encryptedAccount) ),
-    (output) => {return output }
+    // Delay by one second, so that subsequent calls to inputter will return the newly
+    // saved key
+    (output) => { return new Promise((resolve, reject) => {
+      setTimeout(() => { resolve(output) }, 1000)
+    }) }
   )
 }
 
@@ -173,13 +219,13 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
   const _eth = (eth) ? eth : wallet.eth
   LOGGER.debug(`Sending wei value is ${fromWei(weiValue, 'ether')} ETH`)
   return _eth.sendTransaction({
-    value: weiValue,
-    data : "0x",
-    from : fromAddress,
-    to   : toAddress,
-    gas  : gasLimit,
-    gasPrice: gasPrice,
-    nonce: await wallet.eth.getTransactionCount(fromAddress),
+    value    : weiValue,
+    data     : "0x",
+    from     : fromAddress,
+    to       : toAddress,
+    gas      : gasLimit,
+    gasPrice : gasPrice,
+    nonce    : await wallet.eth.getTransactionCount(fromAddress),
   })
 }
 

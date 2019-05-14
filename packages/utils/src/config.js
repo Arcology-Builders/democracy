@@ -3,6 +3,7 @@
 
 require('dotenv').config()
 const { Logger } = require('./logger')
+const { version } = require('../package.json')
 // Pass in log-levels explicitly because this LOGGER cannot include itself
 const assert = require('chai').assert
 
@@ -30,6 +31,7 @@ const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
     'LOG_LEVELS'        : ll,
     'DEPLOYER_ADDRESS'  : da,
     'DEPLOYER_PASSWORD' : dp,
+    'VERSION'           : version,
   }
 }
 
@@ -51,8 +53,8 @@ const createDevEnv = () => {
     'dbURL' : process.env[ 'DEVELOPMENT.DB_URL'  ] || 'http://localhost:7000',
     'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
     'shhURL': process.env[ 'DEVELOPMENT.SHH_URL' ] || 'ws://localhost:8546',
-    'gp'    : 5,
-    'gl'    : '670000',
+    'gp'    : process.env[ 'DEVELOPMENT.GAS_PRICE' ] || 5,
+    'gl'    : process.env[ 'DEVELOPMENT.GAS_LIMIT' ] || '670000',
     'db'    : 'dev',
     'lo'    : process.env[ 'DEVELOPMENT.LOG_OUT' ],
     'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
@@ -70,8 +72,8 @@ const ENVIRONMENTS = {
     'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
     'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
     'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
-    'gp'     : 5,
-    'gl'     : '670000',
+    'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
+    'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
     'db'     : 'test',
     'lo'     : process.env[ 'TEST.LOG_OUT' ],
     'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||

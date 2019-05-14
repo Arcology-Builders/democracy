@@ -1,9 +1,10 @@
 const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
-const { toJS, fromJS } = utils
+const { toJS, fromJS, getConfig, getNetwork } = utils
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract, createBM }
   = require('demo-contract')
+const { wallet } = require('demo-keys')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
 
@@ -11,23 +12,37 @@ const LOGGER = new utils.Logger('departure')
 
 const departs = {}
 
-departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPort,
-                        autoConfig, callback}) => {
-  assert(address, " `address` param needed to deploy from.")
+departs.depart = async ({name, cleanAfter, sourcePath, autoConfig,
+                         deployerEth, deployerAddress, deployerPassword, callback}) => {
   assert(callback, " `callback` param needed to run departure function.")
 
   LOGGER.info(`Now departing: ${name}`)
+  LOGGER.info(`Deployer Address: ${deployerAddress}`)
 
-  const eth      = utils.getNetwork()
-  const accounts = await eth.accounts()
+  const _deployerAddress = (deployerAddress) ? deployerAddress : getConfig()['DEPLOYER_ADDRESS']
+  const _deployerPassword = (deployerPassword) ? deployerPassword : getConfig()['DEPLOYER_PASSWORD']
+  let _deployerEth
+  if (deployerAddress && deployerPassword) {
+    await wallet.init({ autoConfig: autoConfig })
+    await wallet.loadEncryptedAccount({ address: deployerAddress })
+    await wallet.unlockEncryptedAccount({ address: deployerAddress, password: deployerPassword })
+  } else if (!deployerAddress && !deployerPassword) {
+    _deployerEth = await wallet.createSpenderEth({
+      autoInit: true,
+      autoConfig: autoConfig,
+      autoCreate: true,
+      address: _deployerAddress,
+      password: _deployerAddress,
+    })
+  }
+
+  const eth = (deployerEth) ? deployerEth : (_deployerEth ? _deployerEth : getNetwork() )
   const chainId  = await eth.net_version()
 
   const bm = await createBM({
     sourcePath: sourcePath,
     chainId   : chainId,
     autoConfig: autoConfig,
-    hostname  : bmHostName,
-    port      : bmPort,
   })
 
   const c = new Compiler({
@@ -38,7 +53,7 @@ departs.depart = async ({name, cleanAfter, address, sourcePath, bmHostName, bmPo
   })
   const d = new Deployer({
     bm: bm, chainId: chainId,
-    eth: eth, address: address
+    eth: eth, address: _deployerAddress
   })
 
   let compiles = new Map()

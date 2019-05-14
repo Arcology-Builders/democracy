@@ -2,6 +2,9 @@ const utils = require('ethereumjs-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert
 
+const { Logger } = require('demo-utils')
+const LOGGER = new Logger('keys')
+
 const keys = {}
 keys.keythereum = require('keythereum')
 keys.randombytes = require('randombytes')
@@ -91,6 +94,7 @@ keys.accountToEncryptedJSON = ({ account, password }) => {
 }
 
 keys.encryptedJSONToAccount = ({ encryptedJSON, password }) => {
+  LOGGER.debug('encryptedJSONToAccount', encryptedJSON, password)
   const privateBuffer = keys.keythereum.recover(password, encryptedJSON)
   const ivString = encryptedJSON.crypto.cipherparams.iv
   assert.equal(ivString.length, keys.PARAMS.ivBytes * 2)
