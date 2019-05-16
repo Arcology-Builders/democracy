@@ -1,7 +1,102 @@
-/**
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      keys/src/wallet.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Democracy
+    </h3>
+
+    
+
+    <h3>Modules</h3><ul><li id="keys-nav"><a href="module-keys.html">keys</a><ul class='methods'><li data-type="method" id="keys-accountToEncryptedJSON-nav"><a href="module-keys.html#.accountToEncryptedJSON">accountToEncryptedJSON</a></li><li data-type="method" id="keys-buffer-nav"><a href="module-keys.html#.buffer">buffer</a></li><li data-type="method" id="keys-bufferToMap-nav"><a href="module-keys.html#.bufferToMap">bufferToMap</a></li><li data-type="method" id="keys-create-nav"><a href="module-keys.html#.create">create</a></li><li data-type="method" id="keys-createFromPrivateBuffer-nav"><a href="module-keys.html#.createFromPrivateBuffer">createFromPrivateBuffer</a></li><li data-type="method" id="keys-createFromPrivateString-nav"><a href="module-keys.html#.createFromPrivateString">createFromPrivateString</a></li><li data-type="method" id="keys-encryptedJSONToAccount-nav"><a href="module-keys.html#.encryptedJSONToAccount">encryptedJSONToAccount</a></li><li data-type="method" id="keys-hex-nav"><a href="module-keys.html#.hex">hex</a></li><li data-type="method" id="keys-isAccount-nav"><a href="module-keys.html#.isAccount">isAccount</a></li><li data-type="method" id="keys-prefix-nav"><a href="module-keys.html#.prefix">prefix</a></li></ul></li><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#utils">utils</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        keys/src/wallet.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>/**
  * Wallet functions and state
  *
- * @memberof module:wallet
+ * @namespace wallet
+ * @memberof module:demo-keys
  */
 const assert = require('chai').assert
 
@@ -30,40 +125,47 @@ const OVERAGE = toWei('0.00075', 'ether')
 const wallet = {}
 
 /**
- * Convenience method to create a new account if no address/password is given,
- * otherwise load and unlock the given address
- * from the (remote) store. Finally create a signerEth with it.
+ * Convenience method to initialize wallet, load and unlock the given address
+ * from the (remote) store, and prepare a spender eth.
  * Equivalent to calling
- * `wallet.loadEncryptedAccount`, `wallet.unlockEncryptedAccount`, `wallet.createSignerEth`
- *
- * @method prepareSignerEth
- * @memberof module:wallet
- * @param address {String} `0x`-prefixed Ethereum address to create a signer around
- * @param password {String} password to unlock the given Ethereum account
+ * `wallet.init`, `wallet.loadEncryptedAccount`, `wallet.unlockEncryptedAccount`,
+ * and `wallet.createSignerEth` in sequence.
+ * @param autoConfig {boolean} true to take wallet store hostname/port from config.
+ * @param hostname {String} hostname for autoconfig
+ * @param port {Number} port number
  */
-wallet.prepareSignerEth = async ({ address, password }) => {
-  const autoCreate = !address && !password
-  const pair  = (autoCreate) ? (await wallet.createEncryptedAccount()) :
-    { address: address, password: password }
-  const _address  = pair.address
-  const _password = pair.password
+wallet.createSpenderEth = async ({ autoConfig, autoInit, autoCreate, unlockSeconds,
+                                   hostname, port, address, password }) => {
+  if (autoInit) {
+    await wallet.init({
+      autoConfig    : autoConfig,
+      unlockSeconds : unlockSeconds,
+      hostname      : hostname,
+      port          : port
+    })
+  }
+  let autoAddress
+  let autoPassword
+  let autoPair
+  if (autoCreate) {
+    autoPair = await wallet.createEncryptedAccount() 
+  }
+  const _address  = (autoCreate) ? autoPair.address  : address
+  const _password = (autoCreate) ? autoPair.password : password
   LOGGER.debug('AUTO', _address, _password)
 
   const encryptedAccount = await wallet.loadEncryptedAccount({ address: _address })
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
   return {
-    address: _address,
-    password: _password,
-    signerEth: wallet.createSignerEth({ url: getEndpointURL(), address: _address }),
+    address   : _address,
+    password  : _password,
+    spenderEth: wallet.createSignerEth({ url: getEndpointURL(), address: _address })
   }
 }
 
 /**
  * Create a signer provider given the current URL and account.
  * TODO: change democracy API to return the endpoint url from a config name
- *
- * @method createSignerEth
- * @memberof module:wallet
  * @param url {String} the URL of an endpoint
  * @param address {String} `0x`-prefixed Ethereum address of sender
  */
@@ -96,14 +198,6 @@ wallet.UNLOCK_TIMEOUT_SECONDS = 600
 wallet.OVERAGE_100_ETH = toWei('0.0134', 'ether')
 wallet.unlock_seconds
 
-/**
- * Initialize the wallet.
- *
- * @method init
- * @memberof module:wallet
- * @param autoConfig {boolean}
- * @param unlockSeconds {Number}
- */
 wallet.init = async ({autoConfig, unlockSeconds}) => {
   if (wallet.initialized) { LOGGER.error("Wallet already initialized.") }
   if (!require('keythereum')) {
@@ -117,16 +211,6 @@ wallet.init = async ({autoConfig, unlockSeconds}) => {
   wallet.initialized = true
 }
 
-/**
- * Create an encrypted account.
- *
- * @method createEncryptedAccount
- * @memberof module:wallet
- * @return address {String} a `0x`-prefixed Ethereum address
- * @return password {String} a random password string
- * @return encryptedAccount {JSON} the geth-format enciphered Ethereum private key
- * @return result {JSON} the result of saving the encryptedAccount to a (remote) store
- */
 wallet.createEncryptedAccount = async () => {
   if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
   const account = create()
@@ -145,9 +229,6 @@ wallet.createEncryptedAccount = async () => {
 
 /**
  * Retrieves encrypted account for this address from a (possibly remote) persistent store.
- *
- * @method loadEncryptedAccount
- * @memberof module:wallet
  * @param address {String} `0x`-prefixed Ethereum address associated with desired account.
  * @return encrypted JSON account for the given address.
  */
@@ -169,14 +250,6 @@ wallet.loadEncryptedAccount = async ({ address }) => {
   )
 }
 
-/**
- * Saves the encrypted account to a (remote) store
- *
- * @method saveEncryptedAccount
- * @memberof module:wallet
- * @param address {String} a `0x`-prefixed Ethereum address associated with this account
- * @param encryptedAccount {JSON} geth-formatted key to save in a (remote) store
- */
 wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
   if (wallet.accountsMap[address]) {
@@ -193,14 +266,6 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   )
 }
 
-/**
- * Unlock an encrypted account.
- *
- * @method unlockEncryptedAccount
- * @memberof module:wallet
- * @param address {String} `0x`-prefixed Ethereum address associated with account to unlock
- * @param password {String} to unlock the given account
- */
 wallet.unlockEncryptedAccount = async ({ address, password }) => {
   const encryptedAccount = wallet.accountsMap[address]
   if ( isAccount(encryptedAccount) ) {
@@ -218,18 +283,6 @@ wallet.unlockEncryptedAccount = async ({ address, password }) => {
   return relockFunc
 }
 
-/**
- * Transfer ETH between the given addresses, whose accounts have already been unlocked.
- *
- * @method pay
- * @memberof module:wallet
- * @param payAll {boolean} whether to transfer all spendable value
- * @param weiValue {String} the amount in wei to transfer (ignored if `payAll` is true)
- * @param fromAddress {String} `0x`-prefixed Ethereum address of sender
- * @param toAddress {String} `0x`-prefixed Ethereum address of receiver
- * @param overage {String} optional, the amount of fees to withhold if `payAll` is true)
- * @param label {String} optional, a debug label to log for this transaction
- */
 wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage, label}) => {
   const signer = wallet.signersMap[fromAddress]
   if (!signer) { throw new Error(`No signer created for address ${fromAddress}`) }
@@ -238,9 +291,6 @@ wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage, label}) 
 
 /**
  * Pay from a test account (that is already unlocked on the Ethereum node)
- *
- * @method payTest
- * @memberof module:wallet
  * @param weiValue {String} representing the value in wei
  * @param fromAddress {String} Ethereum address of payer/sender
  * @param toAddress {String} Ethereum address of recipient
@@ -283,3 +333,25 @@ wallet.fromWei = fromWei
 wallet.toWei   = toWei
 
 module.exports = wallet
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      utils/src/config.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Democracy
+    </h3>
+
+    
+
+    <h3>Modules</h3><ul><li id="keys-nav"><a href="module-keys.html">keys</a><ul class='methods'><li data-type="method" id="keys-accountToEncryptedJSON-nav"><a href="module-keys.html#.accountToEncryptedJSON">accountToEncryptedJSON</a></li><li data-type="method" id="keys-buffer-nav"><a href="module-keys.html#.buffer">buffer</a></li><li data-type="method" id="keys-bufferToMap-nav"><a href="module-keys.html#.bufferToMap">bufferToMap</a></li><li data-type="method" id="keys-create-nav"><a href="module-keys.html#.create">create</a></li><li data-type="method" id="keys-createFromPrivateBuffer-nav"><a href="module-keys.html#.createFromPrivateBuffer">createFromPrivateBuffer</a></li><li data-type="method" id="keys-createFromPrivateString-nav"><a href="module-keys.html#.createFromPrivateString">createFromPrivateString</a></li><li data-type="method" id="keys-encryptedJSONToAccount-nav"><a href="module-keys.html#.encryptedJSONToAccount">encryptedJSONToAccount</a></li><li data-type="method" id="keys-hex-nav"><a href="module-keys.html#.hex">hex</a></li><li data-type="method" id="keys-isAccount-nav"><a href="module-keys.html#.isAccount">isAccount</a></li><li data-type="method" id="keys-prefix-nav"><a href="module-keys.html#.prefix">prefix</a></li></ul></li><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#utils">utils</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        utils/src/config.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>'use strict'
+/**
+ * Environment-controlled configuration to choose network and deploy parameters
+ *
+ * @namespace config
+ * @memberof module:utils
+ */
+
+require('dotenv').config()
+const { Logger } = require('./logger')
+const { version } = require('../package.json')
+// Pass in log-levels explicitly because this LOGGER cannot include itself
+const assert = require('chai').assert
+
+const { Map } = require('immutable')
+
+const configs = {}
+
+configs.setEnvVars = (_env) => {
+  new Map(_env).forEach((val,key) => { process.env[key] = val })
+}
+
+// TODO: corresponds to eth.arcology.nyc but our Whisper node is not accepting
+// packets addresses to this hostname for some reason.
+//const SHH_IP = "ws://54.69.190.230:8546"
+const SHH_IP = "ws://eth.arcology.nyc:8546"
+const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
+  return {
+    'DB_URL'            : dbURL,
+    'ETH_URL'           : ethURL,
+    'SHH_URL'           : shhURL,
+    'DB_NAMESPACE'      : db,
+    'GAS_PRICE'         : gp,
+    'GAS_LIMIT'         : gl,
+    'LOG_OUT'           : lo,
+    'LOG_LEVELS'        : ll,
+    'DEPLOYER_ADDRESS'  : da,
+    'DEPLOYER_PASSWORD' : dp,
+    'VERSION'           : version,
+  }
+}
+
+const checkEnv = (config, vars) => {
+  vars.forEach((v) => {
+    if (!process.env[v]) {
+      LOGGER.errorAndThrow(`Environment variable ${v} needed but not defined.`)
+    }
+  })
+  return config
+}
+
+/**
+ * @method parseLogLevels
+ * @memberof module:utils
+ */
+configs.parseLogLevels = (string) => {
+  return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
+}
+
+const createDevEnv = () => {
+  return createEnv({
+    'dbURL' : process.env[ 'DEVELOPMENT.DB_URL'  ] || 'http://localhost:7000',
+    'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
+    'shhURL': process.env[ 'DEVELOPMENT.SHH_URL' ] || 'ws://localhost:8546',
+    'gp'    : process.env[ 'DEVELOPMENT.GAS_PRICE' ] || 5,
+    'gl'    : process.env[ 'DEVELOPMENT.GAS_LIMIT' ] || '670000',
+    'db'    : 'dev',
+    'lo'    : process.env[ 'DEVELOPMENT.LOG_OUT' ],
+    'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
+              [ 'info', 'warn', 'error' ],
+    'da'    : process.env[ 'DEVELOPMENT.DEPLOYER_ADDRESS' ],
+    'dp'    : process.env[ 'DEVELOPMENT.DEPLOYER_PASSWORD' ],
+  })
+}
+	
+const ENVIRONMENTS = {
+  'DEVELOPMENT': createDevEnv,
+  'DEV'        : createDevEnv,
+  'TEST'       : () => {
+    return createEnv({
+    'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
+    'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
+    'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
+    'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
+    'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
+    'db'     : 'test',
+    'lo'     : process.env[ 'TEST.LOG_OUT' ],
+    'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
+               [ 'info', 'warn', 'error' ],
+    'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
+  }) },
+  'RINKEBY'    : () => { return checkEnv(createEnv({
+    'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
+    'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
+    'gp'     : 5,
+    'gl'     : '670000',
+    'db'     : 'rinkeby',
+    'lo'     : process.env[ 'RINKEBY.LOG_OUT' ],
+    'll'     : configs.parseLogLevels(process.env[ 'RINKEBY.LOG_LEVELS' ]) ||
+               [ 'warn', 'error' ],
+    'da'    : process.env[ 'RINKEBY.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'RINKEBY.DEPLOYER_PASSWORD' ],
+  }), ['INFURA_PROJECT_ID']) },
+  'MAINNET'    : () => { return checkEnv(createEnv({
+    'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
+    'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
+    'gp'     : 5,
+    'gl'     : '670000',
+    'db'     : 'mainnet',
+    'lo'     : process.env[ 'MAINNET.LOG_OUT' ],
+    'll'     : configs.parseLogLevels(process.env[ 'MAINNET.LOG_LEVELS' ]) ||
+               [ 'warn', 'error' ],
+    'da'    : process.env[ 'MAINNET.DEPLOYER_ADDRESS'  ],
+    'dp'    : process.env[ 'MAINNET.DEPLOYER_PASSWORD' ],
+  }), ['INFURA_PROJECT_ID']) },
+}
+
+configs.isNetName = (_name) => {
+  assert(_name, 'Net name cannot be empty.')
+  return (ENVIRONMENTS[_name.toUpperCase()] !== undefined)
+}
+
+const lazyEval = (env) => {
+  let config = ENVIRONMENTS[env]
+  if (typeof(config) === 'function') {
+    ENVIRONMENTS[env] = config()
+    config = ENVIRONMENTS[env]
+  }
+  return config
+}
+
+/**
+ * Return a configuration object with values determined by NODE_ENV.
+ * @method getConfig
+ * @memberof module:utils
+ */
+configs.getConfig = (debugPrint) => {
+  const windowEnv = (typeof window != 'undefined' &amp;&amp; window.document) ? window.NODE_ENV : ""
+  const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
+  const env = windowEnv ? windowEnv : processEnv
+  debugPrint &amp;&amp; LOGGER.debug(`NODE_ENV=${env}`)
+  let config = lazyEval(env)
+  if (config) {
+   return config
+  } else {
+   debugPrint &amp;&amp; LOGGER.debug('NODE_ENV not defined, using TEST')
+   return lazyEval('TEST')
+  }
+}
+
+const LOGGER = new Logger('config', [ 'warn', 'error' ], configs.getConfig)
+
+module.exports = configs
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+    "plugins": ["plugins/markdown"],
+    "recurseDepth": 10,
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": ["packages/keys/src", "packages/keys/index.js", "packages/utils/src", "packages/utils/index.js"],
+        "exclude": ["docs", "tests", "logs", "dist", ".nyc_output", "lib", "node_modules", "out"]
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "templates": {
+        "referenceTitle": "Democracy",
+        "disableSort": false,
+        "collapse": true
+    },
+    "opts": {
+        "private": true,
+        "recurse": true,
+        "encoding": "utf-8",
+        "destination": "./docs/",
+        "readme": "./README.md",
+        "template": "./node_modules/braintree-jsdoc-template"
+    }
+}

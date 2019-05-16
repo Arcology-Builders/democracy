@@ -20,11 +20,9 @@ describe('Create spender ETH from remote account', () => {
   let eth
 
   before(async () => {
-    let { spenderEth: _spenderEth, address: _address } = await wallet.createSpenderEth({
-      autoInit      : true,
-      autoConfig    : true,
+    await wallet.init({ autoConfig: true, unlockSeconds: 1 })
+    let { spenderEth: _spenderEth, address: _address } = await wallet.prepareSignerEth({
       autoCreate    : true,
-      unlockSeconds : 1,
     })
     spenderEth = _spenderEth
     address    = _address

@@ -1,5 +1,10 @@
 'use strict'
-// Environment-controlled configuration to choose network and deploy parameters
+/**
+ * Environment-controlled configuration to choose network and deploy parameters
+ *
+ * @namespace config
+ * @memberof module:utils
+ */
 
 require('dotenv').config()
 const { Logger } = require('./logger')
@@ -44,6 +49,10 @@ const checkEnv = (config, vars) => {
   return config
 }
 
+/**
+ * @method parseLogLevels
+ * @memberof module:utils
+ */
 configs.parseLogLevels = (string) => {
   return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
 }
@@ -123,6 +132,11 @@ const lazyEval = (env) => {
   return config
 }
 
+/**
+ * Return a configuration object with values determined by NODE_ENV.
+ * @method getConfig
+ * @memberof module:utils
+ */
 configs.getConfig = (debugPrint) => {
   const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ""
   const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""

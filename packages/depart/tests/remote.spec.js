@@ -11,6 +11,7 @@ chai.use(require('chai-as-promised'))
 const { toWei } = require('web3-utils')
 const utils = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
+const { getImmutableKey, setImmutableKey } = utils
 const LOGGER = new Logger('remote.spec')
 
 const { wallet } = require('demo-keys')
@@ -22,12 +23,10 @@ describe( 'Remote departures', () => {
   
   let eth = utils.getNetwork()
   let chainId
-  let accounts
+  let testAccounts
   let cleaner
   let result
   let bm
-  //const deployerAddress = utils.getConfig()['DEPLOYER_ADDRESS']
-  //const deployerPassword = utils.getConfig()['DEPLOYER_PASSWORD']
   let deployerAddress
   let deployerPassword
   let deployerEth
@@ -36,37 +35,37 @@ describe( 'Remote departures', () => {
 
   before(async () => {
     chainId = await eth.net_version()
-    const testAccounts = await eth.accounts()
-
+    testAccounts = await eth.accounts()
+/*
     await wallet.init({ autoConfig: true, unlockSeconds: 10 })
 
     // We create the spenderEth here and not in the departure
     // because we need to fund it from test accounts 
-    const result = await wallet.createSpenderEth({
-      autoConfig : true,
+    const result = await wallet.prepareSignerEth({
       autoCreate : true,
-      autoInit   : false,
     })
     deployerAddress = result.address
     deployerPassword = result.password
     LOGGER.debug('Deployer Address and Password', deployerAddress, deployerPassword)
-    deployerEth = result.spenderEth
-    await wallet.payTest({
-      fromAddress: testAccounts[5],
-      toAddress: deployerAddress,
-      weiValue: toWei('0.1', 'ether'),
-    }) 
+    deployerEth = result.signerEth
+   */
   })
 
   it( 'executing a remote departure', async () => {
     result = await depart({
       name            : "remote-departure",
       autoConfig      : true,
-      deployerEth     : deployerEth,
-      deployerAddress : deployerAddress,
       sourcePath      : "../../node_modules/demo-test-contracts/contracts",
-      callback: async ({compile, link, deploy, bm}) => {
-        
+      callback: async ({compile, link, deploy, bm, deployerEth, deployerAddress}) => {
+       
+        // We only need to do this here b/c tests are in NODE_ENV=DEVELOPMENT
+        // In an actual departure this isn't necessary 
+        await wallet.payTest({
+          fromAddress: testAccounts[5],
+          toAddress: deployerAddress,
+          weiValue: toWei('0.1', 'ether'),
+        }) 
+
         //LOGGER.info( 'Compiling', Date.now() )
         const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
         assert(isCompile(cout),
@@ -86,6 +85,8 @@ describe( 'Remote departures', () => {
       }
     })
     bm = result.bm
+    assert.notEqual(bm.inputter, getImmutableKey)
+    assert.notEqual(bm.outputter, setImmutableKey)
     assert(Map.isMap(result.compiles))
     assert(Map.isMap(result.links))
     assert(Map.isMap(result.deploys))

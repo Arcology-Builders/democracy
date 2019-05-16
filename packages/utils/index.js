@@ -1,4 +1,7 @@
 'use strict'
+/**
+ * @module utils
+ */
 const utils  = require('./src/utils')
 const logger = require('./src/logger')
 const config = require('./src/config')

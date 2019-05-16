@@ -9,7 +9,9 @@ const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 const { getImmutableKey, setImmutableKey } = require('demo-utils')
 const { Map } = require('immutable')
 const assert = require('chai').assert
+const { toWei } = require('web3-utils')
 
+const { wallet } = require('demo-keys')
 const { depart } = require('..')
 
 describe( 'Departures', () => {
@@ -21,14 +23,23 @@ describe( 'Departures', () => {
   let result
 
   before(async () => {
-   accounts = await eth.accounts()
-   chainId = await eth.net_version()
+    accounts = await eth.accounts()
+    LOGGER.debug('before')
+    chainId = await eth.net_version()
+
+    // Fund deployerAddress from test wallet
+    await wallet.payTest({
+     weiValue    : toWei('0.1', 'ether'),
+     fromAddress : accounts[0],
+     toAddress   : utils.getConfig()['DEPLOYER_ADDRESS'],
+     label       : 'funding from test account',
+    })
   })
 
-  it( 'executing a simple departure', async () => {
+  it( 'executes a simple departure', async () => {
     result = await depart({
       name            : "simple-departure",
-      deployerAddress : accounts[1],
+      autoConfig      : false,
       sourcePath      : "../../node_modules/demo-test-contracts/contracts",
       callback        : async ({ compile, link, deploy, bm }) => {
         

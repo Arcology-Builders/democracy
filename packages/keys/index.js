@@ -1,3 +1,8 @@
+/**
+ * Key and signer management
+ * @module keys
+ * @module wallet
+ */
 const keys = require('./src/keys')
 const wallet = require('./src/wallet')
 
