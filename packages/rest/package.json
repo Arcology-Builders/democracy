@@ -1,6 +1,6 @@
 {
   "name": "demo-rest",
-  "version": "0.2.8-alpha.3",
+  "version": "0.2.8",
   "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
@@ -40,8 +40,8 @@
   "dependencies": {
     "body-parser": "1.18.3",
     "chai": "4.2.0",
-    "demo-client": "^0.2.8-alpha.3",
-    "demo-utils": "^0.2.8-alpha.3",
+    "demo-client": "^0.2.8",
+    "demo-utils": "^0.2.8",
     "ethereumjs-utils": "5.2.5",
     "express": "4.16.4",
     "immutable": "4.0.0-rc.12"
