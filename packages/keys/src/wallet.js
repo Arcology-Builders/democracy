@@ -40,6 +40,9 @@ const wallet = {}
  * @memberof module:wallet
  * @param address {String} `0x`-prefixed Ethereum address to create a signer around
  * @param password {String} password to unlock the given Ethereum account
+ * @return address {String} a `0x`-prefixed Ethereum address, auto-created if missing `address` param
+ * @return password {String} a hex password string, auto-created if missing `password` param
+ * @return signerEth {Eth} an Ethereum network object, tied to above address, signing transactions and spending funds from it
  */
 wallet.prepareSignerEth = async ({ address, password }) => {
   const autoCreate = !address && !password

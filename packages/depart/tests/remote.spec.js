@@ -17,7 +17,8 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { depart } = require('..')
+const { deployerMixin, run } = require('demo-cli')
+const { departMixin } = require('..')
 
 describe( 'Remote departures', () => {
   
@@ -25,7 +26,7 @@ describe( 'Remote departures', () => {
   let chainId
   let testAccounts
   let cleaner
-  let result
+  let finalState
   let bm
   let deployerAddress
   let deployerPassword
@@ -52,47 +53,51 @@ describe( 'Remote departures', () => {
   })
 
   it( 'executing a remote departure', async () => {
-    result = await depart({
+    const m1 = deployerMixin({ unlockSeconds: 20 })
+    const m2 = departMixin({
       name            : "remote-departure",
       autoConfig      : true,
       sourcePath      : "../../node_modules/demo-test-contracts/contracts",
-      callback: async ({compile, link, deploy, bm, deployerEth, deployerAddress}) => {
-       
-        // We only need to do this here b/c tests are in NODE_ENV=DEVELOPMENT
-        // In an actual departure this isn't necessary 
-        await wallet.payTest({
-          fromAddress: testAccounts[5],
-          toAddress: deployerAddress,
-          weiValue: toWei('0.1', 'ether'),
-        }) 
-
-        //LOGGER.info( 'Compiling', Date.now() )
-        const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
-        assert(isCompile(cout),
-               `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
-        
-        //LOGGER.info( 'Linking', Date.now() )
-        const lout = await link( 'DifferentSender', 'link' )
-        assert(isLink(lout),
-               `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
-        assert( isLink( await bm.getLink('DifferentSender-link')) )
-
-        //LOGGER.info( 'Deploying', Date.now() )
-        const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
-        assert(isDeploy(dout),
-               `Deploying output invalid: ${JSON.stringify(dout.toJS())}`)
-        return true
-      }
     })
-    bm = result.bm
+    const departFunc = async (state) => {
+      const {compile, link, deploy, bm, deployerEth, deployerAddress} = state.toJS()
+       
+      // We only need to do this here b/c tests are in NODE_ENV=DEVELOPMENT
+      // In an actual departure this isn't necessary 
+      await wallet.payTest({
+        fromAddress: testAccounts[5],
+        toAddress: deployerAddress,
+        weiValue: toWei('0.1', 'ether'),
+      }) 
+
+      //LOGGER.info( 'Compiling', Date.now() )
+      const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
+      assert(isCompile(cout),
+             `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
+      
+      //LOGGER.info( 'Linking', Date.now() )
+      const lout = await link( 'DifferentSender', 'link' )
+      assert(isLink(lout),
+             `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
+      assert( isLink( await bm.getLink('DifferentSender-link')) )
+
+      //LOGGER.info( 'Deploying', Date.now() )
+      const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
+      assert(isDeploy(dout),
+             `Deploying output invalid: ${JSON.stringify(dout.toJS())}`)
+      return new Map({ result: true })
+    }
+
+    finalState = (await run( departFunc, [ m1, m2 ] )).toJS()
+    bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)
-    assert(Map.isMap(result.compiles))
-    assert(Map.isMap(result.links))
-    assert(Map.isMap(result.deploys))
-    assert.typeOf(result.result, 'boolean')
-    assert(result.result)
-    assert.typeOf(result.cleaner, 'function')
+    assert(Map.isMap(finalState.getCompiles()))
+    assert(Map.isMap(finalState.getLinks()))
+    assert(Map.isMap(finalState.getDeploys()))
+    assert.typeOf(finalState.result, 'boolean')
+    assert(finalState.result)
+    assert.typeOf(finalState.clean, 'function')
     // Unfortunately, these local builds get left behind by the concurrent depart.spec.js
     //assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
     //assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
@@ -110,7 +115,7 @@ describe( 'Remote departures', () => {
   })
 
   it( 'remote cleaning is not possible', async () => {
-    await expect ( result.cleaner() ).to.be.rejectedWith(Error)
+    await expect ( finalState.clean() ).to.be.rejectedWith(Error)
   })
 
   s.stop()
