@@ -31,5 +31,6 @@
   },
   "dependencies": {
     "demo-utils": "^0.2.8"
-  }
+  },
+  "gitHead": "8b81b7b1be9b643a7330293e929044fcaeb25511"
 }
