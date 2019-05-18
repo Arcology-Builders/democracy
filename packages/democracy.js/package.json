@@ -33,7 +33,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "@democracy.js/depart": "^0.2.10-alpha.0",
+    "demo-depart": "^0.2.10-alpha.2",
     "demo-compile": "^0.2.10-alpha.2",
     "demo-contract": "^0.2.10-alpha.2",
     "demo-keys": "^0.2.10-alpha.2",
