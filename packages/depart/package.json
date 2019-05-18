@@ -1,5 +1,5 @@
 {
-  "name": "@democracy.js/depart",
+  "name": "demo-depart",
   "version": "0.2.10-alpha.0",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
@@ -39,7 +39,6 @@
     "demo-client": "^0.2.10-alpha.0",
     "demo-compile": "^0.2.10-alpha.0",
     "demo-contract": "^0.2.10-alpha.0",
-    "demo-run": "^0.2.10-alpha.0",
     "demo-utils": "^0.2.10-alpha.0",
     "immutable": "4.0.0-rc.12"
   },
@@ -47,5 +46,5 @@
     "chai": "^4.2.0",
     "demo-test-contracts": "^0.2.7-alpha.7"
   },
-  "gitHead": "fd5f7afd44f8a0eace62dbad7ba594dda5f68428"
+  "gitHead": "e2fc558268751ff989d697c9ed7154a5986a6486"
 }
