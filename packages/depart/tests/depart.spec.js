@@ -12,7 +12,7 @@ const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 const { getImmutableKey, setImmutableKey } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, deployerMixin } = require('demo-cli')
+const { run, deployerMixin } = require('demo-run')
 const { departMixin } = require('..')
 
 describe( 'Departures', () => {

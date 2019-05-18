@@ -36,6 +36,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
+    "demo-run": "^0.2.9",
     "demo-client": "^0.2.9",
     "demo-compile": "^0.2.9",
     "demo-contract": "^0.2.9",
@@ -46,5 +47,5 @@
     "chai": "^4.2.0",
     "demo-test-contracts": "^0.2.7-alpha.7"
   },
-  "gitHead": "8b81b7b1be9b643a7330293e929044fcaeb25511"
+  "gitHead": "fd5f7afd44f8a0eace62dbad7ba594dda5f68428"
 }

@@ -17,7 +17,7 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { deployerMixin, run } = require('demo-cli')
+const { deployerMixin, run } = require('demo-run')
 const { departMixin } = require('..')
 
 describe( 'Remote departures', () => {
