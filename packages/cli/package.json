@@ -1,6 +1,6 @@
 {
   "name": "demo-cli",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Components for building command-line interfaces, in a distributed country",
   "keywords": [
     "ethereum",

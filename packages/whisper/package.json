@@ -1,6 +1,6 @@
 {
   "name": "demo-shh",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Distributed private messaging for a distributed country",
   "keywords": [
     "ethereum",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@babel/runtime-corejs2": "^7.4.3",
     "demo-tools": "^0.2.8",
-    "demo-utils": "^0.2.8",
+    "demo-utils": "^0.2.9",
     "ethjs": "0.4.0",
     "status-js-api": "^1.2.11",
     "web3": "^1.0.0-beta.52",
