@@ -1,6 +1,6 @@
 {
   "name": "demo-compile",
-  "version": "0.2.10-alpha.5",
+  "version": "0.2.10-alpha.6",
   "description": "Ethereum compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -46,7 +46,7 @@
     "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
-    "demo-contract": "^0.2.10-alpha.5",
+    "demo-contract": "^0.2.10-alpha.6",
     "demo-utils": "^0.2.10-alpha.2",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
