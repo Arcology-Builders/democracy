@@ -25,18 +25,10 @@ describe( 'Departures', () => {
     accounts = await eth.accounts()
     LOGGER.debug('before')
     chainId = await eth.net_version()
-
-    // Fund deployerAddress from test wallet
-    await wallet.payTest({
-     weiValue    : toWei('0.1', 'ether'),
-     fromAddress : accounts[0],
-     toAddress   : utils.getConfig()['DEPLOYER_ADDRESS'],
-     label       : 'funding from test account',
-    })
   })
 
   it( 'executes a simple departure', async () => { 
-    const m1 = deployerMixin({ unlockSeconds: 15 })
+    const m1 = deployerMixin({ unlockSeconds: 15, testValueETH: '0.1', testAccountIndex: 0 })
     const m2 = departMixin({
       name            : "simple-departure",
       autoConfig      : false,

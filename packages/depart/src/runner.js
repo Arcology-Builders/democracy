@@ -5,7 +5,8 @@
  */
 
 const assert = require('chai').assert
-const { getConfig, Logger } = require('demo-utils')
+const { toWei } = require('web3-utils')
+const { getConfig, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map, List } = require('immutable')
 const LOGGER = new Logger('cli/runner')
@@ -21,17 +22,28 @@ const runners = {}
  * @return {Function} returns a mixin which takes no input state and returns an
  *   Immutable {Map} of `chainId`, `deployerAddress`, `deployerPassword`, `deployerEth`
  */
-runners.deployerMixin = ({ unlockSeconds }) => {
+runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
   return async (state) => {
     const deployerAddress  = getConfig()['DEPLOYER_ADDRESS']
     const deployerPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
     const {
-      signerEth: deployerEth,
-      address: _deployerAddress,
-     password: _deployerPassword } = await wallet.prepareSignerEth({
+      signerEth : deployerEth,
+      address   : _deployerAddress,
+      password  : _deployerPassword } = await wallet.prepareSignerEth({
         address: deployerAddress, password: deployerPassword })
     const chainId = await deployerEth.net_version()
+
+    if (process.env['NODE_ENV'] === 'DEVELOPMENT') {
+      const eth = getNetwork()
+      const testAccounts = await eth.accounts()
+      LOGGER.debug('testAccount', testAccounts)
+      await wallet.payTest({
+        fromAddress : testAccounts[testAccountIndex || 0],
+        toAddress   : deployerAddress,
+        weiValue    : (testValueETH) ? toWei(testValueETH, 'ether') : toWei('0.01', 'ether'),
+      })
+    }
 
     return new Map({
       chainId          : chainId,
