@@ -1,6 +1,6 @@
 {
   "name": "demo-contract",
-  "version": "0.2.10-alpha.2",
+  "version": "0.2.10-alpha.5",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
