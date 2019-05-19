@@ -24,15 +24,17 @@ const runners = {}
  */
 runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
   return async (state) => {
-    const deployerAddress  = getConfig()['DEPLOYER_ADDRESS']
-    const deployerPassword = getConfig()['DEPLOYER_PASSWORD']
+    const configAddress  = getConfig()['DEPLOYER_ADDRESS']
+    const configPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
     const {
       signerEth : deployerEth,
       address   : _deployerAddress,
       password  : _deployerPassword } = await wallet.prepareSignerEth({
-        address: deployerAddress, password: deployerPassword })
+        address: configAddress, password: configPassword })
     const chainId = await deployerEth.net_version()
+    const deployerAddress = configAddress ? configAddress  : _deployerAddress 
+    const deployerPassword = configPassword ? configPassword  : _deployerPassword 
 
     if (process.env['NODE_ENV'] === 'DEVELOPMENT') {
       const eth = getNetwork()
@@ -47,8 +49,8 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
 
     return new Map({
       chainId          : chainId,
-      deployerAddress  : deployerAddress  ? deployerAddress  : _deployerAddress,
-      deployerPassword : deployerPassword ? deployerPassword : _deployerPassword,
+      deployerAddress  : deployerAddress,
+      deployerPassword : deployerPassword,
       deployerEth      : deployerEth,
     })
   }

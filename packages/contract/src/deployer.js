@@ -1,3 +1,4 @@
+'use strict'
 const path   = require('path')
 const assert = require('chai').assert
 const { Map, List, Seq }
@@ -46,14 +47,14 @@ deploys.Deployer = class {
 
     const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
-    const deploy = deployMap[deployName]
-    if (deploy && deploy.get('inputHash') === inputHash) {
-      deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
+    const deploy = deployMap.get(deployName)
+    if (Map.isMap(deploy) && deploy.get('inputHash') === inputHash) {
+      const deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
       LOGGER.warn(deployError)
-      return deployMap[deployName]
+      return deploy
     } else {
       LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
-      LOGGER.debug(`with hash ${inputHash}`)
+      LOGGER.debug(`current hash ${inputHash}`)
     }
 
     const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
