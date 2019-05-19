@@ -5,7 +5,7 @@ const path       = require('path')
 const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
-const { awaitInputter  } = require('./utils')
+const { awaitInputter, awaitOutputter  } = require('./utils')
 const { ContractsManager } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
 
@@ -38,21 +38,45 @@ bm.BuildsManager = class extends ContractsManager {
   }
 
   async getDeploys() {
-    return this.inputter(`${DEPLOYS_DIR}/${this.chainId}`, new Map({}))
+    if (!this.deploysMap) {
+      this.deploysMap = await this.inputter(`${DEPLOYS_DIR}/${this.chainId}`, new Map({}))
+    }
+    return this.deploysMap
   }
   
   async getDeploy(deployName) {
     const deploysMap = await this.getDeploys()
-    return deploysMap.get(deployName)
+    return this.deploysMap.get(deployName)
   } 
 
+  async setDeploy(deployName, deployOutput) {
+    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
+    LOGGER.debug(`Writing deploy to ${deployFilePath}`)
+    this.deploysMap = this.deploysMap.set(deployName, deployOutput)
+    return awaitOutputter(this.outputter(deployFilePath, deployOutput, true),
+                          () => { return deployOutput })
+  }
+
   async getLinks() {
-    return this.inputter(`${LINKS_DIR}`, new Map({}))
+    if (!(this.linksMap)) {
+      this.linksMap = await this.inputter(`${LINKS_DIR}`, new Map({}))
+    }
+    LOGGER.debug('LINKS', this.linksMap)
+    return this.linksMap
   }
 
   async getLink(linkName) {
     const linksMap = await this.getLinks()
     return linksMap.get(linkName)
+  }
+  
+  async setLink(linkName, linkOutput) {
+    const linkFilePath = `${LINKS_DIR}/${linkName}`
+
+    LOGGER.debug(`Writing link to ${linkFilePath}`)
+    this.linksMap = this.linksMap.set(linkName, linkOutput)
+    return awaitOutputter(this.outputter(linkFilePath, linkOutput, true),
+                          () => { return linkOutput })
   }
 
   async cleanLink(linkName) {

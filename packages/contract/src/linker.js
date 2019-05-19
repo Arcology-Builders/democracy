@@ -38,10 +38,6 @@ linker.Linker = class {
     const code = '0x' + contract.get('code')
     const linkName = `${contractName}-${linkId}`
 
-    const linksDir = LINKS_DIR
-    //ensureDir(LINKS_DIR)
-    //ensureDir(linksDir)
-
     const link = await this.bm.getLink(linkName)
     const inputHash = keccak(JSON.stringify(contract.toJS())).toString('hex')
     if ( isLink(link) && link.get('inputHash') === inputHash ) {
@@ -118,11 +114,11 @@ linker.Linker = class {
       inputHash      : inputHash,
     })
 
-    const linkFilePath = `${linksDir}/${linkName}`
-
-    LOGGER.debug(`Writing link to ${linkFilePath}`)
+    return this.bm.setLink(linkName, linkOutput)
+    /*
     return awaitOutputter(this.bm.outputter(linkFilePath, linkOutput),
                           () => { return linkOutput })
+                         */
   }
 
 }

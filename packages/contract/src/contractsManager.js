@@ -5,7 +5,7 @@ const path       = require('path')
 const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
-const { awaitInputter  } = require('./utils') 
+const { awaitInputter, awaitOutputter } = require('./utils') 
 const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger }
                  = require('demo-utils')
 
@@ -29,32 +29,35 @@ class ContractsManager {
   }
 
   async getContracts() {
-    const contractSources = []
-    if (!fs.existsSync(this.startSourcePath)) {
-      LOGGER.warn(`Sources directory '${this.startSourcePath}' not found.`)
-    } else {
-       // start out by finding all contracts rooted in current directory
-      traverseDirs(
-        [this.startSourcePath],
-        (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-        function(source, f) {
-          const fn = List(f.split(path.sep)).last()
-          const fb = path.basename(fn.split('.')[0])
-          contractSources.push(fb)
-          LOGGER.debug(`Source ${fb}`)
+    if (!this.contracts) {
+      const contractSources = []
+      if (!fs.existsSync(this.startSourcePath)) {
+        LOGGER.warn(`Sources directory '${this.startSourcePath}' not found.`)
+      } else {
+         // start out by finding all contracts rooted in current directory
+        traverseDirs(
+          [this.startSourcePath],
+          (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
+          function(source, f) {
+            const fn = List(f.split(path.sep)).last()
+            const fb = path.basename(fn.split('.')[0])
+            contractSources.push(fb)
+            LOGGER.debug(`Source ${fb}`)
+          }
+        )
+      }
+
+      this.contracts = await awaitInputter(
+        this.inputter(COMPILES_DIR, new Map({})),
+        (contractOutputs) => {
+          return {
+            contractSources: List(contractSources),
+            contractOutputs: contractOutputs
+          }
         }
       )
     }
-
-    return awaitInputter(
-      this.inputter(COMPILES_DIR, new Map({})),
-      (contractOutputs) => {
-        return {
-          contractSources: List(contractSources),
-          contractOutputs: contractOutputs
-        }
-      }
-    )
+    return this.contracts
   }
 
   /**
@@ -66,11 +69,26 @@ class ContractsManager {
     return contractOutputs.get(contractName)
   }
 
-  async cleanContract(contract) {
-    return this.outputter(`${COMPILES_DIR}/${contract}`, null)
+  async setContract(contractName, contractOutput) {
+    const compileKey = `${COMPILES_DIR}/${contractName}`
+    this.contracts.contractOutputs =
+      this.contracts.contractOutputs.set(contractName, contractOutput)
+    return awaitOutputter(
+      this.outputter(compileKey, contractOutput, true),
+      () => { return [ contractName, contractOutput ] }
+    )
+  }
+
+  async cleanContract(contractName) {
+    this.contracts.contractOutputs =
+      this.contracts.contractOutputs.set(contractName, null)
+    return this.outputter(`${COMPILES_DIR}/${contractName}`, null)
   }
 
   async cleanAllCompiles() {
+    if (this.contracts) {
+      this.contracts.contractOutputs = Map({})
+    }
     return this.outputter(`${COMPILES_DIR}`, null)
   }
 

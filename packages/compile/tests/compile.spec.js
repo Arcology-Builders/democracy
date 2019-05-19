@@ -110,7 +110,7 @@ describe('Democracy compiling.', () => {
   })
   
   it( 'should compile from OpenZeppelin paths', async () => {
-    await cm.cleanContract( 'ERC20' )
+    //await cm.cleanContract( 'ERC20' )
     const compile = await comp.compile('ERC20.sol' )
     assert.ok(isCompile(compile))
     

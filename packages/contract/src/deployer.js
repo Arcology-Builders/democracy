@@ -107,11 +107,9 @@ deploys.Deployer = class {
       inputHash    : inputHash,
     })
 
-    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
-    LOGGER.debug(`Writing deploy to ${deployFilePath}`)
-    
-    return awaitOutputter(this.bm.outputter(deployFilePath, deployOutput, true),
-                          () => { return deployOutput })
+    return this.bm.setDeploy(deployName, deployOutput)
+    //awaitOutputter(this.bm.outputter(deployFilePath, deployOutput, true),
+    //                      () => { return deployOutput })
   }
 
 }

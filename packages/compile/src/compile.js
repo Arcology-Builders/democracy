@@ -74,16 +74,12 @@ class Compiler {
       const output = preHash.set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
-      const compileKey = `${COMPILES_DIR}/${contract.name}`
       if (existingOutputs.has(contract.name) &&
           existingOutputs.get(contract.name).get('inputHash') === inputHash) {
         LOGGER.debug(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contract.name, existingOutputs.get(contract.name)]
       } else {
-        return awaitOutputter(
-          this.cm.outputter(compileKey, output, true),
-          () => { return [ contract.name, output ] }
-        )
+        return this.cm.setContract(contract.name, output)
       }
     })
     return Promise.all(tuples).then((pairs) => { return Map(pairs) })
