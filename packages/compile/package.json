@@ -1,6 +1,6 @@
 {
   "name": "demo-compile",
-  "version": "0.2.10-alpha.6",
+  "version": "0.2.10-alpha.7",
   "description": "Ethereum compiling for Democracy, tool for a distributed country",
   "keywords": [
     "democracy",
@@ -41,13 +41,13 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "demo-rest": "^0.2.10-alpha.2",
+    "demo-rest": "^0.2.10-alpha.7",
     "demo-test-contracts": "^0.2.7-alpha.7",
     "openzeppelin-solidity": "2.0.0"
   },
   "dependencies": {
-    "demo-contract": "^0.2.10-alpha.6",
-    "demo-utils": "^0.2.10-alpha.2",
+    "demo-contract": "^0.2.10-alpha.7",
+    "demo-utils": "^0.2.10-alpha.7",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
     "solc": "0.4.25"
