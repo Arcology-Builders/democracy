@@ -8,7 +8,10 @@ const LOGGER = new Logger('keys/remote.spec')
 // These exists and were manually created on ganache.arcology.nyc
 const DEPLOYER_ADDRESS  = '0x182830f0ae9b17ed50bffda8ee90de483d9c304f' 
 const DEPLOYER_PASSWORD = '4808e517d74a32b875e33fdc04510f5b725cbbf7f39d968ee04820eebf7728ee' 
-
+/*
+describe('Local wallet store for accounts',
+         getDescribe() )
+*/
 describe('Remote wallet store for accounts',
          getDescribe(wallet.init({autoConfig: true, unlockSeconds: 1})) )
 
