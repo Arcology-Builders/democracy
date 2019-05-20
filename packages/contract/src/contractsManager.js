@@ -5,8 +5,8 @@ const path       = require('path')
 const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
-const { awaitInputter, awaitOutputter } = require('./utils') 
-const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger }
+const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger,
+  awaitInputter, awaitOutputter }
                  = require('demo-utils')
 
 const LOGGER = new Logger('ContractsManager')

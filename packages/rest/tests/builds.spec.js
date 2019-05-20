@@ -96,12 +96,12 @@ describe( 'Remote builds ', () => {
     const result = await r.postHTTP('/api/links/FirstLink', new Map({'d':4}), true)
     await delayedGet(r.getHTTP.bind(r, '/api/links/FirstLink'), '{"d":4}')
   })
-
+/*
   it( 'get all empty deploys', async () => {
     const res = await r.getHTTP(`/api/deploys/${chainId}`, {})
     assert.equal( res, `{}`)
   })
-  
+ */ 
   it( 'get all deploys', async () => {
     r.postHTTP(`/api/deploys/${chainId}/FirstDeploy`, new Map({'z':22}))
     r.postHTTP(`/api/deploys/${chainId}/SecondDeploy`, new Map({'y':23}))

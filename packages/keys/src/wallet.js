@@ -6,8 +6,9 @@
 const assert = require('chai').assert
 
 const { Map } = require('immutable')
-const { getNetwork, getConfig, getEndpointURL, Logger, toJS, fromJS, deepEqual }
-  = require('demo-utils')
+const {
+  getNetwork, getConfig, getEndpointURL, Logger, toJS, fromJS, deepEqual,
+  awaitInputter, awaitOutputter } = require('demo-utils')
 const LOGGER = new Logger('wallet')
 
 const BN = require('bn.js')
@@ -23,7 +24,6 @@ const { toWei, fromWei } = require('web3-utils')
 const { isValidAddress, isValidPrivate }
               = require('ethereumjs-utils')
 const { createInOut } = require('demo-client')
-const { awaitInputter, awaitOutputter } = require('demo-contract')
 
 const OVERAGE = toWei('0.00075', 'ether')
 
@@ -54,10 +54,11 @@ wallet.prepareSignerEth = async ({ address, password }) => {
 
   const encryptedAccount = await wallet.loadEncryptedAccount({ address: _address })
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
+  wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
   return {
-    address: _address,
-    password: _password,
-    signerEth: wallet.createSignerEth({ url: getEndpointURL(), address: _address }),
+    address   : _address,
+    password  : _password,
+    signerEth : wallet.lastSignerEth,
   }
 }
 
@@ -83,8 +84,10 @@ wallet.createSignerEth = ({url, address}) => {
       },
       accounts: (cb) => cb(null, [address]),
     })
-    wallet.signersMap[address] = new Eth(provider)
-    return wallet.signersMap[address]
+    const newEth = new Eth(provider)
+    newEth.address = address
+    wallet.signersMap[address] = newEth
+    return newEth
   }
 
 wallet.initialized = false

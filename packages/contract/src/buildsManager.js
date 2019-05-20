@@ -5,11 +5,10 @@ const path       = require('path')
 const assert     = require('chai').assert
 const { List, Map, Set }
                  = require('immutable')
-const { awaitInputter, awaitOutputter  } = require('./utils')
 const { ContractsManager } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
 
-const { Logger, LINKS_DIR, DEPLOYS_DIR, getNetwork }
+const { Logger, LINKS_DIR, DEPLOYS_DIR, getNetwork, awaitInputter, awaitOutputter }
                  = require('demo-utils')
 
 const LOGGER = new Logger('BuildsManager')
@@ -61,7 +60,6 @@ bm.BuildsManager = class extends ContractsManager {
     if (!(this.linksMap)) {
       this.linksMap = await this.inputter(`${LINKS_DIR}`, new Map({}))
     }
-    LOGGER.debug('LINKS', this.linksMap)
     return this.linksMap
   }
 

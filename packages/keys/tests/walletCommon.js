@@ -22,6 +22,11 @@ common.getDescribe = (asyncInitProm) => {
     let address
 
     before(async () => {
+      if (!asyncInitProm) {
+        // Local key store
+        await wallet.init({ autoConfig: false, unlockSeconds: 1 })
+      }
+
       account = keys.create()
       address = account.get('addressPrefixed')
       if (asyncInitProm) {
@@ -29,20 +34,18 @@ common.getDescribe = (asyncInitProm) => {
       }
     })
 
-    it( 'retrieving a key before init fails', async () => {
-      expect( wallet.loadEncryptedAccount({ address: account.get('addressPrefixed') }) )
-        .to.be.rejectedWith(Error)
-    })
-
     it( 'retrieving non-existent key before saving fails', async () => {
-      await wallet.init({ autoConfig: false, unlockSeconds: 1 })
-      expect( wallet.loadEncryptedAccount({ address: account.get('addressPrefixed') }) )
-        .to.be.rejectedWith(Error)
+      if (asyncInitProm) {
+        expect( wallet.loadEncryptedAccount({ address: account.get('addressPrefixed') }) )
+          .to.be.rejectedWith(Error)
+      }
     })
 
     it( 'inputter and outputter are local', async () => {
-      assert.equal( wallet.inputter, getImmutableKey, `Inputter is not getImmutableKey` )
-      assert.equal( wallet.outputter, setImmutableKey, `Outputter is not setImmutableKey` )
+      if (!asyncInitProm) {
+        assert.equal( wallet.inputter, getImmutableKey, `Inputter is not getImmutableKey` )
+        assert.equal( wallet.outputter, setImmutableKey, `Outputter is not setImmutableKey` )
+      }
     })
 
     it( 'retrieving gets back the same key saved', async () => {

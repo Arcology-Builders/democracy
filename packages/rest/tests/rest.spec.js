@@ -65,7 +65,8 @@ describe('Runs a REST server', () => {
     setImmutableKey('/compiles/FirstContract', new Map({}))
     setImmutableKey('/compiles/SecondContract', new Map({}))
     const res = await r.getHTTP('/api/compiles', {})
-    assert.equal( res, '{"FirstContract":{},"SecondContract":{}}')
+    assert( res.search('"FirstContract":{}')  , `FirstContract not found in compiles` )
+    assert( res.search('"SecondContract":{}}'), `SecondContract not found in compiles` )
   })
   
   after(async () => {

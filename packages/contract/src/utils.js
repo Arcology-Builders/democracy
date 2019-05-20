@@ -9,40 +9,6 @@ const { Map } = require('immutable')
 const utils = {}
 
 /**
- * Chain and return a (possibly asynchronous) call after the outputter,
- * also possibly asynchronous. 
- * @param outputCallResult the result of calling outputter method, will have a `then`
- *        property if it's thenable / asynchronous.
- * @param callback method, possibly asynchronous, which accepts as input the
- *        return value of the outputter method call (`outputCallResult`) 
- */
-utils.awaitOutputter = (outputCallResult, afterOutput) => {
-  if (outputCallResult.then) {
-    return outputCallResult.then((val) => {
-      return afterOutput(val) }) 
-  } else {
-    return afterOutput(outputCallResult)
-  }
-}
-
-/**
- * Chain and return a (possibly asynchronous) call after the inputter,
- * also possibly asynchronous
- * @param inputCallResult the result of calling the inputter method on some args
- *        will have a `then` property if it's thenable / asynchronous
- * @param callback method, possibly asynchronous, which accepts as input the
- *        return value of the inputter method call (`inputCallResult`)
- */
-utils.awaitInputter = (inputCallResult, afterInput) => {
-  if (inputCallResult.then) {
-    return inputCallResult.then((val) => {
-      return afterInput(val) })
-  } else {
-    return afterInput(inputCallResult)
-  }
-}
-
-/**
  * @return true if the given object is a compile output from a Compiler, otherwise false
  */
 utils.isCompile = (_compile) => {

@@ -33,7 +33,7 @@ deploys.Deployer = class {
    * @param eth network object connected to a local provider
    * @param contractOutput the JSON compiled output to deploy
    */
-  async deploy(contractName, linkId, deployId, ctorArgs) {
+  async deploy(contractName, linkId, deployId, ctorArgs, force) {
     const linkName   = `${contractName}-${linkId}`
     const link       = await this.bm.getLink(linkName)
     assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
@@ -48,7 +48,7 @@ deploys.Deployer = class {
     const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
     const deploy = deployMap.get(deployName)
-    if (Map.isMap(deploy) && deploy.get('inputHash') === inputHash) {
+    if (Map.isMap(deploy) && (deploy.get('inputHash') === inputHash) && !force) {
       const deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
       LOGGER.warn(deployError)
       return deploy
