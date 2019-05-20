@@ -111,7 +111,7 @@ wallet.unlock_seconds
  * @param unlockSeconds {Number}
  */
 wallet.init = async ({autoConfig, unlockSeconds}) => {
-  if (wallet.initialized) { LOGGER.error("Wallet already initialized.") }
+  if (wallet.initialized) { LOGGER.debug("Wallet already initialized."); return }
   if (!require('keythereum')) {
     LOGGER.error("Missing keythereum, did you add a script tag?")
   }
