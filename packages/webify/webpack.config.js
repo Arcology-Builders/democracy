@@ -73,7 +73,8 @@ module.exports = (env, argv) => {
   plugins: [ 
     new HtmlWebPackPlugin({
       template: "./exports/index.html",
-      filename: "./index.html"
+      filename: "./index.html",
+      inject: 'head',
     }),
     new webpack.ProvidePlugin({
       BrowserFS: 'bfsGlobal',

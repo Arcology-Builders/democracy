@@ -32,12 +32,12 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "devDependencies": {
-    "demo-contract": "^0.2.10-alpha.7"
+    "demo-contract": "^0.2.10-alpha.7",
+    "demo-test-contracts": "0.2.7-alpha.7"
   },
   "dependencies": {
     "chai": "4.2.0",
     "demo-keys": "^0.2.10-alpha.7",
-    "demo-test-contracts": "0.2.7-alpha.7",
     "demo-utils": "^0.2.10-alpha.7",
     "immutable": "4.0.0-rc.12",
     "web3-utils": "1.0.0-beta.52"

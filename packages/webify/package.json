@@ -24,6 +24,7 @@
     "democracy.js": "^0.2.10-alpha.7"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
     "demo-tools": "^0.2.8",
     "webpack": "4.29.4",
     "webpack-dev-server": "3.1.14"

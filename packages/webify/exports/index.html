@@ -1,4 +1,86 @@
-<script type="text/javascript">
-</script>
+<head>
 <script type="text/javascript" src="http://arcology.nyc:7000/keythereum-1.0.4.min.js">
 </script>
+</head>
+<body>
+  <h1> Democracy.js Webify Demo</h1>
+  
+  <p>NODE_ENV 
+    <div id="nodeEnv"> </div>
+  </p>
+
+  <p> Open up web inspector and use the console for now. </p>
+
+  <h2> Initialize Filesystem </h2>
+  <blockquote>
+    <pre>
+      demo.initFS({})
+    </pre>
+  </blockquote>
+
+  <h2> Initialize Wallet </h2>
+  <p>
+    First initialize the wallet in this browser tab's localStorage, in case it doesn't
+    have one already. If it has one already, enter in the password into the popup.
+    
+    If it creates a new account, write down the password in the
+    console, as this is the only time you'll see it.
+  </p>
+  <blockquote>
+    <pre>
+      demo.initWallet()
+    </pre>
+  </blockquote>
+
+  <h2> Fund Wallet </h2>
+  <p>
+    Next, fund the wallet from an account with existing funds.
+    If you're using TEST, you're hitting the Democracy maintainer's private testnet node,
+    so you'll need to ask him for this address.
+  </p>
+
+  <p>
+    <pre>ethValue</pre> is a string indicating the amount in ETH to fund, like "0.1"
+    <pre>funderAddress</pre> is a 0x-prefixed string indicating the funding Ethereum address.
+  </p>
+
+  <blockquote>
+    <pre>
+      demo.fundWallet({ ethValue, funderAddress })
+    </pre>
+  </blockquote>
+
+  <p>
+    Something like:
+  </p>
+  <blockquote>
+    <pre>
+      demo.fundWallet({ethValue: '0.1', funderAddress: '0x3ca67fc6b8e71de0dc10dec3fc5072dc717771b9'})
+    </pre>
+  </blockquote>
+
+  <h2> Create Contract </h2>
+
+  <blockquote><pre>
+    ds = await demo.contract.createContract('DifferentSender')
+    ds.instance.send('0x23a2f9c2d53abb7ce998a123894842daa6a2be05', {from: demo.thisAddress, gas: '670000'})
+    (await ds.instance.lastValue())[0].toString()
+    >  "0"
+    await ds.instance.lastSender()
+    > s {0: "0xacd435f731e87005949d6434d0aa43d8a3a1ece4"}
+    await ds.instance.lastPayer()
+    > s {0: "0x23a2f9c2d53abb7ce998a123894842daa6a2be05"}
+  <p>
+
+  <h2> Verify Funds are Spent </h2>
+
+  <blockquote><pre>
+  (await demo.eth.getBalance(demo.thisAddress)).toString()
+  "198631140000000000"
+  </pre></blockquote>
+
+  <script type="text/javascript">
+    document.getElementById('nodeEnv').innerHTML = demo.config.DB_NAMESPACE.toUpperCase()
+  </script>
+
+</body>

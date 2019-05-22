@@ -36,6 +36,7 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
     const deployerAddress = configAddress ? configAddress  : _deployerAddress 
     const deployerPassword = configPassword ? configPassword  : _deployerPassword 
 
+    assert.equal(deployerEth.address, deployerAddress)
     if (process.env['NODE_ENV'] === 'DEVELOPMENT') {
       const eth = getNetwork()
       const testAccounts = await eth.accounts()
