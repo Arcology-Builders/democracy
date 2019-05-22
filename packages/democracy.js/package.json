@@ -1,6 +1,6 @@
 {
   "name": "democracy.js",
-  "version": "0.2.10-alpha.7",
+  "version": "0.2.10-alpha.8",
   "description": "Democracy, an minimalist Ethereum framework for a distributed country",
   "keywords": [
     "democracy",
@@ -35,7 +35,7 @@
   "dependencies": {
     "demo-compile": "^0.2.10-alpha.7",
     "demo-contract": "^0.2.10-alpha.7",
-    "demo-depart": "^0.2.10-alpha.7",
+    "demo-depart": "^0.2.10-alpha.8",
     "demo-keys": "^0.2.10-alpha.7",
     "demo-utils": "^0.2.10-alpha.7"
   },

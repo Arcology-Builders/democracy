@@ -1,6 +1,6 @@
 {
   "name": "demo-tx",
-  "version": "0.2.10-alpha.7",
+  "version": "0.2.10-alpha.8",
   "description": "Ethereum transaction management for a distributed country",
   "keywords": [
     "ethereum",
