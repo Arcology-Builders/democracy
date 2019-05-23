@@ -6,6 +6,7 @@ const BrowserFS = require('browserfs')
 const api = {}
 
 api.initFS = (listingHTTP) => {
+  console.log(JSON.stringify(listingHTTP))
   BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
     BrowserFS.FileSystem.InMemory.Create(function(e, inMemory) {
       BrowserFS.FileSystem.XmlHttpRequest.Create({
@@ -14,7 +15,8 @@ api.initFS = (listingHTTP) => {
       }, (e, httpFS) => {
         BrowserFS.FileSystem.MountableFileSystem.Create({
           '/tmp': inMemory,
-          '/': lsfs
+          '/': lsfs,
+          '/api': httpFS,
         }, function(e, mfs) {
           BrowserFS.initialize(mfs)
           // BFS is now ready to use!

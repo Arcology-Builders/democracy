@@ -14,7 +14,9 @@
   "files": [
     "dist"
   ],
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "demo-client": "^0.2.10-alpha.7",
     "demo-contract": "^0.2.10-alpha.7",
