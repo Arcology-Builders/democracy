@@ -28,7 +28,7 @@
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
-    "lint": "eslint demo.js js/*.js",
+    "lint": "eslint *.js",
     "cov": "nyc/bin/nyc.js mocha tests/",
     "web": "webpack && open dist/index.html",
     "build": "webpack --mode production",

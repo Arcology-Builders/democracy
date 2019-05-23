@@ -13,16 +13,12 @@ const LOGGER = new Logger('wallet')
 
 const BN = require('bn.js')
 const randombytes = require('randombytes')
-const SignerProvider 
-              = require('ethjs-provider-signer')
+const SignerProvider = require('ethjs-provider-signer')
 const ethsign = require('ethjs-signer').sign
 const Eth     = require('ethjs')
-const { create, createFromAddress, createFromPrivateKey, isAccount,
-        encryptedJSONToAccount, accountToEncryptedJSON }
-              = require('./keys')
+const keys = require('./keys')
 const { toWei, fromWei } = require('web3-utils')
-const { isValidAddress, isValidPrivate }
-              = require('ethereumjs-utils')
+const { isValidAddress, isValidPrivate } = require('ethereumjs-utils')
 const { createInOut } = require('demo-client')
 
 const OVERAGE = toWei('0.00075', 'ether')
@@ -52,13 +48,28 @@ wallet.prepareSignerEth = async ({ address, password }) => {
   const _password = pair.password
   LOGGER.debug('AUTO', _address, _password)
 
-  const encryptedAccount = await wallet.loadEncryptedAccount({ address: _address })
+  await wallet.loadEncryptedAccount({ address: _address })
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
   wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
   return {
     address   : _address,
     password  : _password,
     signerEth : wallet.lastSignerEth,
+  }
+}
+
+wallet.createFromPrivateString = async ({ privateString }) => {
+  const account = keys.createFromPrivateString(privateString)
+  const address = account.get('addressPrefixed')
+  const password = randombytes(32).toString('hex')
+  const encryptedJSON = keys.accountToEncryptedJSON({ account: account, password: password })
+  const result = await wallet.saveEncryptedAccount({
+    address: address, encryptedAccount: encryptedJSON })
+  return {
+    password : password,
+    address  : address,
+    result   : result,
+    account  : account
   }
 }
 
@@ -76,7 +87,7 @@ wallet.createSignerEth = ({url, address}) => {
     const provider = new SignerProvider(url, {
       signTransaction: async (rawTx, cb) => {
         let account = wallet.accountsMap[address]
-        if ( isAccount(account) ) {
+        if ( keys.isAccount(account) ) {
           cb(null, ethsign(rawTx, account.get('privatePrefixed') ) )
         } else {
           throw new Error(`Account ${address} is locked. Call wallet.unlockEncryptedAccount`)
@@ -87,6 +98,7 @@ wallet.createSignerEth = ({url, address}) => {
     const newEth = new Eth(provider)
     newEth.address = address
     wallet.signersMap[address] = newEth
+    LOGGER.debug(`Added a signer for ${address}`)
     return newEth
   }
 
@@ -135,17 +147,19 @@ wallet.init = async ({ autoConfig, unlockSeconds }) => {
  */
 wallet.createEncryptedAccount = async () => {
   if (!wallet.initialized) { LOGGER.error("Call wallet.init() first.") }
-  const account = create()
+  const account = keys.create()
   const address = account.get('addressPrefixed')
   const password = randombytes(32).toString('hex')
-  const encryptedAccount = accountToEncryptedJSON({ account: account, password: password })
-  const result = await wallet.saveEncryptedAccount({ address: address, encryptedAccount: encryptedAccount })
+  const encryptedAccount = keys.accountToEncryptedJSON({
+    account: account, password: password })
+  const result = await wallet.saveEncryptedAccount({
+    address: address, encryptedAccount: encryptedAccount })
   assert( result, `Saving encrypted account for ${address} ${encryptedAccount} failed` )
   return {
-    address: address,
-    password: password,
-    result: result,
-    encryptedAccount: encryptedAccount,
+    address          : address,
+    password         : password,
+    result           : result,
+    encryptedAccount : encryptedAccount,
   }
 } 
 
@@ -163,11 +177,6 @@ wallet.loadEncryptedAccount = async ({ address }) => {
     wallet.inputter(`keys/${wallet.chainId}/${address}`, null),
     (encryptedAccount) => {
       if (!encryptedAccount) { throw new Error(`Account not found for ${address}`) }
-      //const account = encryptedJSONToAccount( toJS(encryptedAccount), password )
-      //assert( isAccount(account), `Invalid account retrieved ${account}` )
-      //const _address = account.get('addressPrefixed')
-      //assert.equal( _address, address,
-      //             `Recovered address ${_address} doesn't match ${address}`)
       wallet.accountsMap[address] = toJS( encryptedAccount )
       LOGGER.debug(`Loaded encrypted account for ${address}`)
       return toJS( encryptedAccount )
@@ -209,7 +218,7 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
  */
 wallet.unlockEncryptedAccount = async ({ address, password }) => {
   const encryptedAccount = wallet.accountsMap[address]
-  if ( isAccount(encryptedAccount) ) {
+  if ( keys.isAccount(encryptedAccount) ) {
     throw new Error(`Account ${address} already unlocked`)
   }
   if (!address || !password) {
@@ -217,8 +226,8 @@ wallet.unlockEncryptedAccount = async ({ address, password }) => {
   }
   LOGGER.debug('ENCRYPTED ACCOUNT', encryptedAccount)
   wallet.accountsMap[address] =
-    encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password: password })
-  LOGGER.debug('Unlocked', address, isAccount(wallet.accountsMap[address]))
+    keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password: password })
+  LOGGER.debug('Unlocked', address, keys.isAccount(wallet.accountsMap[address]))
   const relockFunc = () => { wallet.accountsMap[address] = encryptedAccount } 
   setTimeout(relockFunc, wallet.unlockSeconds * 1000)
   return relockFunc
@@ -265,10 +274,7 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
     
     const gasEstimate = await wallet.eth.estimateGas({
       from: fromAddress, to: toAddress, value: balance, data: '0x'})
-    //LOGGER.debug(`Gas estimate for payAll is ${gasEstimate}`)
-    //LOGGER.debug(`Gas price is ${gasPrice} Gwei`)
     const gasAmount = new BN(gasEstimate).mul(new BN(gasPrice)).mul(new BN(toWei('10', 'gwei')))
-    //LOGGER.debug(`Gas amount is ${gasAmount}`)
     weiValue = new BN(balance).sub(new BN(_overage)).toString(10)
     LOGGER.debug(`Sendable wei value is ${fromWei(weiValue, 'ether')} ETH`)
   }
