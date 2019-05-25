@@ -1,5 +1,5 @@
 const { equal, immEqual, parseLogLevels, deepEqual } = require('..')
-const { Map, List } = require('immutable')
+const { Map } = require('immutable')
 const assert = require('chai').assert
 
 describe('Utilities ', () => {
@@ -14,8 +14,8 @@ describe('Utilities ', () => {
     assert.notOk( equal(22, 23) )
     assert.ok( equal('{"a":1}', '{"a":1}' ) )
     assert.notOk( equal('{"a":1}', '{"b":1}' ) )
-    assert.ok( equal({"a":1}, {"a":1} ) )
-    assert.notOk( equal({"a":1}, {"b":1} ) )
+    assert.ok( equal({'a':1}, {'a':1} ) )
+    assert.notOk( equal({'a':1}, {'b':1} ) )
     assert.ok( equal(new Map({'a': 1}), new Map({'a': 1})) )
     assert.notOk( equal(new Map({'a': 1}), new Map({'b': 1})) )
     assert.notOk( equal(new Map({'a': 1}), new Map({'b': 1})) )

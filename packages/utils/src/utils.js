@@ -4,11 +4,7 @@ const path = require('path')
 
 const { Logger } = require('./logger')
 const LOGGER = new Logger('utils/utils')
-const { Seq, Map, List, fromJS } 
-                   = require('immutable')
-const assert = require('chai').assert
-const ethjs  = require('ethjs')
-
+const { Seq, Map, List } = require('immutable')
 const utils = {}
 
 utils.DB_DIR       = 'db'
@@ -44,7 +40,7 @@ utils.fromJS = (js) => {
 utils.toJS = (imm) => {
   return (List.isList(imm)) ? imm.map((val) => {return utils.toJS(val)}).toJS() :
     (Map.isMap(imm)) ? imm.map((val) => {return utils.toJS(val)}).toJS() :
-    imm
+      imm
 }
 
 utils.equal = (a,b) => {
@@ -57,70 +53,70 @@ utils.equal = (a,b) => {
  * Deep JS object equality testing from https://stackoverflow.com/a/10316616
  */
 utils.deepEqual = (a,b) => {
-	if (a instanceof Array && b instanceof Array)
-		return utils.arraysEqual(a,b);
-	if (Object.getPrototypeOf(a)===Object.prototype &&
+  if (a instanceof Array && b instanceof Array)
+    return utils.arraysEqual(a,b)
+  if (Object.getPrototypeOf(a)===Object.prototype &&
       Object.getPrototypeOf(b)===Object.prototype) {
 	  return utils.objectsEqual(a,b)
   }
-	if (a instanceof Map && b instanceof Map) {
-	  return utils.mapsEqual(a,b)
+  if (a instanceof Map && b instanceof Map) {
+    return utils.mapsEqual(a,b)
   }
-	if (a instanceof Set && b instanceof Set) {
-	  throw new Error("equality by hashing not implemented.")
+  if (a instanceof Set && b instanceof Set) {
+    throw new Error('equality by hashing not implemented.')
   }
   if ((a instanceof ArrayBuffer || ArrayBuffer.isView(a)) &&
       (b instanceof ArrayBuffer || ArrayBuffer.isView(b))) {
 	  return utils.typedArraysEqual(a,b)
   }
-	return a==b;  // see note[1] -- IMPORTANT
+  return a==b  // see note[1] -- IMPORTANT
 }
 
 utils.arraysEqual = (a,b) => {
   if (a.length!=b.length) { return false }
-	for (let i=0; i < a.length; i++) {
-		if (!utils.deepEqual(a[i],b[i]))
-			return false;
-		return true;
-	}
+  for (let i=0; i < a.length; i++) {
+    if (!utils.deepEqual(a[i],b[i]))
+      return false
+    return true
+  }
 }
 
 utils.objectsEqual = (a,b) => {
-	const aKeys = Object.getOwnPropertyNames(a)
+  const aKeys = Object.getOwnPropertyNames(a)
   const bKeys = Object.getOwnPropertyNames(b)
   if (aKeys.length != bKeys.length) { return false }
   aKeys.sort()
-	bKeys.sort()
-	for (let i=0; i < aKeys.length; i++) {
+  bKeys.sort()
+  for (let i=0; i < aKeys.length; i++) {
     if (aKeys[i]!=bKeys[i]) { // keys must be strings
-			return false
+      return false
     }
     return utils.deepEqual(aKeys.map(k=>a[k]), aKeys.map(k=>b[k]))
   }
 }
 
 utils.mapsEqual = (a,b) => {
-	if (a.size != b.size) { return false }
-	const aPairs = Array.from(a);
-	const bPairs = Array.from(b);
-	aPairs.sort((x,y) => x[0]<y[0]);
-	bPairs.sort((x,y) => x[0]<y[0]);
-	for (let i=0; i<a.length; i++) {
-		if (!utils.deepEqual(aPairs[i][0],bPairs[i][0]) ||
+  if (a.size != b.size) { return false }
+  const aPairs = Array.from(a)
+  const bPairs = Array.from(b)
+  aPairs.sort((x,y) => x[0]<y[0])
+  bPairs.sort((x,y) => x[0]<y[0])
+  for (let i=0; i<a.length; i++) {
+    if (!utils.deepEqual(aPairs[i][0],bPairs[i][0]) ||
         !utils.deepEqual(aPairs[i][1],bPairs[i][1])) {
-			return false
-		}
-		return true
-	}
+      return false
+    }
+    return true
+  }
 }
 
 utils.typedArraysEqual = (_a, _b) => {
-	const a = new Uint8Array(_a);
-	const b = new Uint8Array(_b);
-	if (a.length != b.length) { return false }
-	for (let i=0; i < a.length; i++) {
-		if (a[i]!=b[i]) { return false }
-		return true
+  const a = new Uint8Array(_a)
+  const b = new Uint8Array(_b)
+  if (a.length != b.length) { return false }
+  for (let i=0; i < a.length; i++) {
+    if (a[i]!=b[i]) { return false }
+    return true
   }
 }
 

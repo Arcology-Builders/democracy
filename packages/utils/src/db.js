@@ -4,11 +4,9 @@ const path        = require('path')
 const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
-const http        = require('http')
-const url         = require('url')
 const { Logger }  = require('./logger')
 const LOGGER      = new Logger('db')
-const { isBrowser, ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
 
 /**
  * Take the callback action for every level in a hierarchical key space
@@ -36,9 +34,9 @@ const store = {}
  */
 store.setImmutableKey = (fullKey, value, overwrite) => {
   assert.typeOf(fullKey, 'string',
-                `fullKey should be a string, instead was ${typeof(fullKey)}`)
+    `fullKey should be a string, instead was ${typeof(fullKey)}`)
   assert(Map.isMap(value) || List.isList(value) || !value, 
-         `Value is not a Map or List or null ${value}` )
+    `Value is not a Map or List or null ${value}` )
  
   // TODO we need the same delete key logic below for browser 
   /*
@@ -47,48 +45,48 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
     localStorage.setItem(fullKey, valString)
   } else {
  */
-    ensureDir(DB_DIR)
-    const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-      ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-    const now = Date.now()
+  ensureDir(DB_DIR)
+  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
+    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
+  const now = Date.now()
 
-    if (fs.existsSync(`${dbFile}.json`)) {
-      if (!value || overwrite) {
-        // We never delete, only move to the side
-        const newFile = `${dbFile}.json.${now}` 
-        fs.renameSync( `${dbFile}.json`, newFile ) 
-        LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-        if (!overwrite) {
-          return true
-        }
-      } else {
-        LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-        throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-      }
-    } else if (fs.existsSync(dbFile)) {
-      if (!value) {
-        LOGGER.debug(`Deleting sub-key ${dbFile}`)
-        fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+  if (fs.existsSync(`${dbFile}.json`)) {
+    if (!value || overwrite) {
+      // We never delete, only move to the side
+      const newFile = `${dbFile}.json.${now}` 
+      fs.renameSync( `${dbFile}.json`, newFile ) 
+      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
+      if (!overwrite) {
         return true
-      } else { 
-        throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
       }
-    } else if (!value) {
-      //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-      return true
+    } else {
+      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
+      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
     }
-    const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-    //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-    fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
+  } else if (fs.existsSync(dbFile)) {
+    if (!value) {
+      LOGGER.debug(`Deleting sub-key ${dbFile}`)
+      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
+      return true
+    } else { 
+      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+    }
+  } else if (!value) {
+    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
     return true
-    /*
+  }
+  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
+  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
+  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
+  return true
+  /*
   }
 */
 }
 
 store.getImmutableKey = (fullKey, defaultValue) => {
   assert(typeof(fullKey) === 'string')
-/*
+  /*
   if (isBrowser()) {
     const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
     if (!value) {
@@ -98,19 +96,19 @@ store.getImmutableKey = (fullKey, defaultValue) => {
     return value
   } else {
  */
-    const dbFile = getFileKeySpace(fullKey, () => {})
-    if (fs.existsSync(`${dbFile}.json`)) {
-      return buildFromDirs(`${dbFile}.json`, () => {return false})
-    } else if (fs.existsSync(dbFile)) {
-      return buildFromDirs(dbFile,
-        // Return undeleted keys like a.json but not deleted keys a.json.1
-        (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) ||
+  const dbFile = getFileKeySpace(fullKey, () => {})
+  if (fs.existsSync(`${dbFile}.json`)) {
+    return buildFromDirs(`${dbFile}.json`, () => {return false})
+  } else if (fs.existsSync(dbFile)) {
+    return buildFromDirs(dbFile,
+      // Return undeleted keys like a.json but not deleted keys a.json.1
+      (fnParts) => { return ((fnParts.length > 1) && (fnParts[1] !== 'json')) ||
                               fnParts.length > 2 })
-    } else {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${dbFile} does not exist.`) }
-    }
-    /*
+  } else {
+    if (defaultValue) return defaultValue
+    else { throw new Error(`Key ${dbFile} does not exist.`) }
+  }
+  /*
   }
  */
 }  

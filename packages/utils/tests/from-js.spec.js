@@ -10,7 +10,7 @@ describe('from JS nested values', () => {
   it('should convert a deeply nested JS object to an Immutable object', () => {
     const x = [
       {'bug': 'bear',
-       'a'  : [ 'tiara', {'b': 2 } ]
+        'a'  : [ 'tiara', {'b': 2 } ]
       },
       [1,2,3]
     ]
@@ -22,7 +22,7 @@ describe('from JS nested values', () => {
         'a'  : List(
           [
             'tiara', 
-             Map({ 'b': 2 })
+            Map({ 'b': 2 })
           ])
       }),
       List([ 1, 2, 3 ])
@@ -33,8 +33,8 @@ describe('from JS nested values', () => {
     const m = Map({
       'abi': List([
         Map({'constant': true,
-             'inputs': List([]),
-             'stateMutability': 'view',
+          'inputs': List([]),
+          'stateMutability': 'view',
         })
       ])
     })

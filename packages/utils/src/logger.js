@@ -22,9 +22,9 @@ logger.Logger = function(prefix, enabled, getConfig) {
   this.printMsgs = (type, msgs) => {
     if (this.enabled.indexOf(type) !== -1) {
       msgs.forEach((msg) => {
-       const str = (Map.isMap(msg) || List.isList(msg)) ?
-         msg.toString() : JSON.stringify(msg)
-       this.out(`[${this.prefix}]`.magenta + `[${type}]`.green +`${str}`) })
+        const str = (Map.isMap(msg) || List.isList(msg)) ?
+          msg.toString() : JSON.stringify(msg)
+        this.out(`[${this.prefix}]`.magenta + `[${type}]`.green +`${str}`) })
     }
   }
 
@@ -43,7 +43,7 @@ logger.Logger = function(prefix, enabled, getConfig) {
   }
   
   this.errorAndThrow = (msg) => {
-    console.error("["+this.prefix+"] " + msg)
+    console.error('['+this.prefix+'] ' + msg)
     throw new Error(msg)
   }
   

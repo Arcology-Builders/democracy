@@ -23,7 +23,7 @@ configs.setEnvVars = (_env) => {
 // TODO: corresponds to eth.arcology.nyc but our Whisper node is not accepting
 // packets addresses to this hostname for some reason.
 //const SHH_IP = "ws://54.69.190.230:8546"
-const SHH_IP = "ws://eth.arcology.nyc:8546"
+const SHH_IP = 'ws://eth.arcology.nyc:8546'
 const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
   return {
     'DB_URL'            : dbURL,
@@ -78,18 +78,18 @@ const ENVIRONMENTS = {
   'DEV'        : createDevEnv,
   'TEST'       : () => {
     return createEnv({
-    'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
-    'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
-    'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
-    'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
-    'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
-    'db'     : 'test',
-    'lo'     : process.env[ 'TEST.LOG_OUT' ],
-    'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
+      'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
+      'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
+      'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
+      'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
+      'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
+      'db'     : 'test',
+      'lo'     : process.env[ 'TEST.LOG_OUT' ],
+      'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
                [ 'info', 'warn', 'error' ],
-    'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
-    'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
-  }) },
+      'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
+      'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
+    }) },
   'RINKEBY'    : () => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
     'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
@@ -138,16 +138,16 @@ const lazyEval = (env) => {
  * @memberof module:utils
  */
 configs.getConfig = (debugPrint) => {
-  const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ""
-  const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ""
+  const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ''
+  const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ''
   const env = windowEnv ? windowEnv : processEnv
   debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
   let config = lazyEval(env)
   if (config) {
-   return config
+    return config
   } else {
-   debugPrint && LOGGER.debug('NODE_ENV not defined, using TEST')
-   return lazyEval('TEST')
+    debugPrint && LOGGER.debug('NODE_ENV not defined, using TEST')
+    return lazyEval('TEST')
   }
 }
 
