@@ -1,4 +1,6 @@
+'use strict'
 // Compile with solcjs
+const fs         = require('fs')
 const path       = require('path')
 const solc       = require('solc')
 const assert     = require('chai').assert
@@ -8,11 +10,19 @@ const { List, Map, Set }
 const { ContractsManager, awaitOutputter, getInputsToBuild }
                  = require('demo-contract')
 
-const { traverseDirs, ensureDir, COMPILES_DIR, ZEPPELIN_SRC_PATH, DEMO_SRC_PATH, fromJS,
+const { traverseDirs, ensureDir, COMPILES_DIR, DEMO_SRC_PATH, fromJS,
         getImmutableKey, setImmutableKey, Logger }
                  = require('demo-utils')
 
 const LOGGER = new Logger('Compiler')
+
+const compiles = {}
+
+const ZEPPELIN_SRC_PATH_WS  = '../../node_modules/openzeppelin-solidity/contracts'
+const ZEPPELIN_SRC_PATH_PKG = './node_modules/openzeppelin-solidity/contracts'
+
+compiles.ZEPPELIN_SRC_PATH = fs.existsSync(ZEPPELIN_SRC_PATH_WS) ?
+  ZEPPELIN_SRC_PATH_WS : ZEPPELIN_SRC_PATH_PKG
 
 /**
  * A reusable Compiler for Democracy.js with a search path and custom outputter.
@@ -23,7 +33,7 @@ const LOGGER = new Logger('Compiler')
  *        If missing, _outputter defaults to `setImmutableKey`
  *        to a local file-based DB store.
  */
-class Compiler {
+compiles.Compiler = class {
   
   constructor({startSourcePath, bm}) {
     this.startSourcePath = (startSourcePath && typeof(startSourcePath) === 'string') ?
@@ -114,7 +124,7 @@ class Compiler {
     
     // Filter out empty paths
     const queue = Set(
-      [ this.startSourcePath, ZEPPELIN_SRC_PATH ]
+      [ this.startSourcePath, compiles.ZEPPELIN_SRC_PATH ]
     ).filter((x) => x).toJS()
 
     traverseDirs(
@@ -145,7 +155,7 @@ class Compiler {
     }
 
     function findImports (path) {
-      assert(inputs[path])
+      assert(inputs[path], `Import not found: ${path}`)
       return { contents: inputs[path].source }
     }
 
@@ -201,6 +211,4 @@ class Compiler {
 
 }
 
-module.exports = {
-  Compiler         : Compiler,
-}
+module.exports = compiles

@@ -3,47 +3,64 @@
 // Create a random new encrypted account on a remote DB
 // and fund it either from a test account or
 // from DEPLOYER_ADDRESS in your .env
+// Useful for creating a new deployer address
+//
+// Usage: node ./createNewAccount.js [test] [payAll|<payAmount>]
 
 const assert = require('chai').assert
 const { getConfig, getNetwork } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { toWei } = require('web3-utils')
+const { List, Range } = require('immutable')
 
-const mainFunc = async (fundFromTest) => {
+const mainFunc = async (fundFromTest, payAmount) => {
   await wallet.init({ autoConfig: true, unlockSeconds: 1 })
   const { address, password } = await wallet.createEncryptedAccount()
-  console.log('New Address' , address )
-  console.log('New Password', password)
+  console.log('Payee Address' , address )
+  console.log('Payee Password', password)
 
   const eth = getNetwork()
-  const accounts = await eth.accounts()
-  const deployerAddress  = (fundFromTest) ? accounts[0] : getConfig()['DEPLOYER_ADDRESS']
-  const deployerPassword = getConfig()['DEPLOYER_PASSWORD']
+  const testAccounts = await eth.accounts()
 
-  console.log('Deployer Address', deployerAddress)
-  console.log('Deployer Password', deployerPassword)
+  const fund = async (funderAddress) => {
 
-  const payerEth = (!fundFromTest) ? await wallet.prepareSignerEth({
-    address    : deployerAddress,
-    password   : deployerPassword,
-  }) : null
+    console.log('Funder Address' , funderAddress)
 
-  console.log('Paying 0.1 ETH...')
-  if (fundFromTest) {
-    await wallet.payTest({
-      fromAddress: deployerAddress,
-      toAddress: address,
-      weiValue: toWei('0.1', 'ether'),
-    })
-  } else {
-    await wallet.pay({
-      eth: payerEth,
-      fromAddress: deployerAddress,
-      toAddress: address,
-      weiValue: toWei('0.1', 'ether'),
-    })
+    const payAll = (payAmount === 'payAll')
+    console.log(`Paying ${payAmount} ETH...`)
+    if (fundFromTest) {
+      await wallet.payTest({
+        fromAddress : funderAddress,
+        toAddress   : address,
+        payAll      : payAll,
+        weiValue    : payAll ? '0' : toWei(payAmount, 'ether'),
+      })
+    } else {
+      const { signerEth: payerEth } = await wallet.prepareSignerEth({
+        address     : funderAddress,
+        password    : funderPassword,
+      })
+
+      await wallet.pay({
+        eth         : signerEth,
+        fromAddress : funderAddress,
+        toAddress   : address,
+        payAll      : payAll,
+        weiValue    : payAll ? '0' : toWei(payAmount, 'ether'),
+      })
+    }
+    console.log(`Paying complete from account ${funderAddress}`)
   }
-  console.log('Paying complete.')
+
+  const funderPassword = getConfig()['DEPLOYER_PASSWORD']
+  console.log('Funder Password', funderPassword)
+
+  return (fundFromTest) ?
+    Promise.all(List(Range(0,10)).map((i) => {
+      return fund(testAccounts[i])
+    })) : fund(getConfig()['DEPLOYER_ADDRESS'])
+
 }
 
-mainFunc(process.argv[2] === 'test').then(() => console.log("That's all folks"))
+mainFunc(process.argv[2] === 'test',
+         process.argv[3]).then(() => console.log("That's all folks"))

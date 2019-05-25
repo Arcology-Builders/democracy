@@ -104,6 +104,7 @@ wallet.inputter = null
 wallet.outputter = null
 wallet.accountsMap = {}
 wallet.signersMap = {}
+wallet.relockMap = {}
 wallet.eth = getNetwork()
 
 wallet.UNLOCK_TIMEOUT_SECONDS = 600
@@ -226,8 +227,24 @@ wallet.unlockEncryptedAccount = async ({ address, password }) => {
     keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password: password })
     LOGGER.debug('Unlocked', address, keys.isAccount(wallet.accountsMap[address]))
     const relockFunc = () => { wallet.accountsMap[address] = encryptedAccount } 
-    setTimeout(relockFunc, wallet.unlockSeconds * 1000)
+    const id = setTimeout(relockFunc, wallet.unlockSeconds * 1000)
+    wallet.relockMap[address] = id
     return relockFunc
+}
+
+wallet.lockEncryptedAccountSync = ({ address }) => {
+  const id = wallet.relockMap[address]
+  if (id) {
+    clearTimeout(id)
+    delete wallet.relockMap[address]
+    LOGGER.debug(`Relocking ${address}`)
+  }
+}
+
+wallet.shutdownSync = () => {
+  for (var address in wallet.relockMap) {
+    wallet.lockEncryptedAccountSync({ address: address })
+  }
 }
 
 /**

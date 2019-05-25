@@ -28,7 +28,7 @@ describe('Signing and spending transactions', () => {
         eth = getNetwork()
         testAccounts = await eth.accounts()
         bigSpender = testAccounts[4]
-        await wallet.init({autoConfig: false, unlockSeconds: 30})
+        await wallet.init({autoConfig: false, unlockSeconds: 100})
     })
 
     it( 'make sure that we have > 99 ETH for old accounts', async () => {
@@ -175,6 +175,10 @@ describe('Signing and spending transactions', () => {
             toAddress  : bigSpender,
             label      : 'Second',
         })
+    })
+
+    after(() => {
+      wallet.shutdownSync()
     })
 
 })
