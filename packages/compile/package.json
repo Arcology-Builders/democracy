@@ -50,7 +50,7 @@
     "demo-utils": "^0.2.10-alpha.9",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
-    "solc": "0.4.24"
+    "solc": "0.4.25"
   },
   "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
 }
