@@ -36,7 +36,7 @@ const mainFunc = async (fundFromTest, payAmount) => {
         weiValue    : payAll ? '0' : toWei(payAmount, 'ether'),
       })
     } else {
-      const { signerEth: payerEth } = await wallet.prepareSignerEth({
+      const { signerEth } = await wallet.prepareSignerEth({
         address     : funderAddress,
         password    : funderPassword,
       })
