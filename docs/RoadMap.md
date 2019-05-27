@@ -14,27 +14,15 @@ To the future!
 * 0.2 Release - build dependency management, webify tests
   * ~add tx signing support, nonce management~
   * ~clean up console.logging, add a decent logger~
-  * allow getting the latest undeleted key in a keyspace
-  * show mocha runs inside a browser
-  * improve documentation and tutorial
+  * show mocha runs inside a browser (as a first step to refactoring webpack bundle)
+  * ~improve documentation~ and tutorial
 
-* 0.3 Release - whisper support
-  [Whisper Design](Whisper Design)
-  * commands for sending and listening to messages
+* 0.3 Release - Debugger & Web UI 
+  * flatten Solidity source code, use source maps to determine where reverts happen
+  * basic React web UI showing a blockchain explorer
+  * add new solidity compiler support
+  * display linked contracts (AZTEC & DAOStack) and automate workflows through them
+  * store / display contract interactions 
 
-* 0.4 Release - ssb config
-  [SSB Design](SSB Design)
-  * switch to using an ssb alternet for storing configs, artifacts, and messages
-  * including sharing reproducible builds across the manyverse
-
-* 0.5 Release - web-based Eth client / interface using BrowserFS, mobile friendly
-  
-* 0.6 Release - cross-chain swaps between Ethereum networks
-
-* 0.7 Release - beginning work on a unified, isomorphic JS / EVM language
-
-* 0.8 Release - a txpool for broadcasting and sponsoring unsigned raw transactions
-
-* 0.9 Release - a nascent DAO
-
-* 1.0 Release - zero-knowledge playground, certifying arbitrary data on SSB via on-chain ETH hashes
+See our [project planning ](https://github.com/invisible-college/democracy/projects/1)
+for more ideas and goals for longer-term releases.
