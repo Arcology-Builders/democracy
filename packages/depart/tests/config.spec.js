@@ -13,7 +13,7 @@ describe( 'Configs for departures', () => {
   })
 
   it( 'picks up db url from .env', async () => {
-    assert.equal( config['DB_URL'], 'http://arcology.nyc:7000' )
+    assert.equal( config['DB_URL'], 'http://localhost:7000' )
   })
 
 })

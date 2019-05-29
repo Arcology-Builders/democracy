@@ -10,8 +10,8 @@ const { List, Map, Set }
 const { ContractsManager, awaitOutputter, getInputsToBuild }
                  = require('demo-contract')
 
-const { traverseDirs, ensureDir, COMPILES_DIR, DEMO_SRC_PATH, fromJS,
-        getImmutableKey, setImmutableKey, Logger }
+const { traverseDirs, ensureDir, COMPILES_DIR, DEMO_SRC_PATH, fromJS, toJS,
+        getImmutableKey, setImmutableKey, textsEqual, immEqual, Logger }
                  = require('demo-utils')
 
 const LOGGER = new Logger('Compiler')
@@ -24,8 +24,12 @@ const ZEPPELIN_SRC_PATH_PKG = './node_modules/openzeppelin-solidity/contracts'
 compiles.ZEPPELIN_SRC_PATH = fs.existsSync(ZEPPELIN_SRC_PATH_WS) ?
   ZEPPELIN_SRC_PATH_WS : ZEPPELIN_SRC_PATH_PKG
 
+const { Flattener } = require('./flattener')
+
 /**
  * A reusable Compiler for Democracy.js with a search path and custom outputter.
+ * @class Compiler
+ * @memberof module:compile
  * @param _startSourcePath {string} a local directory. Can omit the `./` for relative paths.
  * @param _outputter {async function} a (possibly asynchronous) function that
  *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
@@ -53,30 +57,28 @@ compiles.Compiler = class {
 
   /**
    * Format the output from `solc` compiler into an Immutable {Map}
+   * Stage 5 from
+   * https://github.com/invisible-college/democracy/master/packages/compile/README.md
+   * @param solcOutputContract an Immutable {Map} of contracts output from solc
+   * @param requestedInputs an Immutable {Map} of contract names to source content
+   * @param existingOutputs an Immutable {Map} of contract names to compiled output
+   * @return an Immutable {Map} of contract names to compiled output
    */
   getCompileOutputFromSolc(solcOutputContracts, requestedInputs, existingOutputs) {
     // Filter compiled outputs to those in the requested set, and add contractName
-    const requestedOutputs = Map(solcOutputContracts).filter(
-      (contract, contractLongName) => {
-        const contractName = path.basename(contractLongName).split(':')[1]
+    const requestedOutputs = solcOutputContracts.flatMap((j) => j).filter(
+      (contract, contractName) => {
         return requestedInputs.has(contractName)
       })
-      .map((contract, contractLongName) => {
-        const contractName = path.basename(contractLongName).split(':')[1]
-        return {
-          name: contractName,
-          ...contract
-        }
-      })
-    const tuples = List(requestedOutputs.values()).map((contract) => {
+    const tuples = requestedOutputs.map(async (contract, contractName) => {
            
       const now = new Date() 
-      const inputHash = requestedInputs.get(contract.name).get('inputHash') 
+      const inputHash = requestedInputs.get(contractName).get('inputHash') 
       const preHash = Map({
         type       : 'compile',
-        name       : contract.name,
-        code       : contract.bytecode,
-        abi        : fromJS(JSON.parse(contract.interface)),
+        name       : contractName,
+        code       : contract.get('bytecode'),
+        abi        : contract.get('abi'),
         inputHash  : inputHash,
         timestamp  : now.getTime(),
         dateTime   : now.toUTCString(),
@@ -84,15 +86,16 @@ compiles.Compiler = class {
       const output = preHash.set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
-      if (existingOutputs.has(contract.name) &&
-          existingOutputs.get(contract.name).get('inputHash') === inputHash) {
+      if (existingOutputs.has(contractName) &&
+          existingOutputs.get(contractName).get('inputHash') === inputHash) {
         LOGGER.debug(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
-        return [contract.name, existingOutputs.get(contract.name)]
+        return [contractName, existingOutputs.get(contractName)]
       } else {
-        return this.cm.setContract(contract.name, output)
+        return [contractName, await this.cm.setContract(contractName, output)]
       }
     })
-    return Promise.all(tuples).then((pairs) => { return Map(pairs) })
+    
+    return Promise.all(List(tuples.values()).toJS()).then((pairs) => { return Map(pairs) })
   }
   
   /**
@@ -101,13 +104,14 @@ compiles.Compiler = class {
    * @param inputsToBuild an Immutable {Map} with members `filename` for the
    *        original Solidity filename and `source` is the original Solidity source text.
    *        the key does not matter.
-   * @return a sourceMap suitable for solc
+   * @return a {Object} suitable for solc mapping filenames to a nested object of
+   *         `content` to source file.
    */
   getSourceMapForSolc(inputsToBuild) {
     return new Map(List(inputsToBuild.values()).map((val) => {
       const fn = val.get('filename')
       assert(val.get('source'), `${fn} contains null source`)
-      return [ val.get('filename'), val.get('source') ]
+      return [ val.get('filename'), { content: val.get('source') } ]
     })) 
   } 
  
@@ -115,10 +119,11 @@ compiles.Compiler = class {
   * Traverse solidity source files from disk and build requested inputs, and a
   * solidity findImports callback function.
   * @param { source } the filename of the requested source file input to compile, could be empty for compile all files found
+  * @param { flattener } object to collect sources for flattening
   * @return { findImports } a callback for solc to resolve import statements
   * @return { requestedInputs } an Immutable {Map} of filenames as keys and source file contents as values
   */ 
-  getRequestedInputsFromDisk(source) {
+  getRequestedInputsFromDisk(source, flattener) {
     const allInputFiles = []
     const inputs = {}
     
@@ -156,6 +161,8 @@ compiles.Compiler = class {
 
     function findImports (path) {
       assert(inputs[path], `Import not found: ${path}`)
+      LOGGER.debug(`import ${inputs[path].source}`)
+      flattener.addSource(path, inputs[path].source)
       return { contents: inputs[path].source }
     }
 
@@ -167,16 +174,67 @@ compiles.Compiler = class {
     const requestedInputs = new Map(inputFiles.map((name) => {
       const value = new Map(inputs[name]).set('filename', name) 
       assert(name.split('.')[1].startsWith('sol'))
+      flattener.addSource(name, inputs[name].source)
       return [ name.split('.')[0], value ]
     }))
 
     return {
-      requestedInputs : requestedInputs, 
-      findImports     : findImports,
+      requestedInputs  : requestedInputs, 
+      findImports      : findImports,
     }
   } 
 
   /**
+   * Flatten sources and update it in the contracts manager outputter if the hash
+   * is different (content has changed.)
+   *
+   * @method updateFlatten
+   * @memberof module:compile
+   * @param flattener a Flattener object that has been collecting sources during compilation.
+   * @param sourceFile the top-level source filename with extension
+   */
+  async updateFlatten(flattener, sourceFile) {
+    const oldOutput = await this.cm.inputter(`sourcesFlattened/${sourceFile}`, new Map({}))
+    const oldHash = oldOutput.get('inputHash')
+    const flattenedSource = flattener.flatten()
+    const newHash = keccak(flattenedSource).toString('hex')
+    if (oldHash !== newHash) {
+      LOGGER.info(`Flattened source out-of-date, re-flattening.`)
+      LOGGER.debug(`old hash ${oldHash} vs. new hash ${newHash}`)
+      await this.cm.outputter(`sourcesFlattened/${sourceFile}`,
+                              new Map({ 'flattenedSource' : flattenedSource,
+                                        'inputHash'       : newHash }),
+                                        true)
+    } else {
+      const diffLine = textsEqual(oldOutput.get('flattenedSource'), flattenedSource) 
+      assert( diffLine === -1, `Flattened sources differ at line ${diffLine}` )
+    }
+  }
+
+  async updateCompileOutput(compileOutput, sourceFile) {
+    const oldOutput = await this.cm.inputter(`compileOutputs/${sourceFile}`, new Map({}))
+    const oldHash = oldOutput.get('inputHash')
+    const newHash = keccak(JSON.stringify(compileOutput)).toString('hex')
+    LOGGER.debug(`old hash ${oldHash} vs. new hash ${newHash}`)
+    if (oldHash !== newHash) {
+      LOGGER.info(`Compile output out-of-date, re-writing.`)
+      await this.cm.outputter(`compileOutputs/${sourceFile}`,
+                              new Map({ ...compileOutput,
+                                        'inputHash' : newHash }),
+                                        true)
+    } else {
+      // TODO Debug this later
+      //const same = immEqual(oldOutput, fromJS( compileOutput )) 
+      //assert(same, `Compile output does not match, but inputHash was same` )
+    }
+  }
+
+  /**
+   * Main compile method. Takes a Solidity source file name and produces compile artifacts
+   * in the associated contracts manager (either remote or in a local store)
+   *
+   * @method compile
+   * @memberof module:compile
    * @param source {string} name of source file to compile, including Solidity extension
    * @param contracts {Map} from a ContractsManager
    * @return compile output as an Immutable {Map}
@@ -184,8 +242,10 @@ compiles.Compiler = class {
   async compile(source) {
     // Open contracts installed by npm -E zeppelin-solidity
     // Open contracts from democracy
-    
-    const { requestedInputs, findImports } = this.getRequestedInputsFromDisk(source)
+   
+    const flattener = new Flattener() 
+    const { requestedInputs, findImports }
+      = this.getRequestedInputsFromDisk(source, flattener)
 
     const { contractOutputs: existingOutputs } = await this.cm.getContracts()
     const inputsToBuild = getInputsToBuild(requestedInputs, existingOutputs)
@@ -196,17 +256,35 @@ compiles.Compiler = class {
       // Hooray, nothing to build. Return existing outputs as if we had built it.
       return existingOutputs.filter((val, key) => { return requestedInputs.has(key) })
     }
-    LOGGER.debug('sourcesToBuild', sourcesToBuild)
 
-    const outputs = solc.compile({sources: sourcesToBuild.toJS()}, 0, findImports)
-    assert.ok(outputs.contracts, `Expected compile output for requested sources`)
-
-    // Uncomment below to dump the output of solc compiler
-    if (outputs.errors) {
-      LOGGER.error(JSON.stringify(outputs.errors))
+    const inputs = {
+      language: 'Solidity',
+      settings: {
+        outputSelection: {
+          '*': {
+            '*': [ '*' ]
+          }
+        }
+      },
+      sources: toJS( sourcesToBuild ),
     }
 
-    return this.getCompileOutputFromSolc(outputs.contracts, requestedInputs, existingOutputs)
+    const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
+    /*
+    if (outputs.errors) {
+      LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
+      throw new Error(outputs.errors)
+    }
+*/
+    assert.ok(outputs.contracts, `Expected compile output for requested sources`)
+    
+    await this.updateFlatten(flattener, source)
+    await this.updateCompileOutput(outputs, source)
+
+    fs.writeFileSync("outputContracts.json", JSON.stringify(outputs.contracts, null, 2))
+    assert( Map.isMap(requestedInputs) )
+    return this.getCompileOutputFromSolc(fromJS( outputs.contracts ),
+                                         requestedInputs, existingOutputs)
   }
 
 }

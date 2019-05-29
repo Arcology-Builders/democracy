@@ -75,7 +75,7 @@ class ContractsManager {
       this.contracts.contractOutputs.set(contractName, contractOutput)
     return awaitOutputter(
       this.outputter(compileKey, contractOutput, true),
-      () => { return [ contractName, contractOutput ] }
+      () => { return contractOutput }
     )
   }
 

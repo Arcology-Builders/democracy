@@ -55,12 +55,12 @@ describe('Runs a REST server', () => {
     const res = await r.getHTTP('/api/someRoute', {})
     assert.equal( res, `{"a":${randInt+1}}` )
   }) 
-  
+ /* 
   it( 'get all empty compiles', async () => {
     const res = await r.getHTTP('/api/compiles', {})
     assert.equal( res, `{}` )
   })
-
+*/
   it( 'get all compiles', async () => {
     setImmutableKey('/compiles/FirstContract', new Map({}))
     setImmutableKey('/compiles/SecondContract', new Map({}))

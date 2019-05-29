@@ -100,10 +100,11 @@ contracts.getInstance = (eth, deploy) => {
   return Contract.at(deploy.get('deployAddress'))
 } 
 
-contracts.createContract = async (contractName) => {
+contracts.createContract = async (contractName, deployID) => {
   if (!contracts.initialized) { throw new Error('Call contracts.initialize() first') }
-  const deploy = await contracts.bm.getDeploy(`${contractName}-deploy`)
-  assert( isDeploy(deploy), `No valid deploy found for ${contractName}-deploy` )
+  const _deployID = deployID || 'deploy'
+  const deploy = await contracts.bm.getDeploy(`${contractName}-${_deployID}`)
+  assert( isDeploy(deploy), `No valid deploy found for ${contractName}-${_deployID}` )
   LOGGER.info(`Auto-created Contract ${contractName} at ${deploy.get('deployAddress')}`)
   return new contracts.Contract({ deployerEth: wallet.lastSignerEth, deploy: deploy })
 }
