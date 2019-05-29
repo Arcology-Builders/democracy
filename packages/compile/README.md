@@ -1,4 +1,4 @@
-# `compile`
+# `demo-compile`
 
 Compiling management for EVM languages in the Democracy framework, initially only in Solidity.
 * Automatically includes OpenZeppelin contracts (in Solidity 0.5.x)
@@ -56,9 +56,9 @@ organized by contract name, that can then be linked and deployed by
 
 It includes four stages with a defined specification in between them.
 * Stage 1: Reading source files from storage
-  * Output map has `key`: filename, `value`: source contents
+  * Output map has `key`: contract name, `value`: source contents
 * Stage 2: Reading cached compile outputs and comparing content hashes
-  * Output map has `key`: filename, `value`: source contents
+  * Output map has `key`: contract name, `value`: source contents
 * Stage 3: Creating language-specific inputs and configs (e.g. `solc`)
   * Output map has `key`: contract name, `value`: contract output
 * Stage 4: Call the language-specific compiler
@@ -73,6 +73,12 @@ which provide convenience methods for saving contract outputs to a Democracy
 
 * getContract(contractName)
 * isCompile
+
+### Solidity Filename Convention
+
+While a single Solidity file can contain multiple Solidity classes,
+we require the convention that a Solidity file named e.g. `Booberry.sol` contain
+only one class of the same name, called `Booberry` in this case.
 
 ### Stage 1: Reading Source Files from Storage
 
@@ -101,11 +107,11 @@ and also adds it to the flattener via
 flattener.addSource('ERC20Mintable.sol', fileContents)
 ```
 
-`requestedInputs` is an Immutable Map with filename keys and source content values.
+`requestedInputs` is an Immutable Map with contract name keys and source content values.
 
 ```
 return Map({
-  fileName: fileContents
+  contractName: fileContents
 })
 ```
 
@@ -117,7 +123,7 @@ getInputsToBuild(requestedInputs, existingOutputs)
 
 ```
 return Map({
-  fileName: fileContents
+  contractName: fileContents
 })
 ```
 
