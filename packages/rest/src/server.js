@@ -1,10 +1,11 @@
 const express = require('express')
 const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger,
-  COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR }
+  ensureDir, DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, FLATS_DIR, OUTS_DIR }
 	      = require('demo-utils')
 const { Map } = require('immutable')
 const utils = require('ethereumjs-utils')
 const http = require('http')
+const path = require('path')
 const LOGGER = new Logger('rest-server')
 
 var bodyParser = require('body-parser')
@@ -15,7 +16,7 @@ server.RESTServer = class {
 
   constructor(_port, _allowCORS) {
     this.port = _port || 7000
-    this.app     = express()
+    this.app  = express()
 
     // configure app to use bodyParser()
     // this will let us get the data from a POST
@@ -33,7 +34,11 @@ server.RESTServer = class {
     this.router = express.Router()
     this.populateRoutes(this.router)
     this.app.use('/api', this.router)
-    
+    ensureDir(path.join(DB_DIR,COMPILES_DIR))
+    ensureDir(path.join(DB_DIR,LINKS_DIR))
+    ensureDir(path.join(DB_DIR,DEPLOYS_DIR))
+    ensureDir(path.join(DB_DIR,FLATS_DIR))
+    ensureDir(path.join(DB_DIR,OUTS_DIR))
   }
 
   getRouter() {
@@ -61,6 +66,44 @@ server.RESTServer = class {
         //LOGGER.debug('Received route', req)
         next() // make sure we go to the next routes and don't stop here
     });
+
+    _router.route('/sourcesFlattened/:sourceFileName').get((req, res) => {
+      const sourceFileName = req.params.sourceFileName
+      const flats = get(`/${FLATS_DIR}/${sourceFileName}`, new Map({}))
+      res.json(flats.toJS())
+    })
+
+    _router.route('/sourcesFlattened/:sourceFileName').post((req, res) => {
+      const sourceFileName = req.params.sourceFileName
+      const jsBody = fromJS(req.body)
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      try {
+        const result = set(`/${FLATS_DIR}/${sourceFileName}`, jsBody, overwrite)
+        res.json({result: result, body: jsBody})
+      } catch(e) {
+        LOGGER.error('Failed to set key:', e, sourceFileName)
+        res.json({result: false, error: e})
+      }
+    })
+
+    _router.route('/compileOutputs/:sourceFileName').get((req, res) => {
+      const sourceFileName = req.params.sourceFileName
+      const outs = get(`/${OUTS_DIR}/${sourceFileName}`, new Map({}))
+      res.json(outs.toJS())
+    })
+
+    _router.route('/compileOutputs/:sourceFileName').post((req, res) => {
+      const sourceFileName = req.params.sourceFileName
+      const jsBody = fromJS(req.body)
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      try {
+        const result = set(`/${OUTS_DIR}/${sourceFileName}`, jsBody, overwrite)
+        res.json({result: result, body: jsBody})
+      } catch(e) {
+        LOGGER.error('Failed to set key:', e, sourceFileName)
+        res.json({result: false, error: e})
+      }
+    })
 
     _router.route('/deploys').get((req, res) => {
       const chainId = req.params.chainId
@@ -139,6 +182,23 @@ server.RESTServer = class {
       const cn = req.params.contractName
       const cxt = req.params.context
       const compile = get(`/compiles/${cn}`, new Map({}))
+      res.json(compile.toJS())
+    })
+
+    _router.route('/sourcesFlattened/:sourceName').post((req, res) => {
+      const sn = req.params.sourceName
+      const cxt = req.params.context
+      const overwrite = (req.headers['democracy-overwrite'] === 'true')
+      LOGGER.debug('req.body', req.body)
+      const val = (req.body === 'null') ? null : fromJS(req.body)
+      set(`/sourcesFlattened/${sn}`, val, overwrite)
+      res.json(req.body) 
+    })
+
+    _router.route('/sourcesFlattened/:sourceName').get((req, res) => {
+      const sn = req.params.sourceName
+      const cxt = req.params.context
+      const compile = get(`/sourcesFlattened/${sn}`, new Map({}))
       res.json(compile.toJS())
     })
 

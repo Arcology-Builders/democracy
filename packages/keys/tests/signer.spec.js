@@ -46,8 +46,10 @@ describe('Signing and spending transactions', () => {
     const encryptedAccount = keys.accountToEncryptedJSON({ account: account, password: password })
     await wallet.saveEncryptedAccount({ address: address, encryptedAccount: encryptedAccount }) 
     await wallet.unlockEncryptedAccount({ address: address, password: password }) 
+    
     await wallet.createSignerEth({
       url: 'http://localhost:8545', address: newAccounts.get(1).get('addressPrefixed') })
+     
   })
 
   it( 'can transfer money from a testAccount to a new account', async () => {

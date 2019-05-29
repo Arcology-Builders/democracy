@@ -58,30 +58,43 @@ describe( 'Remote builds ', () => {
     await delayedGet(r.getHTTP.bind(r, '/api/someRoute'), `{"a":${randInt+1}}`)
   }) 
   
-  it( 'get all empty compiles', async () => {
+  it( 'does not find compiles before compiling', async () => {
     const res = await r.getHTTP('/api/compiles', {})
-    assert.equal( res, `{}`)
+    assert( res.search('"FirstContract":{}') === -1,
+           'FirstContract not found in compiles.' )
+    assert( res.search('"SecondContract":{}') === -1,
+           'SecondContract not found in compiles.' )
   })
 
-  it( 'get all compiles', async () => {
+  it( 'finds compiles after compiling', async () => {
     setImmutableKey('/compiles/FirstContract', new Map({}))
     setImmutableKey('/compiles/SecondContract', new Map({}))
     const res = await r.getHTTP('/api/compiles', {})
-    assert.equal( res, '{"FirstContract":{},"SecondContract":{}}')
+    assert( res.search('"FirstContract":{}') !== -1,
+           'FirstContract not found in compiles.' )
+    assert( res.search('"SecondContract":{}') !== -1,
+           'SecondContract not found in compiles.' )
   })
 
-  it( 'get all empty links', async () => {
+  it( 'does not find links before linking', async () => {
     const res = await r.getHTTP('/api/links', {})
-    assert.equal( res, `{}`)
+    assert( res.search('"FirstLink":{}') === -1,
+           'FirstLink not found in links.' )
+    assert( res.search('"SecondLink":{}') === -1,
+           'SecondLink not found in links.' )
   })
 
-  it( 'get all links', async () => {
+  it( 'finds links after linking', async () => {
     const result = await r.postHTTP('/api/links/FirstLink', new Map({'a':1}))
     assert.equal(result, '{"result":true,"body":{"a":1}}')
     const result2 = await r.postHTTP('/api/links/SecondLink', new Map({'b': 2}))
     assert.equal(result2, '{"result":true,"body":{"b":2}}')
     const res = await r.getHTTP('/api/links', {})
-    assert.equal( res, '{"FirstLink":{"a":1},"SecondLink":{"b":2}}')
+    LOGGER.debug('RES', res)
+    assert( res.search('"FirstLink":{') !== -1,
+           'FirstLink not found in links.' )
+    assert( res.search('"SecondLink":{') !== -1,
+           'SecondLink not found in links.' )
   })
 
   it( 'fail to overwrite a link', async () => {
@@ -96,20 +109,25 @@ describe( 'Remote builds ', () => {
     const result = await r.postHTTP('/api/links/FirstLink', new Map({'d':4}), true)
     await delayedGet(r.getHTTP.bind(r, '/api/links/FirstLink'), '{"d":4}')
   })
-/*
-  it( 'get all empty deploys', async () => {
+
+  it( 'does not find deploys before deploying', async () => {
     const res = await r.getHTTP(`/api/deploys/${chainId}`, {})
-    assert.equal( res, `{}`)
+    assert( res.search('"FirstDeploy":{') === -1,
+           'FirstDeploy not found in links.' )
+    assert( res.search('"SecondDeploy":{') === -1,
+           'SecondDeploy not found in links.' )
   })
- */ 
-  it( 'get all deploys', async () => {
+  
+  it( 'finds deploys after deploying', async () => {
     r.postHTTP(`/api/deploys/${chainId}/FirstDeploy`, new Map({'z':22}))
     r.postHTTP(`/api/deploys/${chainId}/SecondDeploy`, new Map({'y':23}))
-    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${chainId}`),
-                     '{"FirstDeploy":{"z":22},"SecondDeploy":{"y":23}}')
+    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${chainId}/FirstDeploy`),
+                     '{"z":22}')
+    await delayedGet(r.getHTTP.bind(r, `/api/deploys/${chainId}/SecondDeploy`),
+                     '{"y":23}')
   })
 
-  it( 'get deploy', async () => {
+  it( 'gets an individual deploy', async () => {
     const res = await r.getHTTP(`/api/deploys/${chainId}/FirstDeploy`, {})
   })
 

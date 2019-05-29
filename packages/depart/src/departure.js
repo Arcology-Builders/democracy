@@ -2,7 +2,8 @@ const { List, Map } = require('immutable')
 const assert = require('chai').assert
 const utils = require('demo-utils')
 const { toJS, fromJS, getConfig, getNetwork } = utils
-const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract, createBM }
+const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract,
+  createBM, Contract }
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
@@ -24,9 +25,11 @@ const departs = {}
  */
 departs.departMixin = ({ name, autoConfig, sourcePath }) => {
   return async (state) => {
-    assert( state.get('chainId'), `chainId not in input state.` )
-    assert( state.get('deployerEth'), `deployerEth not in input state.` )
-    assert( state.get('deployerAddress'), `deployerAddress not in input state.` )
+
+    const{ chainId, deployerEth, deployerAddress } = state.toJS()
+    assert( chainId, `chainId not in input state.` )
+    assert( deployerEth, `deployerEth not in input state.` )
+    assert( deployerAddress, `deployerAddress not in input state.` )
 
     const bm = await createBM({
       sourcePath: sourcePath,
@@ -88,6 +91,15 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
       return output
     }
 
+    const deployed = async (contractName, deployID) => {
+      await compile( contractName, `${contractName}.sol` )
+      await link( contractName, 'link' )
+      const _deployID = (deployID) ? deployID : 'deploy'
+      const deployedContract = await deploy( contractName, 'link', _deployID )
+      const contract = new Contract({ deployerEth: deployerEth, deploy: deployedContract })
+      return contract.getInstance()
+    }
+
     const getCompiles = () => {
       return compiles
     }
@@ -121,6 +133,7 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
       departName  : name,
       clean       : clean,
       deploy      : deploy,
+      deployed    : deployed,
       link        : link,
       compile     : compile,
       bm          : bm,

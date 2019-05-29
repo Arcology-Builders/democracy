@@ -3,7 +3,7 @@
 const { getNetwork, Logger, fromJS, toJS } = require('demo-utils')
 const { RemoteDB } = require('demo-rest')
 const { Compiler } = require('demo-compile')
-const { createBM } = require('demo-client')
+const { createBM } = require('demo-contract')
 const LOGGER = new Logger('compile.bin')
 
 const eth = getNetwork()
@@ -12,7 +12,7 @@ const main = async(sourceFile, hostname, port) => {
   const chainId = await eth.net_version()
   let bm
   if (hostname && port) {
-    bm = createBM({
+    bm = await createBM({
       sourcePath : 'contracts',
       hostname   : hostname,
       port       : port,

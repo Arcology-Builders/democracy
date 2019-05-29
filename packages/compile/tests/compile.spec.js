@@ -3,11 +3,11 @@ const assert     = require('chai').assert
 
 const { keccak } = require('ethereumjs-util')
 const utils      = require('demo-utils')
-const { Logger, ZEPPELIN_SRC_PATH, toJS } = utils
+const { Logger, ZEPPELIN_SRC_PATH, fromJS, toJS } = utils
 
 const { ContractsManager, isCompile, isContract, getInputsToBuild }
              = require('demo-contract')
-const { Compiler } = require('..')
+const { Compiler, Flattener } = require('..')
 const LOGGER = new Logger('Compiler Test')
 
 describe('Democracy compiling.', () => {
@@ -21,7 +21,6 @@ describe('Democracy compiling.', () => {
   const SOURCE_PATH = '../../node_modules/demo-test-contracts/contracts'
   const comp  = new Compiler({startSourcePath: SOURCE_PATH})
   const cm = comp.getContractsManager()
-  //new ContractsManager( '../../node_modules/@democracy.js/test-contracts/contracts' )
 
   before(async () => {
     await cm.cleanAllCompiles()
@@ -34,7 +33,7 @@ describe('Democracy compiling.', () => {
 
   it( 'gets the correct requested inputs' , (done) => {
     const { requestedInputs, findImports } =
-      comp.getRequestedInputsFromDisk( 'ERC20.sol' , [ZEPPELIN_SRC_PATH] )
+      comp.getRequestedInputsFromDisk( 'ERC20.sol' , new Flattener() )
     assert.equal(1, requestedInputs.count())
     assert.equal('ERC20.sol', requestedInputs.get('ERC20').get('filename'))
     const safeMath = fs.readFileSync(
@@ -61,15 +60,29 @@ describe('Democracy compiling.', () => {
     assert.ok(sourcesToBuild.has('ERC20.sol'), 'ERC20.sol is a filename to be built')
     const erc20 = fs.readFileSync(
       '../../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol').toString()
-    assert.equal(erc20, sourcesToBuild.get('ERC20.sol'))
+    assert.equal(erc20, sourcesToBuild.get('ERC20.sol').content)
     const solc = require('solc')
-    const outputs = solc.compile({sources: sourcesToBuild.toJS()}, 0, _findImports)
-    assert.ok(outputs.contracts['ERC20.sol:ERC20'])
+
+    const inputs = {
+      language: 'Solidity',
+      settings: {
+        outputSelection: {
+          '*': {
+            '*': [ '*' ]
+          }
+        }
+      },
+      sources: toJS( sourcesToBuild ),
+    }
+
+    const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), _findImports))
+    LOGGER.debug('OUTPUTS', outputs)
     
-    // Re-enable if you ever need to dump a fresh spec
-    //fs.writeFileSync('specs/solc-output.txt', JSON.stringify(outputs, null, '  '))
+    assert.ok(outputs.contracts['ERC20.sol']['ERC20'])
+    
     const outputMap =
-      await comp.getCompileOutputFromSolc(outputs.contracts, _requestedInputs, _existingOutputs)
+      await comp.getCompileOutputFromSolc( fromJS(outputs.contracts),
+                                          _requestedInputs, _existingOutputs)
     assert.ok(outputMap.get('ERC20'))
   })
 
@@ -88,7 +101,8 @@ describe('Democracy compiling.', () => {
   })
 
   it( 'finds an existing contract on disk', async () => {
-    const { findImports, requestedInputs } = comp.getRequestedInputsFromDisk( 'TestLibrary.sol' )
+    const { findImports, requestedInputs } =
+      comp.getRequestedInputsFromDisk( 'TestLibrary.sol', new Flattener() )
     const source = fs.readFileSync(
       '../../node_modules/demo-test-contracts/contracts/TestLibrary.sol').toString()
     assert.equal(requestedInputs.get('TestLibrary').get('source'), source)
@@ -98,7 +112,7 @@ describe('Democracy compiling.', () => {
   it( 'compiles all the way through the pipeline' , async () => {
     compileOutput = await comp.compile( 'TestLibrary.sol' )
     LOGGER.debug('compileOutput', compileOutput)
-    assert.ok(isCompile(compileOutput))
+    assert.ok( isCompile(compileOutput) )
     const contract = await cm.getContract( 'TestLibrary' )
     assert.ok(isContract(contract), "TestLibrary should have a compile output.")
   })
@@ -112,7 +126,7 @@ describe('Democracy compiling.', () => {
   it( 'should compile from OpenZeppelin paths', async () => {
     //await cm.cleanContract( 'ERC20' )
     const compile = await comp.compile('ERC20.sol' )
-    assert.ok(isCompile(compile))
+    assert.ok( isCompile(compile) )
     
     await cm.cleanCompile(compile)
     assert.notOk(await cm.getContract('ERC20'))

@@ -8,6 +8,8 @@ const { Seq, Map, List } = require('immutable')
 const utils = {}
 
 utils.DB_DIR       = 'db'
+utils.OUTS_DIR     = 'compileOutputs'
+utils.FLATS_DIR    = 'sourcesFlattened'
 utils.SOURCES_DIR  = 'contracts'
 utils.COMPILES_DIR = 'compiles'
 utils.LINKS_DIR    = 'links'
@@ -47,6 +49,31 @@ utils.equal = (a,b) => {
   if (Map.isMap(a) && Map.isMap(b)) { return utils.immEqual(a,b) }
   if (List.isList(a) && List.isList(b)) { return utils.immEqual(a,b) }
   return utils.deepEqual(a,b)
+}
+
+/**
+ * Determines if two newline delimited texts are equal by line.
+ *
+ * @method textsEqual
+ * @memberof module:utils
+ * @param a {String} first text to compare
+ * @param b {String} first text to compare
+ * @return first line number where the two texts differ, or -1 if they are identical
+ */
+utils.textsEqual = (a,b) => {
+  const aLines = a.split('\n')
+  const bLines = b.split('\n')
+  for (let i = 0; i < aLines.length; i += 1) {
+    if ( aLines[i] !== bLines[i] ) { return i }
+  }
+  return -1
+}
+
+utils.stringsEqual = (a,b) => {
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) { return i }
+  }
+  return -1
 }
 
 /*
@@ -120,6 +147,11 @@ utils.typedArraysEqual = (_a, _b) => {
   }
 }
 
+/**
+ * @param _a {Immutable} first list or map to compare.
+ * @param _b {Immutable} second list or map to compare.
+ * @return true if the two objects have equal value (JSON strings) false otherwise.
+ */
 utils.immEqual = (_a, _b) => {
   return JSON.stringify(_a.toJS()) === JSON.stringify(_b.toJS())
 }

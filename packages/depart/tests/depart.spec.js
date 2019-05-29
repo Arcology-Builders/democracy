@@ -21,6 +21,13 @@ describe( 'Departures', () => {
   let accounts
   let finalState
 
+  const m1 = deployerMixin({ unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0 })
+  const m2 = departMixin({
+    name            : "simple-departure",
+    autoConfig      : false,
+    sourcePath      : "../../node_modules/demo-test-contracts/contracts",
+  })
+
   before(async () => {
     accounts = await eth.accounts()
     LOGGER.debug('before')
@@ -28,12 +35,6 @@ describe( 'Departures', () => {
   })
 
   it( 'executes a simple departure', async () => { 
-    const m1 = deployerMixin({ unlockSeconds: 15, testValueETH: '0.1', testAccountIndex: 0 })
-    const m2 = departMixin({
-      name            : "simple-departure",
-      autoConfig      : false,
-      sourcePath      : "../../node_modules/demo-test-contracts/contracts",
-    })
     const departFunc = async (state) => {
       const { compile, link, deploy, bm } = state.toJS() 
       LOGGER.info( 'Compiling', Date.now() )
@@ -72,7 +73,18 @@ describe( 'Departures', () => {
     assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
     assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')))
   })
-
+/*
+  it( 'auto-creates contracts', async () => {
+    const departFunc = async (state) => {
+      const { deployed, deployerAddress } = state.toJS() 
+      const ds = await deployed('DifferentSender')
+      ds.send(accounts[2], { from: accounts[2], value: toWei('0.1', 'ether') } )
+      return new Map({ 'result': true })
+    }
+    await run( departFunc, [ m1, m2 ] )
+    
+  })
+*/
   it( 'cleans', async () => {
     await finalState.clean()
   })
@@ -83,4 +95,7 @@ describe( 'Departures', () => {
     assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, 'DifferentSender-deploy.json')))
   })
 
+  after(() => {
+    wallet.shutdownSync()
+  })
 })

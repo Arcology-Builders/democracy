@@ -12,7 +12,7 @@ const compileNewFile = async (c) => {
 
   // Write a new source file from scratch
   if (!fs.existsSync('contracts')) { fs.mkdirSync('contracts') }
-  const source = 'contract TestRecompile { uint256 public thing; constructor() { thing = 0x1; } }'
+  const source = 'pragma solidity >=0.5.0; contract TestRecompile { uint256 public thing; constructor() public { thing = 0x1; } }'
   fs.writeFileSync(path.join('contracts', 'TestRecompile.sol'), source)
 
   const inputHash = util.keccak(source).toString('hex')
@@ -49,7 +49,7 @@ const checkNoRecompile = async (c, prevInputHash, prevTimestamp) => {
 
 const checkRecompile = async (c, prevInputHash, prevTimestamp) => {
 
-  const source2 = 'contract TestRecompile { uint256 public thing2; constructor() { thing2 = 0x1; } }'
+  const source2 = 'pragma solidity >=0.5.0; contract TestRecompile { uint256 public thing2; constructor() public { thing2 = 0x1; } }'
   fs.unlinkSync(path.join('contracts', 'TestRecompile.sol'))
   fs.writeFileSync(path.join('contracts', 'TestRecompile.sol'), source2)
   const inputHash2 = util.keccak(source2)

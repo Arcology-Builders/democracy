@@ -44,9 +44,9 @@ describe('Democracy recompiling remotely on source change', () => {
   it( 'reads back a remote compile that it writes', async () => {
     const compile = await c.compile( 'SomeContract.sol' )
     LOGGER.info('compile', compile.toString())
-    assert(isCompile(compile))
+    assert( isCompile(compile) )
     const contract = await c.getContractsManager().getContract( 'SomeContract' )
-    assert(isContract(contract))
+    assert( isContract(contract) )
     LOGGER.info('CONTRACT', contract)
     LOGGER.info('COMPILE', compile.get('SomeContract'))
     assert.equal(JSON.stringify(compile.get('SomeContract').toJS()),
