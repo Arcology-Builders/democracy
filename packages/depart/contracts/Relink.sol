@@ -5,11 +5,11 @@ contract Relink {
     uint256 public a;
 
     constructor() public {
-        self.a = 0;
+        a = 0;
     }
 
-    function outward(uint256 _a) {
-        self.a = _a
+    function outward(uint256 _a) public {
+        a = _a;
     }
 
 }

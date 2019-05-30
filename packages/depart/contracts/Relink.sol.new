@@ -5,12 +5,12 @@ contract Relink {
     uint256 public a;
 
     constructor() public {
-        self.a = 0;
+        a = 0;
     }
 
-    function outward(uint256 _a, boolean _write) {
+    function outward(uint256 _a, bool _write) public {
         if (_write) {
-            self.a = _a
+            a = _a;
         }
     }
 
