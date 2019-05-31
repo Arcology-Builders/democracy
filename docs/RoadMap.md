@@ -5,12 +5,16 @@ Tools for running a distributed country, currently on Ethereum.
 
 ## Next Release Goals
 
-* 0.3.1 - Improved, succint departure syntax, taking in the following args from depart.js
-  * `unlockSeconds`
-  * `sourcePath`
-  * `testEthValue`
-  * `testAccountIndex`
-* 0.3.2 - Deployed ZKAssets with AZTEC
+* 0.3.1 - Improved, succint departure syntax, successful ZkAssets with AZTEC
+  * taking in the following args from depart.js
+    * `unlockSeconds`
+    * `sourcePath`
+    * `testEthValue`
+    * `testAccountIndex`
+  * multiple source paths
+  * pass in `deployed` and `minedTx` for transparency
+  * allow depart.js to specify command-line args like tradeSymbol
+* 0.3.2 - Successful deploy of GenesisDAO / Alchemy
 
 ## Roadmap
 
