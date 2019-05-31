@@ -14,7 +14,10 @@ Tools for running a distributed country, currently on Ethereum.
   * multiple source paths
   * pass in `deployed` and `minedTx` for transparency
   * allow depart.js to specify command-line args like tradeSymbol
-* 0.3.2 - Successful deploy of GenesisDAO / Alchemy
+  * find some other logic for process.argv other than `*.js` to skip JS commands
+  * add names command-line flags instead of positional args
+  * install javascript bin
+* 0.3.2 - Document departure format, and build pipeline
 
 ## Roadmap
 
