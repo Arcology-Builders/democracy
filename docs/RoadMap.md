@@ -3,6 +3,15 @@ Road Map
 
 Tools for running a distributed country, currently on Ethereum.
 
+## Next Release Goals
+
+* 0.3.1 - Improved, succint departure syntax, taking in the following args from depart.js
+  * `unlockSeconds`
+  * `sourcePath`
+  * `testEthValue`
+  * `testAccountIndex`
+* 0.3.2 - Deployed ZKAssets with AZTEC
+
 ## Roadmap
 
 This is a tentative roadmap to guide our exploration.
