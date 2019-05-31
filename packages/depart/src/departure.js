@@ -70,10 +70,7 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
       assert(contractName, 'contractName param not given')
       assert(linkId, 'link name not given')
       const linkName = `${contractName}-${linkId}`
-      let output = await bm.getLink( linkName )
-      if (!isLink(output)) {
-        output = await l.link( contractName, linkId, depMap )
-      }
+      const output = await l.link( contractName, linkId, depMap )
       assert(isLink(output))
       links = links.set(linkName, output)
       return output
@@ -91,13 +88,27 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
       return output
     }
 
-    const deployed = async (contractName, deployID) => {
+    const deployed = async (contractName, ctorArgList, deployID, force) => {
       await compile( contractName, `${contractName}.sol` )
       await link( contractName, 'link' )
       const _deployID = (deployID) ? deployID : 'deploy'
-      const deployedContract = await deploy( contractName, 'link', _deployID )
+      const deployedContract =
+        await deploy( contractName, 'link', _deployID, ctorArgList, force )
       const contract = new Contract({ deployerEth: deployerEth, deploy: deployedContract })
-      return contract.getInstance()
+      return await contract.getInstance()
+    }
+
+    const minedTx = async ( method, argList, options ) => {
+      /*
+      return contract.getTxReceipt({
+        method: method,
+        args: argList,
+        options: options || {from: deployerAddress},
+      })
+     */
+      const _options = Map({ from: deployerAddress, gas: getConfig()['GAS_LIMIT'] })
+        .merge(options).toJS()
+      return await deployerEth.getTransactionReceipt( await method(...argList, _options) )
     }
 
     const getCompiles = () => {
@@ -134,6 +145,7 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
       clean       : clean,
       deploy      : deploy,
       deployed    : deployed,
+      minedTx     : minedTx,
       link        : link,
       compile     : compile,
       bm          : bm,

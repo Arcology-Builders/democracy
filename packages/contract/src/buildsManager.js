@@ -48,11 +48,11 @@ bm.BuildsManager = class extends ContractsManager {
     return this.deploysMap.get(deployName)
   } 
 
-  async setDeploy(deployName, deployOutput) {
+  async setDeploy(deployName, deployOutput, overwrite) {
     const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
     LOGGER.debug(`Writing deploy to ${deployFilePath}`)
     this.deploysMap = this.deploysMap.set(deployName, deployOutput)
-    return awaitOutputter(this.outputter(deployFilePath, deployOutput, true),
+    return awaitOutputter(this.outputter(deployFilePath, deployOutput, overwrite),
                           () => { return deployOutput })
   }
 
@@ -68,12 +68,12 @@ bm.BuildsManager = class extends ContractsManager {
     return linksMap.get(linkName)
   }
   
-  async setLink(linkName, linkOutput) {
+  async setLink(linkName, linkOutput, overwrite) {
     const linkFilePath = `${LINKS_DIR}/${linkName}`
 
     LOGGER.debug(`Writing link to ${linkFilePath}`)
     this.linksMap = this.linksMap.set(linkName, linkOutput)
-    return awaitOutputter(this.outputter(linkFilePath, linkOutput, true),
+    return awaitOutputter(this.outputter(linkFilePath, linkOutput, overwrite),
                           () => { return linkOutput })
   }
 

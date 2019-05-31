@@ -107,9 +107,8 @@ deploys.Deployer = class {
       inputHash    : inputHash,
     })
 
-    return this.bm.setDeploy(deployName, deployOutput)
-    //awaitOutputter(this.bm.outputter(deployFilePath, deployOutput, true),
-    //                      () => { return deployOutput })
+    // This is an updated deploy, overwrite it
+    return this.bm.setDeploy(deployName, deployOutput, true)
   }
 
 }

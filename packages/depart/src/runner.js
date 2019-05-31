@@ -4,12 +4,13 @@
  * Command-line runners and mixins for extracting arguments and configs of all kinds
  */
 
+const path = require('path')
 const assert = require('chai').assert
 const { toWei } = require('web3-utils')
 const { getConfig, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map, List } = require('immutable')
-const LOGGER = new Logger('cli/runner')
+const LOGGER = new Logger('runner.spec')
 
 const runners = {}
 
@@ -63,7 +64,8 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
  *
  * @method argListMixin
  * @memberof module:cli
- * @param argList {Array} of strings, names to give positional arguments.
+ * @param argList {Array} of tuples [String, defaultVal],
+ *   names and default values to give positional arguments.
  * @return {Function} a function taking no input state and returning a map of
  *         the names in `argList` as keys and corresponding positional command-line args
  *         as values.
@@ -71,10 +73,30 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
 runners.argListMixin = (argList) => {
   return async (state) => {
     const _argList = argList ? argList : []
-    const actualLength = process.argv.length
-    const expectedLength = argList.length
-    const offset = actualLength - expectedLength
-    const argMap = new Map(List(_argList).map((name, i) => [name, process.argv[i+offset] ]))
+    LOGGER.debug('args', process.argv)
+    const scriptName = path.basename(module.filename)
+    const scriptArg = List(process.argv).skipUntil(
+      (x) => (x.startsWith('--') || x.endsWith('.js'))
+    ) 
+    const nonScriptArgs = scriptArg.skipUntil((x) => !x.endsWith('.js'))
+    let args = nonScriptArgs
+    let found = true
+    while (args.count() >= 2 && found) {
+      if (args.get(0).startsWith('--')) {
+        if (!args.get(1).startsWith('--')) {
+          args = args.slice(2)
+        } else {
+          args = args.slice(1)
+        }
+        found = true
+      } else {
+        found = false
+      }
+      LOGGER.debug('args', args)
+    }
+    const argMap = new Map(List(_argList).map(
+      ([name, defaultVal], i) => [name, args.get(i) || defaultVal ]
+    ))
     LOGGER.debug('argMap', argMap)
     return argMap
   }

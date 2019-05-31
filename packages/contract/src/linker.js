@@ -114,11 +114,8 @@ linker.Linker = class {
       inputHash      : inputHash,
     })
 
-    return this.bm.setLink(linkName, linkOutput)
-    /*
-    return awaitOutputter(this.bm.outputter(linkFilePath, linkOutput),
-                          () => { return linkOutput })
-                         */
+    // This is an updated link, overwrite it
+    return this.bm.setLink(linkName, linkOutput, true)
   }
 
 }

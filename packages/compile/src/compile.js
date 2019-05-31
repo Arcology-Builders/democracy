@@ -74,10 +74,12 @@ compiles.Compiler = class {
            
       const now = new Date() 
       const inputHash = requestedInputs.get(contractName).get('inputHash') 
+      const bytecode = contract.get('evm').get('bytecode').get('object') 
+      assert(bytecode)
       const preHash = Map({
         type       : 'compile',
         name       : contractName,
-        code       : contract.get('bytecode'),
+        code       : bytecode,
         abi        : contract.get('abi'),
         inputHash  : inputHash,
         timestamp  : now.getTime(),
@@ -270,12 +272,10 @@ compiles.Compiler = class {
     }
 
     const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
-    /*
     if (outputs.errors) {
       LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
       throw new Error(outputs.errors)
     }
-*/
     assert.ok(outputs.contracts, `Expected compile output for requested sources`)
     
     await this.updateFlatten(flattener, source)

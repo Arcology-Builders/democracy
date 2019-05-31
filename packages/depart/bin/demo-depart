@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+'use strict'
+
+// Democracy Depart command-line tool: orchestrated deploys to the chain
+
+const { Map }   = require('immutable')
+const fs = require('fs')
+const path = require('path')
+const { wallet } = require('demo-keys')
+const { getConfig } = require('demo-utils')
+const { run, deployerMixin, departMixin, argListMixin } = require('..')
+
+const m0 = argListMixin([
+  [ 'departFileName'  , 'depart.js' ],
+  [ 'testValueEth'    , '0.1'       ],
+  [ 'testAccountIndex', 0           ],
+])
+
+// Insert this custom mixin to read in a departure file and save its name
+// and callback
+const m1 = async (state) => {
+  const { departFileName } = state.toJS()
+  const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
+
+  return Map({
+    departFile : departFile,
+  })
+}
+
+const m2 = deployerMixin({ unlockSeconds: 30 })
+
+const m3 = departMixin({
+  autoConfig : true,
+  sourcePath : "contracts",
+})
+
+const departFunc = async (state) => {
+  const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
+          departFile } = state.toJS() 
+
+  let departName
+  let departCallback
+  const depart = (name, callback) => {
+    departName = name
+    departCallback = callback
+  }
+  eval(departFile)
+  const result = await departCallback()
+  wallet.shutdownSync()
+  return new Map({ 'result': result })
+}
+
+run( departFunc, [ m0, m1, m2, m3 ] )
