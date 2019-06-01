@@ -3,6 +3,22 @@ Road Map
 
 Tools for running a distributed country, currently on Ethereum.
 
+## Next Release Goals
+
+* 0.3.1 - Improved, succint departure syntax, successful ZkAssets with AZTEC
+  * taking in the following args from depart.js
+    * `unlockSeconds`
+    * `sourcePath`
+    * `testEthValue`
+    * `testAccountIndex`
+  * multiple source paths
+  * pass in `deployed` and `minedTx` for transparency
+  * allow depart.js to specify command-line args like tradeSymbol
+  * find some other logic for process.argv other than `*.js` to skip JS commands
+  * add names command-line flags instead of positional args
+  * install javascript bin
+* 0.3.2 - Document departure format, and build pipeline
+
 ## Roadmap
 
 This is a tentative roadmap to guide our exploration.
