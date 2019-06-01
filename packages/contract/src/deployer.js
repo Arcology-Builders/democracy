@@ -49,8 +49,9 @@ deploys.Deployer = class {
     // Warn with multiple deploys with the same ID
     const deploy = deployMap.get(deployName)
     if (Map.isMap(deploy) && (deploy.get('inputHash') === inputHash) && !force) {
-      const deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
-      LOGGER.warn(deployError)
+      LOGGER.info(`${deployName} has already been deployed`,
+                  `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
+      LOGGER.debug(`with input hash ${inputHash}`)
       return deploy
     } else {
       LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)

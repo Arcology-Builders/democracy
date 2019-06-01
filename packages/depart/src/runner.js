@@ -23,8 +23,15 @@ const runners = {}
  * @return {Function} returns a mixin which takes no input state and returns an
  *   Immutable {Map} of `chainId`, `deployerAddress`, `deployerPassword`, `deployerEth`
  */
-runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
+runners.deployerMixin = () => {
   return async (state) => {
+    LOGGER.debug('Deployer Input State', state)
+    const { testValueETH, testAccountIndex, unlockSeconds } = state.toJS()
+
+    assert(testValueETH, `testValueETH not found in input state`)
+    assert(Number.isInteger(testAccountIndex), `testAccountIndex not found in input state`)
+    assert(Number.isInteger(unlockSeconds), `unlockSeconds not found in input state`)
+
     const configAddress  = getConfig()['DEPLOYER_ADDRESS']
     const configPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
@@ -38,14 +45,14 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
     const deployerPassword = configPassword ? configPassword  : _deployerPassword 
 
     assert.equal(deployerEth.address, deployerAddress)
-    if (process.env['NODE_ENV'] === 'DEVELOPMENT') {
+    if (process.env['NODE_ENV'] === 'DEVELOPMENT' && testValueETH !== '0') {
       const eth = getNetwork()
       const testAccounts = await eth.accounts()
       LOGGER.debug('testAccount', testAccounts)
       await wallet.payTest({
         fromAddress : testAccounts[testAccountIndex || 0],
         toAddress   : deployerAddress,
-        weiValue    : (testValueETH) ? toWei(testValueETH, 'ether') : toWei('0.01', 'ether'),
+        weiValue    : toWei(testValueETH, 'ether'),
       })
     }
 
@@ -59,46 +66,61 @@ runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
 }
 
 /**
- * Argument list mixin, takes in a list of names and returns a map of them to
- * positional command-line arguments from index 2 onwards (after `node` and `<scriptName>`.
+ * Argument list mixin, takes in an Immutable Map of names to default values,
+ * and extracts them from the command-line in the form `--argname value`.
+ * There are no positional arguments extractd.
  *
  * @method argListMixin
  * @memberof module:cli
- * @param argList {Array} of tuples [String, defaultVal],
- *   names and default values to give positional arguments.
+ * @param argDefaultMap {Map} an Immutable Map of arg String names to default values.
+ *   If there are no default values, pass in nothing to populate a map from CLI args.
  * @return {Function} a function taking no input state and returning a map of
  *         the names in `argList` as keys and corresponding positional command-line args
  *         as values.
  */
-runners.argListMixin = (argList) => {
+runners.argListMixin = (argDefaultMap) => {
   return async (state) => {
-    const _argList = argList ? argList : []
+    assert( !argDefaultMap || Map.isMap(argDefaultMap),
+           `Pass in an Immutable Map or nothing for default args` )
+    const _argDefaultMap = argDefaultMap ? argDefaultMap : Map({})
     LOGGER.debug('args', process.argv)
     const scriptName = path.basename(module.filename)
-    const scriptArg = List(process.argv).skipUntil(
-      (x) => (x.startsWith('--') || x.endsWith('.js'))
+
+    const scriptArgs = List(process.argv).skipUntil(
+      (x) => x.startsWith('--')
     ) 
-    const nonScriptArgs = scriptArg.skipUntil((x) => !x.endsWith('.js'))
-    let args = nonScriptArgs
     let found = true
+    let args = scriptArgs
+    let argMap = new Map({})
     while (args.count() >= 2 && found) {
       if (args.get(0).startsWith('--')) {
+        const key = args.get(0).slice(2)
         if (!args.get(1).startsWith('--')) {
+          const value = args.get(1)
+          const floatVal = parseFloat(value)
+          const intVal = parseInt(value)
+          const convertedVal = Number.isFinite(floatVal) ? floatVal :
+            (Number.isInteger(intVal) ? intVal : value)
+          argMap = argMap.set(key, convertedVal)
+          LOGGER.debug(`found arg ${key}=${convertedVal}`)
           args = args.slice(2)
         } else {
+          argMap = argMap.set(key, true)
+          LOGGER.debug(`found binary arg ${key}`)
           args = args.slice(1)
         }
         found = true
       } else {
+        LOGGER.warn(`Ignoring positional args ${args}`)
         found = false
       }
-      LOGGER.debug('args', args)
     }
-    const argMap = new Map(List(_argList).map(
-      ([name, defaultVal], i) => [name, args.get(i) || defaultVal ]
-    ))
-    LOGGER.debug('argMap', argMap)
-    return argMap
+    const defaultArgsFilled = _argDefaultMap.map(
+      (defaultVal, name, i) => (argMap.get(name) || defaultVal)
+    )
+    const finalArgMap = argMap.merge(defaultArgsFilled)
+    LOGGER.debug('finalArgMap', finalArgMap)
+    return finalArgMap
   }
 }
 

@@ -19,7 +19,7 @@ describe('Democracy compiling.', () => {
   let _findImports
   let _contracts
   const SOURCE_PATH = '../../node_modules/demo-test-contracts/contracts'
-  const comp  = new Compiler({startSourcePath: SOURCE_PATH})
+  const comp  = new Compiler({ sourcePathList: [ SOURCE_PATH ] })
   const cm = comp.getContractsManager()
 
   before(async () => {
@@ -27,8 +27,8 @@ describe('Democracy compiling.', () => {
   })
 
   it( 'compiler has correct start source path', () => {
-    assert.equal(comp.startSourcePath, SOURCE_PATH,
-    `Incorrect source path ${comp.startSourcePath}`)
+    assert(comp.sourcePathSet.has(SOURCE_PATH),
+    `Incorrect source path ${comp.sourcePathSet.toJS()}`)
   })
 
   it( 'gets the correct requested inputs' , (done) => {

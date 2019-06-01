@@ -12,7 +12,7 @@ describe('Democracy recompiling on source change', () => {
   
   let _inputHash
   let _timestamp
-  const c  = new Compiler( 'contracts' )
+  const c  = new Compiler({})
   const cm = new ContractsManager( 'contracts' )
 
   before(async () => {

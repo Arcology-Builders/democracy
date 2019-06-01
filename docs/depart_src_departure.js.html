@@ -77,7 +77,7 @@
 
     
 
-    <h3>Classes</h3><ul><li id="BuildsManager-nav"><a href="bm.BuildsManager.html">BuildsManager</a></li><li id="ContractsManager-nav"><a href="cm.ContractsManager.html">ContractsManager</a><ul class='methods'><li data-type="method" id="ContractsManager-getContract-nav"><a href="cm.ContractsManager.html#getContract">getContract</a></li></ul></li><li id="Compiler-nav"><a href="module-compile.Compiler.html">Compiler</a></li></ul><h3>Modules</h3><ul><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li><li data-type="method" id="utils-textsEqual-nav"><a href="module-utils.html#.textsEqual">textsEqual</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-createEncryptedAccount-nav"><a href="module-wallet.html#.createEncryptedAccount">createEncryptedAccount</a></li><li data-type="method" id="wallet-createSignerEth-nav"><a href="module-wallet.html#.createSignerEth">createSignerEth</a></li><li data-type="method" id="wallet-init-nav"><a href="module-wallet.html#.init">init</a></li><li data-type="method" id="wallet-loadEncryptedAccount-nav"><a href="module-wallet.html#.loadEncryptedAccount">loadEncryptedAccount</a></li><li data-type="method" id="wallet-pay-nav"><a href="module-wallet.html#.pay">pay</a></li><li data-type="method" id="wallet-payTest-nav"><a href="module-wallet.html#.payTest">payTest</a></li><li data-type="method" id="wallet-prepareSignerEth-nav"><a href="module-wallet.html#.prepareSignerEth">prepareSignerEth</a></li><li data-type="method" id="wallet-saveEncryptedAccount-nav"><a href="module-wallet.html#.saveEncryptedAccount">saveEncryptedAccount</a></li><li data-type="method" id="wallet-unlockEncryptedAccount-nav"><a href="module-wallet.html#.unlockEncryptedAccount">unlockEncryptedAccount</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#utils">utils</a></li></ul>
+    <h3>Classes</h3><ul><li id="BuildsManager-nav"><a href="bm.BuildsManager.html">BuildsManager</a></li><li id="ContractsManager-nav"><a href="cm.ContractsManager.html">ContractsManager</a><ul class='methods'><li data-type="method" id="ContractsManager-getContract-nav"><a href="cm.ContractsManager.html#getContract">getContract</a></li></ul></li><li id="Contract-nav"><a href="contract.Contract.html">Contract</a></li><li id="Compiler-nav"><a href="module-compile.Compiler.html">Compiler</a></li></ul><h3>Modules</h3><ul><li id="compile-nav"><a href="module-compile.html">compile</a><ul class='methods'><li data-type="method" id="compile-compile-nav"><a href="module-compile.html#.compile">compile</a></li><li data-type="method" id="compile-updateFlatten-nav"><a href="module-compile.html#.updateFlatten">updateFlatten</a></li></ul></li><li id="contract-nav"><a href="module-contract.html">contract</a><ul class='methods'><li data-type="method" id="contract-createContract-nav"><a href="module-contract.html#.createContract">createContract</a></li><li data-type="method" id="contract-getInstance-nav"><a href="module-contract.html#.getInstance">getInstance</a></li><li data-type="method" id="contract-init-nav"><a href="module-contract.html#.init">init</a></li></ul></li><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li><li data-type="method" id="utils-textsEqual-nav"><a href="module-utils.html#.textsEqual">textsEqual</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-createEncryptedAccount-nav"><a href="module-wallet.html#.createEncryptedAccount">createEncryptedAccount</a></li><li data-type="method" id="wallet-createSignerEth-nav"><a href="module-wallet.html#.createSignerEth">createSignerEth</a></li><li data-type="method" id="wallet-init-nav"><a href="module-wallet.html#.init">init</a></li><li data-type="method" id="wallet-loadEncryptedAccount-nav"><a href="module-wallet.html#.loadEncryptedAccount">loadEncryptedAccount</a></li><li data-type="method" id="wallet-pay-nav"><a href="module-wallet.html#.pay">pay</a></li><li data-type="method" id="wallet-payTest-nav"><a href="module-wallet.html#.payTest">payTest</a></li><li data-type="method" id="wallet-prepareSignerEth-nav"><a href="module-wallet.html#.prepareSignerEth">prepareSignerEth</a></li><li data-type="method" id="wallet-saveEncryptedAccount-nav"><a href="module-wallet.html#.saveEncryptedAccount">saveEncryptedAccount</a></li><li data-type="method" id="wallet-unlockEncryptedAccount-nav"><a href="module-wallet.html#.unlockEncryptedAccount">unlockEncryptedAccount</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#utils">utils</a></li></ul>
   </nav>
 
   <div id="main">
@@ -109,30 +109,38 @@ const departs = {}
 /**
  * Orchestrate a reproducible, idempotent departure of smart contracts for the blockchain,
  * storing artifacts for later web interfaces.
+ * The following runtime state variables are required or optional.
+ *
+ * Required
+ * * chainId {String}
+ * * deployerEth signer eth
+ * * deployerAddress Ethereum address
+ *
+ * Optional
+ * * departName {String}
+ * * sourcePathList {Array}
+ * * autoConfig {Boolean}
  *
  * @method depart
  * @memberof @module:depart
- * @param name {String} optional, a human-readable name
- * @param autoConfig {Boolean} optional, whether to automatically connect to the automatically
- *        configured remote store. Default is `true`.
- * @param sourcePath {String} local source path of Solidity contracts.
  */
-departs.departMixin = ({ name, autoConfig, sourcePath }) => {
+departs.departMixin = () => {
   return async (state) => {
 
-    const{ chainId, deployerEth, deployerAddress } = state.toJS()
+    const{ chainId, deployerEth, deployerAddress, departName, autoConfig,
+      sourcePathList } = state.toJS()
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
 
     const bm = await createBM({
-      sourcePath: sourcePath,
+      sourcePathList: sourcePathList,
       chainId   : state.get('chainId'),
       autoConfig: !(autoConfig === false),
     })
 
     const c = new Compiler({
-      startSourcePath: sourcePath, bm: bm
+      sourcePathList: sourcePathList, bm: bm
     })
     const l = new Linker({
       bm: bm
@@ -235,7 +243,7 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
     }
 
     return new Map({
-      departName  : name,
+      departName  : departName,
       clean       : clean,
       deploy      : deploy,
       deployed    : deployed,

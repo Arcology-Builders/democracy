@@ -42,7 +42,7 @@ describe( 'transaction sender', () => {
            `Newly created account has invalid address ${senderAddress}` )
     signerEth = await wallet.createSignerEth({url: getEndpointURL(), address: senderAddress})
     bm = new BuildsManager({
-      startSourcePath: 'node_modules/demo-test-contracts/contracts',
+      sourcePathList: ['node_modules/demo-test-contracts/contracts'],
       chainId: chainId
     })
     const d = new Deployer({
@@ -73,7 +73,7 @@ describe( 'transaction sender', () => {
       value : '10000',
       data  : contract.getMethodCallData('send', [accounts[2]])
     })
-    assert.equal(gas, 83443)
+    assert((gas >= 83370) && (gas <= 83443))
   })
 
   it( 'creates a raw tx' , async () => {
@@ -84,8 +84,10 @@ describe( 'transaction sender', () => {
     const value = toWei("0.001", "ether")
     const gasPrice = toHex(toWei(String(getConfig()['GAS_PRICE']), 'gwei'))
     LOGGER.info('GAS PRICE', gasPrice)
+    assert( new BN(tx.gas).gte(new BN('16644')), `${tx.gas} is not >= 16644` )
+    assert( new BN(tx.gas).lte(new BN('0x1668b')), `${tx.gas} is not >= 0x1668b` )
     assert.equal(JSON.stringify(tx),
-      `{"nonce":"${nonce}","gas":"1668b","gasPrice":"${gasPrice}","data":`+
+      `{"nonce":"${nonce}","gas":"${toHex(tx.gas).slice(2)}","gasPrice":"${gasPrice}","data":`+
       `"${expected}",`+
       `"from":"${senderAddress}","to":`+
       `"${deployAddress}","value":"${value}","chainId":"${hexChainId}"}`

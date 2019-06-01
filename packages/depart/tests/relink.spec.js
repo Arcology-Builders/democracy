@@ -13,7 +13,7 @@ const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-cont
 const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, deployerMixin, departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -22,12 +22,14 @@ describe( 'Departures', () => {
   let accounts
   let finalState
 
-  const m1 = deployerMixin({ unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0 })
-  const m2 = departMixin({
-    name            : "relink",
+  const m0 = argListMixin(Map({
+    unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0,
+    departName      : "relink",
     autoConfig      : true,
-    sourcePath      : "contracts",
-  })
+    sourcePathList  : ["contracts-new"],
+  }))
+  const m1 = deployerMixin()
+  const m2 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -49,8 +51,8 @@ describe( 'Departures', () => {
                                            { from: deployerAddress,
                                              gas: getConfig()['GAS_LIMIT'] })
       
-      fs.renameSync('./contracts/Relink.sol', './contracts/Relink.sol.old')
-      fs.renameSync('./contracts/Relink.sol.new', './contracts/Relink.sol')
+      fs.renameSync('./contracts-new/Relink.sol', './contracts-new/Relink.sol.old')
+      fs.renameSync('./contracts-new/Relink.sol.new', './contracts-new/Relink.sol')
 
       await compile( 'Relink', 'Relink.sol' )
       const lout2 = await link( 'Relink', 'link' )
@@ -62,12 +64,12 @@ describe( 'Departures', () => {
       const relink = await deployed( 'Relink' )
       await minedTx( relink.outward, [new BN(1234), true] )
       assert( new BN(1234).eq((await relink.a())['0']) )
-      fs.renameSync('./contracts/Relink.sol', './contracts/Relink.sol.new')
-      fs.renameSync('./contracts/Relink.sol.old', './contracts/Relink.sol')
+      fs.renameSync('./contracts-new/Relink.sol', './contracts-new/Relink.sol.new')
+      fs.renameSync('./contracts-new/Relink.sol.old', './contracts-new/Relink.sol')
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( departFunc, [ m1, m2 ] )).toJS()
+    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
     return finalState
   })
 

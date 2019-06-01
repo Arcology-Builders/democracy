@@ -22,7 +22,7 @@ describe( 'Contract parent class', () => {
     const chainId = await eth.net_version() 
     bm = new BuildsManager({
       autoConfig: true,
-      startSourcePath: '../../node_modules/demo-test-contracts/contracts',
+      sourcePathList: ['../../node_modules/demo-test-contracts/contracts'],
       chainId: chainId
     })
     await bm.cleanLink( 'DifferentSender-link' )

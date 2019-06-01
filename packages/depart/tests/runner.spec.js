@@ -12,34 +12,38 @@ describe( 'Runners', () => {
   it( 'creates an arglist mixin', async () => {
   
     // Test reading default values for argList, with no argv's passed in
-    const alm0 = await argListMixin([['anotherThing', 2], ['babaloo', 'eighteen']])
+    const alm0 = await argListMixin(Map({'anotherThing': 2, 'babaloo': 'eighteen'}))
     const out0 = await alm0(Promise.resolve(Map({})))
-    assert( immEqual( out0, new Map({
-      'anotherThing': 2, 'babaloo': 'eighteen'}) ),
-      `Output state was ${out0}` )
+    assert.equal( out0.get('anotherThing'), 2 )
+    assert.equal( out0.get('babaloo'), 'eighteen' )
 
     // Test reading the argv's
-    process.argv.push('a', 'b')
-    const alm = await argListMixin([['anotherThing', 2], ['babaloo', 'eighteen']])
+    process.argv.push('--anotherThing', 'a', '--babaloo', 'b')
+    const alm = await argListMixin(Map({'anotherThing': 2, 'babaloo': 'eighteen'}))
     const out = await alm(Promise.resolve(Map({})))
-    assert( immEqual( out, new Map({
-      'anotherThing': 'a', 'babaloo': 'b', 'calisthenics': undefined}) ),
-      `Output state was ${out}` )
+    assert.equal( out.get('anotherThing'), 'a' )
+    assert.equal( out.get('babaloo'), 'b' )
   
     // Runs a function with mixins, depends on process.argv above
-    const alm2 = await argListMixin([['anteater', undefined], ['bugbear', undefined]])
-    const dm = await deployerMixin({ unlockSeconds: 1 })
+    const alm2 = await argListMixin(Map({
+      'anteater': 'c', 'bugbear': undefined,
+      'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
+    }))
+    const dm = await deployerMixin()
     const mainFunc = async (finalStateProm) => {
       const finalState = await finalStateProm
       assert.equal( finalState.get('chainId'), '2222' )
-      assert.equal( finalState.get('anteater'), 'a' )
+      assert.equal( finalState.get('anteater'), 'c' )
     }
     await run( mainFunc, [ alm2, dm] ) 
   })  
 
   it( 'creates a deployer mixin', async () => {
+    const alm3 = await argListMixin(Map({
+      'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
+    }))
     const dm = await deployerMixin({ unlockSeconds: 1 })
-    const out = await dm(Promise.resolve(Map({})))
+    const out = await dm(await alm3())
     LOGGER.debug('DM out', out)
     assert.equal( out.get('deployerAddress').length, 42 )
     assert.equal( out.get('deployerPassword').length, 64 )

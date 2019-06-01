@@ -23,8 +23,16 @@ const cm = {}
  */
 cm.ContractsManager = class {
   
-  constructor({startSourcePath, inputter, outputter}) {
-    this.startSourcePath = startSourcePath
+  constructor({sourcePathList, inputter, outputter}) {
+    this.sourcePathSet = Set(sourcePathList)
+      .filter((d) => {
+        if (!fs.existsSync(d)) {
+          LOGGER.warn(`Source path ${d} does not exist, ignoring.`)
+          return false
+        } else {
+          return true
+        }
+      })
     assert((inputter && outputter) || (!inputter && !outputter))
     this.inputter = inputter || getImmutableKey
     this.outputter = outputter || setImmutableKey
@@ -33,21 +41,16 @@ cm.ContractsManager = class {
   async getContracts() {
     if (!this.contracts) {
       const contractSources = []
-      if (!fs.existsSync(this.startSourcePath)) {
-        LOGGER.warn(`Sources directory '${this.startSourcePath}' not found.`)
-      } else {
-         // start out by finding all contracts rooted in current directory
-        traverseDirs(
-          [this.startSourcePath],
-          (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
-          function(source, f) {
-            const fn = List(f.split(path.sep)).last()
-            const fb = path.basename(fn.split('.')[0])
-            contractSources.push(fb)
-            LOGGER.debug(`Source ${fb}`)
-          }
-        )
-      }
+      traverseDirs(
+        this.sourcePathSet.toJS(),
+        (fnParts) => { return (fnParts.length > 1 && !fnParts[1].startsWith('sol')) },
+        function(source, f) {
+          const fn = List(f.split(path.sep)).last()
+          const fb = path.basename(fn.split('.')[0])
+          contractSources.push(fb)
+          LOGGER.debug(`Source ${fb}`)
+        }
+      )
 
       this.contracts = await awaitInputter(
         this.inputter(COMPILES_DIR, new Map({})),

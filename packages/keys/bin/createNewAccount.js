@@ -5,7 +5,7 @@
 // from DEPLOYER_ADDRESS in your .env
 // Useful for creating a new deployer address
 //
-// Usage: node ./createNewAccount.js [test] [payAll|<payAmount>]
+// Usage: node ./createNewAccount.js [test|env] [payAll|<payAmount>]
 
 const assert = require('chai').assert
 const { getConfig, getNetwork } = require('demo-utils')
@@ -16,6 +16,10 @@ const { List, Range } = require('immutable')
 const mainFunc = async (fundFromTest, payAmount) => {
   await wallet.init({ autoConfig: true, unlockSeconds: 1 })
   const { address, password } = await wallet.createEncryptedAccount()
+  const { address: _address, password: _password } =
+    await wallet.prepareSignerEth({ address: address, password: password })
+  assert.equal( address, _address, `Could not retrieve back the new address` )
+  assert.equal( password, _password, `Could not retrieve back the new password` )
   console.log('Payee Address' , address )
   console.log('Payee Password', password)
 

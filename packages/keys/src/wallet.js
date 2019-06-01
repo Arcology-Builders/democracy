@@ -122,10 +122,11 @@ wallet.unlock_seconds
  */
 wallet.init = async ({ autoConfig, unlockSeconds }) => {
   if (wallet.initialized) { LOGGER.debug('Wallet already initialized.'); return }
+  const _autoConfig = autoConfig || true // save it remotely by default
   if (!require('keythereum')) {
     LOGGER.error('Missing keythereum, did you add a script tag?')
   }
-  const inout = await createInOut({autoConfig: autoConfig})
+  const inout = await createInOut({autoConfig: _autoConfig})
   wallet.inputter = inout.inputter
   wallet.outputter = inout.outputter
   wallet.unlockSeconds = (unlockSeconds) ? unlockSeconds : wallet.UNLOCK_TIMEOUT_SECONDS

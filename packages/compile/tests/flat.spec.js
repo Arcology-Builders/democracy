@@ -6,7 +6,7 @@ const { textsEqual, stringsEqual } = require('demo-utils')
 
 describe('Flattener', () => {
 
-  const c = new Compiler({startSourcePath: 'contracts' })
+  const c = new Compiler({sourcePathList: 'contracts', flatten: true, outputFull: true })
   const flattener = new Flattener()
 
   let flattenedSource
@@ -32,7 +32,7 @@ describe('Flattener', () => {
   })
 
   it( 'recompiling flattened reduced file gives same results', async () => {
-    const comp2 = new Compiler({startSourcePath: './tests' })
+    const comp2 = new Compiler({sourcePathList: ['./tests'], flatten: true, outputFull: true })
     await comp2.compile('flattenedSource.sol')
     const newFlattened = await c.cm.inputter( 'sourcesFlattened/flattenedSource.sol' )
     assert.equal( textsEqual(newFlattened.get('flattenedSource'),

@@ -30,21 +30,22 @@ const { Flattener } = require('./flattener')
  * A reusable Compiler for Democracy.js with a search path and custom outputter.
  * @class Compiler
  * @memberof module:compile
- * @param _startSourcePath {String} a local directory. Can omit the `./` for relative paths.
- * @param _outputter {Function} a (possibly asynchronous) function that
- *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
- *        other value that you want returned from `compile` or `clean*` methods.
- *        If missing, _outputter defaults to `setImmutableKey`
- *        to a local file-based DB store.
+ * @param sourcePathList {Array} of strings for local directories. Can omit the `./` for relative paths.
+ * @param bm {Object} optional, a BuildsManager if you've already created one with the
+ *        inputters and outputters you need, possibly shared with a Linker and Deployer.
+ * @param flatten {Boolean} whether to save a flattened source file into `/sourcesFlattened/${sourceFileName}`
+ * @param outputFull {Boolean} where to save fill compile outputs into `/compileOutputs/$(sourceFileName}`
  */
 compiles.Compiler = class {
   
-  constructor({startSourcePath, bm}) {
-    this.startSourcePath = (startSourcePath && typeof(startSourcePath) === 'string') ?
-      startSourcePath : DEMO_SRC_PATH
-    LOGGER.debug('START SOURCE PATH', this.startSourcePath)
-    ensureDir(this.startSourcePath)
+  constructor({sourcePathList, bm, flatten, outputFull}) {
+    // Add default paths and remove empty directories
+    this.sourcePathSet = new Set(sourcePathList)
+      .add(DEMO_SRC_PATH).add(compiles.ZEPPELIN_SRC_PATH).filter((d) => d)
+    this.sourcePathSet.map((d) => { ensureDir(d) })
     this.cm = bm || new ContractsManager(...arguments)
+    this.flatten = flatten || false
+    this.outputFull = outputFull || false
   }
 
   /**
@@ -130,9 +131,7 @@ compiles.Compiler = class {
     const inputs = {}
     
     // Filter out empty paths
-    const queue = Set(
-      [ this.startSourcePath, compiles.ZEPPELIN_SRC_PATH ]
-    ).filter((x) => x).toJS()
+    const queue = this.sourcePathSet.toJS()
 
     traverseDirs(
       queue,
@@ -176,6 +175,7 @@ compiles.Compiler = class {
     const requestedInputs = new Map(inputFiles.map((name) => {
       const value = new Map(inputs[name]).set('filename', name) 
       assert(name.split('.')[1].startsWith('sol'))
+      assert(inputs[name], `${name} not found in paths ${this.sourcePathSet.toJS()}`)
       flattener.addSource(name, inputs[name].source)
       return [ name.split('.')[0], value ]
     }))
@@ -196,6 +196,7 @@ compiles.Compiler = class {
    * @param sourceFile the top-level source filename with extension
    */
   async updateFlatten(flattener, sourceFile) {
+    if (!this.flatten) { return }
     const oldOutput = await this.cm.inputter(`sourcesFlattened/${sourceFile}`, new Map({}))
     const oldHash = oldOutput.get('inputHash')
     const flattenedSource = flattener.flatten()
@@ -214,6 +215,7 @@ compiles.Compiler = class {
   }
 
   async updateCompileOutput(compileOutput, sourceFile) {
+    if (!this.outputFull) { return }
     const oldOutput = await this.cm.inputter(`compileOutputs/${sourceFile}`, new Map({}))
     const oldHash = oldOutput.get('inputHash')
     const newHash = keccak(JSON.stringify(compileOutput)).toString('hex')

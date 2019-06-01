@@ -17,7 +17,7 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { deployerMixin, departMixin, run } = require('..')
+const { argListMixin, deployerMixin, departMixin, run } = require('..')
 
 describe( 'Remote departures', () => {
   
@@ -52,12 +52,13 @@ describe( 'Remote departures', () => {
   })
 
   it( 'executing a remote departure', async () => {
-    const m1 = deployerMixin({ unlockSeconds: 20 })
-    const m2 = departMixin({
-      name            : "remote-departure",
-      autoConfig      : true,
-      sourcePath      : "../../node_modules/demo-test-contracts/contracts",
-    })
+    const m0 = argListMixin(Map({
+      testValueETH: '0.1', testAccountIndex: 0, unlockSeconds: 20,
+      departName: "remote-departure", autoConfig: true,
+      sourcePathList: ["../../node_modules/demo-test-contracts/contracts"],
+    }))
+    const m1 = deployerMixin()
+    const m2 = departMixin()
     const departFunc = async (state) => {
       const {compile, link, deploy, bm, deployerEth, deployerAddress} = state.toJS()
        
@@ -84,10 +85,12 @@ describe( 'Remote departures', () => {
       const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
       assert(isDeploy(dout),
              `Deploying output invalid: ${JSON.stringify(dout.toJS())}`)
+      
+      wallet.shutdownSync()
       return new Map({ result: true })
     }
 
-    finalState = (await run( departFunc, [ m1, m2 ] )).toJS()
+    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
     bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)

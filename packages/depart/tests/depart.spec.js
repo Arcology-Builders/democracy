@@ -12,7 +12,7 @@ const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 const { getImmutableKey, setImmutableKey } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, deployerMixin, departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -21,12 +21,15 @@ describe( 'Departures', () => {
   let accounts
   let finalState
 
-  const m1 = deployerMixin({ unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0 })
-  const m2 = departMixin({
+  const m0 = argListMixin( Map({
+    unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0,
     name            : "simple-departure",
     autoConfig      : false,
-    sourcePath      : "../../node_modules/demo-test-contracts/contracts",
+    sourcePathList  : ["../../node_modules/demo-test-contracts/contracts"],
   })
+  )
+  const m1 = deployerMixin()
+  const m2 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -61,7 +64,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( departFunc, [ m1, m2 ] )).toJS()
+    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
     LOGGER.debug('finalState', finalState) 
     assert(Map.isMap(finalState.getCompiles()))
     assert(Map.isMap(finalState.getLinks()))
@@ -73,18 +76,7 @@ describe( 'Departures', () => {
     assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
     assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')))
   })
-/*
-  it( 'auto-creates contracts', async () => {
-    const departFunc = async (state) => {
-      const { deployed, deployerAddress } = state.toJS() 
-      const ds = await deployed('DifferentSender')
-      ds.send(accounts[2], { from: accounts[2], value: toWei('0.1', 'ether') } )
-      return new Map({ 'result': true })
-    }
-    await run( departFunc, [ m1, m2 ] )
-    
-  })
-*/
+
   it( 'cleans', async () => {
     await finalState.clean()
   })

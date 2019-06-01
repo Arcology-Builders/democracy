@@ -7,45 +7,47 @@ const { Map }   = require('immutable')
 const fs = require('fs')
 const path = require('path')
 const { wallet } = require('demo-keys')
-const { getConfig } = require('demo-utils')
+const { getConfig, Logger } = require('demo-utils')
 const { run, deployerMixin, departMixin, argListMixin } = require('..')
+const LOGGER = new Logger('demo-depart')
 
-const m0 = argListMixin([
-  [ 'departFileName'  , 'depart.js' ],
-  [ 'testValueEth'    , '0.1'       ],
-  [ 'testAccountIndex', 0           ],
-])
+let departOptions
+let departCallback
+const depart = (options, callback) => {
+  departOptions = options
+  departCallback = callback
+}
+
+const m0 = argListMixin(Map({
+  'departFileName'   : 'depart.js', // --departFileName
+  'testValueEth'     : '0.1'      ,
+  'testAccountIndex' : 0          ,
+  'unlockSeconds'    : 30,
+}))
 
 // Insert this custom mixin to read in a departure file and save its name
 // and callback
 const m1 = async (state) => {
   const { departFileName } = state.toJS()
+  LOGGER.info(`Depart filename ${departFileName}`)
   const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
+  eval(departFile)
 
   return Map({
     departFile : departFile,
+    ...departOptions,
   })
 }
 
-const m2 = deployerMixin({ unlockSeconds: 30 })
+const m2 = deployerMixin()
 
-const m3 = departMixin({
-  autoConfig : true,
-  sourcePath : "contracts",
-})
+const m3 = departMixin()
 
 const departFunc = async (state) => {
   const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
           departFile } = state.toJS() 
 
-  let departName
-  let departCallback
-  const depart = (name, callback) => {
-    departName = name
-    departCallback = callback
-  }
-  eval(departFile)
-  const result = await departCallback()
+  const result = await departCallback({...state.toJS()})
   wallet.shutdownSync()
   return new Map({ 'result': result })
 }

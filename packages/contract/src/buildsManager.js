@@ -26,7 +26,7 @@ const bm = {}
  */
 bm.BuildsManager = class extends ContractsManager {
   
-  constructor({startSourcePath, inputter, outputter, chainId}) {
+  constructor({sourcePathList, inputter, outputter, chainId}) {
     super(...arguments)
     if (!chainId) { throw new Error("no chain ID passed in") }
     this.chainId = chainId
@@ -89,12 +89,12 @@ bm.BuildsManager = class extends ContractsManager {
 
 }
 
-bm.createBM = async ({sourcePath, chainId, hostname, port, autoConfig}) => {
+bm.createBM = async ({ sourcePathList, chainId, hostname, port, autoConfig }) => {
   const { createInOut } = require('demo-client')
   const { inputter, outputter } = createInOut({hostname, port, autoConfig}) 
   const _chainId = (autoConfig) ? (await getNetwork().net_version()) : chainId
   return new bm.BuildsManager({
-    startSourcePath: sourcePath,
+    sourcePathList : sourcePathList,
     chainId        : _chainId,
     inputter       : inputter,
     outputter      : outputter,

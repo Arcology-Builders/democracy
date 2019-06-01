@@ -14,6 +14,15 @@ const contracts = {}
 contracts.gasPrice = getConfig()['GAS_PRICE']
 contracts.gasLimit = getConfig()['GAS_LIMIT']
 
+/**
+ * Initialize build manager for later calls to `getInstance` and
+ * `createContract`
+ *
+ * @method init
+ * @memberof module:contract
+ *
+ * @returns nothing
+ */
 contracts.init = async () => {
   if (!contracts.initialized) {
     LOGGER.info("Initializing contracts.")
@@ -26,6 +35,12 @@ contracts.init = async () => {
   }
 }
 
+/**
+ * Generic Contract class.
+ *
+ * @class Contract
+ * @memberof contract
+ */
 contracts.Contract = class {
   constructor({ deployerEth, deploy }) {
     this.deploy = deploy
@@ -35,6 +50,12 @@ contracts.Contract = class {
     assert(this.instance)
   }
 
+  /**
+   * Returns a String representation of this contract of the
+   * form
+   * `{contractName}-{deployId} at {address}`
+   * @returns {String} representation in the above format.
+   */
   toString() {
     return `
       ${this.deploy.get('name')}-${this.deploy.get('deployId')} at
@@ -89,7 +110,11 @@ contracts.Contract = class {
 }
 
 /**
- * Return an instance from a previously deployed contract
+ * Return an ethjs-contract instance from a previously deployed contract
+ *
+ * @method getInstance
+ * @memberof module:contract
+ *
  * @param deploy of previous
  * @return an ethjs instance that can be used to call methods on the deployed contract
  */
@@ -100,6 +125,17 @@ contracts.getInstance = (eth, deploy) => {
   return Contract.at(deploy.get('deployAddress'))
 } 
 
+/**
+ * Return a Democracy contract instance from a previous deploy,
+ * including a built-in signer account. Otherwise throws an error.
+ *
+ * @method createContract
+ * @memberof module:contract
+ *
+ * @param contractName {String} the base name of the contract deployed.
+ * @param deployID {String} optional string for a custom deploy ID
+ *   other than the default `deploy`
+ */
 contracts.createContract = async (contractName, deployID) => {
   if (!contracts.initialized) { throw new Error('Call contracts.initialize() first') }
   const _deployID = deployID || 'deploy'

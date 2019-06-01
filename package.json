@@ -22,7 +22,6 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "scripts": {
-    "doc": "documentation build packages/*/src/* -f html -o ./docs/",
     "build:doc": "jsdoc -c .jsdoc.json --verbose"
   },
   "homepage": "https://github.com/invisible-college/democracy#readme"

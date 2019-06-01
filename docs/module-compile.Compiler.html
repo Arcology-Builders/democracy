@@ -75,7 +75,7 @@
 
     
 
-    <h3>Classes</h3><ul><li id="BuildsManager-nav"><a href="bm.BuildsManager.html">BuildsManager</a></li><li id="ContractsManager-nav"><a href="cm.ContractsManager.html">ContractsManager</a><ul class='methods'><li data-type="method" id="ContractsManager-getContract-nav"><a href="cm.ContractsManager.html#getContract">getContract</a></li></ul></li><li id="Compiler-nav"><a href="module-compile.Compiler.html">Compiler</a></li></ul><h3>Modules</h3><ul><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li><li data-type="method" id="utils-textsEqual-nav"><a href="module-utils.html#.textsEqual">textsEqual</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-createEncryptedAccount-nav"><a href="module-wallet.html#.createEncryptedAccount">createEncryptedAccount</a></li><li data-type="method" id="wallet-createSignerEth-nav"><a href="module-wallet.html#.createSignerEth">createSignerEth</a></li><li data-type="method" id="wallet-init-nav"><a href="module-wallet.html#.init">init</a></li><li data-type="method" id="wallet-loadEncryptedAccount-nav"><a href="module-wallet.html#.loadEncryptedAccount">loadEncryptedAccount</a></li><li data-type="method" id="wallet-pay-nav"><a href="module-wallet.html#.pay">pay</a></li><li data-type="method" id="wallet-payTest-nav"><a href="module-wallet.html#.payTest">payTest</a></li><li data-type="method" id="wallet-prepareSignerEth-nav"><a href="module-wallet.html#.prepareSignerEth">prepareSignerEth</a></li><li data-type="method" id="wallet-saveEncryptedAccount-nav"><a href="module-wallet.html#.saveEncryptedAccount">saveEncryptedAccount</a></li><li data-type="method" id="wallet-unlockEncryptedAccount-nav"><a href="module-wallet.html#.unlockEncryptedAccount">unlockEncryptedAccount</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#utils">utils</a></li></ul>
+    <h3>Classes</h3><ul><li id="BuildsManager-nav"><a href="bm.BuildsManager.html">BuildsManager</a></li><li id="ContractsManager-nav"><a href="cm.ContractsManager.html">ContractsManager</a><ul class='methods'><li data-type="method" id="ContractsManager-getContract-nav"><a href="cm.ContractsManager.html#getContract">getContract</a></li></ul></li><li id="Contract-nav"><a href="contract.Contract.html">Contract</a></li><li id="Compiler-nav"><a href="module-compile.Compiler.html">Compiler</a></li></ul><h3>Modules</h3><ul><li id="compile-nav"><a href="module-compile.html">compile</a><ul class='methods'><li data-type="method" id="compile-compile-nav"><a href="module-compile.html#.compile">compile</a></li><li data-type="method" id="compile-updateFlatten-nav"><a href="module-compile.html#.updateFlatten">updateFlatten</a></li></ul></li><li id="contract-nav"><a href="module-contract.html">contract</a><ul class='methods'><li data-type="method" id="contract-createContract-nav"><a href="module-contract.html#.createContract">createContract</a></li><li data-type="method" id="contract-getInstance-nav"><a href="module-contract.html#.getInstance">getInstance</a></li><li data-type="method" id="contract-init-nav"><a href="module-contract.html#.init">init</a></li></ul></li><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li><li data-type="method" id="utils-textsEqual-nav"><a href="module-utils.html#.textsEqual">textsEqual</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-createEncryptedAccount-nav"><a href="module-wallet.html#.createEncryptedAccount">createEncryptedAccount</a></li><li data-type="method" id="wallet-createSignerEth-nav"><a href="module-wallet.html#.createSignerEth">createSignerEth</a></li><li data-type="method" id="wallet-init-nav"><a href="module-wallet.html#.init">init</a></li><li data-type="method" id="wallet-loadEncryptedAccount-nav"><a href="module-wallet.html#.loadEncryptedAccount">loadEncryptedAccount</a></li><li data-type="method" id="wallet-pay-nav"><a href="module-wallet.html#.pay">pay</a></li><li data-type="method" id="wallet-payTest-nav"><a href="module-wallet.html#.payTest">payTest</a></li><li data-type="method" id="wallet-prepareSignerEth-nav"><a href="module-wallet.html#.prepareSignerEth">prepareSignerEth</a></li><li data-type="method" id="wallet-saveEncryptedAccount-nav"><a href="module-wallet.html#.saveEncryptedAccount">saveEncryptedAccount</a></li><li data-type="method" id="wallet-unlockEncryptedAccount-nav"><a href="module-wallet.html#.unlockEncryptedAccount">unlockEncryptedAccount</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#utils">utils</a></li></ul>
   </nav>
 
   <div id="main">
@@ -91,6 +91,8 @@
   <header>
     
       <h2>
+        
+          <span class="ancestors"><a href="module-compile.html">compile</a>.</span>
         
         Compiler
         
@@ -115,7 +117,7 @@
       </svg>
     </a>
     <h4 class="name" id="Compiler">
-      <span class="type-signature"></span>new Compiler<span class="signature">(_startSourcePath, _outputter)</span><span class="type-signature"></span>
+      <span class="type-signature"></span>new Compiler<span class="signature">(sourcePathList, bm, flatten, outputFull)</span><span class="type-signature"></span>
     </h4>
   </span>
 
@@ -157,14 +159,14 @@
     
       <tr>
         
-          <td class="name"><code>_startSourcePath</code></td>
+          <td class="name"><code>sourcePathList</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      String
+      Array
     </span>
 
     
@@ -178,7 +180,7 @@
         
 
         <td class="description last">
-          <p>a local directory. Can omit the <code>./</code> for relative paths.</p>
+          <p>of strings for local directories. Can omit the <code>./</code> for relative paths.</p>
           
         </td>
       </tr>
@@ -186,14 +188,14 @@
     
       <tr>
         
-          <td class="name"><code>_outputter</code></td>
+          <td class="name"><code>bm</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      function
+      Object
     </span>
 
     
@@ -207,11 +209,66 @@
         
 
         <td class="description last">
-          <p>a (possibly asynchronous) function that
-takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
-other value that you want returned from <code>compile</code> or <code>clean*</code> methods.
-If missing, _outputter defaults to <code>setImmutableKey</code>
-to a local file-based DB store.</p>
+          <p>optional, a BuildsManager if you've already created one with the
+inputters and outputters you need, possibly shared with a Linker and Deployer.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>flatten</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      Boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>whether to save a flattened source file into <code>/sourcesFlattened/${sourceFileName}</code></p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>outputFull</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      Boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>where to save fill compile outputs into <code>/compileOutputs/$(sourceFileName}</code></p>
           
         </td>
       </tr>

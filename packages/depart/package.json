@@ -21,9 +21,9 @@
     "src": "src",
     "tests": "tests"
   },
-  "bin": [
-    "bin/demo-depart"
-  ],
+  "bin": {
+    "demo-depart": "./bin/demo-depart.js"
+  },
   "files": [
     "src",
     "index.js"

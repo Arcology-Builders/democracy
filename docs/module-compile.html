@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils - Documentation
+      compile - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -81,7 +81,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils
+        compile
       </h1>
     
 
@@ -91,12 +91,91 @@
   <header>
     
       
+        
   </header>
 
   <article>
     <div class="container-overview">
       
         
+          <div class="description">
+            <p>demo-compile, a package for compiling and EVM language management.
+More detailed docs are available in the [demo-compiler README]
+(https://github.com/invisible-college/democracy/blob/master/packages/compile/README.md)</p>
+          </div>
+        
+
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="compile_index.js.html">compile/index.js</a>, <a href="compile_index.js.html#line3">line 3</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
       
@@ -107,22 +186,22 @@
     
 
     
-
-     
-
-    
-      <h3 class="subsection-title">Namespaces</h3>
+      <h3 class="subsection-title">Classes</h3>
 
       <dl>
         
           <dt>
-            <a href="module-utils.config.html">config</a>
+            <a href="module-compile.Compiler.html">Compiler</a>
           </dt>
           <dd>
             
           </dd>
         
       </dl>
+    
+
+     
+
     
 
     
@@ -137,13 +216,13 @@
   
 
   <span class='name-container'>
-    <a class="link-icon" href="#.getConfig">
+    <a class="link-icon" href="#.compile">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
       </svg>
     </a>
-    <h4 class="name" id=".getConfig">
-      <span class="type-signature">(static) </span>getConfig<span class="signature">()</span><span class="type-signature"></span>
+    <h4 class="name" id=".compile">
+      <span class="type-signature">(static) </span>compile<span class="signature">(source, contracts)</span><span class="type-signature"> &rarr; {Map}</span>
     </h4>
   </span>
 
@@ -152,185 +231,8 @@
 
 
   <div class="description">
-    <p>Return a configuration object with values determined by NODE_ENV.</p>
-  </div>
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source">
-      <ul class="dummy">
-        <li>
-          <a href="utils_src_config.js.html">utils/src/config.js</a>, <a href="utils_src_config.js.html#line135">line 135</a>
-        </li>
-      </ul>
-    </dd>
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-        
-
-
-  
-
-  <span class='name-container'>
-    <a class="link-icon" href="#.parseLogLevels">
-      <svg height="20" width="20" style="fill: black;">
-        <use xlink:href="#linkIcon"></use>
-      </svg>
-    </a>
-    <h4 class="name" id=".parseLogLevels">
-      <span class="type-signature">(static) </span>parseLogLevels<span class="signature">()</span><span class="type-signature"></span>
-    </h4>
-  </span>
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source">
-      <ul class="dummy">
-        <li>
-          <a href="utils_src_config.js.html">utils/src/config.js</a>, <a href="utils_src_config.js.html#line52">line 52</a>
-        </li>
-      </ul>
-    </dd>
-  
-
-  
-
-  
-
-  
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-        
-
-
-  
-
-  <span class='name-container'>
-    <a class="link-icon" href="#.textsEqual">
-      <svg height="20" width="20" style="fill: black;">
-        <use xlink:href="#linkIcon"></use>
-      </svg>
-    </a>
-    <h4 class="name" id=".textsEqual">
-      <span class="type-signature">(static) </span>textsEqual<span class="signature">(a, b)</span><span class="type-signature"></span>
-    </h4>
-  </span>
-
-  
-
-
-
-  <div class="description">
-    <p>Determines if two newline delimited texts are equal by line.</p>
+    <p>Main compile method. Takes a Solidity source file name and produces compile artifacts
+in the associated contracts manager (either remote or in a local store)</p>
   </div>
 
 
@@ -363,14 +265,14 @@
     
       <tr>
         
-          <td class="name"><code>a</code></td>
+          <td class="name"><code>source</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      String
+      string
     </span>
 
     
@@ -384,7 +286,7 @@
         
 
         <td class="description last">
-          <p>first text to compare</p>
+          <p>name of source file to compile, including Solidity extension</p>
           
         </td>
       </tr>
@@ -392,14 +294,14 @@
     
       <tr>
         
-          <td class="name"><code>b</code></td>
+          <td class="name"><code>contracts</code></td>
         
 
         <td class="type">
           
             
     <span class="param-type">
-      String
+      Map
     </span>
 
     
@@ -413,7 +315,7 @@
         
 
         <td class="description last">
-          <p>first text to compare</p>
+          <p>from a ContractsManager</p>
           
         </td>
       </tr>
@@ -457,7 +359,165 @@
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="utils_src_utils.js.html">utils/src/utils.js</a>, <a href="utils_src_utils.js.html#line54">line 54</a>
+          <a href="compile_src_compile.js.html">compile/src/compile.js</a>, <a href="compile_src_compile.js.html#line235">line 235</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.updateFlatten">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".updateFlatten">
+      <span class="type-signature">(static) </span>updateFlatten<span class="signature">(flattener, sourceFile)</span><span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Flatten sources and update it in the contracts manager outputter if the hash
+is different (content has changed.)</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>flattener</code></td>
+        
+
+        <td class="type">
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>a Flattener object that has been collecting sources during compilation.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>sourceFile</code></td>
+        
+
+        <td class="type">
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the top-level source filename with extension</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="compile_src_compile.js.html">compile/src/compile.js</a>, <a href="compile_src_compile.js.html#line188">line 188</a>
         </li>
       </ul>
     </dd>

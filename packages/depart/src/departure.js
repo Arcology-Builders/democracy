@@ -15,30 +15,38 @@ const departs = {}
 /**
  * Orchestrate a reproducible, idempotent departure of smart contracts for the blockchain,
  * storing artifacts for later web interfaces.
+ * The following runtime state variables are required or optional.
+ *
+ * Required
+ * * chainId {String}
+ * * deployerEth signer eth
+ * * deployerAddress Ethereum address
+ *
+ * Optional
+ * * departName {String}
+ * * sourcePathList {Array}
+ * * autoConfig {Boolean}
  *
  * @method depart
  * @memberof @module:depart
- * @param name {String} optional, a human-readable name
- * @param autoConfig {Boolean} optional, whether to automatically connect to the automatically
- *        configured remote store. Default is `true`.
- * @param sourcePath {String} local source path of Solidity contracts.
  */
-departs.departMixin = ({ name, autoConfig, sourcePath }) => {
+departs.departMixin = () => {
   return async (state) => {
 
-    const{ chainId, deployerEth, deployerAddress } = state.toJS()
+    const{ chainId, deployerEth, deployerAddress, departName, autoConfig,
+      sourcePathList } = state.toJS()
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
 
     const bm = await createBM({
-      sourcePath: sourcePath,
+      sourcePathList: sourcePathList,
       chainId   : state.get('chainId'),
       autoConfig: !(autoConfig === false),
     })
 
     const c = new Compiler({
-      startSourcePath: sourcePath, bm: bm
+      sourcePathList: sourcePathList, bm: bm
     })
     const l = new Linker({
       bm: bm
@@ -141,7 +149,7 @@ departs.departMixin = ({ name, autoConfig, sourcePath }) => {
     }
 
     return new Map({
-      departName  : name,
+      departName  : departName,
       clean       : clean,
       deploy      : deploy,
       deployed    : deployed,
