@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/buildsManager.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/buildsManager.js
       </h1>
     
 
@@ -93,121 +93,109 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+// Compile with solcjs
+const fs         = require('fs')
+const path       = require('path')
+const assert     = require('chai').assert
+const { List, Map, Set }
+                 = require('immutable')
+const { ContractsManager } = require('./contractsManager')
+const { BuildsManager } = require('./buildsManager')
+
+const { Logger, LINKS_DIR, DEPLOYS_DIR, getNetwork, awaitInputter, awaitOutputter }
+                 = require('demo-utils')
+
+const LOGGER = new Logger('BuildsManager')
+
+const bm = {}
 
 /**
- * Take the callback action for every level in a hierarchical key space
+ * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles, also
+ * handles network-specific builds like links and deploys.
+ * @param _outputter {Function} a (possibly asynchronous) function that
+ *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
+ *        other value that you want returned from `compile` or `clean*` methods.
+ *        If missing, _outputter defaults to `setImmutableKey`
+ *        to a local file-based DB store.
  */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+bm.BuildsManager = class extends ContractsManager {
+  
+  constructor({startSourcePath, inputter, outputter, chainId}) {
+    super(...arguments)
+    if (!chainId) { throw new Error("no chain ID passed in") }
+    this.chainId = chainId
+  }
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+  getChainID() {
+    return this.chainId
+  }
+
+  async getDeploys() {
+    if (!this.deploysMap) {
+      this.deploysMap = await this.inputter(`${DEPLOYS_DIR}/${this.chainId}`, new Map({}))
+    }
+    return this.deploysMap
+  }
+  
+  async getDeploy(deployName) {
+    const deploysMap = await this.getDeploys()
+    return this.deploysMap.get(deployName)
+  } 
+
+  async setDeploy(deployName, deployOutput, overwrite) {
+    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
+    LOGGER.debug(`Writing deploy to ${deployFilePath}`)
+    this.deploysMap = this.deploysMap.set(deployName, deployOutput)
+    return awaitOutputter(this.outputter(deployFilePath, deployOutput, overwrite),
+                          () => { return deployOutput })
+  }
+
+  async getLinks() {
+    if (!(this.linksMap)) {
+      this.linksMap = await this.inputter(`${LINKS_DIR}`, new Map({}))
+    }
+    return this.linksMap
+  }
+
+  async getLink(linkName) {
+    const linksMap = await this.getLinks()
+    return linksMap.get(linkName)
+  }
+  
+  async setLink(linkName, linkOutput, overwrite) {
+    const linkFilePath = `${LINKS_DIR}/${linkName}`
+
+    LOGGER.debug(`Writing link to ${linkFilePath}`)
+    this.linksMap = this.linksMap.set(linkName, linkOutput)
+    return awaitOutputter(this.outputter(linkFilePath, linkOutput, overwrite),
+                          () => { return linkOutput })
+  }
+
+  async cleanLink(linkName) {
+    const fn = `${LINKS_DIR}/${linkName}`
+    return this.outputter(`${fn}`, null)
+  }
+
+  async cleanDeploy(deployName) {
+    const fn = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
+    return this.outputter(`${fn}`, null)
+  }
+
 }
 
-const store = {}
-
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-    }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
-  }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
+bm.createBM = async ({sourcePath, chainId, hostname, port, autoConfig}) => {
+  const { createInOut } = require('demo-client')
+  const { inputter, outputter } = createInOut({hostname, port, autoConfig}) 
+  const _chainId = (autoConfig) ? (await getNetwork().net_version()) : chainId
+  return new bm.BuildsManager({
+    startSourcePath: sourcePath,
+    chainId        : _chainId,
+    inputter       : inputter,
+    outputter      : outputter,
+  })
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
-
-module.exports = store
+module.exports = bm
 </code></pre>
   </article>
 </section>

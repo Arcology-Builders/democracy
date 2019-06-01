@@ -18,7 +18,7 @@ const bm = {}
 /**
  * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles, also
  * handles network-specific builds like links and deploys.
- * @param _outputter {async function} a (possibly asynchronous) function that
+ * @param _outputter {Function} a (possibly asynchronous) function that
  *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
  *        other value that you want returned from `compile` or `clean*` methods.
  *        If missing, _outputter defaults to `setImmutableKey`

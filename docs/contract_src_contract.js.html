@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/contract.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/contract.js
       </h1>
     
 
@@ -92,122 +92,118 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+    <pre class="prettyprint source linenums"><code>const { Logger, isNetwork, getConfig, getNetwork } = require('demo-utils')
+const { List, Map } = require('immutable')
+const assert = require('chai').assert
+const abi = require('ethjs-abi')
+const { wallet } = require('demo-keys')
 
-/**
- * Take the callback action for every level in a hierarchical key space
- */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+const LOGGER = new Logger('contract')
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+const { isDeploy } = require('./utils')
+const { createBM } = require('./buildsManager')
+
+const contracts = {}
+
+contracts.gasPrice = getConfig()['GAS_PRICE']
+contracts.gasLimit = getConfig()['GAS_LIMIT']
+
+contracts.init = async () => {
+  if (!contracts.initialized) {
+    LOGGER.info("Initializing contracts.")
+    const eth = getNetwork()
+    const chainId = await eth.net_version()
+    contracts.bm = await createBM({ autoConfig: true, chainId: chainId })
+    contracts.initialized = true
+  } else {
+    LOGGER.error("Contracts already initialized.")
+  }
 }
 
-const store = {}
-
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-    }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
+contracts.Contract = class {
+  constructor({ deployerEth, deploy }) {
+    this.deploy = deploy
+    this.deployerEth = deployerEth
+    this.instance = contracts.getInstance(deployerEth, deploy)
+    this.address = this.deploy.get('deployAddress')
+    assert(this.instance)
   }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
+
+  toString() {
+    return `
+      ${this.deploy.get('name')}-${this.deploy.get('deployId')} at
+      ${this.address}
+      `
   }
-*/
+
+  getAddress() {
+    return this.deploy.get('deployedAddress')
+  }
+
+  getInstance() {
+    return this.instance
+  }
+  
+  getABIObjectByName(_name) {
+		const abiMap = new Map(
+			List(this.instance.abi).map((abiObj) => { return [ abiObj.name, abiObj ] })
+		)
+		assert(abiMap.has(_name))
+		const methodObj = abiMap.get(_name)
+		assert(methodObj.type === 'function')
+	  return methodObj 
+  }
+
+  getMethodCallData(_name, _args) {
+    const methodObj = this.getABIObjectByName(_name)
+    return abi.encodeMethod(methodObj, _args)
+  }
+
+  async getTxReceipt({ method, args, options }) {
+    assert(options['from'], `No from address specified.`)
+    const nonce = await this.deployerEth.getTransactionCount(this.deployerEth.address)
+    return new Promise((resolve, reject) => {
+      method(...args, {
+        from     : options['from'],
+        to       : this.address,
+        gas      : contracts.gasLimit,
+        gasPrice : contracts.gasPrice,
+        value    : options['value'],
+        nonce    : nonce,
+      }).then((txHash) => {
+        LOGGER.debug(`Result ${JSON.stringify(txHash)}`)
+        resolve(this.deployerEth.getTransactionReceipt(txHash))
+			}).catch((...error) => {
+				LOGGER.error(`Error ${error}`)
+        reject(error)
+			})
+    })
+  }
+
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
+/**
+ * Return an instance from a previously deployed contract
+ * @param deploy of previous
+ * @return an ethjs instance that can be used to call methods on the deployed contract
  */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
+contracts.getInstance = (eth, deploy) => {
+  assert(isNetwork(eth), 'First parameter is not an Ethereum network.')
+  assert(isDeploy(deploy), 'Second parameter is not a deploy output.')
+  const Contract = eth.contract(deploy.get('abi').toJS(), deploy.get('code'))
+  return Contract.at(deploy.get('deployAddress'))
+} 
 
-module.exports = store
+contracts.createContract = async (contractName, deployID) => {
+  if (!contracts.initialized) { throw new Error('Call contracts.initialize() first') }
+  const _deployID = deployID || 'deploy'
+  const deploy = await contracts.bm.getDeploy(`${contractName}-${_deployID}`)
+  assert( isDeploy(deploy), `No valid deploy found for ${contractName}-${_deployID}` )
+  LOGGER.info(`Auto-created Contract ${contractName} at ${deploy.get('deployAddress')}`)
+  return new contracts.Contract({ deployerEth: wallet.lastSignerEth, deploy: deploy })
+}
+
+module.exports = contracts
 </code></pre>
   </article>
 </section>

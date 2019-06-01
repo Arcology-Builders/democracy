@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/linker.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/linker.js
       </h1>
     
 
@@ -93,121 +93,128 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
 
-/**
- * Take the callback action for every level in a hierarchical key space
- */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+const assert = require('chai').assert
+const { List, Map } = require('immutable')
+const { Logger, isNetwork, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
+             = require('demo-utils')
+const LOGGER = new Logger('Linker')
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
-}
+const { isContract } = require('./contractsManager')
+const { BuildsManager } = require('./buildsManager')
+const { awaitOutputter, isDeploy, isLink } = require('./utils')
+const { keccak } = require('ethereumjs-util')
 
-const store = {}
+const linker = {}
 
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
+linker.Linker = class {
 
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
+  constructor({inputter, outputter, bm}) {
+    this.bm        = bm || new BuildsManager(...arguments)
+  }
+
+  getBuildsManager() {
+    return this.bm
+  }
+
+  /**
+   * Link a previously compiled contract. Validate dependencies and generate appropriate metadata
+   * @param eth network object connected to a local provider
+   * @param contractName {String} the name of the contract to link.
+   * @param linkId {String} the link ID to output the new link as.
+   * @param depMap is an Immutable Map of library names to deploy IDs
+   * @return the contractOutput augmented with a linkDepMap
+   */
+  async link(contractName, linkId, _depMap) {
+    const contract = await this.bm.getContract(contractName)
+    assert( isContract(contract),
+           `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
+    const code = '0x' + contract.get('code')
+    const linkName = `${contractName}-${linkId}`
+
+    const link = await this.bm.getLink(linkName)
+    const inputHash = keccak(JSON.stringify(contract.toJS())).toString('hex')
+    if ( isLink(link) &amp;&amp; link.get('inputHash') === inputHash ) {
+      LOGGER.info(`Link ${linkName} is up-to-date`)
+      LOGGER.debug(`with hash ${inputHash}`)
+      return link
     } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
+      LOGGER.debug(`Link ${linkName} out-of-date, re-linking`)
+      LOGGER.debug(`with hash ${inputHash}`)
     }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+
+    const deployMap = await this.bm.getDeploys()
+
+    let matches = Map({})
+    let match
+    while (match = LIB_PATTERN.exec(code)) {
+      assert(match[0], `Match expression not found in ${code}`)
+      assert(match[1], `Match group not found ${code}`)
+      LOGGER.debug(`Match found ${JSON.stringify(match)}`)
+      if (matches.has(match[1])) { assert.equal(match[0], matches.get(match[1])); continue }
+      matches = matches.set(match[1], match[0])
     }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
+    LOGGER.debug(`matches ${matches.toString()}`)
+
+    if (matches.count() === 0 &amp;&amp; _depMap &amp;&amp; _depMap.count() > 0) {
+      throw new Error(`No matches to replace with link map ${JSON.stringify(depMap)}`)
+    }
+
+    if (matches.count() > 0 &amp;&amp; (!_depMap || _depMap.count() == 0)) {
+      throw new Error(`No link map found to replace ${JSON.stringify(matches)}`)
+    }
+
+    const depMap = Map.isMap(_depMap) ? _depMap : new Map({})
+
+    const replacedCode = depMap.reduce((codeSoFar, deployId, contractName) => {
+      // The linkId to replace for the given linkName can also
+      // be a full deployName by itself (e.g. TestInterface=TestImpl-deploy)
+      // in which case, deployId == `TestImpl-deploy` directly
+      // instead of `TestInterface-deploy`
+      const deployName = (deployId.startsWith('deploy')) ?
+        `${contractName}-${deployId}` : deployId
+      const linkPlaceholder = matches.get(contractName)
+      if (!linkPlaceholder) {
+        throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
+      }
+
+      const deployObject = deployMap.get(deployName)
+      if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
+      LOGGER.debug('DEPLOY OBJECT', deployObject)
+
+      const deployAddress = deployObject.get('deployAddress')
+      assert(deployAddress)
+
+      LOGGER.debug(`Replacing symbols ${linkPlaceholder} with ${deployAddress.slice(2)}`)
+      while (codeSoFar.search(linkPlaceholder) !== -1) {
+        codeSoFar = codeSoFar.replace(linkPlaceholder, deployAddress.slice(2))
+      }
+      return codeSoFar
+    }, code)
+
+    assert(replacedCode.match(LIB_PATTERN) === null) // All placeholders should be replaced
+
+    const now = new Date()
+
+    const linkOutput = new Map({
+      type           : 'link',
+      name           : contractName,
+      linkId         : linkId,
+      linkMap        : depMap,
+      linkDate       : now.toLocaleString(),
+      linkTime       : now.getTime(),
+      code           : replacedCode,
+      abi            : contract.get('abi'),
+      inputHash      : inputHash,
+    })
+
+    // This is an updated link, overwrite it
+    return this.bm.setLink(linkName, linkOutput, true)
   }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
+
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
-
-module.exports = store
+module.exports = linker
 </code></pre>
   </article>
 </section>

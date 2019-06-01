@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/utils.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/utils.js
       </h1>
     
 
@@ -93,121 +93,75 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+
+const { Logger } = require('demo-utils')
+const LOGGER = new Logger('contract/utils')
+
+const { keccak } = require('ethereumjs-util')
+const { Map } = require('immutable')
+
+const utils = {}
 
 /**
- * Take the callback action for every level in a hierarchical key space
+ * @return true if the given object is a compile output from a Compiler, otherwise false
  */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
-
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+utils.isCompile = (_compile) => {
+  return (_compile &amp;&amp; Map.isMap(_compile) &amp;&amp; _compile.count() > 0 &amp;&amp;
+          _compile.reduce((prev, val) => {
+    return prev &amp;&amp; val.get('type') === 'compile'
+  }, true))
 }
-
-const store = {}
 
 /**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
+ * @return true if the given object is a compile output retrieved from db, otherwise false
  */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-    }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
-  }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
+utils.isContract = (_contract) => {
+  return (Map.isMap(_contract) &amp;&amp; _contract.get('type') === 'compile')
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
+/**
+ * Filter out which requested inputs are out-of-date by source hash or are new,
+ * and need to be recompiled, based on the existing outputs.
+ * @param requestedInputs Immutable {Map} of keys and values that are inputs to be built
+ * @param existingOutputs Immutable {Map} with matching keys and values that represent
+ *        built outputs, including a member `inputHash` that matches a `requestedInput`
+ *        value that will deterministically reproduce this output
+ * @return a Map of keys and values from {requestedInputs}
+ */
+utils.getInputsToBuild = (requestedInputs, existingOutputs) => {
+  return new Map(requestedInputs.map((val,key) => {
+    const isNew = !existingOutputs.has(key)
+    // We take the hash of content before it has the field 'inputHash'
+    const inputHash = keccak(JSON.stringify(val.toJS())).toString('hex')
+    const isUpdated = !isNew &amp;&amp; (existingOutputs.get(key).get('inputHash') !== inputHash)
+    if (isNew) {
+      LOGGER.info(`${key} has not been built before.`)
     }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
+    if (isUpdated) {
+      const oldHash = existingOutputs.get(key).get('inputHash')
+      LOGGER.debug(`${key} with inputHash ${inputHash} is not up-to-date with old ${oldHash}`)
+    }
+    return val.set('isUpdated', isUpdated).set('isNew', isNew)
+  })).filter((val, key) => { 
+    return val.get('isUpdated') || val.get('isNew')
+  })
+}
 
-module.exports = store
+/**
+ * @return true if the given object is a link output, otherwise false
+ */
+utils.isLink = (_link) => {
+  return (Map.isMap(_link) &amp;&amp; _link.get('type') === 'link')
+}
+
+/**
+ * @return true if the given object is a deploy output, otherwise false
+ */
+utils.isDeploy = (_deploy) => {
+  return (Map.isMap(_deploy) &amp;&amp; _deploy.get('type') === 'deploy')
+}
+
+module.exports = utils
 </code></pre>
   </article>
 </section>

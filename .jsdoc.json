@@ -4,7 +4,13 @@
     "source": {
         "includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_",
-        "include": ["packages/keys/src", "packages/keys/index.js", "packages/utils/src", "packages/utils/index.js"],
+        "include": [
+          "packages/keys/src", "packages/keys/index.js",
+          "packages/utils/src", "packages/utils/index.js",
+          "packages/depart/src", "packages/depart/index.js",
+          "packages/compile/src", "packages/compile/index.js",
+          "packages/contract/src", "packages/contract/index.js"
+        ],
         "exclude": ["docs", "tests", "logs", "dist", ".nyc_output", "lib", "node_modules", "out"]
     },
     "sourceType": "module",

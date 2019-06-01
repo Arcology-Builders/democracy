@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/contractsManager.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/contractsManager.js
       </h1>
     
 
@@ -93,121 +93,129 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+// Compile with solcjs
+const fs         = require('fs')
+const path       = require('path')
+const assert     = require('chai').assert
+const { List, Map, Set }
+                 = require('immutable')
+const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger,
+  awaitInputter, awaitOutputter }
+                 = require('demo-utils')
+
+const LOGGER = new Logger('ContractsManager')
+
+const cm = {}
 
 /**
- * Take the callback action for every level in a hierarchical key space
+ * A ContractsManager which can read and clean compiled contracts.
+ * @param _outputter {Function} a (possibly asynchronous) function that
+ *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
+ *        other value that you want returned from `compile` or `clean*` methods.
+ *        If missing, _outputter defaults to `setImmutableKey`
+ *        to a local file-based DB store.
  */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+cm.ContractsManager = class {
+  
+  constructor({startSourcePath, inputter, outputter}) {
+    this.startSourcePath = startSourcePath
+    assert((inputter &amp;&amp; outputter) || (!inputter &amp;&amp; !outputter))
+    this.inputter = inputter || getImmutableKey
+    this.outputter = outputter || setImmutableKey
+  }
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
-}
-
-const store = {}
-
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
+  async getContracts() {
+    if (!this.contracts) {
+      const contractSources = []
+      if (!fs.existsSync(this.startSourcePath)) {
+        LOGGER.warn(`Sources directory '${this.startSourcePath}' not found.`)
+      } else {
+         // start out by finding all contracts rooted in current directory
+        traverseDirs(
+          [this.startSourcePath],
+          (fnParts) => { return (fnParts.length > 1 &amp;&amp; !fnParts[1].startsWith('sol')) },
+          function(source, f) {
+            const fn = List(f.split(path.sep)).last()
+            const fb = path.basename(fn.split('.')[0])
+            contractSources.push(fb)
+            LOGGER.debug(`Source ${fb}`)
+          }
+        )
       }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
+
+      this.contracts = await awaitInputter(
+        this.inputter(COMPILES_DIR, new Map({})),
+        (contractOutputs) => {
+          return {
+            contractSources: List(contractSources),
+            contractOutputs: contractOutputs
+          }
+        }
+      )
     }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+    return this.contracts
+  }
+
+  /**
+   * Asynchronously return a contract previously outputted at key `/compiles/`
+   * @param contractName name of the compiled contract
+   */
+  async getContract(contractName) {
+    const { contractOutputs } = await this.getContracts()
+    return contractOutputs.get(contractName)
+  }
+
+  async setContract(contractName, contractOutput) {
+    const compileKey = `${COMPILES_DIR}/${contractName}`
+    this.contracts.contractOutputs =
+      this.contracts.contractOutputs.set(contractName, contractOutput)
+    return awaitOutputter(
+      this.outputter(compileKey, contractOutput, true),
+      () => { return contractOutput }
+    )
+  }
+
+  async cleanContract(contractName) {
+    this.contracts.contractOutputs =
+      this.contracts.contractOutputs.set(contractName, null)
+    return this.outputter(`${COMPILES_DIR}/${contractName}`, null)
+  }
+
+  async cleanAllCompiles() {
+    if (this.contracts) {
+      this.contracts.contractOutputs = Map({})
     }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
+    return this.outputter(`${COMPILES_DIR}`, null)
   }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
+
+  async cleanCompile(compile) {
+    return Promise.all(List(
+      compile.map((compile, compileName) => {
+        return this.cleanContract(compileName)
+      }).values()).toJS()
+    )
   }
-*/
+
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
+/**
+ * @return true if the given object is a compile output from a Compiler, otherwise false
  */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
+cm.isCompile = (_compile) => {
+  return (_compile &amp;&amp; Map.isMap(_compile) &amp;&amp; _compile.count() > 0 &amp;&amp;
+          _compile.reduce((prev, val) => {
+    return prev &amp;&amp; val.get('type') === 'compile'
+  }, true))
+}
 
-module.exports = store
+/**
+ * @return true if the given object is a compile output retrieved from db, otherwise false
+ */
+cm.isContract = (_contract) => {
+  return (Map.isMap(_contract) &amp;&amp; _contract.get('type') === 'compile')
+}
+
+module.exports = cm
 </code></pre>
   </article>
 </section>

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      depart/src/departure.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        depart/src/departure.js
       </h1>
     
 
@@ -92,122 +92,167 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+    <pre class="prettyprint source linenums"><code>const { List, Map } = require('immutable')
+const assert = require('chai').assert
+const utils = require('demo-utils')
+const { toJS, fromJS, getConfig, getNetwork } = utils
+const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract,
+  createBM, Contract }
+  = require('demo-contract')
+const { Compiler } = require('demo-compile')
+const { RemoteDB } = require('demo-client')
+
+const LOGGER = new utils.Logger('departure')
+
+const departs = {}
 
 /**
- * Take the callback action for every level in a hierarchical key space
+ * Orchestrate a reproducible, idempotent departure of smart contracts for the blockchain,
+ * storing artifacts for later web interfaces.
+ *
+ * @method depart
+ * @memberof @module:depart
+ * @param name {String} optional, a human-readable name
+ * @param autoConfig {Boolean} optional, whether to automatically connect to the automatically
+ *        configured remote store. Default is `true`.
+ * @param sourcePath {String} local source path of Solidity contracts.
  */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+departs.departMixin = ({ name, autoConfig, sourcePath }) => {
+  return async (state) => {
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+    const{ chainId, deployerEth, deployerAddress } = state.toJS()
+    assert( chainId, `chainId not in input state.` )
+    assert( deployerEth, `deployerEth not in input state.` )
+    assert( deployerAddress, `deployerAddress not in input state.` )
+
+    const bm = await createBM({
+      sourcePath: sourcePath,
+      chainId   : state.get('chainId'),
+      autoConfig: !(autoConfig === false),
+    })
+
+    const c = new Compiler({
+      startSourcePath: sourcePath, bm: bm
+    })
+    const l = new Linker({
+      bm: bm
+    })
+    const d = new Deployer({
+      bm: bm, chainId: state.get('chainId'),
+      eth: state.get('deployerEth'), address: state.get('deployerAddress')
+    })
+
+    let compiles = new Map()
+    const compile = async ( contractName, sourceFile ) => {
+      assert(sourceFile &amp;&amp; sourceFile.endsWith('.sol'),
+             'sourceFile param not given or does not end with .sol extension')
+      const output = await c.compile( sourceFile )
+      assert(isCompile(output))
+      assert.equal( output.get(contractName).get('name'), contractName )
+      return new Promise((resolve, reject) => {
+        setTimeout( async () => {
+          const contract = await bm.getContract(contractName)
+          assert( isContract(contract), `Contract ${contractName} not found` )
+          compiles = compiles.set(contractName, output.get(contractName))
+          resolve(output)
+        }, 2000)
+      })
+    }
+
+    let links    = new Map()
+    const link = async ( contractName, linkId, depMap ) => {
+      assert(contractName, 'contractName param not given')
+      assert(linkId, 'link name not given')
+      const linkName = `${contractName}-${linkId}`
+      const output = await l.link( contractName, linkId, depMap )
+      assert(isLink(output))
+      links = links.set(linkName, output)
+      return output
+    }
+
+    let deploys  = new Map()
+    const deploy = async ( contractName, linkId, deployId, ctorArgList, force ) => {
+      assert(contractName, 'contractName param not given')
+      assert(linkId, 'linkId param not given')
+      assert(deployId, 'deployId param not given')
+      const deployName = `${contractName}-${deployId}`
+      const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
+      assert( isDeploy(output) )
+      deploys = deploys.set(deployName, output)
+      return output
+    }
+
+    const deployed = async (contractName, ctorArgList, deployID, force) => {
+      await compile( contractName, `${contractName}.sol` )
+      await link( contractName, 'link' )
+      const _deployID = (deployID) ? deployID : 'deploy'
+      const deployedContract =
+        await deploy( contractName, 'link', _deployID, ctorArgList, force )
+      const contract = new Contract({ deployerEth: deployerEth, deploy: deployedContract })
+      return await contract.getInstance()
+    }
+
+    const minedTx = async ( method, argList, options ) => {
+      /*
+      return contract.getTxReceipt({
+        method: method,
+        args: argList,
+        options: options || {from: deployerAddress},
+      })
+     */
+      const _options = Map({ from: deployerAddress, gas: getConfig()['GAS_LIMIT'] })
+        .merge(options).toJS()
+      return await deployerEth.getTransactionReceipt( await method(...argList, _options) )
+    }
+
+    const getCompiles = () => {
+      return compiles
+    }
+
+    const getLinks = () => {
+      return links
+    }
+
+    const getDeploys = () => {
+      return deploys
+    }
+
+    const clean = async () => {
+      const compileList = List(compiles.map((c, name) => {
+        return bm.cleanContract( name )
+      }).values()).toJS()
+      await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
+
+      const linkList = List(links.map((l, name) => {
+        return bm.cleanLink( name )
+      }).values()).toJS()
+      await Promise.all( linkList ).then((vals) => { LOGGER.info( 'Clean links', vals) })
+
+      const deployList = List(deploys.map((d, name) => {
+        return bm.cleanDeploy( name )
+      }).values()).toJS()
+      await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
+    }
+
+    return new Map({
+      departName  : name,
+      clean       : clean,
+      deploy      : deploy,
+      deployed    : deployed,
+      minedTx     : minedTx,
+      link        : link,
+      compile     : compile,
+      bm          : bm,
+      getCompiles : getCompiles,
+      getLinks    : getLinks,
+      getDeploys  : getDeploys,
+    })
+
+  }
+
 }
 
-const store = {}
-
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
-    }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
-  }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
-}
-
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
-
-module.exports = store
+module.exports = departs
 </code></pre>
   </article>
 </section>

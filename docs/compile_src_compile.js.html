@@ -1,4 +1,98 @@
-'use strict'
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      compile/src/compile.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Democracy
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="BuildsManager-nav"><a href="bm.BuildsManager.html">BuildsManager</a></li><li id="ContractsManager-nav"><a href="cm.ContractsManager.html">ContractsManager</a><ul class='methods'><li data-type="method" id="ContractsManager-getContract-nav"><a href="cm.ContractsManager.html#getContract">getContract</a></li></ul></li><li id="Compiler-nav"><a href="module-compile.Compiler.html">Compiler</a></li></ul><h3>Modules</h3><ul><li id="utils-nav"><a href="module-utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-getConfig-nav"><a href="module-utils.html#.getConfig">getConfig</a></li><li data-type="method" id="utils-parseLogLevels-nav"><a href="module-utils.html#.parseLogLevels">parseLogLevels</a></li><li data-type="method" id="utils-textsEqual-nav"><a href="module-utils.html#.textsEqual">textsEqual</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-createEncryptedAccount-nav"><a href="module-wallet.html#.createEncryptedAccount">createEncryptedAccount</a></li><li data-type="method" id="wallet-createSignerEth-nav"><a href="module-wallet.html#.createSignerEth">createSignerEth</a></li><li data-type="method" id="wallet-init-nav"><a href="module-wallet.html#.init">init</a></li><li data-type="method" id="wallet-loadEncryptedAccount-nav"><a href="module-wallet.html#.loadEncryptedAccount">loadEncryptedAccount</a></li><li data-type="method" id="wallet-pay-nav"><a href="module-wallet.html#.pay">pay</a></li><li data-type="method" id="wallet-payTest-nav"><a href="module-wallet.html#.payTest">payTest</a></li><li data-type="method" id="wallet-prepareSignerEth-nav"><a href="module-wallet.html#.prepareSignerEth">prepareSignerEth</a></li><li data-type="method" id="wallet-saveEncryptedAccount-nav"><a href="module-wallet.html#.saveEncryptedAccount">saveEncryptedAccount</a></li><li data-type="method" id="wallet-unlockEncryptedAccount-nav"><a href="module-wallet.html#.unlockEncryptedAccount">unlockEncryptedAccount</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#getFileKeySpace">getFileKeySpace</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#utils">utils</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        compile/src/compile.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>'use strict'
 // Compile with solcjs
 const fs         = require('fs')
 const path       = require('path')
@@ -40,7 +134,7 @@ const { Flattener } = require('./flattener')
 compiles.Compiler = class {
   
   constructor({startSourcePath, bm}) {
-    this.startSourcePath = (startSourcePath && typeof(startSourcePath) === 'string') ?
+    this.startSourcePath = (startSourcePath &amp;&amp; typeof(startSourcePath) === 'string') ?
       startSourcePath : DEMO_SRC_PATH
     LOGGER.debug('START SOURCE PATH', this.startSourcePath)
     ensureDir(this.startSourcePath)
@@ -88,7 +182,7 @@ compiles.Compiler = class {
       const output = preHash.set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
-      if (existingOutputs.has(contractName) &&
+      if (existingOutputs.has(contractName) &amp;&amp;
           existingOutputs.get(contractName).get('inputHash') === inputHash) {
         LOGGER.debug(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contractName, existingOutputs.get(contractName)]
@@ -136,7 +230,7 @@ compiles.Compiler = class {
 
     traverseDirs(
       queue,
-      (fnParts) => { return ((fnParts.length > 1) && !fnParts[1].startsWith('sol')) },
+      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; !fnParts[1].startsWith('sol')) },
       function(source, f) {
         allInputFiles.push(path.basename(f))
         let paths = f.split(path.sep)
@@ -146,7 +240,7 @@ compiles.Compiler = class {
         // in findImport below
         do {
           keys.push(paths.join(path.sep))
-          if (paths.length <= 1) { break }
+          if (paths.length &lt;= 1) { break }
           paths = paths.slice(-(paths.length - 1))
         } while(true)
         const sourceObj = {source: source, inputHash: keccak(source).toString('hex')}
@@ -169,7 +263,7 @@ compiles.Compiler = class {
     }
 
     // Filter out . and ..
-    const inputFiles = (source && source.length > 2) ?
+    const inputFiles = (source &amp;&amp; source.length > 2) ?
       List([path.basename(source)]) : List(allInputFiles)
     
     // Reformat keys to strip filename extensions, but keep the original filename as member
@@ -290,3 +384,25 @@ compiles.Compiler = class {
 }
 
 module.exports = compiles
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>

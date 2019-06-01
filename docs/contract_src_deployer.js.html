@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      contract/src/deployer.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        contract/src/deployer.js
       </h1>
     
 
@@ -93,121 +93,121 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+const path   = require('path')
+const assert = require('chai').assert
+const { Map, List, Seq }
+             = require('immutable')
 
-/**
- * Take the callback action for every level in a hierarchical key space
- */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
+const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
+             = require('demo-utils')
+const LOGGER = new Logger('Deployer')
+const { awaitOutputter, isLink } = require('./utils')
+const { BuildsManager } = require('./buildsManager')
+const { isValidAddress, keccak } = require('ethereumjs-util')
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
-}
+const deploys = {}
 
-const store = {}
+deploys.Deployer = class {
 
-/**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
- */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
+  constructor({inputter, outputter, bm, eth, chainId, address}) {
+    assert(chainId, `chainId param is empty.`)
+    this.bm        = bm || new BuildsManager(...arguments)
+    this.eth       = eth
+    this.chainId   = chainId
+    assert(isValidAddress(address), `${address} not a valid ethereum address`)
+    this.address   = address
+  }
 
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
-      }
+  getBuildsManager() {
+    return this.bm
+  }
+
+  /**
+   * Validate dependencies then deploy the given contract output to a network.
+   * @param eth network object connected to a local provider
+   * @param contractOutput the JSON compiled output to deploy
+   */
+  async deploy(contractName, linkId, deployId, ctorArgs, force) {
+    const linkName   = `${contractName}-${linkId}`
+    const link       = await this.bm.getLink(linkName)
+    assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
+    const code       = link.get('code')
+    const abi        = link.get('abi')
+    const deployName = `${contractName}-${deployId}`
+   
+    assert.equal(this.chainId, await this.eth.net_version())
+
+    const deployMap = await this.bm.getDeploys()
+
+    const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
+    // Warn with multiple deploys with the same ID
+    const deploy = deployMap.get(deployName)
+    if (Map.isMap(deploy) &amp;&amp; (deploy.get('inputHash') === inputHash) &amp;&amp; !force) {
+      const deployError = `Contract "${contractName}" has already been deployed on chain with ID "${deployId} and hash ${inputHash}`
+      LOGGER.warn(deployError)
+      return deploy
     } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
+      LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
+      LOGGER.debug(`current hash ${inputHash}`)
     }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
+
+    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
+    LOGGER.debug(ctorArgList)
+
+    const Contract = this.eth.contract(abi.toJS(), code)
+
+    const gasPrice = getConfig()[ 'GAS_PRICE' ]
+    const gasLimit = getConfig()[ 'GAS_LIMIT' ]
+    LOGGER.debug(`gasPrice`, gasPrice)
+    LOGGER.debug(`gasLimit`, gasLimit)
+
+    const deployPromise = new Promise((resolve, reject) => {
+      Contract.new(...ctorArgList, {
+        from: this.address, gas: gasLimit, gasPrice: gasPrice,
+      }).then((txHash) => {
+          const checkTransaction = setInterval(() => {
+            this.eth.getTransactionReceipt(txHash).then((receipt) => {
+              if (receipt) {
+                clearInterval(checkTransaction)
+                resolve(receipt) 
+              }
+            })
+          })
+        })
+        .catch((error) => {
+          console.error(`error ${error}`)
+          reject(error)
+        })
+    })
+
+    const minedContract = await deployPromise.then((receipt) => { return receipt })
+    LOGGER.debug('MINED', minedContract)
+    const instance = Contract.at(minedContract.contractAddress)
+
+    const now = new Date()
+
+    const deployOutput = new Map({
+      type         : 'deploy',
+      name         : contractName,
+      chainId      : this.chainId,
+      deployId     : deployId,
+      linkId       : link.get('linkId'),
+      abi          : abi,
+      code         : code,
+      deployTx     : new Map(minedContract),
+      deployAddress: minedContract.contractAddress,
+      deployDate   : now.toLocaleString(),
+      deployTime   : now.getTime(),
+      inputHash    : inputHash,
+    })
+
+    // This is an updated deploy, overwrite it
+    return this.bm.setDeploy(deployName, deployOutput, true)
   }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
+
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
-
-module.exports = store
+module.exports = deploys
 </code></pre>
   </article>
 </section>

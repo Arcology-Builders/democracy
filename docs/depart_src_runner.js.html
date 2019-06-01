@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      utils/src/db.js - Documentation
+      depart/src/runner.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        utils/src/db.js
+        depart/src/runner.js
       </h1>
     
 
@@ -92,122 +92,141 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>'use strict'
-const fs          = require('fs')
-const path        = require('path')
-const assert      = require('chai').assert
-const { List, Map }
-                  = require('immutable')
-const { Logger }  = require('./logger')
-const LOGGER      = new Logger('db')
-const { ensureDir, DB_DIR, buildFromDirs } = require('./utils')
+    <pre class="prettyprint source linenums"><code>'use strict';
 
 /**
- * Take the callback action for every level in a hierarchical key space
+ * Command-line runners and mixins for extracting arguments and configs of all kinds
  */
-const getFileKeySpace = (key, cb) => {
-  const keySpaces = List(key.split('/')) // in both localstorage and fs, we use UNIX sep
-  const dirSpaces = keySpaces.slice(0,-1)
-  dirSpaces.map((dir,i) => { cb(keySpaces.slice(0,i+1)) })
-  const keyBase = keySpaces.get(-1)
-  const dbDir = path.join(`${DB_DIR}`, ...dirSpaces.toJS())
 
-  // Return the base filename and don't add .json extension
-  // b/c the latter is only correct behavior for setImmutableKey
-  // and this method is also used by getImmutableKey
-  return path.join(dbDir, `${keyBase}`)
+const path = require('path')
+const assert = require('chai').assert
+const { toWei } = require('web3-utils')
+const { getConfig, getNetwork, Logger } = require('demo-utils')
+const { wallet } = require('demo-keys')
+const { Map, List } = require('immutable')
+const LOGGER = new Logger('runner.spec')
+
+const runners = {}
+
+/**
+ * Deployer mixing that extracts the deployer address/password from the config
+ * Binds no arguments.
+ *
+ * @method deployerMixin
+ * @memberof module:cli 
+ * @return {Function} returns a mixin which takes no input state and returns an
+ *   Immutable {Map} of `chainId`, `deployerAddress`, `deployerPassword`, `deployerEth`
+ */
+runners.deployerMixin = ({ unlockSeconds, testValueETH, testAccountIndex }) => {
+  return async (state) => {
+    const configAddress  = getConfig()['DEPLOYER_ADDRESS']
+    const configPassword = getConfig()['DEPLOYER_PASSWORD']
+    await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
+    const {
+      signerEth : deployerEth,
+      address   : _deployerAddress,
+      password  : _deployerPassword } = await wallet.prepareSignerEth({
+        address: configAddress, password: configPassword })
+    const chainId = await deployerEth.net_version()
+    const deployerAddress = configAddress ? configAddress  : _deployerAddress 
+    const deployerPassword = configPassword ? configPassword  : _deployerPassword 
+
+    assert.equal(deployerEth.address, deployerAddress)
+    if (process.env['NODE_ENV'] === 'DEVELOPMENT') {
+      const eth = getNetwork()
+      const testAccounts = await eth.accounts()
+      LOGGER.debug('testAccount', testAccounts)
+      await wallet.payTest({
+        fromAddress : testAccounts[testAccountIndex || 0],
+        toAddress   : deployerAddress,
+        weiValue    : (testValueETH) ? toWei(testValueETH, 'ether') : toWei('0.01', 'ether'),
+      })
+    }
+
+    return new Map({
+      chainId          : chainId,
+      deployerAddress  : deployerAddress,
+      deployerPassword : deployerPassword,
+      deployerEth      : deployerEth,
+    })
+  }
 }
 
-const store = {}
-
 /**
- * set an immutable key, possibly moving aside previous immutable values
- * @param {fullKey} the full path to the key, separated by `/`
- * @param {value} the value to associate, either an Immutable {List}, {Map}, or null
- * @param {overwrite} true if are allowed to move aside previous immutable keys
+ * Argument list mixin, takes in a list of names and returns a map of them to
+ * positional command-line arguments from index 2 onwards (after `node` and `&lt;scriptName>`.
+ *
+ * @method argListMixin
+ * @memberof module:cli
+ * @param argList {Array} of tuples [String, defaultVal],
+ *   names and default values to give positional arguments.
+ * @return {Function} a function taking no input state and returning a map of
+ *         the names in `argList` as keys and corresponding positional command-line args
+ *         as values.
  */
-store.setImmutableKey = (fullKey, value, overwrite) => {
-  assert.typeOf(fullKey, 'string',
-    `fullKey should be a string, instead was ${typeof(fullKey)}`)
-  assert(Map.isMap(value) || List.isList(value) || !value, 
-    `Value is not a Map or List or null ${value}` )
- 
-  // TODO we need the same delete key logic below for browser 
-  /*
-  if (isBrowser()) {
-    const valString = (value) ? JSON.stringify(value.toJS()) : value
-    localStorage.setItem(fullKey, valString)
-  } else {
- */
-  ensureDir(DB_DIR)
-  const dbFile = getFileKeySpace(fullKey, (keyPrefixes) => {
-    ensureDir(path.join(DB_DIR, ...keyPrefixes)) })
-  const now = Date.now()
-
-  if (fs.existsSync(`${dbFile}.json`)) {
-    if (!value || overwrite) {
-      // We never delete, only move to the side
-      const newFile = `${dbFile}.json.${now}` 
-      fs.renameSync( `${dbFile}.json`, newFile ) 
-      LOGGER.debug(`overwrite ${overwrite} to ${newFile}`)
-      if (!overwrite) {
-        return true
+runners.argListMixin = (argList) => {
+  return async (state) => {
+    const _argList = argList ? argList : []
+    LOGGER.debug('args', process.argv)
+    const scriptName = path.basename(module.filename)
+    const scriptArg = List(process.argv).skipUntil(
+      (x) => (x.startsWith('--') || x.endsWith('.js'))
+    ) 
+    const nonScriptArgs = scriptArg.skipUntil((x) => !x.endsWith('.js'))
+    let args = nonScriptArgs
+    let found = true
+    while (args.count() >= 2 &amp;&amp; found) {
+      if (args.get(0).startsWith('--')) {
+        if (!args.get(1).startsWith('--')) {
+          args = args.slice(2)
+        } else {
+          args = args.slice(1)
+        }
+        found = true
+      } else {
+        found = false
       }
-    } else {
-      LOGGER.error(`Key ${dbFile}.json exists and is read-only.`)
-      throw new Error(`Key ${dbFile}.json exists and is read-only.`)
+      LOGGER.debug('args', args)
     }
-  } else if (fs.existsSync(dbFile)) {
-    if (!value) {
-      LOGGER.debug(`Deleting sub-key ${dbFile}`)
-      fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
-      return true
-    } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
-    }
-  } else if (!value) {
-    //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)
-    return true
+    const argMap = new Map(List(_argList).map(
+      ([name, defaultVal], i) => [name, args.get(i) || defaultVal ]
+    ))
+    LOGGER.debug('argMap', argMap)
+    return argMap
   }
-  const valJS = (Map.isMap(value) || List.isList(value)) ? value.toJS() : value
-  //LOGGER.debug(`Setting key ${fullKey} value ${JSON.stringify(valJS)}`)
-  fs.writeFileSync(`${dbFile}.json`, JSON.stringify(valJS))
-  return true
-  /*
-  }
-*/
 }
 
-store.getImmutableKey = (fullKey, defaultValue) => {
-  assert(typeof(fullKey) === 'string')
-  /*
-  if (isBrowser()) {
-    const value = fromJS(JSON.parse(localStorage.getItem(fullKey)))
-    if (!value) {
-      if (defaultValue) return defaultValue
-      else { throw new Error(`Key ${fullKey} does not exist.`) }
-    }
-    return value
-  } else {
- */
-  const dbFile = getFileKeySpace(fullKey, () => {})
-  if (fs.existsSync(`${dbFile}.json`)) {
-    return buildFromDirs(`${dbFile}.json`, () => {return false})
-  } else if (fs.existsSync(dbFile)) {
-    return buildFromDirs(dbFile,
-      // Return undeleted keys like a.json but not deleted keys a.json.1
-      (fnParts) => { return ((fnParts.length > 1) &amp;&amp; (fnParts[1] !== 'json')) ||
-                              fnParts.length > 2 })
-  } else {
-    if (defaultValue) return defaultValue
-    else { throw new Error(`Key ${dbFile} does not exist.`) }
-  }
-  /*
-  }
- */
-}  
+/**
+ * Runner for a main function that takes a list of mixins to extract, process,
+ * and return state. Agnostic to whether the main function is async or not.
+ *
+ * @method run
+ * @memberof module:cli
+ * @param mainFunc {Function} a callback function which takes in an immutable {Map} of
+ *   state from the last mixin.
+ * @param mixinList an Immutable {List} of mixin functions that take in an Immutable `Map`
+ *   of input state from the previous mixin and return an Immutable `Map` of output state
+ *   to the next mixin.
+ * @return the return value of `mainFunc`
+ */ 
+runners.run = async (mainFunc, mixinList) => {
+  LOGGER.debug('Running main function')
+  
+  const penultState = await mixinList.reduce((stateProm, mixin, i) => {
+    LOGGER.debug(`Running mixin ${i}`)
+    return stateProm.then( (state) => {
+      LOGGER.debug(`on input state ${state}`) 
+      return mixin(state).then((outState) => {
+        return state.merge(outState)
+      })
+    })
+   }, Promise.resolve(Map({})))
+  const finalState = await mainFunc(penultState)
 
-module.exports = store
+  return penultState.merge(finalState)
+}
+
+module.exports = runners
 </code></pre>
   </article>
 </section>

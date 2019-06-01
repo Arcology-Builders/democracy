@@ -11,15 +11,17 @@ const { traverseDirs, COMPILES_DIR, getImmutableKey, setImmutableKey, Logger,
 
 const LOGGER = new Logger('ContractsManager')
 
+const cm = {}
+
 /**
  * A ContractsManager which can read and clean compiled contracts.
- * @param _outputter {async function} a (possibly asynchronous) function that
+ * @param _outputter {Function} a (possibly asynchronous) function that
  *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
  *        other value that you want returned from `compile` or `clean*` methods.
  *        If missing, _outputter defaults to `setImmutableKey`
  *        to a local file-based DB store.
  */
-class ContractsManager {
+cm.ContractsManager = class {
   
   constructor({startSourcePath, inputter, outputter}) {
     this.startSourcePath = startSourcePath
@@ -105,7 +107,7 @@ class ContractsManager {
 /**
  * @return true if the given object is a compile output from a Compiler, otherwise false
  */
-const isCompile = (_compile) => {
+cm.isCompile = (_compile) => {
   return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
           _compile.reduce((prev, val) => {
     return prev && val.get('type') === 'compile'
@@ -115,12 +117,8 @@ const isCompile = (_compile) => {
 /**
  * @return true if the given object is a compile output retrieved from db, otherwise false
  */
-const isContract = (_contract) => {
+cm.isContract = (_contract) => {
   return (Map.isMap(_contract) && _contract.get('type') === 'compile')
 }
 
-module.exports = {
-  ContractsManager : ContractsManager,
-  isCompile        : isCompile,
-  isContract       : isContract,
-}
+module.exports = cm
