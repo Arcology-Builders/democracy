@@ -3,10 +3,12 @@ const BN = require('bn.js')
 const assert = require('chai').assert
 
 depart({
-  departName       : 'Test Departure',
-  testAccountIndex : 1,
-  testValueETH     : '0.2',
-  sourcePathList   : ['contracts-new'],
+  departName        : 'Test Departure',
+  testAccountIndex  : 1,
+  testValueETH      : '0.2',
+  sourcePathList    : ['contracts-new'],
+  compileFlatten    : true,
+  compileOutputFull : true,
 }, async ({ deployed, minedTx }) => {
   const relink = await deployed( 'Relink' )
  

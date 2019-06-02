@@ -22,7 +22,7 @@
     "tests": "tests"
   },
   "bin": {
-    "demo-depart": "./bin/demo-depart.js"
+    "demo-depart": "./bin/demo-depart"
   },
   "files": [
     "src",

@@ -34,7 +34,7 @@ departs.departMixin = () => {
   return async (state) => {
 
     const{ chainId, deployerEth, deployerAddress, departName, autoConfig,
-      sourcePathList } = state.toJS()
+      sourcePathList, compileFlatten, compileOutputFull } = state.toJS()
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
@@ -46,7 +46,10 @@ departs.departMixin = () => {
     })
 
     const c = new Compiler({
-      sourcePathList: sourcePathList, bm: bm
+      sourcePathList : sourcePathList,
+      bm             : bm,
+      flatten        : compileFlatten,
+      outputFull     : compileOutputFull,
     })
     const l = new Linker({
       bm: bm

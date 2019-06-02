@@ -283,7 +283,6 @@ compiles.Compiler = class {
     await this.updateFlatten(flattener, source)
     await this.updateCompileOutput(outputs, source)
 
-    fs.writeFileSync("outputContracts.json", JSON.stringify(outputs.contracts, null, 2))
     assert( Map.isMap(requestedInputs) )
     return this.getCompileOutputFromSolc(fromJS( outputs.contracts ),
                                          requestedInputs, existingOutputs)
