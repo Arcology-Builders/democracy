@@ -17,7 +17,9 @@ Tools for running a distributed country, currently on Ethereum.
   * find some other logic for process.argv other than `*.js` to skip JS commands
   * add names command-line flags instead of positional args
   * install javascript bin
-* 0.3.2 - Document departure format, and build pipeline
+* 0.3.2 - decode sourceMap to help with revert and debugging
+  * improve flattening to reorder sources of imports
+* 0.3.3 - React UI of deploys on Rinkeby
 
 ## Roadmap
 
