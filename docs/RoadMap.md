@@ -9,7 +9,7 @@ Tools for running a distributed country, currently on Ethereum.
   * ~taking in the following args from depart.js~
     * `unlockSeconds`
     * `sourcePath`
-    * `testEthValue`
+    * `testValueETH`
     * `testAccountIndex`
   * ~multiple source paths~
   * ~pass in `deployed` and `minedTx` for transparency~
@@ -17,12 +17,14 @@ Tools for running a distributed country, currently on Ethereum.
   * ~find some other logic for process.argv other than `*.js` to skip JS commands~
   * ~add names command-line flags instead of positional args~
   * install javascript bin
-  * check source hashes and dependencies of all imports, not just top-level file
   * pass in a LOGGER from argListMixin
   * if `testValueETH` not found, skip funding from a test account
-* 0.3.2 - decode sourceMap to help with revert and debugging
+  * allow passing in alternative deployerAddress / deployerPassword into deployerMixin
+* 0.3.2
+  * check source hashes and dependencies of all imports, not just top-level file
+* 0.3.3 - decode sourceMap to help with revert and debugging
   * improve flattening to reorder sources of imports
-* 0.3.3 - React UI of deploys on Rinkeby
+* 0.3.4 - React UI of deploys on Rinkeby
 
 ## Roadmap
 
