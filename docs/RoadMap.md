@@ -18,6 +18,8 @@ Tools for running a distributed country, currently on Ethereum.
   * ~add names command-line flags instead of positional args~
   * install javascript bin
   * check source hashes and dependencies of all imports, not just top-level file
+  * pass in a LOGGER from argListMixin
+  * if `testValueETH` not found, skip funding from a test account
 * 0.3.2 - decode sourceMap to help with revert and debugging
   * improve flattening to reorder sources of imports
 * 0.3.3 - React UI of deploys on Rinkeby
