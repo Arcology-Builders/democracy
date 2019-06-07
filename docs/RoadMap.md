@@ -19,6 +19,7 @@ Tools for running a distributed country, currently on Ethereum.
   * install javascript bin
   * pass in a LOGGER from argListMixin
   * if `testValueETH` not found, skip funding from a test account
+  * don't warn in Compiler for replacing import
   * allow passing in alternative deployerAddress / deployerPassword into deployerMixin
 * 0.3.2
   * check source hashes and dependencies of all imports, not just top-level file
