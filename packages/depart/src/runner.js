@@ -26,40 +26,43 @@ const runners = {}
 runners.deployerMixin = () => {
   return async (state) => {
     LOGGER.debug('Deployer Input State', state)
-    const { testValueETH, testAccountIndex, unlockSeconds } = state.toJS()
+    const { testValueETH, testAccountIndex, unlockSeconds,
+            deployerAddress, deployerPassword } = state.toJS()
 
-    assert(testValueETH, `testValueETH not found in input state`)
-    assert(Number.isInteger(testAccountIndex), `testAccountIndex not found in input state`)
     assert(Number.isInteger(unlockSeconds), `unlockSeconds not found in input state`)
 
     const configAddress  = getConfig()['DEPLOYER_ADDRESS']
     const configPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
+    const _deployerAddress = deployerAddress ? deployerAddress :
+      ( configAddress ? configAddress : createdAddress )
+    const _deployerPassword = deployerPassword ? deployerPassword :
+      ( configPassword ? configPassword : createdPassword )
     const {
       signerEth : deployerEth,
-      address   : _deployerAddress,
-      password  : _deployerPassword } = await wallet.prepareSignerEth({
-        address: configAddress, password: configPassword })
+      address   : createdAddress,
+      password  : createdPassword } = await wallet.prepareSignerEth({
+        address: _deployerAddress, password: _deployerPassword })
     const chainId = await deployerEth.net_version()
-    const deployerAddress = configAddress ? configAddress  : _deployerAddress 
-    const deployerPassword = configPassword ? configPassword  : _deployerPassword 
 
-    assert.equal(deployerEth.address, deployerAddress)
-    if (process.env['NODE_ENV'] === 'DEVELOPMENT' && testValueETH !== '0') {
+    assert.equal(deployerEth.address, _deployerAddress)
+    assert(testValueETH, `testValueETH not found in input state`)
+    if (process.env['NODE_ENV'] === 'DEVELOPMENT' &&
+        testValueETH !== '0' && Number.isInteger(testAccountIndex)) {
       const eth = getNetwork()
       const testAccounts = await eth.accounts()
       LOGGER.debug('testAccount', testAccounts)
       await wallet.payTest({
         fromAddress : testAccounts[testAccountIndex || 0],
-        toAddress   : deployerAddress,
+        toAddress   : _deployerAddress,
         weiValue    : toWei(testValueETH, 'ether'),
       })
     }
 
     return new Map({
       chainId          : chainId,
-      deployerAddress  : deployerAddress,
-      deployerPassword : deployerPassword,
+      deployerAddress  : _deployerAddress,
+      deployerPassword : _deployerPassword,
       deployerEth      : deployerEth,
     })
   }

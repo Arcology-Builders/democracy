@@ -4,6 +4,7 @@ const assert = require('chai').assert
 const { run, argListMixin, deployerMixin } = require('../src/runner')
 
 const { immEqual, getNetwork, Logger } = require('demo-utils')
+const { wallet } = require('demo-keys')
 const { Map } = require('immutable')
 const LOGGER = new Logger('tests/runner')
 
@@ -42,14 +43,28 @@ describe( 'Runners', () => {
     const alm3 = await argListMixin(Map({
       'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
     }))
-    const dm = await deployerMixin({ unlockSeconds: 1 })
+    const dm = await deployerMixin()
     const out = await dm(await alm3())
-    LOGGER.debug('DM out', out)
     assert.equal( out.get('deployerAddress').length, 42 )
     assert.equal( out.get('deployerPassword').length, 64 )
     const actualId = await out.get('deployerEth').net_version()
     const expectedId = await getNetwork().net_version() 
     assert.equal( expectedId, actualId )
+  })
+
+  it( 'preserves deployer address and password in deployer mixin', async () => {
+    const { address, password } = await wallet.createEncryptedAccount()
+    const alm = await argListMixin(Map({
+      'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1',
+      'deployerAddress': address, 'deployerPassword': password,
+    }))
+    const dm = await deployerMixin()
+    const out1 = await alm()
+    assert.equal( out1.get('deployerAddress'), address )
+    assert.equal( out1.get('deployerPassword'), password )
+    const out = await dm(out1)
+    assert.equal( out.get('deployerAddress'), address )
+    assert.equal( out.get('deployerPassword'), password )
   })
 
 })

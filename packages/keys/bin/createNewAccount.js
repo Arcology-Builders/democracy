@@ -45,12 +45,14 @@ const mainFunc = async (fundFromTest, payAmount) => {
         password    : funderPassword,
       })
 
+      const weiValue = (payAll && Number.isFinite(parseFloat(payAmount))) ? '0'
+        : toWei(payAmount, 'ether')
       await wallet.pay({
         eth         : signerEth,
         fromAddress : funderAddress,
         toAddress   : address,
         payAll      : payAll,
-        weiValue    : payAll ? '0' : toWei(payAmount, 'ether'),
+        weiValue    : weiValue,
       })
     }
     console.log(`Paying complete from account ${funderAddress}`)
