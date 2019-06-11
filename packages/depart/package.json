@@ -33,7 +33,8 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec",
+    "cov": "nyc.js mocha tests/"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"

@@ -40,7 +40,6 @@ describe( 'Departures', () => {
   it( 'executes a simple departure', async () => { 
     const departFunc = async (state) => {
       const { compile, link, deploy, bm } = state.toJS() 
-      LOGGER.info( 'Compiling', Date.now() )
       const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
       assert( isCompile(cout) )
       const contract = await bm.getContract( 'DifferentSender' )
@@ -50,13 +49,11 @@ describe( 'Departures', () => {
       assert( bm.inputter == getImmutableKey )
       assert( bm.outputter == setImmutableKey )
 
-      LOGGER.info( 'Linking', Date.now() )
       const lout = await link( 'DifferentSender', 'link' )
       assert( isLink(lout) )
       const rLink = await bm.getLink('DifferentSender-link')
       assert( immEqual(lout, rLink) )
       
-      LOGGER.info( 'Deploying', Date.now() )
       const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
       const rDeploy = await bm.getDeploy('DifferentSender-deploy')
       assert( isDeploy(dout) )

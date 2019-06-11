@@ -138,17 +138,17 @@ departs.departMixin = () => {
       const compileList = List(compiles.map((c, name) => {
         return bm.cleanContract( name )
       }).values()).toJS()
-      await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
+      await Promise.all( compileList ).then((vals) => { LOGGER.debug( 'Clean compiles', vals) })
 
       const linkList = List(links.map((l, name) => {
         return bm.cleanLink( name )
       }).values()).toJS()
-      await Promise.all( linkList ).then((vals) => { LOGGER.info( 'Clean links', vals) })
+      await Promise.all( linkList ).then((vals) => { LOGGER.debug( 'Clean links', vals) })
 
       const deployList = List(deploys.map((d, name) => {
         return bm.cleanDeploy( name )
       }).values()).toJS()
-      await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
+      await Promise.all( deployList ).then((vals) => { LOGGER.debug( 'Clean deploys', vals) })
     }
 
     return new Map({

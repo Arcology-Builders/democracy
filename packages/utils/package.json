@@ -22,7 +22,7 @@
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "exit 0",
     "lint:fix": "eslint --fix -c ../../.eslintrc.json *.js tests/*.js src/*.js",
-    "cov": "nyc/bin/nyc.js mocha tests/"
+    "cov": ". ../../.covenv; ../../node_modules/nyc/bin/nyc.js --reporter=lcov --reporter=text-summary yarn test && ../../node_modules/nyc/bin/nyc.js reporter --reporter=text-lcov | npx coveralls"
   },
   "repository": {
     "type": "git",

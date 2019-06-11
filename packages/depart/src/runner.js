@@ -34,10 +34,8 @@ runners.deployerMixin = () => {
     const configAddress  = getConfig()['DEPLOYER_ADDRESS']
     const configPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
-    const _deployerAddress = deployerAddress ? deployerAddress :
-      ( configAddress ? configAddress : createdAddress )
-    const _deployerPassword = deployerPassword ? deployerPassword :
-      ( configPassword ? configPassword : createdPassword )
+    const _deployerAddress = deployerAddress ? deployerAddress : configAddress
+    const _deployerPassword = deployerPassword ? deployerPassword : configPassword
     const {
       signerEth : deployerEth,
       address   : createdAddress,
@@ -45,7 +43,7 @@ runners.deployerMixin = () => {
         address: _deployerAddress, password: _deployerPassword })
     const chainId = await deployerEth.net_version()
 
-    assert.equal(deployerEth.address, _deployerAddress)
+    assert.equal(deployerEth.address, createdAddress)
     assert(testValueETH, `testValueETH not found in input state`)
     if (process.env['NODE_ENV'] === 'DEVELOPMENT' &&
         testValueETH !== '0' && Number.isInteger(testAccountIndex)) {
@@ -54,15 +52,15 @@ runners.deployerMixin = () => {
       LOGGER.debug('testAccount', testAccounts)
       await wallet.payTest({
         fromAddress : testAccounts[testAccountIndex || 0],
-        toAddress   : _deployerAddress,
+        toAddress   : createdAddress,
         weiValue    : toWei(testValueETH, 'ether'),
       })
     }
 
     return new Map({
       chainId          : chainId,
-      deployerAddress  : _deployerAddress,
-      deployerPassword : _deployerPassword,
+      deployerAddress  : createdAddress,
+      deployerPassword : createdPassword,
       deployerEth      : deployerEth,
     })
   }
