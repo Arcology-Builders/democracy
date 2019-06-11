@@ -26,7 +26,8 @@
   },
   "files": [
     "src",
-    "index.js"
+    "index.js",
+    "bin/demo-depart"
   ],
   "repository": {
     "type": "git",
