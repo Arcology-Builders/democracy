@@ -1,0 +1,22 @@
+  202.8 MiB [##########] /node_modules
+   44.5 MiB [##        ] /.git
+   34.1 MiB [#         ] /packages
+    4.9 MiB [          ] /deprecated
+    3.4 MiB [          ] /docs
+    1.7 MiB [          ] /dist
+  320.0 KiB [          ]  yarn.lock
+  136.0 KiB [          ] /docker
+   12.0 KiB [          ] /specs
+    8.0 KiB [          ]  README.md
+    8.0 KiB [          ] /scripts
+    4.0 KiB [          ]  .jsdoc.json
+    4.0 KiB [          ]  LICENSE.md
+    4.0 KiB [          ] /.circleci
+    4.0 KiB [          ]  package.json
+    4.0 KiB [          ]  .gitignore
+    4.0 KiB [          ] /.vscode
+    4.0 KiB [          ]  lerna-debug.log
+    4.0 KiB [          ]  .eslintrc.json
+    4.0 KiB [          ]  lerna.json
+    4.0 KiB [          ]  .covenv
+    4.0 KiB [          ]  democracy.code-workspace

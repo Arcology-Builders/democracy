@@ -4,8 +4,6 @@ const assert = require('chai').assert
 
 depart({
   departName        : 'Test Departure',
-  testAccountIndex  : 1,
-  testValueETH      : '0.2',
   sourcePathList    : ['contracts-new'],
   compileFlatten    : true,
   compileOutputFull : true,

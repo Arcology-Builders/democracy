@@ -44,8 +44,7 @@ runners.deployerMixin = () => {
     const chainId = await deployerEth.net_version()
 
     assert.equal(deployerEth.address, createdAddress)
-    assert(testValueETH, `testValueETH not found in input state`)
-    if (process.env['NODE_ENV'] === 'DEVELOPMENT' &&
+    if (process.env['NODE_ENV'] === 'DEVELOPMENT' && testValueETH && 
         testValueETH !== '0' && Number.isInteger(testAccountIndex)) {
       const eth = getNetwork()
       const testAccounts = await eth.accounts()
