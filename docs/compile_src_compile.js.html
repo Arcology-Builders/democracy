@@ -269,6 +269,7 @@ compiles.Compiler = class {
     const requestedInputs = new Map(inputFiles.map((name) => {
       const value = new Map(inputs[name]).set('filename', name) 
       assert(name.split('.')[1].startsWith('sol'))
+      assert(inputs[name], `${name} not found in paths ${this.sourcePathSet.toJS()}`)
       flattener.addSource(name, inputs[name].source)
       return [ name.split('.')[0], value ]
     }))
@@ -376,7 +377,6 @@ compiles.Compiler = class {
     await this.updateFlatten(flattener, source)
     await this.updateCompileOutput(outputs, source)
 
-    fs.writeFileSync("outputContracts.json", JSON.stringify(outputs.contracts, null, 2))
     assert( Map.isMap(requestedInputs) )
     return this.getCompileOutputFromSolc(fromJS( outputs.contracts ),
                                          requestedInputs, existingOutputs)

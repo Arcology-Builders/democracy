@@ -128,7 +128,7 @@ departs.departMixin = () => {
   return async (state) => {
 
     const{ chainId, deployerEth, deployerAddress, departName, autoConfig,
-      sourcePathList } = state.toJS()
+      sourcePathList, compileFlatten, compileOutputFull } = state.toJS()
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
@@ -140,7 +140,10 @@ departs.departMixin = () => {
     })
 
     const c = new Compiler({
-      sourcePathList: sourcePathList, bm: bm
+      sourcePathList : sourcePathList,
+      bm             : bm,
+      flatten        : compileFlatten,
+      outputFull     : compileOutputFull,
     })
     const l = new Linker({
       bm: bm
@@ -229,17 +232,17 @@ departs.departMixin = () => {
       const compileList = List(compiles.map((c, name) => {
         return bm.cleanContract( name )
       }).values()).toJS()
-      await Promise.all( compileList ).then((vals) => { LOGGER.info( 'Clean compiles', vals) })
+      await Promise.all( compileList ).then((vals) => { LOGGER.debug( 'Clean compiles', vals) })
 
       const linkList = List(links.map((l, name) => {
         return bm.cleanLink( name )
       }).values()).toJS()
-      await Promise.all( linkList ).then((vals) => { LOGGER.info( 'Clean links', vals) })
+      await Promise.all( linkList ).then((vals) => { LOGGER.debug( 'Clean links', vals) })
 
       const deployList = List(deploys.map((d, name) => {
         return bm.cleanDeploy( name )
       }).values()).toJS()
-      await Promise.all( deployList ).then((vals) => { LOGGER.info( 'Clean deploys', vals) })
+      await Promise.all( deployList ).then((vals) => { LOGGER.debug( 'Clean deploys', vals) })
     }
 
     return new Map({
