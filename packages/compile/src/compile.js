@@ -276,7 +276,7 @@ compiles.Compiler = class {
     const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
     if (outputs.errors) {
       LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
-      throw new Error(outputs.errors)
+      throw new Error(JSON.stringify(outputs.errors))
     }
     assert.ok(outputs.contracts, `Expected compile output for requested sources`)
     

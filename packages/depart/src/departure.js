@@ -99,13 +99,16 @@ departs.departMixin = () => {
       return output
     }
 
-    const deployed = async (contractName, ctorArgList, deployID, force) => {
+    const deployed = async (contractName, opts = {}) => {
+      const { ctorArgList, deployID, force, abi } = opts
       await compile( contractName, `${contractName}.sol` )
       await link( contractName, 'link' )
       const _deployID = (deployID) ? deployID : 'deploy'
       const deployedContract =
         await deploy( contractName, 'link', _deployID, ctorArgList, force )
-      const contract = new Contract({ deployerEth: deployerEth, deploy: deployedContract })
+      const replacedContract = (abi) ?
+        deployedContract.set( 'abi', fromJS(abi) ) : deployedContract 
+      const contract = new Contract({ deployerEth: deployerEth, deploy: replacedContract })
       return await contract.getInstance()
     }
 
