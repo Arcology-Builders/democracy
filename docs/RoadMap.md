@@ -8,10 +8,15 @@ Tools for running a distributed country, currently on Ethereum.
 These are active development goals for the next release here (June 2019)
 
 * 0.3.2 Improve webify bundle, React components, generic signing for ZkAsset issuing, trading, private voting
+  * allow test key unlocking across refreshes, and manual relocking in API
+  * add secp256k1 from Aztec and use for generating keys
+  * export secp256k1 in webify
+  * break out compile into its own departure mixin, for webifying
+  * test deploying new contracts in browser
   * render react components listening to Websocket mongo changes like 
   * pass in a LOGGER from argListMixin
-  * check source hashes and dependencies of all imports, not just top-level file
 * 0.3.3 - decode sourceMap to help with revert and debugging
+  * check source hashes and dependencies of all imports, not just top-level file
   * improve flattening to reorder sources of imports
 * 0.3.4 - React UI of deploys on Rinkeby
   * especially ZkAssets for private voting
