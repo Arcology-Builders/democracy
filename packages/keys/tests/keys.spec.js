@@ -2,7 +2,7 @@ const chai = require('chai')
 const assert = chai.assert
 chai.use(require('chai-as-promised'))
 
-const utils = require('ethereumjs-utils')
+const util = require('ethereumjs-util')
 const keys = require('../src/keys')
 const randombytes = require('randombytes')
 const { getImmutableKey, setImmutableKey, fromJS }
@@ -24,7 +24,7 @@ describe('Self-generated keys and signing', () => {
   })
 
   it('generates a valid key randomly from scratch', async () => {
-    assert(utils.isValidAddress(account.get('addressPrefixed')))
+    assert(util.isValidAddress(account.get('addressPrefixed')))
     assert.equal(40 , account.get('addressString'  ).length)
     assert.equal(42 , account.get('addressPrefixed').length)
     assert.equal(64 , account.get('privateString'  ).length)
@@ -33,8 +33,10 @@ describe('Self-generated keys and signing', () => {
     assert.equal(130, account.get('publicPrefixed' ).length)
     assert.equal(32 , account.get('ivString'       ).length)
     assert.equal(64 , account.get('saltString'     ).length)
-    const address = utils.publicToAddress(account.get('publicPrefixed')).toString('hex')
-    assert.equal(address, account.get('addressString'))
+    const address =
+      util.publicToAddress(account.get('publicPrefixed'))
+        .toString('hex')
+    assert.equal(util.toChecksumAddress(address), account.get('addressPrefixed'))
   })
 
   it( 'dumps a password and recovers it', async () => {

@@ -9,6 +9,7 @@ const LOGGER = new Logger('create.spec')
 const keys = require('..')
 const { wallet, isAccount } = keys
 const { toWei } = require('web3-utils')
+
 describe('Remote account created from private key', () => {
 
   let privateString
@@ -24,6 +25,12 @@ describe('Remote account created from private key', () => {
     testAccounts = await eth.accounts()
   })
 
+  it('creates a valid checksum address', () => {
+    const address = result['address']
+    assert.equal( address, util.toChecksumAddress(address))
+    assert( util.isValidChecksumAddress(address), `${address} is not a checksum address` )
+  })
+
   it('generates the correct local result', async () => {
     assert.equal(result.password.length, 64)
     assert.equal(result.account.get('privateString'), privateString)
@@ -35,8 +42,12 @@ describe('Remote account created from private key', () => {
       await wallet.loadEncryptedAccount({address: result.address })
     const recoveredAccount = keys.encryptedJSONToAccount({
       encryptedJSON: encryptedJSON, password: result.password })
-    assert.equal(recoveredAccount.get('addressPrefixed'), result.address)
-    assert.equal(recoveredAccount.get('privateString'), privateString)
+    assert.equal(util.toChecksumAddress(recoveredAccount.get('addressPrefixed')),
+      result.address,
+      'Recovered address is different than expected.')
+    assert.equal(recoveredAccount.get('privateString'),
+      privateString,
+      'Recovered private key is different than expected.')
     assert(isAccount(recoveredAccount),
       `Recovered account ${recoveredAccount} is not a valid account`)
   })
@@ -63,5 +74,9 @@ describe('Remote account created from private key', () => {
       label       : 'New account -> test account',
     })
   }) 
-    
+
+  after(() => {
+    wallet.shutdownSync()
+  })
+
 })

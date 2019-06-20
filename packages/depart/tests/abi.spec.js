@@ -1,6 +1,4 @@
 'use strict'
-const fs        = require('fs')
-const path      = require('path')
 const { Map }   = require('immutable')
 const assert    = require('chai').assert
 const { toWei } = require('web3-utils')
@@ -8,9 +6,7 @@ const BN        = require('bn.js')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const LOGGER = new Logger('depart.spec')
-const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-contract')
-const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
+const LOGGER = new Logger('abi.spec')
 
 const { wallet } = require('demo-keys')
 const { run, argListMixin, deployerMixin, departMixin } = require('..')
@@ -20,10 +16,12 @@ describe( 'ABI swap', () => {
   let finalState
 
   const m0 = argListMixin(Map({
-    unlockSeconds: 50, testValueETH: '0.05', testAccountIndex: 0,
-    departName      : "shadow",
-    autoConfig      : true,
-    sourcePathList  : ["contracts-new"],
+    unlockSeconds     : 50,
+    testValueETH      : '0.05',
+    testAccountIndex  : 0,
+    departName        : "shadow",
+    autoConfig        : true,
+    sourcePathList    : ["contracts-new"],
   }))
   const m1 = deployerMixin()
   const m2 = departMixin()

@@ -166,7 +166,7 @@ describe('Signing and spending transactions', () => {
     const expected = new BN(oldToBalance).add(new BN(oldFromBalance)).sub(new BN(OVERAGE_100_ETH)).toString(10)
     assert.equal(newToBalance, expected,
       `newToBalance should receive all funds ${expected}, instead ${newToBalance}`)
-   
+  
     // Stop commenting here, to transfer back all funds to bigSpender in case of an error 
     // Pay the money back so tests above are repeatable
     await wallet.pay({

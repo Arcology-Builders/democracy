@@ -17,7 +17,7 @@ const ethsign = require('ethjs-signer').sign
 const Eth     = require('ethjs')
 const keys = require('./keys')
 const { toWei, fromWei } = require('web3-utils')
-const { isValidAddress } = require('ethereumjs-utils')
+const { isValidAddress, toChecksumAddress } = require('ethereumjs-utils')
 const { createInOut } = require('demo-client')
 
 const wallet = {}
@@ -41,7 +41,7 @@ wallet.prepareSignerEth = async ({ address, password }) => {
   const autoCreate = !address && !password
   const pair  = (autoCreate) ? (await wallet.createEncryptedAccount()) :
     { address: address, password: password }
-  const _address  = pair.address
+  const _address  = toChecksumAddress(pair.address)
   const _password = pair.password
   LOGGER.debug('AUTO', _address, _password)
 
@@ -81,20 +81,21 @@ wallet.createFromPrivateString = async ({ privateString }) => {
  */
 wallet.createSignerEth = ({url, address}) => {
   assert( isValidAddress(address), `Invalid Ethereum address ${address}` )
+  const checksumAddress = toChecksumAddress(address)
   const provider = new SignerProvider(url, {
     signTransaction: async (rawTx, cb) => {
-      let account = wallet.accountsMap[address]
+      let account = wallet.accountsMap[checksumAddress]
       if ( keys.isAccount(account) ) {
         cb(null, ethsign(rawTx, account.get('privatePrefixed') ) )
       } else {
         throw new Error(`Account ${address} is locked. Call wallet.unlockEncryptedAccount`)
       }
     },
-    accounts: (cb) => cb(null, [address]),
+    accounts: (cb) => cb(null, [checksumAddress]),
   })
   const newEth = new Eth(provider)
-  newEth.address = address
-  wallet.signersMap[address] = newEth
+  newEth.address = checksumAddress
+  wallet.signersMap[checksumAddress] = newEth
   LOGGER.debug(`Added a signer for ${address}`)
   return newEth
 }
@@ -172,11 +173,13 @@ wallet.createEncryptedAccount = async () => {
  */
 wallet.loadEncryptedAccount = async ({ address }) => {
   if (!wallet.initialized) { LOGGER.error('Call wallet.init() first.') }
+  const checksumAddress = toChecksumAddress(address)
   return awaitInputter(
     wallet.inputter(`keys/${wallet.chainId}/${address}`, null),
     (encryptedAccount) => {
       if (!encryptedAccount) { throw new Error(`Account not found for ${address}`) }
-      wallet.accountsMap[address] = toJS( encryptedAccount )
+      wallet.accountsMap[checksumAddress] =
+        toJS( encryptedAccount )
       LOGGER.debug(`Loaded encrypted account for ${address}`)
       return toJS( encryptedAccount )
     }
@@ -193,10 +196,11 @@ wallet.loadEncryptedAccount = async ({ address }) => {
  */
 wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   if (!wallet.initialized) { LOGGER.error('Call wallet.init() first.') }
-  if (wallet.accountsMap[address]) {
+  const checksumAddress = toChecksumAddress(address)
+  if (wallet.accountsMap[checksumAddress]) {
     throw new Error(`Attempting to overwrite existing account at ${address}`)
   }
-  wallet.accountsMap[address] = encryptedAccount
+  wallet.accountsMap[checksumAddress] = encryptedAccount
   return awaitOutputter(
     wallet.outputter( `keys/${wallet.chainId}/${address}`, fromJS(encryptedAccount) ),
     // Delay by one second, so that subsequent calls to inputter will return the newly
@@ -216,29 +220,31 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
  * @param password {String} to unlock the given account
  */
 wallet.unlockEncryptedAccount = async ({ address, password }) => {
-  const encryptedAccount = wallet.accountsMap[address]
+  const checksumAddress = toChecksumAddress(address)
+  const encryptedAccount = wallet.accountsMap[checksumAddress]
   if ( keys.isAccount(encryptedAccount) ) {
     throw new Error(`Account ${address} already unlocked`)
   }
   if (!address || !password) {
     throw new Error(`Empty address ${address} or password`)
   }
-  LOGGER.debug('ENCRYPTED ACCOUNT', encryptedAccount)
-  wallet.accountsMap[address] =
-    keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password: password })
-  LOGGER.debug('Unlocked', address, keys.isAccount(wallet.accountsMap[address]))
-  const relockFunc = () => { wallet.accountsMap[address] = encryptedAccount } 
+  wallet.accountsMap[checksumAddress] =
+    keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount,
+      password: password })
+  const relockFunc = () => {
+    wallet.accountsMap[checksumAddress] = encryptedAccount } 
   const id = setTimeout(relockFunc, wallet.unlockSeconds * 1000)
-  wallet.relockMap[address] = { id: id, relockFunc: relockFunc }
+  wallet.relockMap[checksumAddress] = { id: id, relockFunc: relockFunc }
   return relockFunc
 }
 
 wallet.lockEncryptedAccountSync = ({ address }) => {
-  const { id, relockFunc } = wallet.relockMap[address]
+  const checksumAddress = toChecksumAddress(address)
+  const { id, relockFunc } = wallet.relockMap[checksumAddress]
   if (id) {
     clearTimeout(id)
     relockFunc()
-    delete wallet.relockMap[address]
+    delete wallet.relockMap[checksumAddress]
     LOGGER.debug(`Relocked ${address}`)
   }
 }
@@ -262,7 +268,8 @@ wallet.shutdownSync = () => {
  * @param label {String} optional, a debug label to log for this transaction
  */
 wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage, label}) => {
-  const signer = wallet.signersMap[fromAddress]
+  const checksumAddress = toChecksumAddress(fromAddress)
+  const signer = wallet.signersMap[checksumAddress]
   if (!signer) { throw new Error(`No signer created for address ${fromAddress}`) }
   return wallet.payTest({eth: signer, fromAddress: fromAddress, payAll: payAll, toAddress: toAddress, weiValue: weiValue, overage: overage, label: label}) 
 }

@@ -76,7 +76,7 @@ compiles.Compiler = class {
       const now = new Date() 
       const inputHash = requestedInputs.get(contractName).get('inputHash') 
       const bytecode = contract.get('evm').get('bytecode').get('object') 
-      assert(bytecode)
+      assert(bytecode || contractName.endsWith('Interface'))
       const preHash = Map({
         type       : 'compile',
         name       : contractName,

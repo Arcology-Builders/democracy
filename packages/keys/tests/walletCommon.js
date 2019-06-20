@@ -7,7 +7,7 @@ const keys = require('../src/keys')
 const wallet = require('../src/wallet')
 const randombytes = require('randombytes')
 const { getImmutableKey, setImmutableKey, Logger,
-  toJS, immEqual } = require('demo-utils')
+  toJS, deepEqual } = require('demo-utils')
 const LOGGER = new Logger('local.spec')
 
 const common = {}
@@ -54,7 +54,8 @@ common.getDescribe = (asyncInitProm) => {
       const encryptedAccount2 = await wallet.loadEncryptedAccount({ address: address })
       const account2 = keys.encryptedJSONToAccount({
         encryptedJSON: toJS(encryptedAccount2), password: password })
-      assert( immEqual(account2, account), `Different account retrieved ${account2.toJS()}`)
+      assert( deepEqual(account2.toJS(), account.toJS()),
+        `Different account retrieved ${account2.toJS()}` )
     })
 
     after(() => {

@@ -1,16 +1,15 @@
-/**
- */
-const utils = require('ethereumjs-utils')
+'use strict'
+const utils   = require('ethereumjs-utils')
 const { Map } = require('immutable')
-const assert = require('chai').assert
+const assert  = require('chai').assert
 
 const { Logger } = require('demo-utils')
-const LOGGER = new Logger('keys')
+const LOGGER     = new Logger('keys')
 
 const keys = {}
-keys.keythereum = require('keythereum')
+keys.keythereum  = require('keythereum')
 keys.randombytes = require('randombytes')
-keys.Buffer = Buffer
+keys.Buffer      = Buffer
 
 /**
  * Key and initialization vector lengths for Ethereum account generation.
@@ -27,12 +26,10 @@ keys.PARAMS = { keyBytes: 32, ivBytes: 16 }
  */
 keys.create = () => {
   const account = keys.keythereum.create(keys.PARAMS)
-  const privateBuffer = account.privateKey
-  const publicBuffer = utils.privateToPublic(account.privateKey)
-  const addressBuffer = utils.privateToAddress(account.privateKey)
-
-  return keys.bufferToMap(privateBuffer, publicBuffer, addressBuffer,
-    account.iv, account.salt)
+  const privateString = account.privateKey.toString('hex') 
+  const ivString      = keys.hex(account.iv)
+  const saltString    = keys.hex(account.salt)
+  return keys.createFromPrivateString(privateString, ivString, saltString)
 }
 
 /**
@@ -55,19 +52,19 @@ keys.bufferToMap =
 
     const privateString = keys.hex(_privateBuffer)
     const publicString  = keys.hex(_publicBuffer)
-    const addressString = keys.hex(_addressBuffer)
+    const addressPrefixed = utils.toChecksumAddress(keys.hex(_addressBuffer))
     const ivString      = keys.hex(_ivBuffer)
     const saltString    = keys.hex(_saltBuffer)
 
     return new Map({
-      privateString   : privateString,
-      publicString    : publicString,
-      addressString   : addressString,
-      ivString        : ivString,
-      saltString      : saltString,
-      privatePrefixed : keys.prefix(privateString),
-      publicPrefixed  : keys.prefix(publicString),
-      addressPrefixed : keys.prefix(addressString),
+      privateString,
+      publicString,
+      addressString   : addressPrefixed.slice(2),
+      ivString,
+      saltString,
+      privatePrefixed : keys.prefixed(privateString),
+      publicPrefixed  : keys.prefixed(publicString),
+      addressPrefixed,
     })
   }
 
@@ -78,13 +75,28 @@ keys.bufferToMap =
  * @return an Immutable {Map} representing an Ethereum account associated with the given
  * private key string.
  */
-keys.createFromPrivateString = (_privateString) => {
-  const privateBuffer = Buffer.from(_privateString, 'hex')
+keys.createFromPrivateString = (privateString, ivString, saltString) => {
+  const privateBuffer = keys.buffer(privateString)  
+  assert(utils.isValidPrivate(privateBuffer))
   const publicBuffer = utils.privateToPublic(privateBuffer)
   const addressBuffer = utils.privateToAddress(privateBuffer)
-  const ivBuffer = keys.randombytes(keys.PARAMS.ivBytes)
-  const keyBuffer = keys.randombytes(keys.PARAMS.keyBytes)
-  return keys.bufferToMap(privateBuffer, publicBuffer, addressBuffer, ivBuffer, keyBuffer)
+  const _ivString = ivString || keys.hex(keys.randombytes(keys.PARAMS.ivBytes))
+  const _saltString = saltString || keys.hex(keys.randombytes(32))
+
+  const privatePrefixed = keys.prefixed(privateString)
+  const publicPrefixed  = keys.prefixed(publicBuffer.toString('hex'))
+  const addressPrefixed = utils.toChecksumAddress(addressBuffer.toString('hex'))
+
+  return Map({
+    privatePrefixed,
+    publicPrefixed,
+    addressPrefixed,
+    privateString,
+    publicString    : publicPrefixed.slice(2),
+    addressString   : addressPrefixed.slice(2),
+    ivString        : _ivString,
+    saltString      : _saltString,
+  })
 }
 
 /**
@@ -188,11 +200,11 @@ keys.buffer = (_hex) => {
 }
 
 /**
- * @method prefix
+ * @method prefixed
  * @memberof module:keys
  * @return the given string with a `0x` prefix
  */
-keys.prefix = (_str) => {
+keys.prefixed = (_str) => {
   return '0x' + _str
 }
 

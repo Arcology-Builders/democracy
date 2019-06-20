@@ -21,7 +21,7 @@ describe('Wallet locking and unlocking', () => {
   before(async () => {
     eth = getNetwork()
     testAccounts = await eth.accounts()
-    bigSpender = testAccounts[4]
+    bigSpender = testAccounts[7]
     await wallet.init({autoConfig: false, unlockSeconds: 1})
     let { address, password, encryptedAccount } = await wallet.createEncryptedAccount()
     newAddress = address

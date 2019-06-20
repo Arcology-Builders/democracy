@@ -11,7 +11,7 @@ const LOGGER = new Logger('tx.spec')
 const { toWei, toHex } = require('web3-utils')
 const BN = require('bn.js')
 const abi = require('ethjs-abi')
-const { isValidAddress } = require('ethereumjs-utils')
+const { isValidAddress, toChecksumAddress } = require('ethereumjs-utils')
 
 describe( 'transaction sender', () => {
 
@@ -35,12 +35,14 @@ describe( 'transaction sender', () => {
     accounts = await eth.accounts()
     await wallet.init({autoConfig: false})
     let { address, password } = await wallet.createEncryptedAccount()
-    assert( wallet.accountsMap[address], `Newly created account is not mapped to address ${address}`)
+    assert( wallet.accountsMap[address],
+           `Newly created account is not mapped to address ${address}`)
     senderAddress = address
     senderPassword = password
     assert( isValidAddress(senderAddress),
            `Newly created account has invalid address ${senderAddress}` )
-    signerEth = await wallet.createSignerEth({url: getEndpointURL(), address: senderAddress})
+    signerEth = await wallet.createSignerEth({
+      url: getEndpointURL(), address: senderAddress })
     bm = new BuildsManager({
       sourcePathList: ['node_modules/demo-test-contracts/contracts'],
       chainId: chainId
@@ -87,8 +89,8 @@ describe( 'transaction sender', () => {
     assert( new BN(tx.gas).gte(new BN('16644')), `${tx.gas} is not >= 16644` )
     assert( new BN(tx.gas).lte(new BN('0x1668b')), `${tx.gas} is not >= 0x1668b` )
     assert.equal(JSON.stringify(tx),
-      `{"nonce":"${nonce}","gas":"${toHex(tx.gas).slice(2)}","gasPrice":"${gasPrice}","data":`+
-      `"${expected}",`+
+      `{"nonce":"${nonce}","gas":"${toHex(tx.gas).slice(2)}",` +
+      `"gasPrice":"${gasPrice}","data":"${expected}",`+
       `"from":"${senderAddress}","to":`+
       `"${deployAddress}","value":"${value}","chainId":"${hexChainId}"}`
     )
@@ -100,19 +102,20 @@ describe( 'transaction sender', () => {
       fromAddress : accounts[7],
       toAddress   : senderAddress,
     })
-    await wallet.unlockEncryptedAccount({ address: senderAddress, password: senderPassword })
+    await wallet.unlockEncryptedAccount({
+      address: senderAddress, password: senderPassword })
     assert.equal(signerEth.address, senderAddress)
-    txHash = await txs.sendSignedTx({rawTx: tx, signerEth: signerEth })
+    txHash = await txs.sendSignedTx({ rawTx: tx, signerEth: signerEth })
 
     await eth.getTransactionReceipt(txHash)
     const owner = await contract.instance.owner()
-    assert.equal(owner['0'], accounts[7])
+    assert.equal( owner['0'], accounts[7] )
     const lastPayer = await contract.instance.lastPayer()
-    assert.equal(lastPayer['0'], accounts[2])
+    assert.equal( lastPayer['0'], accounts[2] )
     const lastValue = await contract.instance.lastValue()
-    assert.equal(lastValue['0'].toString(), toWei('0.001', 'ether'))
+    assert.equal( lastValue['0'].toString(), toWei('0.001', 'ether') )
     const lastSender = await contract.instance.lastSender()
-    assert.equal(lastSender['0'], senderAddress)
+    assert.equal( toChecksumAddress(lastSender['0']), senderAddress )
 
     await contract.getTxReceipt({
       method   : contract.instance.send,
@@ -120,13 +123,13 @@ describe( 'transaction sender', () => {
       options  : { from: accounts[3], value: toWei('0.01', 'ether') }
     })
     const owner2 = await contract.instance.owner()
-    assert.equal(owner2['0'], accounts[7])
+    assert.equal( owner2['0'], accounts[7] )
     const lastPayer2 = await contract.instance.lastPayer()
-    assert.equal(lastPayer2['0'], accounts[3])
+    assert.equal( lastPayer2['0'], accounts[3] )
     const lastValue2 = await contract.instance.lastValue()
-    assert.equal(lastValue2['0'].toString(), toWei('0.01', 'ether'))
+    assert.equal( lastValue2['0'].toString(), toWei('0.01', 'ether') )
     const lastSender2 = await contract.instance.lastSender()
-    assert.equal(lastSender2['0'], signerEth.address)
+    assert.equal( toChecksumAddress(lastSender2['0']), signerEth.address )
    
   })
 
