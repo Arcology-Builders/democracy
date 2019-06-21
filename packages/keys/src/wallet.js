@@ -37,7 +37,7 @@ const wallet = {}
  * @return password {String} a hex password string, auto-created if missing `password` param
  * @return signerEth {Eth} an Ethereum network object, tied to above address, signing transactions and spending funds from it
  */
-wallet.prepareSignerEth = async ({ address, password, createOnError }) => {
+wallet.prepareSignerEth = async ({ address, password }) => {
   const autoCreate = !address && !password
   const pair  = (autoCreate) ? (await wallet.createEncryptedAccount()) :
     { address: address, password: password }
@@ -46,7 +46,6 @@ wallet.prepareSignerEth = async ({ address, password, createOnError }) => {
   LOGGER.debug('AUTO', _address, _password)
 
   await wallet.loadEncryptedAccount({ address: _address })
-  let newAddress, newPassword
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
   wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
   return {
