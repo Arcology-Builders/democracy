@@ -3,7 +3,7 @@ const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger,
   ensureDir, DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, FLATS_DIR, OUTS_DIR }
 	      = require('demo-utils')
 const { Map } = require('immutable')
-const utils = require('ethereumjs-utils')
+const utils = require('ethereumjs-util')
 const http = require('http')
 const path = require('path')
 const LOGGER = new Logger('rest-server')

@@ -37,7 +37,7 @@ const wallet = {}
  * @return password {String} a hex password string, auto-created if missing `password` param
  * @return signerEth {Eth} an Ethereum network object, tied to above address, signing transactions and spending funds from it
  */
-wallet.prepareSignerEth = async ({ address, password }) => {
+wallet.prepareSignerEth = async ({ address, password, createOnError }) => {
   const autoCreate = !address && !password
   const pair  = (autoCreate) ? (await wallet.createEncryptedAccount()) :
     { address: address, password: password }
@@ -46,12 +46,23 @@ wallet.prepareSignerEth = async ({ address, password }) => {
   LOGGER.debug('AUTO', _address, _password)
 
   await wallet.loadEncryptedAccount({ address: _address })
+  let newAddress, newPassword
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
   wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
   return {
     address   : _address,
     password  : _password,
     signerEth : wallet.lastSignerEth,
+  }
+}
+
+wallet.validatePassword = async ({ address, password }) => {
+  try {
+    await wallet.loadEncryptedAccount({ address })
+    await wallet.unlockEncryptedAccount({ address, password })
+    return true
+  } catch(e) {
+    return false
   }
 }
 
@@ -140,6 +151,9 @@ wallet.init = async ({ autoConfig, unlockSeconds }) => {
  *
  * @method createEncryptedAccount
  * @memberof module:wallet
+ * @param creatorFunc {Function} a factory function with no parameters that
+ *   returns an account as an Immutable Map, with possible extra leading
+ *   bytes in the public key that can be safely ignored / sliced.
  * @return address {String} a `0x`-prefixed Ethereum address
  * @return password {String} a random password string
  * @return encryptedAccount {JSON} the geth-format enciphered Ethereum private key

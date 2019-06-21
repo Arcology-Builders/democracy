@@ -27,12 +27,17 @@ contracts.init = async () => {
   if (!contracts.initialized) {
     LOGGER.info("Initializing contracts.")
     const eth = getNetwork()
-    const chainId = await eth.net_version()
-    contracts.bm = await createBM({ autoConfig: true, chainId: chainId })
+    contracts.chainId = await eth.net_version()
+    contracts.bm = await createBM({ autoConfig: true, chainId: contracts.chainId })
     contracts.initialized = true
   } else {
     LOGGER.error("Contracts already initialized.")
   }
+}
+
+contracts.getChainIdSync = () => {
+  if (!contracts.initialized) { throw new Error('Initialize contracts first') }
+  return contracts.chainId
 }
 
 /**

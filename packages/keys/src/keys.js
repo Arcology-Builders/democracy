@@ -1,5 +1,5 @@
 'use strict'
-const utils   = require('ethereumjs-utils')
+const utils   = require('ethereumjs-util')
 const { Map } = require('immutable')
 const assert  = require('chai').assert
 

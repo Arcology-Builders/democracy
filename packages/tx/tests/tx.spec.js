@@ -11,7 +11,7 @@ const LOGGER = new Logger('tx.spec')
 const { toWei, toHex } = require('web3-utils')
 const BN = require('bn.js')
 const abi = require('ethjs-abi')
-const { isValidAddress, toChecksumAddress } = require('ethereumjs-utils')
+const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
 
 describe( 'transaction sender', () => {
 

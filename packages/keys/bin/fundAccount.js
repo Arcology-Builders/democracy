@@ -17,18 +17,31 @@ const mainFunc = async (payeeAddress, ethValue, fundFromTest) => {
   const accounts = await eth.accounts()
   const deployerAddress  = (fundFromTest) ? accounts[fundFromTest] : getConfig()['DEPLOYER_ADDRESS']
   const deployerPassword = getConfig()['DEPLOYER_PASSWORD']
+  await wallet.init({ unlockSeconds: 2, autoConfig: true })
+  console.log(deployerPassword)
 
   assert(payeeAddress, `No payee address specified`)
   const weiValue = (ethValue !== 'payAll') ? toWei(ethValue, 'ether') : '0'
 
   console.log(`Paying ${ethValue} ETH from ${deployerAddress} ...`)
-  await wallet.payTest({
-    fromAddress: accounts[0],
-    toAddress: payeeAddress,
-    payAll: (ethValue === 'payAll'),
-    weiValue: weiValue,
-  })
+  if (fundFromTest) {
+    await wallet.payTest({
+      fromAddress: deployerAddress,
+      toAddress: payeeAddress,
+      payAll: (ethValue === 'payAll'),
+      weiValue: weiValue,
+    })
+  } else {
+    await wallet.prepareSignerEth({ address: deployerAddress, password: deployerPassword })
+    await wallet.pay({
+      fromAddress: deployerAddress,
+      toAddress: payeeAddress,
+      weiValue: weiValue,
+    })
+  }
   console.log('Paying complete.')
+
+  wallet.shutdownSync()
 }
 
 console.log(process.argv.slice(2,5))
