@@ -1,13 +1,23 @@
 <head>
-<script type="text/javascript" src="http://arcology.nyc:7000/keythereum-1.0.4.min.js">
-</script>
+  <script type="text/javascript" src="http://arcology.nyc:7000/keythereum-1.0.4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/aztec.js@0.9.1/dist/bundle.web.min.js"> </script>
+  <link href="https://fonts.googleapis.com/css?family=Vast+Shadow" rel="stylesheet" type="text/css">
 </head>
 <body>
-  <h1> Democracy.js Webify Demo</h1>
+  <h1 style="font-family: Vast Family;"> Democracy.js Webify Demo</h1>
   
   <p>NODE_ENV 
     <div id="nodeEnv"> </div>
   </p>
+
+  <p>This Address</p>
+  <div id="thisAddress"></div>
+
+  <p>Balance</p>
+  <div id="thisBalance"></div>
+
+  <p>Relock Seconds Left</p>
+  <div id="relockSecondsLeft"></div>
 
   <p> Open up web inspector and use the console for now. </p>
 
@@ -80,7 +90,18 @@
   </pre></blockquote>
 
   <script type="text/javascript">
-    document.getElementById('nodeEnv').innerHTML = demo.config.DB_NAMESPACE.toUpperCase()
+    document.addEventListener('DOMContentLoaded', async () => {
+      await demo.initFS({})
+      await demo.initWallet({})
+      document.getElementById('thisAddress').innerHTML = demo.thisAddress
+      document.getElementById('nodeEnv').innerHTML = demo.config.DB_NAMESPACE.toUpperCase()
+      setInterval(() => {
+        document.getElementById('relockSecondsLeft').innerHTML = demo.relockTime - Date.now()
+      }, 1000)
+      setInterval(async () => {
+        document.getElementById('thisBalance').innerHTML = await demo.eth.getBalance(demo.thisAddress)
+      }, 1000)
+    })
   </script>
 
 </body>

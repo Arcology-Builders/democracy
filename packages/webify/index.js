@@ -1,3 +1,5 @@
-const webify = require('./src/webify')
+const webifies = {}
+webifies.script = require('./src/webify')
+webifies.api = require('./exports/api')
 
-module.exports = webify
+module.exports = webifies

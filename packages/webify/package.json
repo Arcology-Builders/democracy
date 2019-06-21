@@ -16,6 +16,7 @@
   ],
   "private": true,
   "dependencies": {
+    "@aztec/secp256k1": "^1.0.1",
     "demo-client": "^0.3.1-alpha.4",
     "demo-contract": "^0.3.1-alpha.4",
     "demo-depart": "^0.3.2-alpha.0",
