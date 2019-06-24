@@ -17,7 +17,7 @@ const ethsign = require('ethjs-signer').sign
 const Eth     = require('ethjs')
 const keys = require('./keys')
 const { toWei, fromWei } = require('web3-utils')
-const { isValidAddress, toChecksumAddress } = require('ethereumjs-utils')
+const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
 const { createInOut } = require('demo-client')
 
 const wallet = {}
