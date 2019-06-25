@@ -9,7 +9,8 @@
           "packages/utils/src", "packages/utils/index.js",
           "packages/depart/src", "packages/depart/index.js",
           "packages/compile/src", "packages/compile/index.js",
-          "packages/contract/src", "packages/contract/index.js"
+          "packages/contract/src", "packages/contract/index.js",
+          "packages/webify/exports"
         ],
         "exclude": ["docs", "tests", "logs", "dist", ".nyc_output", "lib", "node_modules", "out"]
     },
