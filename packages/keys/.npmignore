@@ -6,6 +6,7 @@ links
 tests
 scraps
 webpack.log
+.nyc_output
 dist
 exports
 src/index.html
