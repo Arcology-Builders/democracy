@@ -76,7 +76,8 @@ compiles.Compiler = class {
       const now = new Date() 
       const inputHash = requestedInputs.get(contractName).get('inputHash') 
       const bytecode = contract.get('evm').get('bytecode').get('object') 
-      assert(bytecode || contractName.endsWith('Interface'))
+      assert(bytecode || contractName.endsWith('Interface'),
+             `${contractName} does not have bytecode and does not end with Interface`)
       const preHash = Map({
         type       : 'compile',
         name       : contractName,
