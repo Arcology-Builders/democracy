@@ -4,7 +4,7 @@
   <link href="https://fonts.googleapis.com/css?family=Vast+Shadow" rel="stylesheet" type="text/css">
 </head>
 <body>
-  <h1 style="font-family: Vast Family;"> Democracy.js Webify Demo</h1>
+  <h1 style="font-family: Vast Shadow;"> Democracy.js Webify Demo</h1>
   
   <p>NODE_ENV 
     <div id="nodeEnv"> </div>
@@ -91,16 +91,24 @@
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', async () => {
+      const cachedSecondsLeft = document.getElementById('relockSecondsLeft')
       await demo.initFS({})
-      await demo.initWallet({})
+      await demo.init({})
+      await demo.prepareCachedWallet({}) // no password
+      await demo.prepareErasePassword({
+        erasePasswordSeconds: 6000,
+        erasePasswordCallback: () => { cachedSecondsLeft.innerHTML = 'ERASED' },
+      })
+      await demo.prepareUpdateWhileCached({
+        updateCallback: async (secondsLeft) => {
+          cachedSecondsLeft.innerHTML = secondsLeft
+          document.getElementById('thisBalance').innerHTML =
+            await demo.eth.getBalance(demo.thisAddress)
+        },
+      })
+          
       document.getElementById('thisAddress').innerHTML = demo.thisAddress
       document.getElementById('nodeEnv').innerHTML = demo.config.DB_NAMESPACE.toUpperCase()
-      setInterval(() => {
-        document.getElementById('relockSecondsLeft').innerHTML = demo.relockTime - Date.now()
-      }, 1000)
-      setInterval(async () => {
-        document.getElementById('thisBalance').innerHTML = await demo.eth.getBalance(demo.thisAddress)
-      }, 1000)
     })
   </script>
 
