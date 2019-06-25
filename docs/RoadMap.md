@@ -1,38 +1,22 @@
 Road Map
 =========
 
-Tools for running a distributed country, currently on Ethereum.
+Our roadmap brainstorming and details are now tracked
+in our [Roadmap Project](https://github.com/invisible-college/democracy/projects/1).
 
-## Next Release Goals
+We are currently working on patch release 0.3.2 (browser wallet management)
+in support of using AZTEC for private voting and zero-knowledge asset management.
 
-These are active development goals for the next release here (June 2019)
-
-* 0.3.2 Improve webify bundle, React components, generic signing for ZkAsset issuing, trading, private voting
-  * allow test key unlocking across refreshes, and manual relocking in API
-  * add secp256k1 from Aztec and use for generating keys
-  * export secp256k1 in webify
-  * break out compile into its own departure mixin, for webifying
-  * test deploying new contracts in browser
-  * render react components listening to Websocket mongo changes like 
-  * pass in a LOGGER from argListMixin
-* 0.3.3 - decode sourceMap to help with revert and debugging
-  * check source hashes and dependencies of all imports, not just top-level file
-  * improve flattening to reorder sources of imports
-* 0.3.4 - React UI of deploys on Rinkeby
-  * especially ZkAssets for private voting
+We use the below themes to guide our exploration.
 
 ## Roadmap
 
-This is a tentative roadmap to guide our exploration.
-To the future!
-
 * ~0.1 Release - basic subcommands and libraries for testing~
-  * ~commands for deploying and interacting with contracts, use json files for now~
+  * ~commands for deploying and interacting with contracts, using json files for now~
   
 * 0.2 Release - build dependency management, webify tests
   * ~add tx signing support, nonce management~
   * ~clean up console.logging, add a decent logger~
-  * show mocha runs inside a browser (as a first step to refactoring webpack bundle)
   * ~improve documentation~ and tutorial
 
 * 0.3 Release - Debugger & Web UI 
@@ -41,9 +25,6 @@ To the future!
   * add new solidity compiler support
   * display linked contracts (AZTEC & DAOStack) and automate workflows through them
   * store / display contract interactions 
-
-See our [project planning ](https://github.com/invisible-college/democracy/projects/1)
-for more ideas and goals for longer-term releases.
 
 ## Old Release Notes
 
