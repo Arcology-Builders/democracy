@@ -1,6 +1,6 @@
 {
   "name": "demo-tx",
-  "version": "0.3.2-alpha.2",
+  "version": "0.3.2-alpha.3",
   "description": "Ethereum transaction management for a distributed country",
   "keywords": [
     "ethereum",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "chai": "4.2.0",
-    "demo-keys": "^0.3.2-alpha.2",
+    "demo-keys": "^0.3.2-alpha.3",
     "demo-utils": "^0.3.1-alpha.4",
     "immutable": "4.0.0-rc.12",
     "web3-utils": "1.0.0-beta.52"
