@@ -106,7 +106,6 @@ server.RESTServer = class {
     })
 
     _router.route('/deploys').get((req, res) => {
-      const chainId = req.params.chainId
       const deploys = get(`/${DEPLOYS_DIR}`, new Map({}))
       res.json(deploys.toJS())
     })
