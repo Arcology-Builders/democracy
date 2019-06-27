@@ -1,6 +1,6 @@
 {
   "name": "demo-rest",
-  "version": "0.3.2-alpha.3",
+  "version": "0.3.2",
   "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
