@@ -3,11 +3,11 @@ democracy
 
 Minimalist tools for running a distributed country, currently on Ethereum.
 
-This is a [lerna](http://lernajs.org)-managed monorepo.
+[Documentation](https://invisible-college.github.io/democracy/)
 
 You can include the top-level npm package `democracy.js` or just include the sub-packages you need.
 
-[![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js) `democracy.js` our main framework package, built on `ethjs`
+[![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js) `democracy.js`
 
 [![npm version](https://badge.fury.io/js/demo-utils.svg)](https://badge.fury.io/js/demo-utils) `demo-utils` a browser-friendly key/value store and functions for managing build outputs / dependencies
 
