@@ -99,8 +99,9 @@ runners.argListMixin = (argDefaultMap) => {
           const value = args.get(1)
           const floatVal = parseFloat(value)
           const intVal = parseInt(value)
-          const convertedVal = Number.isFinite(floatVal) ? floatVal :
-            (Number.isInteger(intVal) ? intVal : value)
+          const convertedVal = value.startsWith('0x') ? value :
+            Number.isFinite(floatVal) ? floatVal :
+            Number.isInteger(intVal) ? intVal : value
           argMap = argMap.set(key, convertedVal)
           LOGGER.debug(`found arg ${key}=${convertedVal}`)
           args = args.slice(2)

@@ -38,7 +38,16 @@
   </p>
   <blockquote>
     <pre>
-      demo.initWallet()
+      demo.init({ unlockSeconds: 100 })
+      demo.prepareCachedWallet({ enteredPassword: 'unlockmeagain' })
+      demo.prepareErasePassword({
+        erasePasswordSeconds: 100000, // 100,000 seconds is 27.77 hours
+        erasePasswordCallback: () => { console.log("Change HTML to show account locked") },
+      })
+      demo.prepareUpdateWhileCached({
+        updateSeconds: 5,
+        updateCallback: (secondsLeft) => { console.log("Change HTML to show seconds left") },
+      })
     </pre>
   </blockquote>
 

@@ -19,11 +19,11 @@ describe( 'Runners', () => {
     assert.equal( out0.get('babaloo'), 'eighteen' )
 
     // Test reading the argv's
-    process.argv.push('--anotherThing', 'a', '--babaloo', 'b')
+    process.argv.push('--anotherThing', 'a', '--babaloo', '0x1010')
     const alm = await argListMixin(Map({'anotherThing': 2, 'babaloo': 'eighteen'}))
     const out = await alm(Promise.resolve(Map({})))
     assert.equal( out.get('anotherThing'), 'a' )
-    assert.equal( out.get('babaloo'), 'b' )
+    assert.equal( out.get('babaloo'), '0x1010' )
   
     // Runs a function with mixins, depends on process.argv above
     const alm2 = await argListMixin(Map({
