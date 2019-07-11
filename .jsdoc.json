@@ -28,7 +28,7 @@
         "private": true,
         "recurse": true,
         "encoding": "utf-8",
-        "destination": "./docs/",
+        "destination": "./docs/jsdocs",
         "readme": "./README.md",
         "template": "./node_modules/braintree-jsdoc-template"
     }
