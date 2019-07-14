@@ -13,7 +13,7 @@ const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-cont
 const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -29,7 +29,8 @@ describe( 'Departures', () => {
     sourcePathList  : ["contracts-new"],
   }))
   const m1 = deployerMixin()
-  const m2 = departMixin()
+  const m2 = compileMixin()
+  const m3 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -69,7 +70,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
+    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
     return finalState
   })
 

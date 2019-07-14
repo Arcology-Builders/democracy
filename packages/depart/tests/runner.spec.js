@@ -36,7 +36,7 @@ describe( 'Runners', () => {
       assert.equal( finalState.get('chainId'), '2222' )
       assert.equal( finalState.get('anteater'), 'c' )
     }
-    await run( mainFunc, [ alm2, dm] ) 
+    await run( alm2, dm, mainFunc ) 
   })  
 
   it( 'creates a deployer mixin', async () => {

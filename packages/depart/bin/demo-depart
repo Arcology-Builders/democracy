@@ -10,20 +10,15 @@ const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
 const { run, deployerMixin, departMixin, argListMixin } = require('demo-depart')
 const LOGGER = new Logger('demo-depart')
+const assert = require('chai').assert
 
-let departOptions
+let departInputState
 let departCallback
-const depart = (options, callback) => {
-  departOptions = options
+const depart = (inputState, callback) => {
+  assert(Map.isMap(inputState), 'Input state should be immutable Map')
+  departInputState = inputState 
   departCallback = callback
 }
-
-const m0 = argListMixin(Map({
-  'departFileName'   : 'depart.js', // --departFileName
-  'testValueEth'     : '0.1'      ,
-  'testAccountIndex' : 0          ,
-  'unlockSeconds'    : 30,
-}))
 
 // Insert this custom mixin to read in a departure file and save its name
 // and callback
@@ -35,8 +30,7 @@ const m1 = async (state) => {
 
   return Map({
     departFile : departFile,
-    ...departOptions,
-  })
+  }).merge(departInputState)
 }
 
 const m2 = deployerMixin()
@@ -52,4 +46,19 @@ const departFunc = async (state) => {
   return new Map({ 'result': result })
 }
 
-run( departFunc, [ m0, m1, m2, m3 ] )
+const departs = {}
+  departs.run = async (filename) => {
+    const m0 = argListMixin(Map({
+      'departFileName'   : filename || 'depart.js', // --departFileName
+      'testValueEth'     : '0.1'      ,
+      'testAccountIndex' : 0          ,
+      'unlockSeconds'    : 30,
+    }))
+  run( m0, m1, m2, m3, departFunc )
+}
+
+if (require.main === module) {
+  departs.run()
+}
+
+module.exports = departs.run

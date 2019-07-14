@@ -12,7 +12,7 @@ const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 const { getImmutableKey, setImmutableKey } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -22,14 +22,17 @@ describe( 'Departures', () => {
   let finalState
 
   const m0 = argListMixin( Map({
-    unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0,
+    unlockSeconds   : 30,
+    testValueETH    : '0.1',
+    testAccountIndex: 0,
     name            : "simple-departure",
     autoConfig      : false,
     sourcePathList  : ["../../node_modules/demo-test-contracts/contracts"],
   })
   )
   const m1 = deployerMixin()
-  const m2 = departMixin()
+  const m2 = compileMixin()
+  const m3 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -61,7 +64,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
+    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
     LOGGER.debug('finalState', finalState) 
     assert(Map.isMap(finalState.getCompiles()))
     assert(Map.isMap(finalState.getLinks()))
@@ -76,6 +79,7 @@ describe( 'Departures', () => {
 
   it( 'cleans', async () => {
     await finalState.clean()
+    await finalState.cleanCompiles()
   })
 
   it( 'cleaning happens', async () => {

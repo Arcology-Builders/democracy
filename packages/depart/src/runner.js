@@ -138,10 +138,10 @@ runners.argListMixin = (argDefaultMap) => {
  *   to the next mixin.
  * @return the return value of `mainFunc`
  */ 
-runners.run = async (mainFunc, mixinList) => {
+runners.run = async (...mixinList) => {
   LOGGER.debug('Running main function')
   
-  const penultState = await mixinList.reduce((stateProm, mixin, i) => {
+  return mixinList.reduce((stateProm, mixin, i) => {
     LOGGER.debug(`Running mixin ${i}`)
     return stateProm.then( (state) => {
       LOGGER.debug(`on input state ${state}`) 
@@ -150,9 +150,6 @@ runners.run = async (mainFunc, mixinList) => {
       })
     })
    }, Promise.resolve(Map({})))
-  const finalState = await mainFunc(penultState)
-
-  return penultState.merge(finalState)
 }
 
 module.exports = runners

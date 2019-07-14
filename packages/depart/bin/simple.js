@@ -5,16 +5,20 @@
 // A simple script to test a production-style departure
 // outside of a unit test using .env and TEST.DEPLOYER_ADDRESS
 
+const { Map } = require('immutable')
 const { Logger } = require('demo-utils')
 const LOGGER = new Logger('bin/simple')
-const { deployerMixin, departMixin, argListMixin, run } = require('..')
-
-const m0 = argListMixin(['anotherThing'])
-const m1 = deployerMixin({ unlockSeconds: 10 })
-const m2 = departMixin({
+const { deployerMixin, compileMixin, departMixin, argListMixin, run } = require('..')
+const m0 = argListMixin(Map({
+  'anotherThing': 'foo',
+  unlockSeconds: 10,
+  sourcePathList: ['../test-contracts/contracts'],
+}))
+const m1 = deployerMixin(Map({}))
+const m2 = compileMixin(Map({}))
+const m3 = departMixin(Map({
   name: 'Simple departure',
-  sourcePath: '../../node_modules/demo-test-contracts/contracts',
-})
+}))
 const departFunc = async (state) => {
   const { compile, link, deploy, bm, deployerEth, deployerAddress, anotherThing } = state.toJS()
   LOGGER.info(`Prepared signer at address ${deployerAddress}`)
@@ -25,4 +29,4 @@ const departFunc = async (state) => {
   LOGGER.info(`Deployed DifferentSender at ${ds.get('deployAddress')}`)
 }
 
-run( departFunc, [ m0, m1, m2 ] )
+run( m0, m1, m2, m3, departFunc )

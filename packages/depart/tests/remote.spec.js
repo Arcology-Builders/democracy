@@ -17,7 +17,7 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { argListMixin, deployerMixin, departMixin, run } = require('..')
+const { argListMixin, compileMixin, deployerMixin, departMixin, run } = require('..')
 
 describe( 'Remote departures', () => {
   
@@ -58,7 +58,8 @@ describe( 'Remote departures', () => {
       sourcePathList: ["../../node_modules/demo-test-contracts/contracts"],
     }))
     const m1 = deployerMixin()
-    const m2 = departMixin()
+    const m2 = compileMixin()
+    const m3 = departMixin()
     const departFunc = async (state) => {
       const {compile, link, deploy, bm, deployerEth, deployerAddress} = state.toJS()
        
@@ -70,12 +71,10 @@ describe( 'Remote departures', () => {
         weiValue: toWei('0.1', 'ether'),
       }) 
 
-      //LOGGER.info( 'Compiling', Date.now() )
       const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
       assert(isCompile(cout),
              `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
       
-      //LOGGER.info( 'Linking', Date.now() )
       const lout = await link( 'DifferentSender', 'link' )
       assert(isLink(lout),
              `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
@@ -90,7 +89,7 @@ describe( 'Remote departures', () => {
       return new Map({ result: true })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
+    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
     bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)
