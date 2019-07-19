@@ -18,6 +18,8 @@ const bm = {}
 /**
  * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles, also
  * handles network-specific builds like links and deploys.
+ * @class BuildsManager
+ * @memberof module:contract
  * @param _outputter {Function} a (possibly asynchronous) function that
  *        takes (key: string, val: {Map} | {List} | null ) and returns a Promise or
  *        other value that you want returned from `compile` or `clean*` methods.
@@ -26,7 +28,7 @@ const bm = {}
  */
 bm.BuildsManager = class extends ContractsManager {
   
-  constructor({sourcePathList, inputter, outputter, chainId}) {
+  constructor({sourcePathList, inputter, outputter, chainId, allowForking}) {
     super(...arguments)
     if (!chainId) { throw new Error("no chain ID passed in") }
     this.chainId = chainId
@@ -42,16 +44,35 @@ bm.BuildsManager = class extends ContractsManager {
     }
     return this.deploysMap
   }
-  
-  async getDeploy(deployName) {
+ 
+  /**
+   * Asynchronous method to get a deploy (possibly forked) from the given name.
+   * @method getDeploy
+   * @memberof class:BuildsManager
+   * @param deployName {String} the full deploy name including contract and deploy ID
+   *   Example: `ContractName-deploy`
+   * @param forkTime {String} the unix timestamp in milliseconds of the forked deploy.
+   */
+  async getDeploy(deployName, forkTime) {
     const deploysMap = await this.getDeploys()
-    return this.deploysMap.get(deployName)
+    const parentDeploy = this.deploysMap.get(deployName)
+    const deploy = (forkTime) ? parentDeploy.get(String(forkTime)) : parentDeploy
+    return deploy
   } 
 
-  async setDeploy(deployName, deployOutput, overwrite) {
-    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}`
+  async setDeploy(deployName, deployOutput, overwrite, fork) {
+    const forkTime = String(deployOutput.get('deployTime'))
+    const forkSuffix = (fork) ? `/${forkTime}` : ``
+    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}${forkSuffix}`
     LOGGER.debug(`Writing deploy to ${deployFilePath}`)
-    this.deploysMap = this.deploysMap.set(deployName, deployOutput)
+    if (fork) {
+      const parentDeploy = this.deploysMap
+        .get(deployName, Map({}))
+        .set(forkTime, deployOutput)
+      this.deploysMap = this.deploysMap.set(deployName, parentDeploy)
+    } else {
+      this.deploysMap = this.deploysMap.set(deployName, deployOutput)
+    }
     return awaitOutputter(this.outputter(deployFilePath, deployOutput, overwrite),
                           () => { return deployOutput })
   }

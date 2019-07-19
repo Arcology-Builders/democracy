@@ -116,6 +116,29 @@ server.RESTServer = class {
       res.json(deploys.toJS())
     })
 
+    _router.route('/deploys/:chainId/:deployName/:forkTime').get((req, res) => {
+      const chainId    = req.params.chainId
+      const deployName = req.params.deployName
+      const forkTime   = req.params.forkTime
+      const deploy     = get(`/${DEPLOYS_DIR}/${chainId}/${deployName}/${forkTime}`, new Map({}))
+      res.json(deploy.toJS())
+    })
+
+    _router.route('/deploys/:chainId/:deployName/:forkTime').post((req, res) => {
+      const chainId    = req.params.chainId
+      const deployName = req.params.deployName
+      const forkTime   = req.params.forkTime
+      const jsBody     = fromJS(req.body)
+      const overwrite  = (req.headers['democracy-overwrite'] === 'true')
+      try {
+        const result = set(`/${DEPLOYS_DIR}/${chainId}/${deployName}/${forkTime}`, jsBody, overwrite)
+        res.json({result: result, body: jsBody})
+      } catch(e) {
+        LOGGER.error('Failed to set key:', e, chainId, deployName)
+        res.json({result: false, error: e})
+      }
+    })
+
     _router.route('/deploys/:chainId/:deployName').get((req, res) => {
       const chainId = req.params.chainId
       const deployName = req.params.deployName

@@ -13,6 +13,20 @@ const { isValidAddress, keccak } = require('ethereumjs-util')
 
 const deploys = {}
 
+/**
+ * Class encapsulating a deployer for a given network (chain ID)
+ * and inputter / outputter (possibly a remote data store)
+ * @memberof module:contract
+ * @param inputter {Function} a getter function, possibly async,
+ *   that takes a key and returns the associated value if it exists.
+ * @param outputter {Function} a setter function, possibly async,
+ *   that takes a key and a value as an Immutable Map, and returns
+ *   the written value, also as an Immutable Map.
+ * @param bm {Object} a BuildsManager, null if we want to auto-create one.
+ * @param eth {Object} an Ethereum network object
+ * @param chainId {String} the chain ID of the given eth, must match.
+ * @param address {String} the `0x`-prefixed Ethereum address to deploy from
+ */
 deploys.Deployer = class {
 
   constructor({inputter, outputter, bm, eth, chainId, address}) {
@@ -36,6 +50,7 @@ deploys.Deployer = class {
    * @param deployId {String} ID of previous deploy
    * @param ctorArgs {Immutable Map} of constructor arguments, can be empty Map or null
    * @param fork {boolean} whether to fork the given deploy at the current timestamp
+   *   can be left null for false
    */
   async deploy(contractName, linkId, deployId, ctorArgs, fork) {
     const linkName   = `${contractName}-${linkId}`
@@ -115,7 +130,7 @@ deploys.Deployer = class {
     })
 
     // This is an updated deploy, overwrite it
-    return this.bm.setDeploy(deployName, deployOutput, true)
+    return this.bm.setDeploy(deployName, deployOutput, true, fork)
   }
 
 }

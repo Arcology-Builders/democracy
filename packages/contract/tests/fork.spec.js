@@ -35,7 +35,7 @@ describe('Democracy forking', () => {
     deploy = await d.deploy('DifferentSender', 'link', 'deploy', Map({}), true)
     deploy2 = await d.deploy('DifferentSender', 'link', 'deploy', Map({}), true)
     LOGGER.info('deploy1 time', deploy.get('deployTime') )
-    LOGGER.info('deploy2 time', deploy.get('deployTime') )
+    LOGGER.info('deploy2 time', deploy2.get('deployTime') )
     assert( deploy.get('deployTime') < deploy2.get('deployTime') )
   })
 
@@ -50,9 +50,16 @@ describe('Democracy forking', () => {
     assert.equal( lastValue2, 3344 )
   })
 
+  it( 'retrieves back forked deploys', async () => {
+    const ddeploy = await bm.getDeploy('DifferentSender-deploy', deploy.get('deployTime') )
+    const ddeploy2 = await bm.getDeploy('DifferentSender-deploy', deploy2.get('deployTime') )
+    assert.equal( ddeploy.get('deployTime'), deploy.get('deployTime') )
+    assert.equal( ddeploy2.get('deployTime'), deploy2.get('deployTime') )
+  })
+
   after( async () => {
-    await bm.cleanDeploy( 'DifferentSender-deploy' )
-    await bm.cleanLink(   'DifferentSender-link'   )
+//    await bm.cleanDeploy( 'DifferentSender-deploy' )
+//    await bm.cleanLink(   'DifferentSender-link'   )
   })
 
 })
