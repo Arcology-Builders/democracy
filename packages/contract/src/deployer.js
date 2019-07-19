@@ -31,9 +31,13 @@ deploys.Deployer = class {
   /**
    * Validate dependencies then deploy the given contract output to a network.
    * @param eth network object connected to a local provider
-   * @param contractOutput the JSON compiled output to deploy
+   * @param contractName {String} of source contract
+   * @param linkId {String} ID of previous link to instantiate and deploy
+   * @param deployId {String} ID of previous deploy
+   * @param ctorArgs {Immutable Map} of constructor arguments, can be empty Map or null
+   * @param fork {boolean} whether to fork the given deploy at the current timestamp
    */
-  async deploy(contractName, linkId, deployId, ctorArgs, force) {
+  async deploy(contractName, linkId, deployId, ctorArgs, fork) {
     const linkName   = `${contractName}-${linkId}`
     const link       = await this.bm.getLink(linkName)
     assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
@@ -43,18 +47,22 @@ deploys.Deployer = class {
    
     assert.equal(this.chainId, await this.eth.net_version())
 
+    const now = new Date()
     const deployMap = await this.bm.getDeploys()
 
     const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
     const deploy = deployMap.get(deployName)
-    if (Map.isMap(deploy) && (deploy.get('inputHash') === inputHash) && !force) {
+    if (Map.isMap(deploy) && (deploy.get('inputHash') === inputHash) && !fork) {
       LOGGER.info(`${deployName} has already been deployed`,
                   `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
       LOGGER.debug(`with input hash ${inputHash}`)
       return deploy
     } else {
       LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
+      if (fork) {
+        LOGGER.info(`Forking at time ${now.getTime()}`)
+      }
       LOGGER.debug(`current hash ${inputHash}`)
     }
 
@@ -90,8 +98,6 @@ deploys.Deployer = class {
     const minedContract = await deployPromise.then((receipt) => { return receipt })
     LOGGER.debug('MINED', minedContract)
     const instance = Contract.at(minedContract.contractAddress)
-
-    const now = new Date()
 
     const deployOutput = new Map({
       type         : 'deploy',
