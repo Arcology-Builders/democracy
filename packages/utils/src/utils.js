@@ -206,17 +206,24 @@ utils.traverseDirs = (startDirs, skipFilt, cb, dcb) => {
  * as directory paths and values as file contents (leaf nodes)
  * @param f the full path to a filename (possibly a directory) to start traversal
  * @param skipFilt a function that returns true for files that need to be skipped
+ * @return {Immutable Map} of the current file, or a
  */
 utils.buildFromDirs = (f, skipFilt) => {
   const shortList = path.basename(f).split('.')
   if (skipFilt(shortList)) { return null }
   if (fs.lstatSync(f).isDirectory()) {
-    return new Map(List(fs.readdirSync(f)).map((f2) => {
+    const dirValues = new Map(List(fs.readdirSync(f)).map((f2) => {
       const builtValues = utils.buildFromDirs(path.join(f,f2), skipFilt)
       const baseKey = path.basename(f2)
       const key = (baseKey.endsWith('.json')) ? baseKey.split('.')[0] : baseKey
       return builtValues ? [key, builtValues] : null
     }))
+    // merge any sibling file with same name
+    const siblingFile = `${f.json}`
+    const fileValues = fs.existsSync(siblingFile) ?
+      utils.fromJS(JSON.parse(fs.readFileSync(siblingFile))) :
+      Map({})
+    return dirValues.merge(fileValues) 
   } else {
     return utils.fromJS(JSON.parse(fs.readFileSync(f)))
   }

@@ -69,7 +69,7 @@ store.setImmutableKey = (fullKey, value, overwrite) => {
       fs.renameSync(`${dbFile}`, `${dbFile}.${now}`) 
       return true
     } else { 
-      throw new Error(`Key ${dbFile} exists and is not a JSON file.`)
+      LOGGER.debug(`Adding a file ${dbFile} with sibling directory of same base name.`)
     }
   } else if (!value) {
     //LOGGER.debug(`Unnecessary deletion of non-existent key ${fullKey}`)

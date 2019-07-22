@@ -46,7 +46,7 @@ describe('Database tests for key/value store', () => {
   })
 
   it('cannot overwrite an existing key by accident', () => {
-    should.Throw(() => { setImmutableKey('someSpace', new Map({'c':3})) }, Error)
+    should.Throw(() => { setImmutableKey('someSpace/b', new Map({'c':3})) }, Error)
   })
 
   it('can overwrite a key explicitly', () => {
@@ -62,6 +62,11 @@ describe('Database tests for key/value store', () => {
     const val2 = getImmutableKey('anotherSpace')
     assert.equal(val2.count(), 1)
     assert.equal(val2.get('a').get('c'), 1)
+  })
+
+  it( 'can set sibling keys to a directory', () => {
+    assert(setImmutableKey('someSpace', new Map({'e':6, 'f':7})),
+          `Setting sibling keys {e:6, f:7} fails`)
   })
 
   it('overwrites a directory with a null', () => {
