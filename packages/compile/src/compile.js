@@ -42,7 +42,9 @@ compiles.Compiler = class {
     // Add default paths and remove empty directories
     this.sourcePathSet = new Set(sourcePathList)
       .add(DEMO_SRC_PATH).add(compiles.ZEPPELIN_SRC_PATH).filter((d) => d)
-    this.sourcePathSet.map((d) => { ensureDir(d) })
+    this.sourcePathSet.map((d) => {
+      if (!fs.existsSync(d)) { LOGGER.warn(`Source directory ${d} doesn't exists.`) }
+    })
     this.cm = bm || new ContractsManager(...arguments)
     this.flatten = flatten || false
     this.outputFull = outputFull || false
@@ -92,7 +94,7 @@ compiles.Compiler = class {
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
       if (existingOutputs.has(contractName) &&
           existingOutputs.get(contractName).get('inputHash') === inputHash) {
-        LOGGER.debug(`${contract.name} is up-to-date with hash ${inputHash}, not overwriting.`)
+        LOGGER.debug(`${contractName} is up-to-date with hash ${inputHash}, not overwriting.`)
         return [contractName, existingOutputs.get(contractName)]
       } else {
         return [contractName, await this.cm.setContract(contractName, output)]
@@ -163,7 +165,6 @@ compiles.Compiler = class {
 
     function findImports (path) {
       assert(inputs[path], `Import not found: ${path}`)
-      LOGGER.debug(`import ${inputs[path].source}`)
       flattener.addSource(path, inputs[path].source)
       return { contents: inputs[path].source }
     }
@@ -176,7 +177,8 @@ compiles.Compiler = class {
     const requestedInputs = new Map(inputFiles.map((name) => {
       const value = new Map(inputs[name]).set('filename', name) 
       assert(name.split('.')[1].startsWith('sol'))
-      assert(inputs[name], `${name} not found in paths ${this.sourcePathSet.toJS()}`)
+      assert(inputs[name], `${name} not found in paths ${this.sourcePathSet.toJS()} ` +
+            `starting in ${process.cwd()}`)
       flattener.addSource(name, inputs[name].source)
       return [ name.split('.')[0], value ]
     }))
