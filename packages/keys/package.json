@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.3.2-alpha.3",
+  "version": "0.3.3-alpha.0",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -21,7 +21,7 @@
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
-    "demo-tools": "^0.3.1-alpha.4",
+    "demo-tools": "^0.3.3-alpha.0",
     "webpack": "4.29.5",
     "webpack-dev-server": "3.1.14"
   },
