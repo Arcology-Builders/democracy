@@ -39,8 +39,10 @@ runners.deployerMixin = () => {
     const {
       signerEth : deployerEth,
       address   : createdAddress,
-      password  : createdPassword } = await wallet.prepareSignerEth({
-        address: _deployerAddress, password: _deployerPassword })
+      password  : createdPassword
+    } = await wallet.prepareSignerEth({
+      address: _deployerAddress, password: _deployerPassword
+    })
     const chainId = await deployerEth.net_version()
 
     assert.equal(deployerEth.address, createdAddress)
@@ -126,16 +128,14 @@ runners.argListMixin = (argDefaultMap) => {
 }
 
 /**
- * Runner for a main function that takes a list of mixins to extract, process,
- * and return state. Agnostic to whether the main function is async or not.
+ * Runner for a list of mixins, including a main function, to extract, process,
+ * and return state. All mixins should be asynchronous.
  *
  * @method run
  * @memberof module:cli
- * @param mainFunc {Function} a callback function which takes in an immutable {Map} of
- *   state from the last mixin.
  * @param mixinList an Immutable {List} of mixin functions that take in an Immutable `Map`
  *   of input state from the previous mixin and return an Immutable `Map` of output state
- *   to the next mixin.
+ *   to the next mixin. A main function is just another mixin added to the very end.
  * @return the return value of `mainFunc`
  */ 
 runners.run = async (...mixinList) => {
@@ -149,7 +149,7 @@ runners.run = async (...mixinList) => {
         return state.merge(outState)
       })
     })
-   }, Promise.resolve(Map({})))
+  }, Promise.resolve(Map({})))
 }
 
 module.exports = runners

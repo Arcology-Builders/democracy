@@ -11,7 +11,7 @@ const LOGGER = new utils.Logger('departure')
 
 const departs = {}
 
-departs.compileMixin = () => {
+departs.compileMixin = (compileEnable) => {
   return async (state) => {
     const{
       chainId, autoConfig, sourcePathList, compileFlatten, compileOutputFull
@@ -23,14 +23,6 @@ departs.compileMixin = () => {
       autoConfig     : !(autoConfig === false),
     })
 
-    const { Compiler } = require('demo-compile')
-    const c = new Compiler({
-      sourcePathList : sourcePathList,
-      bm             : bm,
-      flatten        : compileFlatten,
-      outputFull     : compileOutputFull,
-    })
-
     const cleanCompiles = async () => {
       const compileList = List(compiles.map((c, name) => {
         return bm.cleanContract( name )
@@ -38,13 +30,38 @@ departs.compileMixin = () => {
       await Promise.all( compileList ).then((vals) => { LOGGER.debug( 'Clean compiles', vals) })
     }
 
+    let c
+    LOGGER.debug('COMPILE MIXIN')
+    //if (compileEnable) {
+      const { Compiler } = require('demo-compile')
+      c = new Compiler({
+        sourcePathList : sourcePathList,
+        bm             : bm,
+        flatten        : compileFlatten,
+        outputFull     : compileOutputFull,
+      })
+    /*
+    } else {
+      class Compiler {
+        constructor() { }
+        async compile(filename) {
+          LOGGER.debug(`Empty compile request for ${filename}, depends on previous compile.`)
+          // Accepting requests to compile, but don't do anything
+          // If compiles are missing of out-of-date, will fail a later assertion
+        }
+      }
+      c = new Compiler({})
+    }
+*/
     let compiles = new Map()
     const compile = async ( contractName, sourceFile ) => {
       assert(sourceFile && sourceFile.endsWith('.sol'),
              'sourceFile param not given or does not end with .sol extension')
       const output = await c.compile( sourceFile )
-      assert(isCompile(output))
+      assert(isCompile(output), `Compile output not found for ${sourceFile}`)
       assert.equal( output.get(contractName).get('name'), contractName )
+      // HACK: This appears to be reasonable delay for a compiled output to be returned again
+      // remotely.
       return new Promise((resolve, reject) => {
         setTimeout( async () => {
           const contract = await bm.getContract(contractName)
@@ -70,28 +87,41 @@ departs.compileMixin = () => {
 }
 
 /**
+ * Empty mixin for optionally passing through in a pipeline.
+ *
+ * Required State: none
+ *
+ * @method emptyMixin
+ * @memberof module:depart
+ */
+departs.emptyMixin = () => {
+  return async (state) => {
+  }
+}
+
+/**
  * Orchestrate a reproducible, idempotent departure of smart contracts for the blockchain,
  * storing artifacts for later web interfaces.
  * The following runtime state variables are required or optional.
  *
- * Required
+ * Required State
  * * chainId {String}
  * * deployerEth signer eth
  * * deployerAddress Ethereum address
  *
- * Optional
+ * Optional State
  * * departName {String}
  * * sourcePathList {Array}
  * * autoConfig {Boolean}
  *
- * @method depart
- * @memberof @module:depart
+ * @method departMixin
+ * @memberof module:depart
  */
 departs.departMixin = () => {
   return async (state) => {
 
     const{ bm, chainId, deployerEth, deployerAddress, departName, autoConfig,
-      sourcePathList, compileFlatten, compileOutputFull } = state.toJS()
+      sourcePathList, compile } = state.toJS()
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
@@ -122,12 +152,12 @@ departs.departMixin = () => {
     }
 
     let deploys  = new Map()
-    const deploy = async ( contractName, linkId, deployId, ctorArgList, force ) => {
+    const deploy = async ( contractName, linkId, deployId, ctorArgList, fork ) => {
       assert(contractName, 'contractName param not given')
       assert(linkId, 'linkId param not given')
       assert(deployId, 'deployId param not given')
       const deployName = `${contractName}-${deployId}`
-      const output = await d.deploy( contractName, linkId, deployId, ctorArgList, force )
+      const output = await d.deploy( contractName, linkId, deployId, ctorArgList, fork )
       assert( isDeploy(output) )
       deploys = deploys.set(deployName, output)
       return output
@@ -135,6 +165,7 @@ departs.departMixin = () => {
 
     const deployed = async (contractName, opts = {}) => {
       const { ctorArgList, deployID, force, abi } = opts
+      await compile( contractName, `${contractName}.sol` )
       await link( contractName, 'link' )
       const _deployID = (deployID) ? deployID : 'deploy'
       const deployedContract =

@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+'use strict'
+
+// Democracy Test command-line tool: tests that use immutable snapshots of state
+// transformed by departures
+
+const { Map }   = require('immutable')
+const fs = require('fs')
+const path = require('path')
+const { wallet } = require('demo-keys')
+const { getConfig, Logger, traverseDirs } = require('demo-utils')
+const { run, deployerMixin, departMixin, argListMixin } = require('demo-depart')
+const LOGGER = new Logger('demo-depart')
+const TESTS_DIR = 'tests'
+const assert = require('chai').assert
+const Mocha = require('mocha')
+const { end, begin } = require('demo-depart')
+
+const runTest = async () => {
+  
+  // Read mocha options from the beginning
+  // Do a full compile before any test
+  const initialState = (await begin(Map({mochaTimeout: 10000}), true))
+  const m = new Mocha({timeout: initialState.get('mochaTimeout')})
+
+  let filenameMap = new Map({})
+
+  traverseDirs([TESTS_DIR],
+               (fnParts, f) => { return (fnParts.length > 1) && (fnParts[1] !== 'flow') },
+               (source, f) => { m.addFile(f) }
+              )
+  //await m.run()
+
+  // Currently this doesn't depend on the state of any particular flow
+  await end()
+}
+
+if (require.main === module) {
+  runTest() 
+}

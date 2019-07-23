@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+'use strict'
+
+const { Map } = require('immutable')
+const { begin } = require('demo-depart')
+const { wallet } = require('demo-keys')
+const { getConfig } = require('demo-utils')
+
+var lineReader = require('readline').createInterface({
+    input: require('fs').createReadStream('file.in')
+});
+
+const mainFunc = async() => {
+  await wallet.init({})
+  await wallet.prepareSignerEth({
+    address: getConfig()['DEPLOYER_ADDRESS'],
+    password: getConfig()['DEPLOYER_PASSWORD'],
+  })
+  let state = await begin(Map({'departFileName': 'departNew.js'}), true)
+  lineReader.on('line', async function (line) {
+    console.log('Line from file:', line);
+    const newState = await (async (state) => {
+      const result = await eval(line)
+      return result 
+    })
+    state = state.merge(newState)
+  })
+}
+
+if (require.main === module) {
+  mainFunc()
+}

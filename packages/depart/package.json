@@ -22,7 +22,8 @@
     "tests": "tests"
   },
   "bin": {
-    "demo-depart": "./bin/demo-depart"
+    "demo-depart": "./bin/demo-depart",
+    "demo-test": "NODE_ENV=DEVELOPMENT ./bin/demo-test --departFileName departDS.js"
   },
   "files": [
     "src",
@@ -35,7 +36,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec",
-    "cov": "nyc.js mocha tests/"
+    "test:flow": "NODE_ENV=DEVELOPMENT ./bin/demo-test",
+    "cov": "nyc.js mocha tests/",
+    "console": "NODE_ENV=DEVELOPMENT ./bin/demo-console"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
@@ -44,6 +47,7 @@
     "demo-client": "^0.3.1-alpha.4",
     "demo-compile": "^0.3.2",
     "demo-contract": "^0.3.2-alpha.1",
+    "demo-keys": "^0.3.2-alpha.3",
     "demo-utils": "^0.3.1-alpha.4",
     "immutable": "4.0.0-rc.12"
   },

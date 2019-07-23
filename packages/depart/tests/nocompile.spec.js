@@ -23,7 +23,7 @@ describe( 'Departures', () => {
   let finalState2
 
   const m0 = argListMixin( Map({
-    unlockSeconds   : 5,
+    unlockSeconds   : 20,
     testValueETH    : '0.1',
     testAccountIndex: 0,
     name            : "simple-departure",
@@ -32,7 +32,6 @@ describe( 'Departures', () => {
   })
   )
   const m1 = deployerMixin()
-  const m2 = compileMixin()
   const m3 = departMixin()
 
   before(async () => {
@@ -51,7 +50,7 @@ describe( 'Departures', () => {
     }
 
     const startTime = Date.now()
-    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
+    finalState = (await run( m0, m1, compileMixin(true), m3, departFunc )).toJS()
     assert(finalState['result'])
     const elapsedTime = Date.now() - startTime
     LOGGER.info('Elapsed time with compile', elapsedTime)
@@ -63,7 +62,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
     const startTime2 = Date.now()
-    finalState2 = (await run( m0, m1, m3, departFunc2 )).toJS()
+    finalState2 = (await run( m0, m1, compileMixin(false), m3, departFunc2 )).toJS()
     assert(finalState2['result'])
     const elapsedTime2 = Date.now() - startTime2
     LOGGER.info('Elapsed time without compile', elapsedTime2)

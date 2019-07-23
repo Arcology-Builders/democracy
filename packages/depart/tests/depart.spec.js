@@ -31,7 +31,7 @@ describe( 'Departures', () => {
   })
   )
   const m1 = deployerMixin()
-  const m2 = compileMixin()
+  const m2 = compileMixin(true)
   const m3 = departMixin()
 
   before(async () => {
@@ -58,9 +58,9 @@ describe( 'Departures', () => {
       assert( immEqual(lout, rLink) )
       
       const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
-      const rDeploy = await bm.getDeploy('DifferentSender-deploy')
+      const rDeploy = await bm.getMergedDeploy('DifferentSender-deploy', dout.get('deployTime'))
       assert( isDeploy(dout) )
-      assert( immEqual(dout, rDeploy) )
+      assert( immEqual(dout, rDeploy), `Retrieved deploy\n ${rDeploy}\n not equal to returned deploy\n ${dout}` )
       return new Map({ 'result': true })
     }
 
@@ -72,9 +72,12 @@ describe( 'Departures', () => {
     assert.typeOf(finalState.result, 'boolean')
     assert(finalState.result === true) 
     assert.typeOf(finalState.clean, 'function')
-    assert(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
-    assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
-    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')))
+    assert(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')),
+          `DifferentSender compile exists`)
+    assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')),
+          `DifferentSender link exists`)
+    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy', 'deploy.json')),
+          `DifferentSender deploy exists`)
   })
 
   it( 'cleans', async () => {
@@ -83,7 +86,8 @@ describe( 'Departures', () => {
   })
 
   it( 'cleaning happens', async () => {
-    assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
+    assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')),
+                 'DifferentSender compile should be cleaned.')
     assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
     assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, 'DifferentSender-deploy.json')))
   })
