@@ -23,7 +23,7 @@
   },
   "bin": {
     "demo-depart": "./bin/demo-depart",
-    "demo-test": "NODE_ENV=DEVELOPMENT ./bin/demo-test --departFileName departDS.js"
+    "demo-test": "./bin/demo-test"
   },
   "files": [
     "src",
