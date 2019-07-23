@@ -28,7 +28,8 @@
   "files": [
     "src",
     "index.js",
-    "bin/demo-depart"
+    "bin/demo-depart",
+    "bin/demo-test"
   ],
   "repository": {
     "type": "git",
