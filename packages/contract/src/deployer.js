@@ -48,7 +48,7 @@ deploys.Deployer = class {
    * @param contractName {String} of source contract
    * @param linkId {String} ID of previous link to instantiate and deploy
    * @param deployId {String} ID of previous deploy
-   * @param ctorArgs {Immutable Map} of constructor arguments, can be empty Map or null
+   * @param ctorArgs {Object} Immutable Map of constructor arguments, can be empty Map or null
    * @param fork {boolean} whether to fork the given deploy at the current timestamp
    *   can be left null for false
    */

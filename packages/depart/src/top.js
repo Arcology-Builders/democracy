@@ -67,7 +67,7 @@ departs.end = async (state) => {
  * Includes the standard
  * list of mixins from departs.begin and in addition shuts down any state
  * after the departure-from-file mixin
- * @param inputState {Immutable Map} of incoming state
+ * @param inputState {Object} Immutable Map of incoming state
  * @param compile {Boolean} whether to include compile mixin
  *
  * Optional State:
@@ -88,7 +88,7 @@ departs.top = async (inputState, compileEnable) => {
  *
  * @method begin
  * @memberof module:departs
- * @param inputState {Immutable Map} of incoming state
+ * @param inputState {Object} Immutable Map of incoming state
  * @param compileEnable {Boolean} whether to include compile mixin
  */
 departs.begin = async (inputState, compileEnable) => {

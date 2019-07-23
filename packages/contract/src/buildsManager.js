@@ -108,7 +108,7 @@ bm.BuildsManager = class extends ContractsManager {
    * @memberof class:BuildsManager
    *
    * @param deployName {String}
-   * @param forkOutput {Immutable Map}
+   * @param forkOutput {Object} Immutable Map
    * @param overwrite
    */
   async setForkedDeploy(deployName, forkOutput, overwrite) {
@@ -129,7 +129,7 @@ bm.BuildsManager = class extends ContractsManager {
    * @memberof module:deployer
    *
    * @param deployName {String} name of the deploy in the form of ContractName-deployID.
-   * @param deployOutput {Immutable Map} key-value deploy data.
+   * @param deployOutput {Object} Immutable Map of key-value deploy data.
    * @param overwrite {Boolean} whether to overwrite any existing deploys with this name.
    */
   async setDeploy(deployName, deployOutput, overwrite) {

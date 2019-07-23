@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      contract/src/deployer.js - Documentation
+      Deployer - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,167 +81,350 @@
   <div id="main">
     
       <h1 class="page-title">
-        contract/src/deployer.js
+        Deployer
       </h1>
     
 
     
-      
 
 <section>
+  <header>
+    
+      <h2>
+        
+          <span class="ancestors"><a href="module-contract.html">contract</a>.</span>
+        
+        Deployer
+        
+      </h2>
+
+      
+        <div class="class-description">
+          <p>Class encapsulating a deployer for a given network (chain ID)
+and inputter / outputter (possibly a remote data store)</p>
+        </div>
+      
+    
+  </header>
+
   <article>
-    <pre class="prettyprint source linenums"><code>'use strict'
-const path   = require('path')
-const assert = require('chai').assert
-const { Map, List, Seq }
-             = require('immutable')
+    <div class="container-overview">
+      
+        
 
-const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
-             = require('demo-utils')
-const LOGGER = new Logger('Deployer')
-const { awaitOutputter, isLink, isForkedDeploy } = require('./utils')
-const { BuildsManager } = require('./buildsManager')
-const { isValidAddress, keccak } = require('ethereumjs-util')
 
-const deploys = {}
+  
+    <h2>Constructor</h2>
+  
 
-/**
- * Class encapsulating a deployer for a given network (chain ID)
- * and inputter / outputter (possibly a remote data store)
- * @memberof module:contract
- * @param inputter {Function} a getter function, possibly async,
- *   that takes a key and returns the associated value if it exists.
- * @param outputter {Function} a setter function, possibly async,
- *   that takes a key and a value as an Immutable Map, and returns
- *   the written value, also as an Immutable Map.
- * @param bm {Object} a BuildsManager, null if we want to auto-create one.
- * @param eth {Object} an Ethereum network object
- * @param chainId {String} the chain ID of the given eth, must match.
- * @param address {String} the `0x`-prefixed Ethereum address to deploy from
- */
-deploys.Deployer = class {
+  <span class='name-container'>
+    <a class="link-icon" href="#Deployer">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="Deployer">
+      <span class="type-signature"></span>new Deployer<span class="signature">(inputter, outputter, bm, eth, chainId, address)</span><span class="type-signature"></span>
+    </h4>
+  </span>
 
-  constructor({inputter, outputter, bm, eth, chainId, address}) {
-    assert(chainId, `chainId param is empty.`)
-    this.bm        = bm || new BuildsManager(...arguments)
-    this.eth       = eth
-    this.chainId   = chainId
-    assert(isValidAddress(address), `${address} not a valid ethereum address`)
-    this.address   = address
-  }
+  
 
-  getBuildsManager() {
-    return this.bm
-  }
 
-  /**
-   * Validate dependencies then deploy the given contract output to a network.
-   * @param eth network object connected to a local provider
-   * @param contractName {String} of source contract
-   * @param linkId {String} ID of previous link to instantiate and deploy
-   * @param deployId {String} ID of previous deploy
-   * @param ctorArgs {Object} Immutable Map of constructor arguments, can be empty Map or null
-   * @param fork {boolean} whether to fork the given deploy at the current timestamp
-   *   can be left null for false
-   */
-  async deploy(contractName, linkId, deployId, ctorArgs, fork) {
-    const linkName   = `${contractName}-${linkId}`
-    const link       = await this.bm.getLink(linkName)
-    assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
-    const code       = link.get('code')
-    const abi        = link.get('abi')
-    const deployName = `${contractName}-${deployId}`
-   
-    assert.equal(this.chainId, await this.eth.net_version())
 
-    const now = new Date()
-    const deployMap = await this.bm.getDeploys()
 
-    const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
-    // Warn with multiple deploys with the same ID
-    const deploy = deployMap.get(deployName)
-    if (Map.isMap(deploy) &amp;&amp; (deploy.get('inputHash') === inputHash) &amp;&amp; !fork) {
-      LOGGER.info(`${deployName} has already been deployed`,
-                  `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
-      LOGGER.debug(`with input hash ${inputHash}`)
-      return deploy
-    } else {
-      LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
-      if (fork) {
-        LOGGER.info(`Forking at time ${now.getTime()}`)
-      }
-      LOGGER.debug(`current hash ${inputHash}`)
-    }
 
-    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
-    LOGGER.debug(ctorArgList)
 
-    const Contract = this.eth.contract(abi.toJS(), code)
 
-    const gasPrice = getConfig()[ 'GAS_PRICE' ]
-    const gasLimit = getConfig()[ 'GAS_LIMIT' ]
-    LOGGER.debug(`gasPrice`, gasPrice)
-    LOGGER.debug(`gasLimit`, gasLimit)
 
-    const deployPromise = new Promise((resolve, reject) => {
-      Contract.new(...ctorArgList, {
-        from: this.address, gas: gasLimit, gasPrice: gasPrice,
-      }).then((txHash) => {
-          const checkTransaction = setInterval(() => {
-            this.eth.getTransactionReceipt(txHash).then((receipt) => {
-              if (receipt) {
-                clearInterval(checkTransaction)
-                resolve(receipt) 
-              }
-            })
-          })
-        })
-        .catch((error) => {
-          console.error(`error ${error}`)
-          reject(error)
-        })
-    })
 
-    const minedContract = await deployPromise.then((receipt) => { return receipt })
-    LOGGER.debug('MINED', minedContract)
-    const instance = Contract.at(minedContract.contractAddress)
+  <h5>Parameters:</h5>
+  
 
-    const deployOutput = new Map({
-      type         : 'deploy',
-      name         : contractName,
-      chainId      : this.chainId,
-      deployId     : deployId,
-      linkId       : link.get('linkId'),
-      abi          : abi,
-      code         : code,
-      inputHash    : inputHash,
-    })
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
 
-    const forkOutput = new Map({
-      type         : 'forkedDeploy',
-      deployTx     : new Map(minedContract),
-      deployAddress: minedContract.contractAddress,
-      deployDate   : now.toLocaleString(),
-      deployTime   : now.getTime(),
-    })
+      <th>Type</th>
 
-    // This is an updated deploy, overwrite it
-    await this.bm.setDeploy(deployName, deployOutput, true)
-    // We should never overwrite a fork, otherwise what was the point
-    await this.bm.setForkedDeploy(deployName, forkOutput, false)
-    const forkedDeploy = await this.bm.getForkedDeploy(deployName, now.getTime())
-    assert( isForkedDeploy(forkedDeploy), `Not a valid forked deploy ${forkedDeploy.toJS()}`)
-    return this.bm.getMergedDeploy(deployName, now.getTime())
-  }
+      
 
-}
+      
 
-module.exports = deploys
-</code></pre>
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>inputter</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      function
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>a getter function, possibly async,
+that takes a key and returns the associated value if it exists.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>outputter</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      function
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>a setter function, possibly async,
+that takes a key and a value as an Immutable Map, and returns
+the written value, also as an Immutable Map.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>bm</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      Object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>a BuildsManager, null if we want to auto-create one.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>eth</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      Object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>an Ethereum network object</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>chainId</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the chain ID of the given eth, must match.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>address</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the <code>0x</code>-prefixed Ethereum address to deploy from</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="contract_src_deployer.js.html">contract/src/deployer.js</a>, <a href="contract_src_deployer.js.html#line32">line 32</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
   </article>
 </section>
 
-    
+
 
 
   </div>

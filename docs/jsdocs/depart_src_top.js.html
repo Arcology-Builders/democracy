@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      contract/src/deployer.js - Documentation
+      depart/src/top.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        contract/src/deployer.js
+        depart/src/top.js
       </h1>
     
 
@@ -92,153 +92,110 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>'use strict'
-const path   = require('path')
+    <pre class="prettyprint source linenums"><code>#!/usr/bin/env node
+'use strict'
+
+// Democracy Depart command-line tool: orchestrated deploys to the chain
+
+const { Map }   = require('immutable')
+const fs = require('fs')
+const path = require('path')
+const { wallet } = require('demo-keys')
+const { getConfig, Logger } = require('demo-utils')
+const { run, argListMixin, deployerMixin } = require('./runner')
+const { departMixin, compileMixin, emptyMixin } = require('./departure')
+const LOGGER = new Logger('demo-depart')
 const assert = require('chai').assert
-const { Map, List, Seq }
-             = require('immutable')
 
-const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
-             = require('demo-utils')
-const LOGGER = new Logger('Deployer')
-const { awaitOutputter, isLink, isForkedDeploy } = require('./utils')
-const { BuildsManager } = require('./buildsManager')
-const { isValidAddress, keccak } = require('ethereumjs-util')
-
-const deploys = {}
-
-/**
- * Class encapsulating a deployer for a given network (chain ID)
- * and inputter / outputter (possibly a remote data store)
- * @memberof module:contract
- * @param inputter {Function} a getter function, possibly async,
- *   that takes a key and returns the associated value if it exists.
- * @param outputter {Function} a setter function, possibly async,
- *   that takes a key and a value as an Immutable Map, and returns
- *   the written value, also as an Immutable Map.
- * @param bm {Object} a BuildsManager, null if we want to auto-create one.
- * @param eth {Object} an Ethereum network object
- * @param chainId {String} the chain ID of the given eth, must match.
- * @param address {String} the `0x`-prefixed Ethereum address to deploy from
- */
-deploys.Deployer = class {
-
-  constructor({inputter, outputter, bm, eth, chainId, address}) {
-    assert(chainId, `chainId param is empty.`)
-    this.bm        = bm || new BuildsManager(...arguments)
-    this.eth       = eth
-    this.chainId   = chainId
-    assert(isValidAddress(address), `${address} not a valid ethereum address`)
-    this.address   = address
-  }
-
-  getBuildsManager() {
-    return this.bm
-  }
-
-  /**
-   * Validate dependencies then deploy the given contract output to a network.
-   * @param eth network object connected to a local provider
-   * @param contractName {String} of source contract
-   * @param linkId {String} ID of previous link to instantiate and deploy
-   * @param deployId {String} ID of previous deploy
-   * @param ctorArgs {Object} Immutable Map of constructor arguments, can be empty Map or null
-   * @param fork {boolean} whether to fork the given deploy at the current timestamp
-   *   can be left null for false
-   */
-  async deploy(contractName, linkId, deployId, ctorArgs, fork) {
-    const linkName   = `${contractName}-${linkId}`
-    const link       = await this.bm.getLink(linkName)
-    assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
-    const code       = link.get('code')
-    const abi        = link.get('abi')
-    const deployName = `${contractName}-${deployId}`
-   
-    assert.equal(this.chainId, await this.eth.net_version())
-
-    const now = new Date()
-    const deployMap = await this.bm.getDeploys()
-
-    const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
-    // Warn with multiple deploys with the same ID
-    const deploy = deployMap.get(deployName)
-    if (Map.isMap(deploy) &amp;&amp; (deploy.get('inputHash') === inputHash) &amp;&amp; !fork) {
-      LOGGER.info(`${deployName} has already been deployed`,
-                  `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
-      LOGGER.debug(`with input hash ${inputHash}`)
-      return deploy
-    } else {
-      LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
-      if (fork) {
-        LOGGER.info(`Forking at time ${now.getTime()}`)
-      }
-      LOGGER.debug(`current hash ${inputHash}`)
-    }
-
-    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
-    LOGGER.debug(ctorArgList)
-
-    const Contract = this.eth.contract(abi.toJS(), code)
-
-    const gasPrice = getConfig()[ 'GAS_PRICE' ]
-    const gasLimit = getConfig()[ 'GAS_LIMIT' ]
-    LOGGER.debug(`gasPrice`, gasPrice)
-    LOGGER.debug(`gasLimit`, gasLimit)
-
-    const deployPromise = new Promise((resolve, reject) => {
-      Contract.new(...ctorArgList, {
-        from: this.address, gas: gasLimit, gasPrice: gasPrice,
-      }).then((txHash) => {
-          const checkTransaction = setInterval(() => {
-            this.eth.getTransactionReceipt(txHash).then((receipt) => {
-              if (receipt) {
-                clearInterval(checkTransaction)
-                resolve(receipt) 
-              }
-            })
-          })
-        })
-        .catch((error) => {
-          console.error(`error ${error}`)
-          reject(error)
-        })
-    })
-
-    const minedContract = await deployPromise.then((receipt) => { return receipt })
-    LOGGER.debug('MINED', minedContract)
-    const instance = Contract.at(minedContract.contractAddress)
-
-    const deployOutput = new Map({
-      type         : 'deploy',
-      name         : contractName,
-      chainId      : this.chainId,
-      deployId     : deployId,
-      linkId       : link.get('linkId'),
-      abi          : abi,
-      code         : code,
-      inputHash    : inputHash,
-    })
-
-    const forkOutput = new Map({
-      type         : 'forkedDeploy',
-      deployTx     : new Map(minedContract),
-      deployAddress: minedContract.contractAddress,
-      deployDate   : now.toLocaleString(),
-      deployTime   : now.getTime(),
-    })
-
-    // This is an updated deploy, overwrite it
-    await this.bm.setDeploy(deployName, deployOutput, true)
-    // We should never overwrite a fork, otherwise what was the point
-    await this.bm.setForkedDeploy(deployName, forkOutput, false)
-    const forkedDeploy = await this.bm.getForkedDeploy(deployName, now.getTime())
-    assert( isForkedDeploy(forkedDeploy), `Not a valid forked deploy ${forkedDeploy.toJS()}`)
-    return this.bm.getMergedDeploy(deployName, now.getTime())
-  }
-
+let departInputState = null
+let departCallback = null
+const depart = (inputState, callback) => {
+  assert(Map.isMap(inputState), 'Input state should be immutable Map')
+  departInputState = inputState 
+  departCallback = callback
 }
 
-module.exports = deploys
+// Insert this custom mixin to read in a departure file and save its name
+// and callback
+const m1 = async (state) => {
+  const { departFileName } = state.toJS()
+  LOGGER.info(`Depart filename ${departFileName}`)
+  const departFilePath = path.join(process.cwd(), departFileName)
+  const departFile = fs.existsSync(departFilePath) ?
+    fs.readFileSync(departFilePath).toString() : ''
+
+  // TODO If it's ever useful to save output state of eval, like console line,
+  // save the return value here and add it to the returned state below
+  eval(departFile)
+
+  return Map({
+    departFile : departFile,
+  }).merge(departInputState)
+}
+
+const m2 = deployerMixin()
+
+const m3 = departMixin()
+
+const departs = {}
+
+departs.departFunc = async (state) => {
+  const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
+          departFile } = state.toJS() 
+
+  const result = (departCallback) ? (await departCallback({...state.toJS()})) : null
+  return new Map({ 'result': result })
+}
+
+departs.end = async (state) => {
+  LOGGER.info('departs.end')
+  wallet.shutdownSync()
+}
+
+/**
+ * Top-level departure command that also finalizes state.
+ * Suitable for command-line tools or non-appendable UI calls.
+ * @memberof module:depart
+ * @method top
+ *
+ * Includes the standard
+ * list of mixins from departs.begin and in addition shuts down any state
+ * after the departure-from-file mixin
+ * @param inputState {Object} Immutable Map of incoming state
+ * @param compile {Boolean} whether to include compile mixin
+ *
+ * Optional State:
+ * departFileName - path to departure file
+ */
+departs.top = async (inputState, compileEnable) => {
+  const outState = await departs.begin(inputState, compileEnable)
+  return await departs.end(outState)
+}
+
+/**
+ * Top-level departure command that includes the following standard mixins
+ * but does not finalize state. Suitable for appendable UI calls, such as a console or
+ * web.
+ * - a custom mixin for reading from departure files
+ * - a deployer mixin for reading from .env files and supplying builds manager
+ * - a departure mixin for supplying linking, deploying, cleaning methods
+ *
+ * @method begin
+ * @memberof module:departs
+ * @param inputState {Object} Immutable Map of incoming state
+ * @param compileEnable {Boolean} whether to include compile mixin
+ */
+departs.begin = async (inputState, compileEnable) => {
+  const m0 = argListMixin(Map({
+    'departFileName'   : 'depart.js', // can be override on command-line --departFileName
+    'testValueEth'     : '0.1'      ,
+    'testAccountIndex' : 0          ,
+    'unlockSeconds'    : 30,
+  }).merge(inputState))
+  return (await run( m0, m1, m2, compileMixin(compileEnable), m3, departs.departFunc ))
+}
+
+module.exports = departs
 </code></pre>
   </article>
 </section>
