@@ -35,8 +35,9 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:flow": "NODE_ENV=DEVELOPMENT ./bin/demo-test",
+    "test:mocha": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:flow": "NODE_ENV=DEVELOPMENT ./bin/demo-test --mochaTimeout 10000 --unlockSeconds 20",
+    "test": "yarn test:mocha && yarn test:flow",
     "cov": "nyc.js mocha tests/",
     "console": "NODE_ENV=DEVELOPMENT ./bin/demo-console"
   },
