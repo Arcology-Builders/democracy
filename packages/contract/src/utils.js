@@ -67,4 +67,11 @@ utils.isDeploy = (_deploy) => {
   return (Map.isMap(_deploy) && _deploy.get('type') === 'deploy')
 }
 
+/**
+ * @return true if the given object is a fork-level deploy output, otherwise false
+ */
+utils.isForkedDeploy = (fd) => {
+  return (Map.isMap(fd) && fd.get('type') === 'forkedDeploy')
+}
+
 module.exports = utils

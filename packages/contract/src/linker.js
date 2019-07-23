@@ -31,7 +31,7 @@ linker.Linker = class {
    * @param depMap is an Immutable Map of library names to deploy IDs
    * @return the contractOutput augmented with a linkDepMap
    */
-  async link(contractName, linkId, _depMap) {
+  async link(contractName, linkId, _depMap, forkTime) {
     const contract = await this.bm.getContract(contractName)
     assert( isContract(contract),
            `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
@@ -48,8 +48,6 @@ linker.Linker = class {
       LOGGER.debug(`${linkName} out-of-date, re-linking`)
       LOGGER.debug(`with input hash ${inputHash}`)
     }
-
-    const deployMap = await this.bm.getDeploys()
 
     let matches = Map({})
     let match
@@ -72,7 +70,7 @@ linker.Linker = class {
 
     const depMap = Map.isMap(_depMap) ? _depMap : new Map({})
 
-    const replacedCode = depMap.reduce((codeSoFar, deployId, contractName) => {
+    const replacedCode = await depMap.reduce(async (codeSoFar, deployId, contractName) => {
       // The linkId to replace for the given linkName can also
       // be a full deployName by itself (e.g. TestInterface=TestImpl-deploy)
       // in which case, deployId == `TestImpl-deploy` directly
@@ -84,12 +82,12 @@ linker.Linker = class {
         throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
       }
 
-      const deployObject = deployMap.get(deployName)
+      const deployObject = await this.bm.getMergedDeploy(deployName, forkTime)
       if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
       LOGGER.debug('DEPLOY OBJECT', deployObject)
 
       const deployAddress = deployObject.get('deployAddress')
-      assert(deployAddress)
+      assert(deployAddress, `Null deployAddress`)
 
       LOGGER.debug(`Replacing symbols ${linkPlaceholder} with ${deployAddress.slice(2)}`)
       while (codeSoFar.search(linkPlaceholder) !== -1) {

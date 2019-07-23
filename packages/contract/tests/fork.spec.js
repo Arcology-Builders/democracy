@@ -51,8 +51,8 @@ describe('Democracy forking', () => {
   })
 
   it( 'retrieves back forked deploys', async () => {
-    const ddeploy = await bm.getDeploy('DifferentSender-deploy', deploy.get('deployTime') )
-    const ddeploy2 = await bm.getDeploy('DifferentSender-deploy', deploy2.get('deployTime') )
+    const ddeploy = await bm.getMergedDeploy('DifferentSender-deploy', deploy.get('deployTime') )
+    const ddeploy2 = await bm.getMergedDeploy('DifferentSender-deploy', deploy2.get('deployTime') )
     assert.equal( ddeploy.get('deployTime'), deploy.get('deployTime') )
     assert.equal( ddeploy2.get('deployTime'), deploy2.get('deployTime') )
   })

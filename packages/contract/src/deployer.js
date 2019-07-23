@@ -7,7 +7,7 @@ const { Map, List, Seq }
 const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
              = require('demo-utils')
 const LOGGER = new Logger('Deployer')
-const { awaitOutputter, isLink } = require('./utils')
+const { awaitOutputter, isLink, isForkedDeploy } = require('./utils')
 const { BuildsManager } = require('./buildsManager')
 const { isValidAddress, keccak } = require('ethereumjs-util')
 
@@ -122,15 +122,24 @@ deploys.Deployer = class {
       linkId       : link.get('linkId'),
       abi          : abi,
       code         : code,
+      inputHash    : inputHash,
+    })
+
+    const forkOutput = new Map({
+      type         : 'forkedDeploy',
       deployTx     : new Map(minedContract),
       deployAddress: minedContract.contractAddress,
       deployDate   : now.toLocaleString(),
       deployTime   : now.getTime(),
-      inputHash    : inputHash,
     })
 
     // This is an updated deploy, overwrite it
-    return this.bm.setDeploy(deployName, deployOutput, true, fork)
+    await this.bm.setDeploy(deployName, deployOutput, true)
+    // We should never overwrite a fork, otherwise what was the point
+    await this.bm.setForkedDeploy(deployName, forkOutput, false)
+    const forkedDeploy = await this.bm.getForkedDeploy(deployName, now.getTime())
+    assert( isForkedDeploy(forkedDeploy), `Not a valid forked deploy ${forkedDeploy.toJS()}`)
+    return this.bm.getMergedDeploy(deployName, now.getTime())
   }
 
 }

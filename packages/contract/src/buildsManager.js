@@ -16,8 +16,8 @@ const LOGGER = new Logger('BuildsManager')
 const bm = {}
 
 /**
- * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles, also
- * handles network-specific builds like links and deploys.
+ * A BuildsManager is a ContractsManager which in addition to managing contracts and compiles,
+ * also handles network-specific builds like links and deploys.
  * @class BuildsManager
  * @memberof module:contract
  * @param _outputter {Function} a (possibly asynchronous) function that
@@ -46,34 +46,99 @@ bm.BuildsManager = class extends ContractsManager {
   }
  
   /**
-   * Asynchronous method to get a deploy (possibly forked) from the given name.
+   * Asynchronous method to get parent-level deploy information (not specific to a fork)
    * @method getDeploy
    * @memberof class:BuildsManager
    * @param deployName {String} the full deploy name including contract and deploy ID
    *   Example: `ContractName-deploy`
-   * @param forkTime {String} the unix timestamp in milliseconds of the forked deploy.
    */
   async getDeploy(deployName, forkTime) {
     const deploysMap = await this.getDeploys()
-    const parentDeploy = this.deploysMap.get(deployName)
-    const deploy = (forkTime) ? parentDeploy.get(String(forkTime)) : parentDeploy
-    return deploy
+    const parentDeploy = this.deploysMap.get(deployName).get('deploy')
+    return parentDeploy
   } 
 
-  async setDeploy(deployName, deployOutput, overwrite, fork) {
-    const forkTime = String(deployOutput.get('deployTime'))
-    const forkSuffix = (fork) ? `/${forkTime}` : ``
-    const deployFilePath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}${forkSuffix}`
-    LOGGER.debug(`Writing deploy to ${deployFilePath}`)
-    if (fork) {
-      const parentDeploy = this.deploysMap
-        .get(deployName, Map({}))
-        .set(forkTime, deployOutput)
-      this.deploysMap = this.deploysMap.set(deployName, parentDeploy)
-    } else {
-      this.deploysMap = this.deploysMap.set(deployName, deployOutput)
-    }
-    return awaitOutputter(this.outputter(deployFilePath, deployOutput, overwrite),
+  async getLatestForkedDeploy(deployName) {
+    const deploysMap = await this.getDeploys()
+    const parentDeploy = deploysMap.get(deployName)
+    const latestForkTime = List(parentDeploy.get('forks').keys()).sort().last()
+    return this.getForkedDeploy(deployName, latestForkTime)
+  }
+  
+  async getEarliestForkedDeploy(deployName) {
+    const deploysMap = await this.getDeploys()
+    const parentDeploy = deploysMap.get(deployName)
+    const earliestForkTime = List(parentDeploy.get('forks').keys()).sort().first()
+    LOGGER.debug('Earliest fork', earliestForkTime)
+    return this.getForkedDeploy(deployName, earliestForkTime)
+  }
+
+  /**
+   * Get merged deploy data (both parent-level and fork-level) in one Immutable Map.
+   * @param deployName {String} a deploy name in the form of ContractName-deploy
+   * @param forkTime {String}
+   *
+   * @method getForkedDeploy
+   * @memberof class:BuildsManager
+   */
+  async getForkedDeploy(deployName, forkTime) {
+    const deploysMap = await this.getDeploys()
+    const parentDeploy = deploysMap.get(deployName)
+    const forkedDeploy = parentDeploy.get('forks').get(String(forkTime))
+    return forkedDeploy
+  }
+
+  /**
+   * Return both fork-level and parent-level deploy data as one Immutable Map.
+   *
+   * @param deployName {String}
+   * @param forkTime {String}
+   */
+  async getMergedDeploy(deployName, forkTime) {
+    const deploysMap = await this.getDeploys()
+    const fd = await ((forkTime) ? this.getForkedDeploy(deployName, forkTime) :
+      this.getEarliestForkedDeploy(deployName))
+    return fd.merge(deploysMap.get(deployName).get('deploy'))
+  }
+
+  /**
+   * Write fork-level deploy data (deployTime, deployAddress, deployerAddress)
+   * Should be preceded by a call to `setDeploy` to write parent-level deploy data.
+   * @method setForkedDeploy
+   * @memberof class:BuildsManager
+   *
+   * @param deployName {String}
+   * @param forkOutput {Immutable Map}
+   * @param overwrite
+   */
+  async setForkedDeploy(deployName, forkOutput, overwrite) {
+    const forkTime = String(forkOutput.get('deployTime'))
+    const deployKeyPath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}/forks/${forkTime}`
+    LOGGER.debug(`Writing forked deploy to ${deployKeyPath}`)
+    const parentDeploy = this.deploysMap.get(deployName, Map({}))
+    const forks = parentDeploy.get('forks', Map({})).set(forkTime, forkOutput)
+    this.deploysMap = this.deploysMap.set(deployName, parentDeploy.set('forks', forks))
+    return awaitOutputter(this.outputter(deployKeyPath, forkOutput, overwrite),
+                          () => { return forkOutput })
+  }
+
+  /**
+   * Write parent deploy-data (ABI, constructor args) to the (possibly remote) keystore.
+   * Should be accompanied with a `setForkedData` call for fork-level data.
+   * @method setDeploy
+   * @memberof module:deployer
+   *
+   * @param deployName {String} name of the deploy in the form of ContractName-deployID.
+   * @param deployOutput {Immutable Map} key-value deploy data.
+   * @param overwrite {Boolean} whether to overwrite any existing deploys with this name.
+   */
+  async setDeploy(deployName, deployOutput, overwrite) {
+    const deployKeyPath = `${DEPLOYS_DIR}/${this.chainId}/${deployName}/deploy`
+    LOGGER.debug(`Writing parent deploy to ${deployKeyPath}`)
+    const parentDeploy = this.deploysMap.get(deployName, Map({})).set('deploy', deployOutput)
+    this.deploysMap = this.deploysMap.set(deployName, parentDeploy)
+    
+    return awaitOutputter(this.outputter(deployKeyPath, deployOutput, overwrite),
                           () => { return deployOutput })
   }
 
