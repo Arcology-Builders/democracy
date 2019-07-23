@@ -1,6 +1,6 @@
 const { Map } = require('immutable')
 const { wallet } = require('demo-keys')
-const { forkDepart } = require('../src/shims')
+const { forkDepart, forkDone } = require('../src/shims')
 const assert = require('chai').assert
 const { Logger } = require('demo-utils')
 const LOGGER = new Logger('example.flow')
@@ -40,7 +40,7 @@ describe('Flow example 1', () => {
   })
 
   after(async () => {
-    // TODO flowDone()
+    forkDone()
   })
 
 })

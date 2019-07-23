@@ -11,7 +11,7 @@ const { wallet } = require('demo-keys')
 const { getConfig, Logger, traverseDirs } = require('demo-utils')
 const { run, deployerMixin, departMixin, argListMixin } = require('demo-depart')
 const LOGGER = new Logger('demo-depart')
-const TESTS_DIR = 'tests'
+const TESTS_DIR = 'flows'
 const assert = require('chai').assert
 const Mocha = require('mocha')
 const { end, begin } = require('demo-depart')
@@ -29,10 +29,10 @@ const runTest = async () => {
                (fnParts, f) => { return (fnParts.length > 1) && (fnParts[1] !== 'flow') },
                (source, f) => { m.addFile(f) }
               )
-  //await m.run()
+  await m.run()
 
   // Currently this doesn't depend on the state of any particular flow
-  await end()
+  //await end()
 }
 
 if (require.main === module) {

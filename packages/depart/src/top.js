@@ -54,7 +54,8 @@ departs.departFunc = async (state) => {
 }
 
 departs.end = async (state) => {
-  //wallet.shutdownSync()
+  LOGGER.info('departs.end')
+  wallet.shutdownSync()
 }
 
 /**
