@@ -40,6 +40,6 @@ RUN ln -s /usr/sbin/nvim /usr/local/bin/vi
 
 ENTRYPOINT . ~/.nvm/nvm.sh \
   && /bin/versions/node/v11.2.0/bin/ganache-cli \
-       --debug -v -p 8545 --hostname 0.0.0.0 
+       --debug -v -p 8545 -i 2222 --hostname 0.0.0.0 
 
 EXPOSE 8545
