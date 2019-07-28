@@ -32,7 +32,7 @@ tx.getGasEstimate = async ({from, to, value, data, eth }) => {
 tx.createRawTx = async function({ from, to, value, data, gasPrice, eth }) {
   const _gasPrice = gasPrice || getConfig()['GAS_PRICE']
   assert(data.slice(0,2) === '0x')
-  assert(data.length === 74)
+  //assert(data.length === 74)
   const _eth = eth || getNetwork()
   const chainId = await _eth.net_version()
   const gas = await tx.getGasEstimate(...arguments)
@@ -49,7 +49,7 @@ tx.createRawTx = async function({ from, to, value, data, gasPrice, eth }) {
 }
 
 tx.sendSignedTxFromArgs = async function ({ from, to, value, data, signerEth }) {
-  const rawTx = createRawTx(arguments)
+  const rawTx = tx.createRawTx(arguments)
   const eth = signerEth || getNetwork()
   return await eth.sendTransaction(rawTx)
 } 
@@ -68,6 +68,7 @@ tx.call = async function ({ data, from, to, value, gasPrice, signerEth }) {
  */
 tx.sendSignedTx = async ({ rawTx, signerEth }) => {
   const eth = signerEth || getNetwork()
+  LOGGER.debug('rawTx', rawTx)
   return await eth.sendTransaction(rawTx)
 }
 
