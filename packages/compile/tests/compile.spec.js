@@ -93,10 +93,17 @@ describe('Democracy compiling.', () => {
     const contract = await cm.getContract('ERC20')
     const contractJS = toJS(contract)
     const actualContentHash = contractJS['contentHash']
-    assert(actualContentHash)
     delete(contractJS['contentHash'])
+    delete(contractJS['dateTime'])
+    delete(contractJS['timestamp'])
     const contentHash = keccak(JSON.stringify(contractJS)).toString('hex')
     assert.equal(contract.get('inputHash'), inputHash)
+    LOGGER.debug('PREHASH', JSON.stringify(contractJS))
+    assert.equal(JSON.stringify(contractJS),
+                 JSON.stringify(contract
+                                .remove('contentHash')
+                                .remove('dateTime')
+                                .remove('timestamp').toJS()))
     assert.equal(actualContentHash, contentHash)
   })
 
