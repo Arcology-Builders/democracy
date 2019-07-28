@@ -1,4 +1,4 @@
-const { List, Map } 
+const { List, Map, OrderedMap } 
              = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
@@ -17,12 +17,12 @@ describe('from JS nested values', () => {
 
     const imm = fromJS(x)
     assert(imm.equals(List([
-      Map({
+      OrderedMap({
         'bug': 'bear',
         'a'  : List(
           [
             'tiara', 
-            Map({ 'b': 2 })
+            OrderedMap({ 'b': 2 })
           ])
       }),
       List([ 1, 2, 3 ])
