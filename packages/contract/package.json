@@ -27,7 +27,9 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test": "yarn test:mocha && yarn test:scripts",
+    "test:scripts": "./scripts/test.sh",
+    "test:mocha": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "doc": "documentation build src/** -f md -o docs/Contracts.md"
   },
   "bugs": {
@@ -35,6 +37,7 @@
   },
   "dependencies": {
     "demo-client": "^0.3.1-alpha.4",
+    "demo-tx": "^0.3.3-alpha.1",
     "demo-utils": "^0.3.1-alpha.4",
     "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",

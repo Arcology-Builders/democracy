@@ -36,7 +36,8 @@ linker.Linker = class {
     assert( isContract(contract),
            `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
     const code = '0x' + contract.get('code')
-    const linkName = `${contractName}-${linkId}`
+    const _linkId = linkId || 'link'
+    const linkName = `${contractName}-${_linkId}`
 
     const link = await this.bm.getLink(linkName)
     const inputHash = keccak(JSON.stringify(contract.toJS())).toString('hex')

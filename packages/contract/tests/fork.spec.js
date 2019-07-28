@@ -1,4 +1,4 @@
-const { Deployer, Linker, isLink, isDeploy, Contract } = require('..')
+const { Deployer, Linker, isLink, isDeploy, Contract, createBM } = require('..')
 const { getNetwork, Logger } = require('demo-utils')
 const { Map } = require('immutable')
 
@@ -23,11 +23,13 @@ describe('Democracy forking', () => {
     eth = getNetwork()
     accounts = await eth.accounts()
     networkId = await eth.net_version()
-    d = new Deployer({eth: eth, chainId: networkId, address: accounts[0] })
+    d = new Deployer({bm: bm, eth: eth, chainId: networkId, address: accounts[0] })
+    // bm = await createBM({chainId: networkId, sourcePathList: ['contracts'], autoConfig: true})
     bm = d.getBuildsManager()
     l = new Linker({bm: bm, chainId: networkId})
-    await bm.cleanDeploy( 'DifferentSender-deploy' )
-    await bm.cleanLink( 'DifferentSender-link' )
+    // No remote cleaning allowed
+    //await bm.cleanDeploy( 'DifferentSender-deploy' )
+    //await bm.cleanLink( 'DifferentSender-link' )
   })
 
   it( 'creates two forked deploys' , async () => {

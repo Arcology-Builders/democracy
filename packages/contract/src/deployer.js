@@ -3,13 +3,19 @@ const path   = require('path')
 const assert = require('chai').assert
 const { Map, List, Seq }
              = require('immutable')
+const ethjsABI = require('ethjs-abi')
 
-const { DEPLOYS_DIR, getConfig, Logger, getImmutableKey, setImmutableKey }
+const { DEPLOYS_DIR, getConfig, getNetwork, Logger, getImmutableKey, setImmutableKey, toJS }
              = require('demo-utils')
 const LOGGER = new Logger('Deployer')
-const { awaitOutputter, isLink, isForkedDeploy } = require('./utils')
-const { BuildsManager } = require('./buildsManager')
-const { isValidAddress, keccak } = require('ethereumjs-util')
+const { awaitOutputter, isLink, isForkedDeploy }
+             = require('./utils')
+const { BuildsManager }
+             = require('./buildsManager')
+const { isValidAddress, keccak }
+             = require('ethereumjs-util')
+const { getKeys } = require('ethjs-util')
+const tx = require('demo-tx')
 
 const deploys = {}
 
@@ -32,14 +38,40 @@ deploys.Deployer = class {
   constructor({inputter, outputter, bm, eth, chainId, address}) {
     assert(chainId, `chainId param is empty.`)
     this.bm        = bm || new BuildsManager(...arguments)
-    this.eth       = eth
+    this.eth       = eth || getNetwork()
     this.chainId   = chainId
     assert(isValidAddress(address), `${address} not a valid ethereum address`)
-    this.address   = address
+    this.address   = address 
   }
 
   getBuildsManager() {
     return this.bm
+  }
+
+  getNewContractTx(args, options, abi, contractBytecode) {
+/*
+		if (typeof newMethodArgs[newMethodArgs.length - 1] === 'function') newMethodCallback = newMethodArgs.pop();
+		if (hasTransactionObject(newMethodArgs)) providedTxObject = newMethodArgs.pop();
+   */
+		const constructorMethod = abi.filter((x) => x.type === 'constructor')[0]
+		const assembleTxObject = {}
+
+		// set contract deploy bytecode
+		if (contractBytecode) {
+			assembleTxObject.data = contractBytecode;
+		}   
+    LOGGER.debug('args', args)
+
+		// append encoded constructor arguments
+		if (constructorMethod) {
+      LOGGER.debug('constructorMethod.inputs', constructorMethod.inputs)
+      const keys = getKeys(constructorMethod.inputs, 'type')
+      LOGGER.debug('keys', keys)
+			const constructorBytecode = ethjsABI.encodeParams(keys, args).substring(2); // eslint-disable-line
+			assembleTxObject.data = `${assembleTxObject.data}${constructorBytecode}`;
+		}   
+
+		return assembleTxObject.data
   }
 
   /**
@@ -58,7 +90,8 @@ deploys.Deployer = class {
     assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
     const code       = link.get('code')
     const abi        = link.get('abi')
-    const deployName = `${contractName}-${deployId}`
+    const _deployId  = deployId || 'deploy'
+    const deployName = `${contractName}-${_deployId}`
    
     assert.equal(this.chainId, await this.eth.net_version())
 
@@ -68,29 +101,45 @@ deploys.Deployer = class {
     const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
     const deploy = deployMap.get(deployName)
-    if (Map.isMap(deploy) && (deploy.get('inputHash') === inputHash) && !fork) {
-      LOGGER.info(`${deployName} has already been deployed`,
-                  `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
-      LOGGER.debug(`with input hash ${inputHash}`)
-      return deploy
-    } else {
-      LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
-      if (fork) {
-        LOGGER.info(`Forking at time ${now.getTime()}`)
+    if (Map.isMap(deploy)) {
+      LOGGER.debug(`previous input hash ${deploy.get('inputHash')}`)
+      LOGGER.debug(`current input hash ${inputHash}`)
+      if (deploy.get('inputHash') === inputHash) {
+        if (fork) {
+          LOGGER.info(`Forking at time ${now.getTime()}`)
+        } else {
+          LOGGER.info(`${deployName} has already been deployed`,
+                      `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)
+          return deploy
+        }
       }
-      LOGGER.debug(`current hash ${inputHash}`)
     }
+    LOGGER.info(`Deploy ${deployName} is out-of-date, re-deploying...`)
 
-    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : new Map({})
+    const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : []
     LOGGER.debug(ctorArgList)
 
-    const Contract = this.eth.contract(abi.toJS(), code)
+    const Contract = this.eth.contract(toJS( abi ), code)
 
     const gasPrice = getConfig()[ 'GAS_PRICE' ]
     const gasLimit = getConfig()[ 'GAS_LIMIT' ]
     LOGGER.debug(`gasPrice`, gasPrice)
     LOGGER.debug(`gasLimit`, gasLimit)
 
+    const txData = this.getNewContractTx(ctorArgList, 
+        { from: this.address, gas: gasLimit, gasPrice: gasPrice },
+                                        toJS( abi ), code)
+    LOGGER.debug('newContractTxData', txData)
+
+    const rawTx = await tx.createRawTx({
+      from: this.address,
+      data: txData,
+    })
+    const deployPromise = tx.sendSignedTx({
+      rawTx: rawTx, signerEth: this.eth
+    }).then((txHash) => this.eth.getTransactionReceipt(txHash))
+
+    /*
     const deployPromise = new Promise((resolve, reject) => {
       Contract.new(...ctorArgList, {
         from: this.address, gas: gasLimit, gasPrice: gasPrice,
@@ -109,7 +158,7 @@ deploys.Deployer = class {
           reject(error)
         })
     })
-
+*/
     const minedContract = await deployPromise.then((receipt) => { return receipt })
     LOGGER.debug('MINED', minedContract)
     const instance = Contract.at(minedContract.contractAddress)
