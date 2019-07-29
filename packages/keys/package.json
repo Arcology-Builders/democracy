@@ -9,18 +9,16 @@
     "access": "public"
   },
   "dependencies": {
-    "chai-as-promised": "7.1.1",
     "demo-client": "^0.3.1-alpha.4",
     "demo-utils": "^0.3.1-alpha.4",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
     "ethjs-signer": "0.1.1",
-    "immutable": "4.0.0-rc.12",
     "keythereum": "^1.0.4",
-    "randombytes": "2.1.0",
-    "web3-utils": "1.0.0-beta.48"
+    "randombytes": "2.1.0"
   },
   "devDependencies": {
+    "chai-as-promised": "7.1.1",
     "demo-tools": "^0.3.3-alpha.0",
     "webpack": "4.29.5",
     "webpack-dev-server": "3.1.14"

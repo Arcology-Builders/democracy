@@ -8,7 +8,7 @@ const expect  = require('chai').expect
 const assert  = chai.assert
 chai.use(require('chai-as-promised'))
 
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 const utils = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
 const { getImmutableKey, setImmutableKey } = utils

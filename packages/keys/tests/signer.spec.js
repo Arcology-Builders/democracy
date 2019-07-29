@@ -7,7 +7,7 @@ const LOGGER = new Logger('signer.spec')
 const keys   = require('../src/keys')
 const wallet = require('../src/wallet')
 const BN     = require('bn.js')
-const { fromWei, toWei } = require('web3-utils')
+const { fromWei, toWei } = require('ethjs-unit')
 const { Range, List } = require('immutable')
 const randombytes = require('randombytes')
 

@@ -2,7 +2,7 @@
 'use strict'
 
 const { getNetwork, getConfig } = require('demo-utils')
-const { fromWei } = require('web3-utils')
+const { fromWei } = require('ethjs-unit')
 
 const eth = getNetwork()
 

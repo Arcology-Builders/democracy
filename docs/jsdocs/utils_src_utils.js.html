@@ -130,7 +130,7 @@ utils.fromJS = (js) => {
   return typeof js !== 'object' || js === null ? js :
     Array.isArray(js) ? 
       Seq(js).map(utils.fromJS).toList() :
-      Seq(js).map(utils.fromJS).toMap()
+      Seq(js).map(utils.fromJS).toOrderedMap()
 }
 
 utils.toJS = (imm) => {

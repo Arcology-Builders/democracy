@@ -9,7 +9,7 @@
 const assert = require('chai').assert
 const { getConfig, getNetwork } = require('demo-utils')
 const { wallet } = require('demo-keys')
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 
 const mainFunc = async (payeeAddress, ethValue, fundFromTest) => {
 

@@ -1,6 +1,6 @@
 // Utility script to fund new Rinkeby accounts from old ones, for easy testing
 const assert = require('chai').assert
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 const { getNetwork, getEndpointURL, print }
              = require('demo-utils') 
 const keys   = require('../src/keys')

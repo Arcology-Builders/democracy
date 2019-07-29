@@ -16,7 +16,7 @@ const SignerProvider = require('ethjs-provider-signer')
 const ethsign = require('ethjs-signer').sign
 const Eth     = require('ethjs')
 const keys = require('./keys')
-const { toWei, fromWei } = require('web3-utils')
+const { toWei, fromWei } = require('ethjs-unit')
 const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
 const { createInOut } = require('demo-client')
 

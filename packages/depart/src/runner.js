@@ -6,7 +6,7 @@
 
 const path = require('path')
 const assert = require('chai').assert
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 const { getConfig, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map, List } = require('immutable')

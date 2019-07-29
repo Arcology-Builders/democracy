@@ -1,7 +1,7 @@
 'use strict'
 const { getDescribe } = require('./walletCommon')
 const { getNetwork }  = require('demo-utils')
-const { toWei }       = require('web3-utils')
+const { toWei }       = require('ethjs-unit')
 const { wallet }      = require('demo-keys')
 
 /*

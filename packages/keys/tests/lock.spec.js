@@ -7,7 +7,7 @@ const { getNetwork, getEndpointURL, Logger, immEqual }
 const LOGGER = new Logger('signer.spec')
 const keys   = require('../src/keys')
 const wallet = require('../src/wallet')
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 
 describe('Wallet locking and unlocking', () => {
 

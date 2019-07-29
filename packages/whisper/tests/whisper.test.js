@@ -4,7 +4,7 @@ const randombytes   = require('randombytes')
 const { Whisperer } = require('..')
 const { getConfig } = require('demo-utils')
 const { Range }     = require('immutable')
-const utils         = require('web3-utils')
+const utils         = require('ethjs-unit')
 const { Logger }    = require('demo-utils')
 const LOGGER        = new Logger('whisper.spec')
 

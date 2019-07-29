@@ -4,7 +4,7 @@ const assert = require('chai').assert
 
 const { getNetwork, getConfig, isNetwork, getEndpointURL, Logger } = require('demo-utils')
 const LOGGER = new Logger('tx')
-const { toHex, toWei } = require('web3-utils')
+const { toHex, toWei } = require('ethjs-unit')
 const BN = require('bn.js')
 
 const tx = {}

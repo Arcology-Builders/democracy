@@ -8,7 +8,7 @@ const assert = require('chai').assert
 const { BuildsManager, Linker, Deployer, isDeploy, Contract }
              = require('demo-contract')
 const LOGGER = new Logger('tx.spec')
-const { toWei, toHex } = require('web3-utils')
+const { toWei, toHex } = require('ethjs-unit')
 const BN = require('bn.js')
 const abi = require('ethjs-abi')
 const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')

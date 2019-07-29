@@ -8,7 +8,7 @@ const { getNetwork, Logger } = require('demo-utils')
 const LOGGER = new Logger('create.spec')
 const keys = require('..')
 const { wallet, isAccount } = keys
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 
 describe('Remote account created from private key', () => {
 

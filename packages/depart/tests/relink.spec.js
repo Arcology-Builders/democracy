@@ -3,7 +3,7 @@ const fs        = require('fs')
 const path      = require('path')
 const { Map }   = require('immutable')
 const assert    = require('chai').assert
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 const BN        = require('bn.js')
 
 const utils = require('demo-utils') 

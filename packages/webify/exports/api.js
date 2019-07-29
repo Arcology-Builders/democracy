@@ -53,7 +53,7 @@ api.initFS = (listingHTTP) => {
 }
 
 require('dotenv').config()
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 const { isValidAddress } = require('ethereumjs-util')
 
 /**

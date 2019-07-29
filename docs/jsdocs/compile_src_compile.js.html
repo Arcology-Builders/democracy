@@ -99,7 +99,7 @@ const path       = require('path')
 const solc       = require('solc')
 const assert     = require('chai').assert
 const { keccak } = require('ethereumjs-util')
-const { List, Map, Set }
+const { List, Map, Set, OrderedMap }
                  = require('immutable')
 const { ContractsManager, awaitOutputter, getInputsToBuild }
                  = require('demo-contract')
@@ -172,18 +172,22 @@ compiles.Compiler = class {
       const now = new Date() 
       const inputHash = requestedInputs.get(contractName).get('inputHash') 
       const bytecode = contract.get('evm').get('bytecode').get('object') 
+      const deployedCode = contract.get('evm').get('deployedBytecode').get('object') 
       assert(bytecode || contractName.endsWith('Interface'),
              `${contractName} does not have bytecode and does not end with Interface`)
-      const preHash = Map({
-        type       : 'compile',
-        name       : contractName,
-        code       : bytecode,
-        abi        : contract.get('abi'),
-        inputHash  : inputHash,
-        timestamp  : now.getTime(),
-        dateTime   : now.toUTCString(),
+      const preHash = OrderedMap({
+        type         : 'compile',
+        name         : contractName,
+        code         : bytecode,
+        deployedCode : deployedCode,
+        abi          : contract.get('abi'),
+        inputHash    : inputHash,
       })
-      const output = preHash.set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
+      LOGGER.debug('preHash', JSON.stringify(toJS( preHash )))
+      const output = preHash
+        .set('contentHash', keccak(JSON.stringify(toJS( preHash ))).toString('hex'))
+        .set('timestamp'  , now.getTime())
+        .set('dateTime'   , now.toUTCString())
       // In some other place, the abiString is useful as a web output
       //const abiString = `abi${contract.name} = ${JSON.stringify(output['abi'], null, 2)}`
       if (existingOutputs.has(contractName) &amp;&amp;
