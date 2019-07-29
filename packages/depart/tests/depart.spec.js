@@ -58,7 +58,7 @@ describe( 'Departures', () => {
       assert( immEqual(lout, rLink) )
       
       const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
-      const rDeploy = await bm.getMergedDeploy('DifferentSender-deploy', dout.get('deployTime'))
+      const rDeploy = await bm.getDeploy('DifferentSender-deploy')
       assert( isDeploy(dout) )
       assert( immEqual(dout, rDeploy), `Retrieved deploy\n ${rDeploy}\n not equal to returned deploy\n ${dout}` )
       return new Map({ 'result': true })
@@ -76,7 +76,7 @@ describe( 'Departures', () => {
           `DifferentSender compile exists`)
     assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')),
           `DifferentSender link exists`)
-    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy', 'deploy.json')),
+    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')),
           `DifferentSender deploy exists`)
   })
 

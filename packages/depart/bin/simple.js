@@ -15,7 +15,7 @@ const m0 = argListMixin(Map({
   sourcePathList: ['../test-contracts/contracts'],
 }))
 const m1 = deployerMixin(Map({}))
-const m2 = compileMixin(Map({}))
+const m2 = compileMixin(false)
 const m3 = departMixin(Map({
   name: 'Simple departure',
 }))

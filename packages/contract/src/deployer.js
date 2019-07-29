@@ -12,7 +12,7 @@ const { awaitOutputter, isLink, isForkedDeploy }
              = require('./utils')
 const { BuildsManager }
              = require('./buildsManager')
-const { isValidAddress, keccak }
+const { isValidAddress, toChecksumAddress, keccak }
              = require('ethereumjs-util')
 const { getKeys } = require('ethjs-util')
 const tx = require('demo-tx')
@@ -160,7 +160,7 @@ deploys.Deployer = class {
       set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
       .merge(OrderedMap({
         deployTx     : new Map(minedContract),
-        deployAddress: minedContract.contractAddress,
+        deployAddress: toChecksumAddress(minedContract.contractAddress),
         deployDate   : now.toLocaleString(),
         deployTime   : now.getTime(),
       }))
