@@ -6,7 +6,7 @@ const { getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const LOGGER = new Logger('contract.spec')
 const abi = require('ethjs-abi')
-const { toWei } = require('web3-utils')
+const { toWei } = require('ethjs-unit')
 
 describe( 'Contract parent class', () => {
 

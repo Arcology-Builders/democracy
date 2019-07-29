@@ -1,7 +1,7 @@
 'use strict'
 const path   = require('path')
 const assert = require('chai').assert
-const { Map, List, Seq }
+const { Map, List, Seq, OrderedMap }
              = require('immutable')
 const ethjsABI = require('ethjs-abi')
 
@@ -48,11 +48,13 @@ deploys.Deployer = class {
     return this.bm
   }
 
-  getNewContractTx(args, options, abi, contractBytecode) {
-/*
-		if (typeof newMethodArgs[newMethodArgs.length - 1] === 'function') newMethodCallback = newMethodArgs.pop();
-		if (hasTransactionObject(newMethodArgs)) providedTxObject = newMethodArgs.pop();
+  /**
+   * Create the raw tx data for deploying a new contract
+   * @param args {Array} list of arguments matching constructor
+   * @param abi {Object} ABI of contract
+   * @param contractBytecode {String} `0x`-prefixed string of deployedBytecode
    */
+  getNewContractTxData(args, abi, contractBytecode) {
 		const constructorMethod = abi.filter((x) => x.type === 'constructor')[0]
 		const assembleTxObject = {}
 
@@ -67,8 +69,8 @@ deploys.Deployer = class {
       LOGGER.debug('constructorMethod.inputs', constructorMethod.inputs)
       const keys = getKeys(constructorMethod.inputs, 'type')
       LOGGER.debug('keys', keys)
-			const constructorBytecode = ethjsABI.encodeParams(keys, args).substring(2); // eslint-disable-line
-			assembleTxObject.data = `${assembleTxObject.data}${constructorBytecode}`;
+			const constructorBytecode = ethjsABI.encodeParams(keys, args).substring(2)
+			assembleTxObject.data = `${assembleTxObject.data}${constructorBytecode}`
 		}   
 
 		return assembleTxObject.data
@@ -97,6 +99,7 @@ deploys.Deployer = class {
 
     const now = new Date()
     const deployMap = await this.bm.getDeploys()
+    LOGGER.debug('deployMap', List(deployMap.keys()))
 
     const inputHash = keccak(JSON.stringify(link.toJS())).toString('hex')
     // Warn with multiple deploys with the same ID
@@ -126,9 +129,7 @@ deploys.Deployer = class {
     LOGGER.debug(`gasPrice`, gasPrice)
     LOGGER.debug(`gasLimit`, gasLimit)
 
-    const txData = this.getNewContractTx(ctorArgList, 
-        { from: this.address, gas: gasLimit, gasPrice: gasPrice },
-                                        toJS( abi ), code)
+    const txData = this.getNewContractTxData(ctorArgList, toJS( abi ), code)
     LOGGER.debug('newContractTxData', txData)
 
     const rawTx = await tx.createRawTx({
@@ -139,31 +140,11 @@ deploys.Deployer = class {
       rawTx: rawTx, signerEth: this.eth
     }).then((txHash) => this.eth.getTransactionReceipt(txHash))
 
-    /*
-    const deployPromise = new Promise((resolve, reject) => {
-      Contract.new(...ctorArgList, {
-        from: this.address, gas: gasLimit, gasPrice: gasPrice,
-      }).then((txHash) => {
-          const checkTransaction = setInterval(() => {
-            this.eth.getTransactionReceipt(txHash).then((receipt) => {
-              if (receipt) {
-                clearInterval(checkTransaction)
-                resolve(receipt) 
-              }
-            })
-          })
-        })
-        .catch((error) => {
-          console.error(`error ${error}`)
-          reject(error)
-        })
-    })
-*/
     const minedContract = await deployPromise.then((receipt) => { return receipt })
     LOGGER.debug('MINED', minedContract)
     const instance = Contract.at(minedContract.contractAddress)
 
-    const deployOutput = new Map({
+    const preHash = new OrderedMap({
       type         : 'deploy',
       name         : contractName,
       chainId      : this.chainId,
@@ -172,23 +153,20 @@ deploys.Deployer = class {
       abi          : abi,
       code         : code,
       inputHash    : inputHash,
+      ctorArgList  : ctorArgList,
     })
 
-    const forkOutput = new Map({
-      type         : 'forkedDeploy',
-      deployTx     : new Map(minedContract),
-      deployAddress: minedContract.contractAddress,
-      deployDate   : now.toLocaleString(),
-      deployTime   : now.getTime(),
-    })
+    const deployOutput = preHash.
+      set('contentHash', keccak(JSON.stringify(preHash)).toString('hex'))
+      .merge(OrderedMap({
+        deployTx     : new Map(minedContract),
+        deployAddress: minedContract.contractAddress,
+        deployDate   : now.toLocaleString(),
+        deployTime   : now.getTime(),
+      }))
 
     // This is an updated deploy, overwrite it
-    await this.bm.setDeploy(deployName, deployOutput, true)
-    // We should never overwrite a fork, otherwise what was the point
-    await this.bm.setForkedDeploy(deployName, forkOutput, false)
-    const forkedDeploy = await this.bm.getForkedDeploy(deployName, now.getTime())
-    assert( isForkedDeploy(forkedDeploy), `Not a valid forked deploy ${forkedDeploy.toJS()}`)
-    return this.bm.getMergedDeploy(deployName, now.getTime())
+    return await this.bm.setDeploy(deployName, deployOutput, true)
   }
 
 }

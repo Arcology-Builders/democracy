@@ -4,6 +4,7 @@ const { Logger, fromJS, toJS, getNetwork, getConfig } = require('demo-utils')
 const { Deployer } = require('demo-contract')
 const { wallet } = require('demo-keys')
 const LOGGER = new Logger('bin/deployer')
+const { toWei } = require('ethjs-unit')
 
 const main = async({ contractName, linkId, deployId }) => {
   const eth     = getNetwork()
@@ -11,10 +12,16 @@ const main = async({ contractName, linkId, deployId }) => {
   const deployerAddress = getConfig()['DEPLOYER_ADDRESS']
   const deployerPassword = getConfig()['DEPLOYER_PASSWORD']
 
-  await wallet.init({unlockSeconds: 10})
+  await wallet.init({unlockSeconds: 2})
   const { signerEth } = await wallet.prepareSignerEth({
     address: deployerAddress,
     password: deployerPassword,
+  })
+  const accounts = await eth.accounts()
+  await wallet.payTest({
+    fromAddress : accounts[0],
+    toAddress   : deployerAddress,
+    weiValue    : toWei('0.1', 'ether'),
   })
 
   const d       = new Deployer({

@@ -31,7 +31,7 @@ linker.Linker = class {
    * @param depMap is an Immutable Map of library names to deploy IDs
    * @return the contractOutput augmented with a linkDepMap
    */
-  async link(contractName, linkId, _depMap, forkTime) {
+  async link(contractName, linkId, _depMap) {
     const contract = await this.bm.getContract(contractName)
     assert( isContract(contract),
            `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
@@ -83,7 +83,7 @@ linker.Linker = class {
         throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
       }
 
-      const deployObject = await this.bm.getMergedDeploy(deployName, forkTime)
+      const deployObject = await this.bm.getDeploy(deployName)
       if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
       LOGGER.debug('DEPLOY OBJECT', deployObject)
 
