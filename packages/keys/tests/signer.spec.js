@@ -74,7 +74,7 @@ describe('Signing and spending transactions', () => {
     const gasValue = new BN(tx.gasPrice).mul(new BN(txReceipt.gasUsed))
     assert(txReceipt && txReceipt.transactionHash === txHash)
     const balance = await eth.getBalance(newAccounts.get(0).get('addressPrefixed'))
-    assert.equal(toWei('1', 'ether'), balance)
+    assert.equal(toWei('1', 'ether').toString(), balance)
     const newBalance = await eth.getBalance(fromAddress)
     const expectedBalance =  new BN(testBalances[9])
       .sub(new BN(toWei('1', 'ether')))
@@ -107,13 +107,13 @@ describe('Signing and spending transactions', () => {
     assert(txReceipt && txReceipt.transactionHash === txHash)
 
     const toBalance = await eth.getBalance(newAccounts.get(1).get('addressPrefixed'))
-    assert.equal(toWei('0.333', 'ether'), toBalance)
+    assert.equal( toWei('0.333', 'ether').toString(), toBalance )
     const newFromBalance = await eth.getBalance(newAccounts.get(0).get('addressPrefixed'))
     const expectedBalance = new BN(oldFromBalance)
       .sub(new BN(toWei('0.333', 'ether')))
       .sub(gasValue)
     const actualBalance = new BN(newFromBalance)
-    assert.equal(expectedBalance.toString(10), actualBalance.toString(10))
+    assert.equal( expectedBalance.toString(10), actualBalance.toString(10) )
   })
   /*
   it( 'tries to transfer all money to get the gas overage', async () => {
