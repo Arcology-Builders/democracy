@@ -8,7 +8,8 @@ const assert = require('chai').assert
 const { BuildsManager, Linker, Deployer, isDeploy, Contract }
              = require('demo-contract')
 const LOGGER = new Logger('tx.spec')
-const { toWei, toHex } = require('ethjs-unit')
+const { toWei } = require('ethjs-unit')
+const { intToHex } = require('ethjs-util')
 const BN = require('bn.js')
 const abi = require('ethjs-abi')
 const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
@@ -79,17 +80,17 @@ describe( 'transaction sender', () => {
   })
 
   it( 'creates a raw tx' , async () => {
-    const hexChainId = '0x' + Number(chainId).toString(16)
+    const hexChainId = '0x0' + Number(chainId).toString(16)
     const methodObj = contract.getABIObjectByName('send')
     const expected = abi.encodeMethod(methodObj, [accounts[2]])
     const nonce = await eth.getTransactionCount(senderAddress)
     const value = toWei("0.001", "ether")
-    const gasPrice = toHex(toWei(String(getConfig()['GAS_PRICE']), 'gwei'))
+    const gasPrice = intToHex( toWei(String(getConfig()['GAS_PRICE']), 'gwei') )
     LOGGER.info('GAS PRICE', gasPrice)
-    assert( new BN(tx.gas).gte(new BN('16644')), `${tx.gas} is not >= 16644` )
-    assert( new BN(tx.gas).lte(new BN('0x1668b')), `${tx.gas} is not >= 0x1668b` )
+    assert( new BN(parseInt(tx.gas, 16)).gte(new BN(parseInt('16644', 16))), `${tx.gas} is not >= 16644` )
+    assert( new BN(parseInt(tx.gas, 16)).lte(new BN(parseInt('0x1668b', 16))), `${tx.gas} is not >= 0x1668b` )
     assert.equal(JSON.stringify(tx),
-      `{"nonce":"${nonce}","gas":"${toHex(tx.gas).slice(2)}",` +
+      `{"nonce":"${nonce}","gas":"${intToHex(tx.gas).slice(2)}",` +
       `"gasPrice":"${gasPrice}","data":"${expected}",`+
       `"from":"${senderAddress}","to":`+
       `"${deployAddress}","value":"${value}","chainId":"${hexChainId}"}`

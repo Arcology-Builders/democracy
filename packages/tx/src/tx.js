@@ -4,7 +4,8 @@ const assert = require('chai').assert
 
 const { getNetwork, getConfig, isNetwork, getEndpointURL, Logger } = require('demo-utils')
 const LOGGER = new Logger('tx')
-const { toHex, toWei } = require('ethjs-unit')
+const { intToHex } = require('ethjs-util')
+const { toWei } = require('ethjs-unit')
 const BN = require('bn.js')
 
 const tx = {}
@@ -36,15 +37,16 @@ tx.createRawTx = async function({ from, to, value, data, gasPrice, eth }) {
   const _eth = eth || getNetwork()
   const chainId = await _eth.net_version()
   const gas = await tx.getGasEstimate(...arguments)
+  const gasEstimate = new BN(Math.floor(Number(gas) * 1.1))
   return {
     nonce   : await _eth.getTransactionCount(from),
-    gas     : new BN(Math.floor(Number(gas) * 1.1)),
-    gasPrice: toHex(toWei(String(_gasPrice), 'gwei')),
+    gas     : intToHex( gasEstimate ),
+    gasPrice: intToHex( toWei(String(_gasPrice), 'gwei') ),
     data    : data,
     from    : from,
     to      : to,
-    value   : value,
-    chainId : toHex(chainId),
+    value   : value ? value.toString() : '',
+    chainId : intToHex( Number(chainId).toString(16) ),
   }
 }
 
