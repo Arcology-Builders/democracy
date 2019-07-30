@@ -2,7 +2,6 @@
 // Compile with solcjs
 const fs         = require('fs')
 const path       = require('path')
-const solc       = require('solc')
 const assert     = require('chai').assert
 const { keccak } = require('ethereumjs-util')
 const { List, Map, Set, OrderedMap }
@@ -280,6 +279,7 @@ compiles.Compiler = class {
       sources: toJS( sourcesToBuild ),
     }
 
+    const solc = require('solc')
     const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
     if (outputs.errors) {
       LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
@@ -295,6 +295,20 @@ compiles.Compiler = class {
                                          requestedInputs, existingOutputs)
   }
 
+}
+
+compiles.createCompiler = (state) => {
+	const{
+		bm, sourcePathList, compileFlatten, compileOutputFull
+	} = state.toJS()
+
+	const { Compiler } = require('demo-compile')
+	return new Compiler({
+		sourcePathList : sourcePathList,
+		bm             : bm,
+		flatten        : compileFlatten,
+		outputFull     : compileOutputFull,
+	})
 }
 
 module.exports = compiles
