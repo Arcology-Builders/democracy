@@ -23,8 +23,8 @@ depart(Map({
   const lastPayer  = toChecksumAddress((await ds.lastPayer())['0'])
   const lastValue  = (await ds.lastValue())['0']
   assert.equal( owner      , deployerAddress )
-  //assert.equal( lastSender , deployerAddress )
-  //assert.equal( lastPayer  , deployerAddress )
+  assert.equal( lastSender , deployerAddress )
+  assert.equal( lastPayer  , deployerAddress )
   assert.equal( lastValue.toString()  , toWei('0.1', 'ether').toString() )
  
   return 22

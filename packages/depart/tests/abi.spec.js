@@ -36,8 +36,8 @@ describe( 'ABI swap', () => {
       const { compile, deployed, minedTx, deployerAddress, deployerEth } = state.toJS()
 
       // The new way of compiling: deployed and minedTx
-      await compile( 'ShadowInterface', 'ShadowInterface.sol' )
-      await compile( 'Shadow', 'Shadow.sol' )
+      //await compile( 'ShadowInterface', 'ShadowInterface.sol' )
+      //await compile( 'Shadow', 'Shadow.sol' )
       const shadowInterface = await deployed( 'ShadowInterface' )
       const shadow = await deployed( 'Shadow', { abi: shadowInterface.abi } )
       const args = List([new BN(1234), deployerAddress, new BN(5678)])

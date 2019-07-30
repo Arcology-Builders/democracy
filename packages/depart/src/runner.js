@@ -73,7 +73,8 @@ runners.deployerMixin = () => {
 }
 
 runners.isHexString = (string) => {
-  return isHexString(string) || isHexString('0x' + string)
+  return !(String(parseInt(string)) === string) &&
+   (isHexString(string) || isHexString('0x' + string))
 }
 
 /**

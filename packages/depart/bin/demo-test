@@ -23,7 +23,9 @@ const runTest = async () => {
   
   // Read mocha options from the beginning
   // Do a full compile before any test
-  const initialState = (await begin(Map({mochaTimeout: 10000}), createCompiler))
+  const initialState = (await begin(Map({
+    mochaTimeout  : 10000,
+  }), createCompiler))
   const m = new Mocha({timeout: initialState.get('mochaTimeout')})
 
   let filenameMap = new Map({})
