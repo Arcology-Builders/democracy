@@ -11,7 +11,7 @@ const LOGGER = new utils.Logger('departure')
 
 const departs = {}
 
-departs.compileMixin = (compileEnable) => {
+departs.compileMixin = (compileEnable=true) => {
   return async (state) => {
     const{
       chainId, autoConfig, sourcePathList, compileFlatten, compileOutputFull
@@ -40,7 +40,7 @@ departs.compileMixin = (compileEnable) => {
         flatten        : compileFlatten,
         outputFull     : compileOutputFull,
       })
-    /*
+      /*
     } else {
       class Compiler {
         constructor() { }

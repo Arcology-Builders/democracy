@@ -108,10 +108,12 @@ cm.ContractsManager = class {
 }
 
 /**
- * @return true if the given object is a compile output from a Compiler, otherwise false
+ * @return true if the given object is a compile output from a Compiler
+ *   (i.e. a Map (or OrderedMap) where each value has type === 'compile', or empty,
+ *   otherwise false
  */
 cm.isCompile = (_compile) => {
-  return (_compile && Map.isMap(_compile) && _compile.count() > 0 &&
+  return (_compile && Map.isMap(_compile) && 
           _compile.reduce((prev, val) => {
     return prev && val.get('type') === 'compile'
   }, true))

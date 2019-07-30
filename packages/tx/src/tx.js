@@ -2,11 +2,16 @@
 
 const assert = require('chai').assert
 
-const { getNetwork, getConfig, isNetwork, getEndpointURL, Logger } = require('demo-utils')
+const { getNetwork, getConfig, isNetwork, getEndpointURL, Logger, toJS }
+             = require('demo-utils')
 const LOGGER = new Logger('tx')
-const { intToHex } = require('ethjs-util')
-const { toWei } = require('ethjs-unit')
-const BN = require('bn.js')
+const { intToHex }
+             = require('ethjs-util')
+const { encodeMethod }
+             = require('ethjs-abi')
+const { toWei }
+             = require('ethjs-unit')
+const BN     = require('bn.js')
 
 const tx = {}
 
@@ -28,6 +33,19 @@ tx.getGasEstimate = async ({from, to, value, data, eth }) => {
     value : value,
     data  : data,
   })
+}
+
+tx.getABIObjectByName = (abi, name) => {
+  const matches = abi.filter((obj) => (obj.get('name') === name))
+  assert( matches.count() === 1)
+  const methodObj = matches.first()
+  assert(methodObj.get('type') === 'function')
+  return methodObj 
+}
+
+tx.getMethodCallData = (abi, name, args) => {
+  const methodObj = tx.getABIObjectByName(abi, name)
+  return encodeMethod(toJS( methodObj ), args.toJS())
 }
 
 tx.createRawTx = async function({ from, to, value, data, gasPrice, eth }) {

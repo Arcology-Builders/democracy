@@ -1,14 +1,16 @@
 'use strict'
-const { Map }   = require('immutable')
-const assert    = require('chai').assert
-const { toWei } = require('ethjs-unit')
-const BN        = require('bn.js')
+const { List, Map } = require('immutable')
+const assert        = require('chai').assert
+const { toWei }     = require('ethjs-unit')
+const BN            = require('bn.js')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
 const LOGGER = new Logger('abi.spec')
 
 const { wallet } = require('demo-keys')
+const { getMethodCallData, createRawTx, sendSignedTx } = require('demo-tx')
+const { fromJS } = require('demo-utils')
 const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
 
 describe( 'ABI swap', () => {
@@ -24,20 +26,28 @@ describe( 'ABI swap', () => {
     sourcePathList    : ["contracts-new"],
   }))
   const m1 = deployerMixin()
-  const m2 = compileMixin()
+  const m2 = compileMixin(true)
   const m3 = departMixin()
 
   it( 'departs with a shadowed ABI', async () => { 
     const departFunc = async (state) => {
-      const { compile, deployed, minedTx, deployerAddress } = state.toJS()
+      const { compile, deployed, minedTx, deployerAddress, deployerEth } = state.toJS()
 
       // The new way of compiling: deployed and minedTx
       await compile( 'ShadowInterface', 'ShadowInterface.sol' )
       await compile( 'Shadow', 'Shadow.sol' )
       const shadowInterface = await deployed( 'ShadowInterface' )
       const shadow = await deployed( 'Shadow', { abi: shadowInterface.abi } )
+      const args = List([new BN(1234), deployerAddress, new BN(5678)])
+      const txData = await getMethodCallData(fromJS( shadowInterface.abi ), 'doTheThing', args)
+      assert( List.isList(fromJS( shadowInterface.abi )), `ABI is not an Immutable List` )
+      const rawTx = await createRawTx({ from: deployerAddress, data: txData })
+      LOGGER.info('rawTxi', rawTx)
       const result = await shadow.doTheThing(new BN(1234), deployerAddress, new BN(5678),
-                                             { from: deployerAddress, gas: 100000 } )
+                                             { from: deployerAddress, gas: '100000' } )
+/*
+      const result = await sendSignedTx({ rawTx, signerEth: deployerEth })
+      */
       //await minedTx( shadow.doTheThing, [new BN(1234), deployerAddress, new BN(5678)] )
       return new Map({ 'result': result['0'] })
     }
