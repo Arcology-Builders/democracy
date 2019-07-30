@@ -3,7 +3,7 @@
 const assert = require('chai').assert
 const { run, argListMixin, deployerMixin } = require('../src/runner')
 
-const { immEqual, getNetwork, Logger } = require('demo-utils')
+const { immEqual, getNetwork, Logger, getConfig } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map } = require('immutable')
 const LOGGER = new Logger('tests/runner')
@@ -65,6 +65,14 @@ describe( 'Runners', () => {
     const out = await dm(out1)
     assert.equal( out.get('deployerAddress'), address )
     assert.equal( out.get('deployerPassword'), password )
+  })
+
+  it( 'allows password hex strings without 0x prefix', async () => {
+    const password = getConfig()['DEPLOYER_PASSWORD']
+    const alm = await argListMixin(Map({ password }))
+    const out = await alm()
+    assert.equal( out.get('password').length, 64, `Arg list password is wrong length.` )
+    assert.equal( out.get('password'), getConfig()['DEPLOYER_PASSWORD'] )
   })
 
 })

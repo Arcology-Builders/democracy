@@ -3,6 +3,8 @@ const assert = require('chai').assert
 const { Map } = require('immutable')
 const { begin, end } = require('./top')
 const { Logger } = require('demo-utils')
+const { createCompiler } = require('demo-compile')
+
 const LOGGER = new Logger('depart/shims')
 
 const shims = {}
@@ -14,14 +16,14 @@ let flowsOpen = 0
 shims.flowDepart = async (name, inputState) => {
   flowsOpen += 1
 	assert(Map.isMap(inputState), 'Input state should be immutable Map')
-	const outState = (await begin(inputState, false))
+	const outState = (await begin(inputState, createCompiler))
 	return outState
 }
 
 shims.forkDepart = async (name, inputState) => {
   forksOpen += 1
 	assert(Map.isMap(inputState), 'Input state should be immutable Map')
-	const outState = (await begin(inputState, false))
+	const outState = (await begin(inputState, createCompiler))
 	return outState
 }
 

@@ -4,12 +4,17 @@
  * Command-line runners and mixins for extracting arguments and configs of all kinds
  */
 
-const path = require('path')
-const assert = require('chai').assert
+const path      = require('path')
+const assert    = require('chai').assert
 const { toWei } = require('ethjs-unit')
-const { getConfig, getNetwork, Logger } = require('demo-utils')
+const { isHexString }
+                = require('ethjs-util')
+const { getConfig, getNetwork, Logger }
+                = require('demo-utils')
 const { wallet } = require('demo-keys')
-const { Map, List } = require('immutable')
+const { Map, List }
+                = require('immutable')
+
 const LOGGER = new Logger('runner.spec')
 
 const runners = {}
@@ -67,6 +72,10 @@ runners.deployerMixin = () => {
   }
 }
 
+runners.isHexString = (string) => {
+  return isHexString(string) || isHexString('0x' + string)
+}
+
 /**
  * Argument list mixin, takes in an Immutable Map of names to default values,
  * and extracts them from the command-line in the form `--argname value`.
@@ -101,7 +110,7 @@ runners.argListMixin = (argDefaultMap) => {
           const value = args.get(1)
           const floatVal = parseFloat(value)
           const intVal = parseInt(value)
-          const convertedVal = value.startsWith('0x') ? value :
+          const convertedVal = runners.isHexString(value) ? value :
             Number.isFinite(floatVal) ? floatVal :
             Number.isInteger(intVal) ? intVal : value
           argMap = argMap.set(key, convertedVal)

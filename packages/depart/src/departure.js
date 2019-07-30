@@ -7,14 +7,34 @@ const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract
   = require('demo-contract')
 const { RemoteDB } = require('demo-client')
 
-const LOGGER = new utils.Logger('departure')
+const LOGGER = new utils.Logger('depart/departure')
 
 const departs = {}
 
-departs.compileMixin = (compileEnable=true) => {
+departs.createEmptyCompiler = (state) => {
+  const{
+    contractOutputs
+  } = state.toJS()
+
+  class Compiler {
+    constructor() { }
+    async compile(filename) {
+      LOGGER.debug(`Empty compile request for ${filename}, depends on previous compile.`)
+      // Accepting requests to compile, but don't do anything
+      // If compiles are missing of out-of-date, will fail a later assertion
+      return fromJS( contractOutputs )
+    }
+  }
+  return new Compiler({})
+}
+
+departs.bmMixin = () => {
+  
+  let contracts
+
   return async (state) => {
     const{
-      chainId, autoConfig, sourcePathList, compileFlatten, compileOutputFull
+      chainId, autoConfig, sourcePathList
     } = state.toJS()
 
     const bm = await createBM({
@@ -22,43 +42,32 @@ departs.compileMixin = (compileEnable=true) => {
       chainId        : chainId,
       autoConfig     : !(autoConfig === false),
     })
-
-    const cleanCompiles = async () => {
-      const compileList = List(compiles.map((c, name) => {
-        return bm.cleanContract( name )
-      }).values()).toJS()
-      await Promise.all( compileList ).then((vals) => { LOGGER.debug( 'Clean compiles', vals) })
+    if (!contracts) {
+      contracts = await bm.getContracts()
     }
+    const contractOutputs = contracts.contractOutputs
 
-    let c
-    LOGGER.debug('COMPILE MIXIN')
-    //if (compileEnable) {
-      const { Compiler } = require('demo-compile')
-      c = new Compiler({
-        sourcePathList : sourcePathList,
-        bm             : bm,
-        flatten        : compileFlatten,
-        outputFull     : compileOutputFull,
-      })
-      /*
-    } else {
-      class Compiler {
-        constructor() { }
-        async compile(filename) {
-          LOGGER.debug(`Empty compile request for ${filename}, depends on previous compile.`)
-          // Accepting requests to compile, but don't do anything
-          // If compiles are missing of out-of-date, will fail a later assertion
-        }
-      }
-      c = new Compiler({})
-    }
-*/
+    assert( isCompile(fromJS( contractOutputs )) )
+    return Map({
+      bm: bm,
+      contractOutputs: contractOutputs,
+    })
+  }
+}
+
+departs.compileMixin = (createCompiler=departs.createEmptyCompiler) => {
+  return async (state) => {
+    const{
+      bm, chainId, autoConfig, sourcePathList
+    } = state.toJS()
+
+    const c = await createCompiler(state)
     let compiles = new Map()
     const compile = async ( contractName, sourceFile ) => {
       assert(sourceFile && sourceFile.endsWith('.sol'),
              'sourceFile param not given or does not end with .sol extension')
       const output = await c.compile( sourceFile )
-      assert(isCompile(output), `Compile output not found for ${sourceFile}`)
+      assert( isCompile(output), `Compile output not found for ${sourceFile}`)
       assert.equal( output.get(contractName).get('name'), contractName )
       // HACK: This appears to be reasonable delay for a compiled output to be returned again
       // remotely.
@@ -72,15 +81,24 @@ departs.compileMixin = (compileEnable=true) => {
       })
     }
 
+    const cleanCompiles = async () => {
+      const compileList = List(compiles.map((c, name) => {
+        return bm.cleanContract( name )
+      }).values()).toJS()
+      await Promise.all( compileList ).then((vals) => {
+        LOGGER.debug( 'Clean compiles', vals)
+      })
+    }
+
     const getCompiles = () => {
       return compiles
     }
 
     return new Map({
-      cleanCompiles : cleanCompiles,
       compile       : compile,
       bm            : bm,
       getCompiles   : getCompiles,
+      cleanCompiles : cleanCompiles,
     })
 
   }
@@ -165,7 +183,9 @@ departs.departMixin = () => {
 
     const deployed = async (contractName, opts = {}) => {
       const { ctorArgList, deployID, force, abi } = opts
-      await compile( contractName, `${contractName}.sol` )
+      if (!isContract (await bm.getContract(contractName)) ) {
+        await compile( contractName, `${contractName}.sol` )
+      }
       await link( contractName, 'link' )
       const _deployID = (deployID) ? deployID : 'deploy'
       const deployedContract =

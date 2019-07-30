@@ -4,6 +4,8 @@
 const { Map } = require('immutable')
 const { top } = require('demo-depart')
 
+// Command-line departures always compile first
+const { createCompiler } = require('demo-compile')
 if (require.main === module) {
-  top(Map({}), true)
+  top(Map({}), createCompiler)
 }

@@ -7,12 +7,17 @@ const { toWei } = require('ethjs-unit')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const LOGGER = new Logger('depart.spec')
-const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
-const { getImmutableKey, setImmutableKey } = require('demo-utils')
+const { isContract, isCompile, isLink, isDeploy }
+                = require('demo-contract')
+const { createCompiler }
+                = require('demo-compile')
+const { getImmutableKey, setImmutableKey }
+                = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin } = require('..')
+
+const LOGGER = new Logger('depart.spec')
 
 describe( 'Departures', () => {
   
@@ -31,8 +36,9 @@ describe( 'Departures', () => {
   })
   )
   const m1 = deployerMixin()
-  const m2 = compileMixin(true)
-  const m3 = departMixin()
+  const m2 = bmMixin()
+  const m3 = compileMixin(createCompiler)
+  const m4 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -64,7 +70,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
+    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
     LOGGER.debug('finalState', finalState) 
     assert(Map.isMap(finalState.getCompiles()))
     assert(Map.isMap(finalState.getLinks()))

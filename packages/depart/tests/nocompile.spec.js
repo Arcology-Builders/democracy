@@ -10,9 +10,11 @@ const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logg
 const LOGGER = new Logger('depart.spec')
 const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 const { getImmutableKey, setImmutableKey } = require('demo-utils')
+const { createCompiler } = require('demo-compile')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin,
+  createEmptyCompiler } = require('..')
 
 describe( 'Departures', () => {
   
@@ -32,7 +34,15 @@ describe( 'Departures', () => {
   })
   )
   const m1 = deployerMixin()
+  const m2 = bmMixin()
   const m3 = departMixin()
+  const departFunc = async (state) => {
+    const { compile, deployed } = state.toJS() 
+
+    await compile( 'DifferentSender', 'DifferentSender.sol' )
+    const ds = await deployed( 'DifferentSender' )
+    return new Map({ 'result': true })
+  }
 
   before(async () => {
     accounts = await eth.accounts()
@@ -41,41 +51,22 @@ describe( 'Departures', () => {
   })
 
   it( 'executes a departure with/without a compile', async () => { 
-    const departFunc = async (state) => {
-      const { compile, deployed } = state.toJS() 
-
-      await compile( 'DifferentSender', 'DifferentSender.sol' )
-      const ds = await deployed( 'DifferentSender' )
-      return new Map({ 'result': true })
-    }
-
     const startTime = Date.now()
-    finalState = (await run( m0, m1, compileMixin(true), m3, departFunc )).toJS()
+    finalState = (await run( m0, m1, m2, compileMixin(createCompiler), m3, departFunc )).toJS()
     assert(finalState['result'])
     const elapsedTime = Date.now() - startTime
     LOGGER.info('Elapsed time with compile', elapsedTime)
-
-    const departFunc2 = async (state) => {
-      const { deployed } = state.toJS() 
-
-      const ds = await deployed( 'DifferentSender' )
-      return new Map({ 'result': true })
-    }
     const startTime2 = Date.now()
-    finalState2 = (await run( m0, m1, compileMixin(false), m3, departFunc2 )).toJS()
+    finalState2 = (await run( m0, m1, m2, compileMixin(createEmptyCompiler), m3, departFunc )).toJS()
     assert(finalState2['result'])
     const elapsedTime2 = Date.now() - startTime2
     LOGGER.info('Elapsed time without compile', elapsedTime2)
   })
 
-  it( 'cleans', async () => {
+  after(async () => {
     await finalState.clean()
     await finalState.cleanCompiles()
-    await finalState2.clean()
-  })
-
-  after((done) => {
+    //await finalState2.clean()
     wallet.shutdownSync()
-    done()
   })
 })

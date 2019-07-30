@@ -8,14 +8,20 @@ const BN        = require('bn.js')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const LOGGER = new Logger('depart.spec')
-const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-contract')
-const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
+const { Contract, isContract, isCompile, isLink, isDeploy }
+                = require('demo-contract')
+const { getImmutableKey, setImmutableKey, getConfig }
+                = require('demo-utils')
 
-const { wallet } = require('demo-keys')
-const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { createCompiler }
+                = require('demo-compile')
+const { wallet }
+                = require('demo-keys')
+const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin } = require('..')
 
-describe( 'Departures', () => {
+const LOGGER    = new Logger('depart.spec')
+
+describe( 'Departures with relinking', () => {
   
   let eth = getNetwork()
   let chainId
@@ -29,8 +35,9 @@ describe( 'Departures', () => {
     sourcePathList  : ["contracts-new"],
   }))
   const m1 = deployerMixin()
-  const m2 = compileMixin()
-  const m3 = departMixin()
+  const m2 = bmMixin ()
+  const m3 = compileMixin(createCompiler)
+  const m4 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -38,7 +45,7 @@ describe( 'Departures', () => {
     chainId = await eth.net_version()
   })
 
-  it( 'executes a simple departure', async () => { 
+  it( 'departs twice, with a relink', async () => { 
     const departFunc = async (state) => {
       const { compile, link, deploy, deployed, deployerEth, minedTx,
         deployerAddress } = state.toJS() 
@@ -70,7 +77,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
+    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
     return finalState
   })
 
@@ -83,8 +90,8 @@ describe( 'Departures', () => {
 
   it( 'cleaning happens', async () => {
     assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'Relink.json')))
-    assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'Relink-link.json')))
-    assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, 'Relink-deploy.json')))
+    assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR,    'Relink-link.json')))
+    assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR,  'Relink-deploy.json')))
   })
 
   after(() => {

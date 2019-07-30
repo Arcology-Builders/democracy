@@ -11,7 +11,8 @@ const LOGGER = new Logger('abi.spec')
 const { wallet } = require('demo-keys')
 const { getMethodCallData, createRawTx, sendSignedTx } = require('demo-tx')
 const { fromJS } = require('demo-utils')
-const { run, argListMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { createCompiler } = require('demo-compile')
 
 describe( 'ABI swap', () => {
   
@@ -26,8 +27,9 @@ describe( 'ABI swap', () => {
     sourcePathList    : ["contracts-new"],
   }))
   const m1 = deployerMixin()
-  const m2 = compileMixin(true)
-  const m3 = departMixin()
+  const m2 = bmMixin()
+  const m3 = compileMixin(createCompiler)
+  const m4 = departMixin()
 
   it( 'departs with a shadowed ABI', async () => { 
     const departFunc = async (state) => {
@@ -52,7 +54,7 @@ describe( 'ABI swap', () => {
       return new Map({ 'result': result['0'] })
     }
 
-    finalState = (await run( m0, m1, m2, m3, departFunc )).toJS()
+    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
     const result = finalState['result']
     assert(result.eq(new BN(1234)), `Result ${result.toString()} was not hex for 1234`)
     return finalState

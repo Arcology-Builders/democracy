@@ -9,8 +9,8 @@ const path = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
 const { run, argListMixin, deployerMixin } = require('./runner')
-const { departMixin, compileMixin, emptyMixin } = require('./departure')
-const LOGGER = new Logger('demo-depart')
+const { departMixin, compileMixin, bmMixin } = require('./departure')
+const LOGGER = new Logger('depart/top')
 const assert = require('chai').assert
 
 let departInputState = null
@@ -40,8 +40,8 @@ const m1 = async (state) => {
 }
 
 const m2 = deployerMixin()
-
-const m3 = departMixin()
+const m3 = bmMixin()
+const m4 = departMixin()
 
 const departs = {}
 
@@ -73,8 +73,8 @@ departs.end = async (state) => {
  * Optional State:
  * departFileName - path to departure file
  */
-departs.top = async (inputState, compileEnable) => {
-  const outState = await departs.begin(inputState, compileEnable)
+departs.top = async (inputState, createCompiler) => {
+  const outState = await departs.begin(inputState, createCompiler)
   return await departs.end(outState)
 }
 
@@ -89,16 +89,17 @@ departs.top = async (inputState, compileEnable) => {
  * @method begin
  * @memberof module:departs
  * @param inputState {Object} Immutable Map of incoming state
- * @param compileEnable {Boolean} whether to include compile mixin
+ * @param createCompiler {Function} a function to create a new language-specific compiler
+ *   in a departure. If empty, defaults to departs.createEmptyCompiler
  */
-departs.begin = async (inputState, compileEnable) => {
+departs.begin = async (inputState, createCompiler) => {
   const m0 = argListMixin(Map({
     'departFileName'   : 'depart.js', // can be override on command-line --departFileName
     'testValueEth'     : '0.1'      ,
     'testAccountIndex' : 0          ,
     'unlockSeconds'    : 30,
   }).merge(inputState))
-  return (await run( m0, m1, m2, compileMixin(compileEnable), m3, departs.departFunc ))
+  return (await run( m0, m1, m2, m3, compileMixin(createCompiler), m4, departs.departFunc ))
 }
 
 module.exports = departs
