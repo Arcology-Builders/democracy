@@ -41,17 +41,16 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "demo-rest": "^0.3.3-alpha.0",
-    "demo-test-contracts": "^0.2.7-alpha.7",
-    "openzeppelin-solidity": "2.0.0"
+    "demo-rest": "0.3.3-alpha.0",
+    "demo-test-contracts": "0.2.7-alpha.7"
   },
   "dependencies": {
-    "demo-contract": "^0.3.3-alpha.1",
-    "demo-utils": "^0.3.1-alpha.4",
+    "demo-contract": "0.3.3-alpha.1",
+    "demo-utils": "0.3.1-alpha.4",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",
-    "openzeppelin-solidity": "^2.2.0",
-    "solc": "^0.5.8"
+    "openzeppelin-solidity": "2.2.0",
+    "solc": "0.5.8"
   },
   "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
 }

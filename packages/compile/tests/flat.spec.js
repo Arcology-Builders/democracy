@@ -6,7 +6,7 @@ const { textsEqual, stringsEqual } = require('demo-utils')
 
 describe('Flattener', () => {
 
-  const c = new Compiler({sourcePathList: 'contracts', flatten: true, outputFull: true })
+  const c = new Compiler({sourcePathList: ['contracts'], flatten: true, outputFull: true })
   const flattener = new Flattener()
 
   let flattenedSource
