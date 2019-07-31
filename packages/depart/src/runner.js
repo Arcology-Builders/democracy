@@ -96,7 +96,6 @@ runners.argListMixin = (argDefaultMap) => {
            `Pass in an Immutable Map or nothing for default args` )
     const _argDefaultMap = argDefaultMap ? argDefaultMap : Map({})
     LOGGER.debug('args', process.argv)
-    const scriptName = path.basename(module.filename)
 
     const scriptArgs = List(process.argv).skipUntil(
       (x) => x.startsWith('--')

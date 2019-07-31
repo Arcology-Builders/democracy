@@ -3,7 +3,6 @@ const assert = require('chai').assert
 const { Map } = require('immutable')
 const { begin, end } = require('./top')
 const { Logger } = require('demo-utils')
-const { createCompiler } = require('demo-compile')
 
 const LOGGER = new Logger('depart/shims')
 
@@ -13,14 +12,14 @@ let forksOpen = 0
 let flowsOpen = 0
 
 // Only make the flow command available within run files
-shims.flowDepart = async (name, inputState) => {
+shims.flowDepart = async (name, inputState, createCompiler) => {
   flowsOpen += 1
 	assert(Map.isMap(inputState), 'Input state should be immutable Map')
 	const outState = (await begin(inputState, createCompiler))
 	return outState
 }
 
-shims.forkDepart = async (name, inputState) => {
+shims.forkDepart = async (name, inputState, createCompiler) => {
   forksOpen += 1
 	assert(Map.isMap(inputState), 'Input state should be immutable Map')
 	const outState = (await begin(inputState, createCompiler))

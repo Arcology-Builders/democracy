@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict'
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
