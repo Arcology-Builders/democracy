@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('chai').assert
-const { List, Map } = require('immutable')
+const { List, Map, OrderedMap } = require('immutable')
 const { Logger, isNetwork, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
              = require('demo-utils')
 const LOGGER = new Logger('Linker')
