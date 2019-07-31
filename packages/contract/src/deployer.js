@@ -90,7 +90,7 @@ deploys.Deployer = class {
     const linkName   = `${contractName}-${linkId}`
     const link       = await this.bm.getLink(linkName)
     assert( isLink(link), `Link ${linkName} not valid: ${JSON.stringify(link.toJS())}` )
-    const code       = link.get('code')
+    const deployedCode       = link.get('deployedCode')
     const abi        = link.get('abi')
     const _deployId  = deployId || 'deploy'
     const deployName = `${contractName}-${_deployId}`
@@ -122,14 +122,12 @@ deploys.Deployer = class {
     const ctorArgList = Map.isMap(ctorArgs) ? List(ctorArgs.values()).toJS() : []
     LOGGER.debug(ctorArgList)
 
-    const Contract = this.eth.contract(toJS( abi ), code)
-
     const gasPrice = getConfig()[ 'GAS_PRICE' ]
     const gasLimit = getConfig()[ 'GAS_LIMIT' ]
     LOGGER.debug(`gasPrice`, gasPrice)
     LOGGER.debug(`gasLimit`, gasLimit)
 
-    const txData = this.getNewContractTxData(ctorArgList, toJS( abi ), code)
+    const txData = this.getNewContractTxData(ctorArgList, toJS( abi ), deployedCode)
     LOGGER.debug('newContractTxData', txData)
 
     const rawTx = await tx.createRawTx({
@@ -142,18 +140,17 @@ deploys.Deployer = class {
 
     const minedContract = await deployPromise.then((receipt) => { return receipt })
     LOGGER.debug('MINED', minedContract)
-    const instance = Contract.at(minedContract.contractAddress)
 
     const preHash = new OrderedMap({
-      type         : 'deploy',
-      name         : contractName,
-      chainId      : this.chainId,
-      deployId     : deployId,
-      linkId       : link.get('linkId'),
-      abi          : abi,
-      code         : code,
-      inputHash    : inputHash,
-      ctorArgList  : ctorArgList,
+      type        : 'deploy',
+      name        : contractName,
+      chainId     : this.chainId,
+      deployId    : deployId,
+      linkId      : link.get('linkId'),
+      code         : deployedCode,
+      abi         : abi,
+      inputHash   : inputHash,
+      ctorArgList : ctorArgList,
     })
 
     const deployOutput = preHash.

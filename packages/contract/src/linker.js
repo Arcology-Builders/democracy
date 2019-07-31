@@ -13,6 +13,34 @@ const { keccak } = require('ethereumjs-util')
 
 const linker = {}
 
+linker.replaceLibraries = async (codeToStart, depMap, matches, deployMap) => {
+  return await depMap.reduce(async (codeSoFar, deployId, contractName) => {
+    // The linkId to replace for the given linkName can also
+    // be a full deployName by itself (e.g. TestInterface=TestImpl-deploy)
+    // in which case, deployId == `TestImpl-deploy` directly
+    // instead of `TestInterface-deploy`
+    const deployName = (deployId.startsWith('deploy')) ?
+      `${contractName}-${deployId}` : deployId
+    const linkPlaceholder = matches.get(contractName)
+    if (!linkPlaceholder) {
+      throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
+    }
+
+    const deployObject = deployMap.get(deployName)
+    if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
+    LOGGER.debug('DEPLOY OBJECT', deployObject)
+
+    const deployAddress = deployObject.get('deployAddress')
+    assert(deployAddress, `Null deployAddress`)
+
+    LOGGER.debug(`Replacing symbols ${linkPlaceholder} with ${deployAddress.slice(2)}`)
+    while (codeSoFar.search(linkPlaceholder) !== -1) {
+      codeSoFar = codeSoFar.replace(linkPlaceholder, deployAddress.slice(2))
+    }
+    return codeSoFar
+  }, codeToStart)
+}
+
 linker.Linker = class {
 
   constructor({inputter, outputter, bm}) {
@@ -36,6 +64,7 @@ linker.Linker = class {
     assert( isContract(contract),
            `Compile output for ${contractName} invalid: ${JSON.stringify(contract)}` )
     const code = '0x' + contract.get('code')
+    const deployedCode = '0x' + contract.get('deployedCode')
     const _linkId = linkId || 'link'
     const linkName = `${contractName}-${_linkId}`
 
@@ -71,46 +100,29 @@ linker.Linker = class {
 
     const depMap = Map.isMap(_depMap) ? _depMap : new Map({})
 
-    const replacedCode = await depMap.reduce(async (codeSoFar, deployId, contractName) => {
-      // The linkId to replace for the given linkName can also
-      // be a full deployName by itself (e.g. TestInterface=TestImpl-deploy)
-      // in which case, deployId == `TestImpl-deploy` directly
-      // instead of `TestInterface-deploy`
-      const deployName = (deployId.startsWith('deploy')) ?
-        `${contractName}-${deployId}` : deployId
-      const linkPlaceholder = matches.get(contractName)
-      if (!linkPlaceholder) {
-        throw new Error(`Placeholder for dependency ${linkPlaceholder} not found in bytecode.`)
-      }
+    const deployMap = await this.bm.getDeploys()
+    const replacedCode
+      = await linker.replaceLibraries(code, depMap, matches, deployMap)
+    const replacedDeployedCode
+      = await linker.replaceLibraries(deployedCode, depMap, matches, deployMap)
 
-      const deployObject = await this.bm.getDeploy(deployName)
-      if (!isDeploy(deployObject)) { throw new Error(`Deploy ${deployName} not deployed`) }
-      LOGGER.debug('DEPLOY OBJECT', deployObject)
-
-      const deployAddress = deployObject.get('deployAddress')
-      assert(deployAddress, `Null deployAddress`)
-
-      LOGGER.debug(`Replacing symbols ${linkPlaceholder} with ${deployAddress.slice(2)}`)
-      while (codeSoFar.search(linkPlaceholder) !== -1) {
-        codeSoFar = codeSoFar.replace(linkPlaceholder, deployAddress.slice(2))
-      }
-      return codeSoFar
-    }, code)
-
-    assert(replacedCode.match(LIB_PATTERN) === null) // All placeholders should be replaced
+    // All placeholders should be replaced
+    assert(replacedCode.match(LIB_PATTERN) === null)
+    assert(replacedDeployedCode.match(LIB_PATTERN) === null)
 
     const now = new Date()
 
     const linkOutput = new Map({
-      type           : 'link',
-      name           : contractName,
-      linkId         : linkId,
-      linkMap        : depMap,
-      linkDate       : now.toLocaleString(),
-      linkTime       : now.getTime(),
-      code           : replacedCode,
-      abi            : contract.get('abi'),
-      inputHash      : inputHash,
+      type         : 'link',
+      name         : contractName,
+      linkId       : linkId,
+      linkMap      : depMap,
+      linkDate     : now.toLocaleString(),
+      linkTime     : now.getTime(),
+      code         : replacedCode,
+      deployedCode : replacedDeployedCode,
+      abi          : contract.get('abi'),
+      inputHash    : inputHash,
     })
 
     // This is an updated link, overwrite it
