@@ -73,6 +73,7 @@ api.process       = process
 api.processGlobal = require('processGlobal')
 api.buffer        = require('buffer')
 api.bufferGlobal  = require('bufferGlobal')
+api.depart        = require('demo-depart')
 api.contract      = require('demo-contract')
 api.keys          = require('demo-keys')
 api.tx            = require('demo-tx')
