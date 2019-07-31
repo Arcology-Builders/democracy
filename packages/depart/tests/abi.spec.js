@@ -5,7 +5,8 @@ const { toWei }     = require('ethjs-unit')
 const BN            = require('bn.js')
 
 const utils = require('demo-utils') 
-const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
+const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger, toJS }
+            = utils
 const LOGGER = new Logger('abi.spec')
 
 const { wallet } = require('demo-keys')
@@ -31,18 +32,21 @@ describe( 'ABI swap', () => {
 
   it( 'departs with a shadowed ABI', async () => { 
     const departFunc = async (state) => {
-      const { compile, deployed, minedTx, deployerAddress, deployerEth } = state.toJS()
+      const { compile, link, deployed, minedTx, deployerAddress, deployerEth } = state.toJS()
 
       // The new way of compiling: deployed and minedTx
       await compile( 'ShadowInterface', 'ShadowInterface.sol' )
       await compile( 'Shadow', 'Shadow.sol' )
-      const shadowInterface = await deployed( 'ShadowInterface' )
-      const shadow = await deployed( 'Shadow', { abi: shadowInterface.abi } )
+      const shadowInterface = await link( 'ShadowInterface', 'link' ) //deployed( 'ShadowInterface' )
+      assert( List.isList(shadowInterface.get('abi')), 'ABI should be a Map')
+      const shadow = await deployed( 'Shadow', { abi: shadowInterface.get('abi') } )
+      /*
       const args = List([new BN(1234), deployerAddress, new BN(5678)])
       const txData = await getMethodCallData(fromJS( shadowInterface.abi ), 'doTheThing', args)
       assert( List.isList(fromJS( shadowInterface.abi )), `ABI is not an Immutable List` )
       const rawTx = await createRawTx({ from: deployerAddress, data: txData })
       LOGGER.info('rawTxi', rawTx)
+     */
       const result = await shadow.doTheThing(new BN(1234), deployerAddress, new BN(5678),
                                              { from: deployerAddress, gas: '100000' } )
 /*

@@ -126,7 +126,8 @@ contracts.Contract = class {
 contracts.getInstance = (eth, deploy) => {
   assert(isNetwork(eth), 'First parameter is not an Ethereum network.')
   assert(isDeploy(deploy), 'Second parameter is not a deploy output.')
-  const Contract = eth.contract(deploy.get('abi').toJS(), deploy.get('code'))
+  const abiJS = deploy.get('abi').toJS()
+  const Contract = eth.contract(abiJS, deploy.get('code'))
   return Contract.at(deploy.get('deployAddress'))
 } 
 

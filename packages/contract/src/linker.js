@@ -101,7 +101,7 @@ linker.Linker = class {
 
     const now = new Date()
 
-    const linkOutput = new Map({
+    const linkOutput = new OrderedMap({
       type           : 'link',
       name           : contractName,
       linkId         : linkId,

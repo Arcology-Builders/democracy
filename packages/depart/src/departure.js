@@ -171,7 +171,7 @@ departs.departMixin = () => {
       const deployedContract =
         await deploy( contractName, 'link', _deployID, ctorArgList, force )
       const replacedContract = (abi) ?
-        deployedContract.set( 'abi', fromJS(abi) ) : deployedContract 
+        deployedContract.set( 'abi', abi ) : deployedContract 
       const contract = new Contract({ deployerEth: deployerEth, deploy: replacedContract })
       return await contract.getInstance()
     }
