@@ -1,6 +1,6 @@
 {
   "name": "demo-contract",
-  "version": "0.3.3-alpha.1",
+  "version": "0.3.3-alpha.4",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
@@ -36,9 +36,9 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-client": "^0.3.1-alpha.4",
-    "demo-tx": "^0.3.3-alpha.1",
-    "demo-utils": "^0.3.1-alpha.4",
+    "demo-client": "^0.3.3-alpha.4",
+    "demo-tx": "^0.3.3-alpha.4",
+    "demo-utils": "^0.3.3-alpha.4",
     "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",
     "immutable": "4.0.0-rc.12"
