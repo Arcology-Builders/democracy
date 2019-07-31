@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('chai').assert
-const { List, Map } = require('immutable')
+const { List, Map, OrderedMap } = require('immutable')
 const { Logger, isNetwork, getImmutableKey, setImmutableKey, LIB_PATTERN, LINKS_DIR }
              = require('demo-utils')
 const LOGGER = new Logger('Linker')
@@ -101,7 +101,7 @@ linker.Linker = class {
 
     const now = new Date()
 
-    const linkOutput = new Map({
+    const linkOutput = new OrderedMap({
       type           : 'link',
       name           : contractName,
       linkId         : linkId,
