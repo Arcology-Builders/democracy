@@ -78,8 +78,8 @@ const ENVIRONMENTS = {
   'DEV'        : createDevEnv,
   'TEST'       : () => {
     return createEnv({
-      'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
-      'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
+      'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'https://ganache.arcology.nyc:7001',
+      'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'https://ganache.arcology.nyc:8547',
       'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
       'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
       'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
@@ -91,7 +91,7 @@ const ENVIRONMENTS = {
       'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
     }) },
   'RINKEBY'    : () => { return checkEnv(createEnv({
-    'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
+    'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'https://rinkeby.arcology.nyc:8547',
     'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
@@ -104,7 +104,7 @@ const ENVIRONMENTS = {
     'dp'    : process.env[ 'RINKEBY.DEPLOYER_PASSWORD' ],
   }), ['INFURA_PROJECT_ID']) },
   'MAINNET'    : () => { return checkEnv(createEnv({
-    'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
+    'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'https://mainnet.arcology.nyc:8545',
     'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
     'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
     'gp'     : 5,

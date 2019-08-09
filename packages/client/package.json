@@ -24,7 +24,9 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "yarn test:dev && yarn test:test",
+    "test:dev": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:test": "NODE_ENV=TEST mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
