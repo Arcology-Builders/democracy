@@ -10,6 +10,7 @@ const { toWei } = require('web3-utils')
 const { getConfig, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map, List } = require('immutable')
+const { isValidChecksumAddress } = require('ethereumjs-util')
 const LOGGER = new Logger('runner.spec')
 
 const runners = {}
@@ -34,8 +35,14 @@ runners.deployerMixin = () => {
     const configAddress  = getConfig()['DEPLOYER_ADDRESS']
     const configPassword = getConfig()['DEPLOYER_PASSWORD']
     await wallet.init({ autoConfig: true, unlockSeconds: unlockSeconds || 1 })
-    const _deployerAddress = deployerAddress ? deployerAddress : configAddress
-    const _deployerPassword = deployerPassword ? deployerPassword : configPassword
+    LOGGER.debug('deployerAddress from state', deployerAddress)
+    LOGGER.debug('deployerPassword from state', deployerPassword)
+    const deployerComboFromState = isValidChecksumAddress(deployerAddress)
+    LOGGER.debug('isValidDeployerComboFromState', deployerComboFromState)
+    const _deployerAddress = deployerComboFromState ? deployerAddress : configAddress
+    const _deployerPassword = deployerComboFromState ? deployerPassword : configPassword
+    LOGGER.debug('_deployerAddress', _deployerAddress)
+    LOGGER.debug('_deployerPassword', _deployerPassword)
     const {
       signerEth : deployerEth,
       address   : createdAddress,
