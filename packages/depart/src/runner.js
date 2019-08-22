@@ -143,12 +143,13 @@ runners.run = async (mainFunc, mixinList) => {
   
   const penultState = await mixinList.reduce((stateProm, mixin, i) => {
     LOGGER.debug(`Running mixin ${i}`)
-    return stateProm.then( (state) => {
-      LOGGER.debug(`on input state ${state}`) 
-      return mixin(state).then((outState) => {
-        return state.merge(outState)
+    return stateProm
+      .then( (state) => {
+        LOGGER.debug(`on input state ${state}`) 
+        return mixin(state).then((outState) => {
+          return state.merge(outState)
+        })
       })
-    })
    }, Promise.resolve(Map({})))
   const finalState = await mainFunc(penultState)
 
