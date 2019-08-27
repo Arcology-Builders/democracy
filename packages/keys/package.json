@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.3.4-alpha.0",
+  "version": "0.3.4-alpha.1",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "chai-as-promised": "7.1.1",
-    "demo-client": "^0.3.4-alpha.0",
-    "demo-utils": "^0.3.4-alpha.0",
+    "demo-client": "^0.3.4-alpha.1",
+    "demo-utils": "^0.3.4-alpha.1",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
     "ethjs-signer": "0.1.1",
