@@ -70,6 +70,7 @@ describe( 'Runners', () => {
   it( 'merges a parallel list of mixins', async () => {
     const siblingMixin = (keyPrefix, timeout) => {
       return async (state) => {
+        const { lastKey } = state.toJS()
         const returnMap = {}
         returnMap[keyPrefix + 'Address'] = '0x123'
         returnMap[keyPrefix + 'Password'] = '0x456'
@@ -77,23 +78,30 @@ describe( 'Runners', () => {
         returnMap['lastKey'] = keyPrefix
         return new Promise((resolve, reject) => {
           setTimeout(() => {
-            console.log('Inside ' + keyPrefix, Date.now())
             returnMap[keyPrefix + 'EndTime'] = Date.now()
             resolve(Map(returnMap))
           }, timeout)
         })
       }
     }
+
     const m0 = siblingMixin('sender', 1000)
     const m1 = siblingMixin('receiver', 1500)
+    const m2 = async (state) => {
+      const { senderEndTime, receiverEndTime } = state.toJS()
+      return Map({
+        timeDiff: receiverEndTime - senderEndTime
+      })
+    }
 
-    const finalState = await run( async (state) => { }, [ [ m0, m1 ] ] )
+    const finalState = await run( async (state) => { }, [ [ m0, m1 ], m2 ] )
 
     assert.equal(finalState.get('senderAddress'), '0x123')
     assert.equal(finalState.get('receiverAddress'), '0x123')
     assert(finalState.has('lastKey'))
     assert(finalState.get('receiverEndTime')  - finalState.get('senderEndTime') < 700)
-    assert.equal(finalState.count(), 9)
+    assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
+    assert.equal(finalState.count(), 10)
   })
 
 })
