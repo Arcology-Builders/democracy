@@ -19,7 +19,6 @@ const keys = require('./keys')
 const { toWei, fromWei } = require('web3-utils')
 const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
 const { createInOut } = require('demo-client')
-const { Map } = require('immutable')
 
 const wallet = {}
 
@@ -48,7 +47,7 @@ wallet.prepareSignerEth = async ({ address, password }) => {
 
   await wallet.loadEncryptedAccount({ address: _address })
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
-  wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
+  wallet.lastSignerEth = await wallet.createSignerEth({ url: getEndpointURL(), address: _address }) // eslint-disable-line require-atomic-updates
   return {
     address   : _address,
     password  : _password,
@@ -156,11 +155,11 @@ wallet.init = async ({ autoConfig, unlockSeconds }) => {
     LOGGER.error('Missing keythereum, did you add a script tag?')
   }
   const inout = await createInOut({autoConfig: _autoConfig})
-  wallet.inputter = inout.inputter
-  wallet.outputter = inout.outputter
-  wallet.unlockSeconds = (unlockSeconds) ? unlockSeconds : wallet.UNLOCK_TIMEOUT_SECONDS
-  wallet.chainId = await wallet.eth.net_version()
-  wallet.initialized = true
+  wallet.inputter = inout.inputter     // eslint-disable-line require-atomic-updates
+  wallet.outputter = inout.outputter   // eslint-disable-line require-atomic-updates
+  wallet.unlockSeconds = (unlockSeconds) ? unlockSeconds : wallet.UNLOCK_TIMEOUT_SECONDS // eslint-disable-line require-atomic-updates
+  wallet.chainId = await wallet.eth.net_version() // eslint-disable-line require-atomic-updates 
+  wallet.initialized = true // eslint-disable-line require-atomic-updates
 }
 
 /**
@@ -202,6 +201,7 @@ wallet._setAccountSync = (address, value) => {
 wallet.getAccountSync = (address, expectUnlocked) => {
   const checksumAddress = toChecksumAddress(address)
   const account = wallet._accountsMap[checksumAddress]
+  LOGGER.debug('account', account)
   if (expectUnlocked) {
     assert( keys.isAccount(account), `Invalid account for ${checksumAddress}` )
   }
@@ -245,6 +245,7 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
     throw new Error(`Attempting to overwrite existing account at ${address}`)
   }
   wallet._setAccountSync(checksumAddress, encryptedAccount)
+  assert( wallet.getAccountSync(checksumAddress), `Saved account for ${checksumAddress} is not returned.` )
   return awaitOutputter(
     wallet.outputter( `keys/${wallet.chainId}/${address}`, fromJS(encryptedAccount) ),
     // Delay by one second, so that subsequent calls to inputter will return the newly
