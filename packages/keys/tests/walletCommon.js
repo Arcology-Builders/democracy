@@ -50,7 +50,7 @@ common.getDescribe = (asyncInitProm) => {
       const encryptedJSON = keys.accountToEncryptedJSON({ account: account, password: password })
       await wallet.saveEncryptedAccount({
         address: address, encryptedAccount: encryptedJSON })
-      LOGGER.debug( 'Encrypted account', wallet.accountsMap[address] )
+      LOGGER.debug( 'Encrypted account', wallet.getAccountSync(address) )
       const encryptedAccount2 = await wallet.loadEncryptedAccount({ address: address })
       const account2 = keys.encryptedJSONToAccount({
         encryptedJSON: toJS(encryptedAccount2), password: password })

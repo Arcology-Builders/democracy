@@ -30,7 +30,7 @@ describe('Create spender ETH from remote account', () => {
   })
   
   it( 'makes unlocked account available immediately', async () => {
-    assert( isAccount(wallet.accountsMap[address]), `Valid account for ${address}` )
+    assert( isAccount(wallet.getAccountSync(address)), `Valid account for ${address}` )
   })
 
   it( 'Is able to send transactions from a spender account', async () => {
