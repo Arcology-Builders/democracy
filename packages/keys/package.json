@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.3.4-alpha.1",
+  "version": "0.3.4-alpha.2",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
