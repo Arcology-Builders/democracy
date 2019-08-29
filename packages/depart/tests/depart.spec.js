@@ -22,7 +22,9 @@ describe( 'Departures', () => {
   let finalState
 
   const m0 = argListMixin( Map({
-    unlockSeconds: 30, testValueETH: '0.1', testAccountIndex: 0,
+    unlockSeconds   : 60,
+    testValueETH    : '0.1',
+    testAccountIndex: 0,
     name            : "simple-departure",
     autoConfig      : false,
     sourcePathList  : ["../../node_modules/demo-test-contracts/contracts"],

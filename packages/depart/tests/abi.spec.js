@@ -16,7 +16,7 @@ describe( 'ABI swap', () => {
   let finalState
 
   const m0 = argListMixin(Map({
-    unlockSeconds     : 50,
+    unlockSeconds     : 10,
     testValueETH      : '0.05',
     testAccountIndex  : 0,
     departName        : "shadow",
@@ -29,6 +29,7 @@ describe( 'ABI swap', () => {
   it( 'departs with a shadowed ABI', async () => { 
     const departFunc = async (state) => {
       const { deployed, minedTx, deployerAddress } = state.toJS()
+      LOGGER.debug(`DEPLOYER ADDRESS ${deployerAddress}`)
 
       // The new way of compiling: deployed and minedTx
       const shadowInterface = await deployed( 'ShadowInterface' )
@@ -39,10 +40,9 @@ describe( 'ABI swap', () => {
       return new Map({ 'result': result['0'] })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
-    const result = finalState['result']
+    finalState = await run( departFunc, [ m0, m1, m2 ] )
+    const result = finalState.get('result')
     assert(result.eq(new BN(1234)), `Result ${result.toString()} was not hex for 1234`)
-    return finalState
   })
 
   after(() => {

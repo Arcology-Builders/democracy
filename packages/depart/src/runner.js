@@ -1,4 +1,4 @@
-'use strict';
+ 'usestrict';
 
 /**
  * Command-line runners and mixins for extracting arguments and configs of all kinds
@@ -8,7 +8,7 @@ const path = require('path')
 const assert = require('chai').assert
 const { toWei } = require('web3-utils')
 const { getConfig, getNetwork, Logger } = require('demo-utils')
-const { wallet } = require('demo-keys')
+const { wallet, isAccount } = require('demo-keys')
 const { Map, List } = require('immutable')
 const { isValidChecksumAddress } = require('ethereumjs-util')
 const LOGGER = new Logger('runner.spec')
@@ -43,12 +43,16 @@ runners.deployerMixin = () => {
     const _deployerPassword = deployerComboFromState ? deployerPassword : configPassword
     LOGGER.debug('_deployerAddress', _deployerAddress)
     LOGGER.debug('_deployerPassword', _deployerPassword)
+    const validCombo = await wallet.validatePassword({
+      address: _deployerAddress, password: _deployerPassword })
+    assert(validCombo, `Invalid address/password combo ${_deployerAddress} ${_deployerPassword}`) 
     const {
       signerEth : deployerEth,
       address   : createdAddress,
       password  : createdPassword } = await wallet.prepareSignerEth({
         address: _deployerAddress, password: _deployerPassword })
     const chainId = await deployerEth.net_version()
+    assert.equal( createdAddress, _deployerAddress, `New address created ${createdAddress} instead of ${_deployerAddress}`)
 
     assert.equal(deployerEth.address, createdAddress)
     if (process.env['NODE_ENV'] === 'DEVELOPMENT' && testValueETH && 
@@ -63,11 +67,13 @@ runners.deployerMixin = () => {
       })
     }
 
+    LOGGER.debug( `Accounts Map is a map`, Map.isMap(wallet.getAccountSync(createdAddress)) )
     return new Map({
       chainId          : chainId,
       deployerAddress  : createdAddress,
       deployerPassword : createdPassword,
       deployerEth      : deployerEth,
+      wallet           : wallet,
     })
   }
 }
@@ -143,7 +149,8 @@ runners.argListMixin = (argDefaultMap) => {
  * @param mixinList an Immutable {List} of mixin functions that take in an Immutable `Map`
  *   of input state from the previous mixin and return an Immutable `Map` of output state
  *   to the next mixin.
- * @return the return value of `mainFunc`
+ * @return Immutable {Map} merging all output states of each mixin sequentially and finally
+ *   mainFunc.
  */ 
 runners.run = async (mainFunc, mixinList) => {
   LOGGER.debug('Running main function')
