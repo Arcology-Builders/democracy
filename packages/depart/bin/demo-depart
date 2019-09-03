@@ -8,7 +8,8 @@ const fs = require('fs')
 const path = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
-const { run, deployerMixin, departMixin, argListMixin } = require('demo-depart')
+const { run, deployerMixin, argListMixin } = require('demo-transform')
+const { departMixin } = require('demo-depart')
 const LOGGER = new Logger('demo-depart')
 
 let departOptions
@@ -52,4 +53,4 @@ const departFunc = async (state) => {
   return new Map({ 'result': result })
 }
 
-run( departFunc, [ m0, m1, m2, m3 ] )
+run( [ m0, m1, m2, m3, departFunc ] )
