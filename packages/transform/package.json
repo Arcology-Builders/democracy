@@ -12,7 +12,7 @@
     "demo-utils": "0.3.4-alpha.1"
   },
   "devDependencies": {
-    "demo-tools": "0.3.4-alpha.1"
+    "demo-tools": "0.3.4-alpha.4"
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
