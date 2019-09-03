@@ -13,7 +13,8 @@ const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-cont
 const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, deployerMixin } = require('demo-transform')
+const { departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -69,7 +70,7 @@ describe( 'Departures', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
+    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
     return finalState
   })
 

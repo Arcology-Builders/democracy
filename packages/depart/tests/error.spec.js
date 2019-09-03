@@ -1,4 +1,4 @@
-const { run } = require('..')
+const { run } = require('demo-transform')
 const chai = require('chai')
 chai.use(require('chai-as-promised'))
 

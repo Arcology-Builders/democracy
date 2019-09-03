@@ -9,7 +9,8 @@ const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logg
 const LOGGER = new Logger('abi.spec')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, deployerMixin, departMixin } = require('..')
+const { run, argListMixin, deployerMixin } = require('demo-transform')
+const { departMixin } = require('..')
 
 describe( 'ABI swap', () => {
   
@@ -40,7 +41,7 @@ describe( 'ABI swap', () => {
       return new Map({ 'result': result['0'] })
     }
 
-    finalState = await run( departFunc, [ m0, m1, m2 ] )
+    finalState = await run( [ m0, m1, m2, departFunc ] )
     const result = finalState.get('result')
     assert(result.eq(new BN(1234)), `Result ${result.toString()} was not hex for 1234`)
   })

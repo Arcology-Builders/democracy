@@ -41,10 +41,11 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-client": "^0.3.4-alpha.1",
-    "demo-compile": "^0.3.4-alpha.1",
-    "demo-contract": "^0.3.4-alpha.1",
-    "demo-utils": "^0.3.4-alpha.1",
+    "demo-client": "0.3.4-alpha.1",
+    "demo-compile": "0.3.4-alpha.1",
+    "demo-contract": "0.3.4-alpha.1",
+    "demo-utils": "0.3.4-alpha.1",
+    "demo-transform": "0.3.4-alpha.2",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {

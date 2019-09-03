@@ -17,7 +17,8 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { argListMixin, deployerMixin, departMixin, run } = require('..')
+const { argListMixin, deployerMixin, run } = require('demo-transform')
+const { departMixin } = require('..')
 
 describe( 'Remote departures', () => {
   
@@ -90,7 +91,7 @@ describe( 'Remote departures', () => {
       return new Map({ result: true })
     }
 
-    finalState = (await run( departFunc, [ m0, m1, m2 ] )).toJS()
+    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
     bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)

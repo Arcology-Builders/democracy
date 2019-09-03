@@ -3,7 +3,7 @@ const { Map } = require('immutable')
 const { isAccount } = require('demo-keys')
 const { Logger } = require('demo-utils')
 const LOGGER = new Logger('depart/deploy.spec')
-const { deployerMixin, argListMixin, run } = require('..')
+const { deployerMixin, argListMixin, run } = require('demo-transform')
 
 describe('Deployer mixin', () => {
 
@@ -19,7 +19,7 @@ describe('Deployer mixin', () => {
       deployerPassword : PASSWORD,
       unlockSeconds    : 5,
     }))
-    result = await run( async (state) => {}, [ ma, md ] ) 
+    result = await run( [ ma, md ] ) 
   })
   
   it('takes in deployerAddress/Password from state', async () => {
