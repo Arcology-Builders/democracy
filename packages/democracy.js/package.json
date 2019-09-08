@@ -1,6 +1,6 @@
 {
   "name": "democracy.js",
-  "version": "0.3.4-alpha.4",
+  "version": "0.3.4",
   "description": "Democracy, an minimalist Ethereum framework for a distributed country",
   "keywords": [
     "democracy",
@@ -36,7 +36,7 @@
     "demo-compile": "^0.3.4-alpha.1",
     "demo-contract": "^0.3.4-alpha.1",
     "demo-depart": "^0.3.4-alpha.4",
-    "demo-keys": "^0.3.4-alpha.2",
+    "demo-keys": "^0.3.4",
     "demo-utils": "^0.3.4-alpha.1"
   },
   "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
