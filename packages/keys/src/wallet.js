@@ -121,6 +121,7 @@ wallet.createSignerEth = ({url, address}) => {
     accounts: (cb) => cb(null, [checksumAddress]),
   })
   const newEth = new Eth(provider)
+  newEth.provider = provider
   newEth.address = checksumAddress
   wallet.signersMap[checksumAddress] = newEth
   LOGGER.debug(`Added a signer for ${address}`)
