@@ -138,8 +138,11 @@ const lazyEval = (env, infuraProjectId) => {
 const getEnvVar = (varName) => {
   if (typeof window != 'undefined' && window.document) {
     return window[varName]
-  } else {
+  } else if (process.env[varName]) {
     return process.env[varName]
+  } else {
+    console.warn(`No env var found called ${varName}`)
+    return ''
   }
 }
 

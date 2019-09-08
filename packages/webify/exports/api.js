@@ -156,12 +156,12 @@ api.prepareCachedWallet = async ({
   newAddress  = address
   newPassword = password
 
-  if (['test', 'dev'].indexOf(demo.config.DB_NAMESPACE) !== -1 ) {
+//  if (['test', 'dev'].indexOf(demo.config.DB_NAMESPACE) !== -1 ) {
     localStorage.setItem(`demo/${api.chainId}/thisPassword`, newPassword)
-  } else {
-    console.warn("Passwords are not cached locally for production environments.")
-    console.warn("Consider using Oauth credentials.")
-  } 
+//  } else {
+//    console.warn("Passwords are not cached locally for production environments.")
+//    console.warn("Consider using Oauth credentials.")
+//  } 
 
   // Update thisAddress if we just created a new one
   api.assert( isValidAddress(newAddress) )
