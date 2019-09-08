@@ -108,12 +108,3 @@ const { address, password, signerEth } = await createSignerEth({
   password: string,
 })
 ```
-
-Future Improvements
-===================
-
-Currently `demo-keys` uses `setTimeout` to set a callback in the future to relock an
-account. A program will not exit as long as `setTimeout` functions are outstanding.
-It would be a useful design change in the future to keep more state, such as the
-relock function IDs, and have a `wallet.shutdown` API method that relocks all unlocked
-accounts and then calls `cancelTimeout` on all the callbacks. 
