@@ -1,16 +1,16 @@
 npm notice 
-npm notice 📦  demo-webify@0.3.4-alpha.4
+npm notice 📦  demo-webify@0.3.5-alpha.1
 npm notice === Tarball Contents === 
 npm notice 3.9kB dist/index.html                    
-npm notice 1.4MB dist/democracy.0.3.4_alpha.4.min.js
+npm notice 1.4MB dist/democracy.0.3.5_alpha.1.min.js
 npm notice 1.2kB package.json                       
 npm notice === Tarball Details === 
 npm notice name:          demo-webify                             
-npm notice version:       0.3.4-alpha.4                           
+npm notice version:       0.3.5-alpha.1                           
 npm notice package size:  422.1 kB                                
 npm notice unpacked size: 1.4 MB                                  
-npm notice shasum:        d1df564de510b1b5acbacdc9fc4d532cc63f4337
-npm notice integrity:     sha512-UyAE/LZ/eSlQO[...]pouYkK2xpVEPw==
+npm notice shasum:        5b76aa533b2a28f3e5641eb89f4bdb4f6222515f
+npm notice integrity:     sha512-6p3TBYWtwqnT2[...]Wk3J1/ltOsRog==
 npm notice total files:   3                                       
 npm notice 
-+ demo-webify@0.3.4-alpha.4
++ demo-webify@0.3.5-alpha.1
