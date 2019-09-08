@@ -48,7 +48,7 @@ describe('config has correct members', () => {
   it('rinkeby configs are expected', () => {
     process.env['NODE_ENV'] = 'RINKEBY'
     assert( arraysEqual([ 'warn', 'error' ], getConfig()['LOG_LEVELS']) )
-    assert.equal( getConfig()['ETH_URL'], 'https://rinkeby.infura.io/1234567890' )
+    assert.equal( getConfig()['ETH_URL'], 'https://rinkeby.infura.io/v3/590812d0023e4798aba2a764c477f504' )
     assert.equal( getConfig()['DB_URL'], 'https://ganache.arcology.nyc:7001' )
     assert.notOk( getConfig()['DEPLOYER_PASSWORD'],
       'Rinkeby deployer password should not be defined in .env' )
@@ -57,7 +57,7 @@ describe('config has correct members', () => {
   it('mainnet configs are expected', () => {
     process.env['NODE_ENV'] = 'MAINNET'
     assert( arraysEqual([ 'warn', 'error' ], getConfig()['LOG_LEVELS']) )
-    assert.equal( getConfig()['ETH_URL'], 'https://mainnet.infura.io/1234567890' )
+    assert.equal( getConfig()['ETH_URL'], 'https://mainnet.infura.io/v3/590812d0023e4798aba2a764c477f504' )
     assert.equal( getConfig()['DB_URL'], 'https://ganache.arcology.nyc:7001' )
     assert.notOk( getConfig()['DEPLOYER_ADDRESS'],
       'Mainnet deployer address should not be defined in .env' )

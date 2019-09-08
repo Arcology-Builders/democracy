@@ -57,7 +57,7 @@ configs.parseLogLevels = (string) => {
   return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
 }
 
-const createDevEnv = () => {
+const createDevEnv = (infuraProjectId) => {
   return createEnv({
     'dbURL' : process.env[ 'DEVELOPMENT.DB_URL'  ] || 'http://localhost:7000',
     'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
@@ -76,7 +76,7 @@ const createDevEnv = () => {
 const ENVIRONMENTS = {
   'DEVELOPMENT': createDevEnv,
   'DEV'        : createDevEnv,
-  'TEST'       : () => {
+  'TEST'       : (infuraProjectId) => {
     return createEnv({
       'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'https://ganache.arcology.nyc:7001',
       'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'https://ganache.arcology.nyc:8547',
@@ -90,9 +90,9 @@ const ENVIRONMENTS = {
       'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
       'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
     }) },
-  'RINKEBY'    : () => { return checkEnv(createEnv({
+  'RINKEBY'    : (infuraProjectId) => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'https://rinkeby.arcology.nyc:8547',
-    'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/v3/${infuraProjectId}`,
     'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
     'gl'     : '670000',
@@ -103,9 +103,9 @@ const ENVIRONMENTS = {
     'da'    : process.env[ 'RINKEBY.DEPLOYER_ADDRESS'  ],
     'dp'    : process.env[ 'RINKEBY.DEPLOYER_PASSWORD' ],
   }), ['INFURA_PROJECT_ID']) },
-  'MAINNET'    : () => { return checkEnv(createEnv({
+  'MAINNET'    : (infuraProjectId) => { return checkEnv(createEnv({
     'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'https://mainnet.arcology.nyc:8545',
-    'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
+    'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/v3/${infuraProjectId}`,
     'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
     'gp'     : 5,
     'gl'     : '670000',
@@ -123,10 +123,10 @@ configs.isNetName = (_name) => {
   return (ENVIRONMENTS[_name.toUpperCase()] !== undefined)
 }
 
-const lazyEval = (env) => {
+const lazyEval = (env, infuraProjectId) => {
   let config = ENVIRONMENTS[env]
   if (typeof(config) === 'function') {
-    ENVIRONMENTS[env] = config()
+    ENVIRONMENTS[env] = config(infuraProjectId)
     config = ENVIRONMENTS[env]
   }
   return config
@@ -139,10 +139,11 @@ const lazyEval = (env) => {
  */
 configs.getConfig = (debugPrint) => {
   const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ''
+  const infuraProjectId = (typeof window != 'undefined' && window.document) ? window.INFURA_PROJECT_ID : process.env.INFURA_PROJECT_ID
   const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ''
   const env = windowEnv ? windowEnv : processEnv
   debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
-  let config = lazyEval(env)
+  let config = lazyEval(env, infuraProjectId)
   if (config) {
     return config
   } else {
