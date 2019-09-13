@@ -3,15 +3,19 @@ npm notice 📦  demo-webify@0.3.5
 npm notice === Tarball Contents === 
 npm notice 3.8kB dist/index.html            
 npm notice 1.4MB dist/democracy.0.3.5.min.js
-npm notice 129B  index.js                   
+npm notice 974B  index.js                   
 npm notice 1.2kB package.json               
 npm notice === Tarball Details === 
 npm notice name:          demo-webify                             
 npm notice version:       0.3.5                                   
-npm notice package size:  422.3 kB                                
+npm notice package size:  422.7 kB                                
 npm notice unpacked size: 1.4 MB                                  
-npm notice shasum:        4cc6b667f817fa2c3082b18ae3875a5615bfaa09
-npm notice integrity:     sha512-ReKF58p5YzOzq[...]NjElf4kYn714w==
+npm notice shasum:        812e29c180ce792093848c7ffb4db7b2e08b8084
+npm notice integrity:     sha512-z6dqVZZqj1V5Y[...]1NVohqEP6fS6A==
 npm notice total files:   4                                       
 npm notice 
-+ demo-webify@0.3.5
+npm ERR! code E403
+npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/demo-webify - You cannot publish over the previously published versions: 0.3.5.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /Users/ppham/.npm/_logs/2019-09-13T08_33_55_924Z-debug.log
