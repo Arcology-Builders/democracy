@@ -12,7 +12,8 @@
     "clean": "rimraf -f dist"
   },
   "files": [
-    "dist"
+    "dist",
+    "index.js"
   ],
   "private": true,
   "dependencies": {
