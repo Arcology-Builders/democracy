@@ -1,6 +1,6 @@
 {
   "name": "demo-webify",
-  "version": "0.3.5-alpha.5",
+  "version": "0.3.5",
   "description": "Generic tools to webify a distributed country",
   "keywords": "democracy ethereum webpack",
   "author": "Paul Pham",
