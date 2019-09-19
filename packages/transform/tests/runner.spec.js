@@ -3,7 +3,7 @@
 const assert = require('chai').assert
 const { run, argListMixin, deployerMixin } = require('../src/runner')
 
-const { immEqual, getNetwork, Logger } = require('demo-utils')
+const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map } = require('immutable')
 const LOGGER = new Logger('tests/runner')
@@ -85,8 +85,6 @@ describe( 'Runners', () => {
       }
     }
 
-    const m0 = siblingMixin('sender', 1000)
-    const m1 = siblingMixin('receiver', 1500)
     const m2 = async (state) => {
       const { senderEndTime, receiverEndTime } = state.toJS()
       return Map({
@@ -94,6 +92,8 @@ describe( 'Runners', () => {
       })
     }
 
+    const m0 = siblingMixin('sender', 1000)
+    const m1 = siblingMixin('receiver', 1500)
     const finalState = await run( [ [ m0, m1 ], m2 ] )
 
     assert.equal(finalState.get('senderAddress'), '0x123')
@@ -103,6 +103,59 @@ describe( 'Runners', () => {
     assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
     assert.equal(finalState.count(), 10)
   })
+
+  it( 'merges substates deeply', async () => {
+    const subMixin = (keyPrefix, timeout, subStateLabel) => {
+      return async (state) => {
+        const { lastKey } = state.toJS()
+        const returnMap = {}
+        returnMap[keyPrefix + 'Address'] = '0x123'
+        returnMap[keyPrefix + 'Password'] = '0x456'
+        returnMap[keyPrefix + 'StartTime'] = Date.now()
+        returnMap['lastKey'] = keyPrefix
+        let out
+        if (subStateLabel) { 
+          out = {}
+          out[subStateLabel] = returnMap
+        } else {
+          out = returnMap
+        }
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            returnMap[keyPrefix + 'EndTime'] = Date.now()
+            resolve(fromJS(out))
+          }, timeout)
+        })
+      }
+    }
+
+    const m2 = async (state) => {
+      const { sub: { senderEndTime } , bass: { receiverEndTime } } = state.toJS()
+      return Map({
+        lastKey : 'no im the only one',
+        timeDiff: receiverEndTime - senderEndTime
+      })
+    }
+
+    const m0 = subMixin('sender', 1000, 'sub')
+    const m1 = subMixin('receiver', 1500, 'bass')
+    const m3 = subMixin('niece', 500, 'sub')
+    const m4 = subMixin('nephew', 700, 'bass')
+
+    const finalState = await run( [ [ m0, m1 ], [ m3, m4 ], m2 ] )
+
+    const sub = finalState.get('sub')
+    const bass = finalState.get('bass')
+
+    assert.equal(sub.get('senderAddress'), '0x123')
+    assert.equal(sub.get('nieceAddress'), '0x123')
+    assert.equal(bass.get('receiverAddress'), '0x123')
+    assert.equal(bass.get('nephewAddress'), '0x123')
+    assert(finalState.has('lastKey'))
+    assert(bass.get('receiverEndTime')  - sub.get('senderEndTime') < 700)
+    assert.equal(finalState.get('timeDiff'), bass.get('receiverEndTime')  - sub.get('senderEndTime'))
+    assert.equal(finalState.count(), 4)
+  }) 
 
 })
 

@@ -126,9 +126,11 @@ configs.isNetName = (_name) => {
   return (ENVIRONMENTS[_name.toUpperCase()] !== undefined)
 }
 
-const lazyEval = (env, infuraProjectId) => {
+const lazyEval = (env) => {
   let config = ENVIRONMENTS[env]
   if (typeof(config) === 'function') {
+    // Only warn / check for Infura ID when we need it
+    const infuraProjectId = getEnvVar('INFURA_PROJECT_ID')
     ENVIRONMENTS[env] = config(infuraProjectId)
     config = ENVIRONMENTS[env]
   }
@@ -152,10 +154,9 @@ const getEnvVar = (varName) => {
  * @memberof module:utils
  */
 configs.getConfig = (debugPrint) => {
-  const infuraProjectId = getEnvVar('INFURA_PROJECT_ID')
   const env = getEnvVar('NODE_ENV').toUpperCase()
   debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
-  let config = lazyEval(env, infuraProjectId)
+  let config = lazyEval(env)
   if (config) {
     return config
   } else {

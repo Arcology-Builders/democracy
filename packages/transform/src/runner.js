@@ -164,9 +164,9 @@ runners.run = async (mixinList) => {
           LOGGER.debug(`running ${mixin.length} mixins in parallel`)
           return Promise.all(mixin.map(async (x) => await x(state)))
             .then(listOfMaps => listOfMaps.reduce(
-              (reducedState, state) => state.merge(reducedState), Map({})
+              (reducedState, state) => state.mergeDeep(reducedState), Map({})
             ))
-            .then(outState => state.merge(outState))
+            .then(outState => state.mergeDeep(outState))
         } else {
           return mixin(state).then(outState => state.merge(outState))
         }
