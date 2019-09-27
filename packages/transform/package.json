@@ -1,6 +1,6 @@
 {
   "name": "demo-transform",
-  "version": "0.3.7-alpha.0",
+  "version": "0.3.7",
   "description": "Transform pipeline for a distributed country on Ethereum",
   "directories": {
     "tests": "tests"
@@ -9,7 +9,7 @@
     "access": "public"
   },
   "dependencies": {
-    "demo-utils": "^0.3.7-alpha.0"
+    "demo-utils": "^0.3.7"
   },
   "devDependencies": {
     "demo-tools": "0.3.3-alpha.0"
