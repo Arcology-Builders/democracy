@@ -3,21 +3,17 @@ const fs        = require('fs')
 const path      = require('path')
 const { Map }   = require('immutable')
 const assert    = require('chai').assert
-const { toWei } = require('ethjs-unit')
+const { toWei } = require('web3-utils')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const { isContract, isCompile, isLink, isDeploy }
-                = require('demo-contract')
-const { createCompiler }
-                = require('demo-compile')
-const { getImmutableKey, setImmutableKey }
-                = require('demo-utils')
+const LOGGER = new Logger('depart.spec')
+const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
+const { getImmutableKey, setImmutableKey } = require('demo-utils')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin } = require('..')
-
-const LOGGER = new Logger('depart.spec')
+const { run, argListMixin, deployerMixin } = require('demo-transform')
+const { departMixin } = require('..')
 
 describe( 'Departures', () => {
   
@@ -27,7 +23,7 @@ describe( 'Departures', () => {
   let finalState
 
   const m0 = argListMixin( Map({
-    unlockSeconds   : 30,
+    unlockSeconds   : 60,
     testValueETH    : '0.1',
     testAccountIndex: 0,
     name            : "simple-departure",
@@ -36,9 +32,7 @@ describe( 'Departures', () => {
   })
   )
   const m1 = deployerMixin()
-  const m2 = bmMixin()
-  const m3 = compileMixin(createCompiler)
-  const m4 = departMixin()
+  const m2 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -66,11 +60,11 @@ describe( 'Departures', () => {
       const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
       const rDeploy = await bm.getDeploy('DifferentSender-deploy')
       assert( isDeploy(dout) )
-      assert( immEqual(dout, rDeploy), `Retrieved deploy\n ${rDeploy}\n not equal to returned deploy\n ${dout}` )
+      assert( immEqual(dout, rDeploy) )
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
+    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
     LOGGER.debug('finalState', finalState) 
     assert(Map.isMap(finalState.getCompiles()))
     assert(Map.isMap(finalState.getLinks()))
@@ -78,22 +72,17 @@ describe( 'Departures', () => {
     assert.typeOf(finalState.result, 'boolean')
     assert(finalState.result === true) 
     assert.typeOf(finalState.clean, 'function')
-    assert(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')),
-          `DifferentSender compile exists`)
-    assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')),
-          `DifferentSender link exists`)
-    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')),
-          `DifferentSender deploy exists`)
+    assert(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
+    assert(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
+    assert(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, chainId, 'DifferentSender-deploy.json')))
   })
 
   it( 'cleans', async () => {
     await finalState.clean()
-    await finalState.cleanCompiles()
   })
 
   it( 'cleaning happens', async () => {
-    assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')),
-                 'DifferentSender compile should be cleaned.')
+    assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'DifferentSender.json')))
     assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'DifferentSender-link.json')))
     assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, 'DifferentSender-deploy.json')))
   })

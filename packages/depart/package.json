@@ -1,6 +1,6 @@
 {
   "name": "demo-depart",
-  "version": "0.3.3-alpha.4",
+  "version": "0.3.7-alpha.0",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
     "ethereum",
@@ -22,35 +22,31 @@
     "tests": "tests"
   },
   "bin": {
-    "demo-depart": "./bin/demo-depart",
-    "demo-test": "./bin/demo-test"
+    "demo-depart": "./bin/demo-depart"
   },
   "files": [
     "src",
     "index.js",
-    "bin/demo-depart",
-    "bin/demo-test"
+    "bin/demo-depart"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test:mocha": "NODE_ENV=DEVELOPMENT mocha ./tests -t 25000 --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:flow": "NODE_ENV=DEVELOPMENT ./bin/demo-test --mochaTimeout 10000 --unlockSeconds 20",
-    "test": "yarn test:mocha && yarn test:flow",
-    "cov": "nyc.js mocha tests/",
-    "console": "NODE_ENV=DEVELOPMENT ./bin/demo-console"
+    "test": "yarn test:mocha && ./test.sh",
+    "test:mocha": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 25000 --trace-warnings --exit --colors --recursive --reporter spec; done",
+    "cov": "nyc.js mocha tests/"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-client": "^0.3.3-alpha.4",
-    "demo-compile": "^0.3.3-alpha.4",
-    "demo-contract": "^0.3.3-alpha.4",
-    "demo-keys": "^0.3.3-alpha.4",
-    "demo-utils": "^0.3.3-alpha.4",
+    "demo-client": "^0.3.7-alpha.0",
+    "demo-compile": "^0.3.7-alpha.0",
+    "demo-contract": "^0.3.7-alpha.0",
+    "demo-transform": "^0.3.7-alpha.0",
+    "demo-utils": "^0.3.7-alpha.0",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {

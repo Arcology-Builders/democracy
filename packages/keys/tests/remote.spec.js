@@ -1,8 +1,10 @@
 'use strict'
 const { getDescribe } = require('./walletCommon')
 const { getNetwork }  = require('demo-utils')
-const { toWei }       = require('ethjs-unit')
-const { wallet }      = require('demo-keys')
+const { toWei }       = require('web3-utils')
+const { wallet, isAccount }
+                      = require('demo-keys')
+const { assert }      = require('chai')
 
 /*
 describe('Local wallet store for accounts',
@@ -27,6 +29,10 @@ describe('Create spender ETH from remote account', () => {
     testAccounts = await eth.accounts()
   })
   
+  it( 'makes unlocked account available immediately', async () => {
+    assert( isAccount(wallet.getAccountSync(address)), `Valid account for ${address}` )
+  })
+
   it( 'Is able to send transactions from a spender account', async () => {
     await wallet.payTest({
       eth         : eth, 

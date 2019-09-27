@@ -13,7 +13,7 @@ const password = process.argv[3] || getConfig()['DEPLOYER_PASSWORD']
 const mainFunc = async () => {
   await wallet.init({ autoConfig: true, unlockSeconds: 10 })
   await wallet.prepareSignerEth({ address: address, password: password })
-  console.log(JSON.stringify(wallet.accountsMap[address], null, '  '))
+  console.log(JSON.stringify(wallet.getAccountSync(address), null, '  '))
   wallet.shutdownSync()
 }
 

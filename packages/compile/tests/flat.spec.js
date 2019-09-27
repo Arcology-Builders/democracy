@@ -35,6 +35,7 @@ describe('Flattener', () => {
     const comp2 = new Compiler({sourcePathList: ['./tests'], flatten: true, outputFull: true })
     await comp2.compile('flattenedSource.sol')
     const newFlattened = await c.cm.inputter( 'sourcesFlattened/flattenedSource.sol' )
+    fs.writeFileSync(`./newFlatterendSource.sol`, newFlattened.get('flattenedSource'))
     assert.equal( textsEqual(newFlattened.get('flattenedSource'),
                              flattenedSource.get('flattenedSource')), -1 ) 
     const oldContract = await c.cm.inputter( 'compileOutputs/ERC20Mintable.sol' )

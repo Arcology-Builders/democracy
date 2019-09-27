@@ -1,11 +1,56 @@
 #!/usr/bin/env node
 'use strict'
 
-const { Map } = require('immutable')
-const { top } = require('demo-depart')
+// Democracy Depart command-line tool: orchestrated deploys to the chain
 
-// Command-line departures always compile first
-const { createCompiler } = require('demo-compile')
-if (require.main === module) {
-  top(Map({}), createCompiler)
+const { Map }   = require('immutable')
+const fs = require('fs')
+const path = require('path')
+const { wallet } = require('demo-keys')
+const { getConfig, Logger } = require('demo-utils')
+const { run, deployerMixin, argListMixin } = require('demo-transform')
+const { departMixin } = require('demo-depart')
+const LOGGER = new Logger('demo-depart')
+
+let departOptions
+let departCallback
+const depart = (options, callback) => {
+  departOptions = options
+  departCallback = callback
 }
+
+const m0 = argListMixin(Map({
+  'departFileName'   : 'depart.js', // --departFileName
+  'testValueEth'     : '0.1'      ,
+  'testAccountIndex' : 0          ,
+  'unlockSeconds'    : 30,
+}))
+
+// Insert this custom mixin to read in a departure file and save its name
+// and callback
+const m1 = async (state) => {
+  const { departFileName } = state.toJS()
+  LOGGER.info(`Depart filename ${departFileName}`)
+  const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
+  eval(departFile)
+
+  return Map({
+    departFile : departFile,
+    ...departOptions,
+  })
+}
+
+const m2 = deployerMixin()
+
+const m3 = departMixin()
+
+const departFunc = async (state) => {
+  const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
+          departFile } = state.toJS() 
+
+  const result = await departCallback({...state.toJS()})
+  wallet.shutdownSync()
+  return new Map({ 'result': result })
+}
+
+run( [ m0, m1, m2, m3, departFunc ] )

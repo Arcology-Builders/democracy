@@ -13,14 +13,15 @@ helpers.createInOut = ({hostname, port, autoConfig}) => {
   
   // Autoconfig'd URL and host
   const autoURL = getConfig()['DB_URL']
-  const [ autoHostname, autoPort ] = autoURL.split('://')[1].split(':')
+  const [ autoScheme, autoHostPort ] = autoURL.split('://')
+  const [ autoHostname, autoPort ] = autoHostPort.split(':')
   assert(autoHostname && autoPort, `Invalid autoconfig URL ${autoURL}`)
   LOGGER.debug('createInOut autoconfig URL', autoConfig, autoHostname, autoPort)
 
   const _hostname = (autoConfig) ? autoHostname : hostname
   const _port     = (autoConfig) ? autoPort     : port
 
-  const r = new RemoteDB(_hostname, _port)
+  const r = new RemoteDB(_hostname, _port, autoScheme === 'https' )
 
   const useHostAndPort = (_hostname && _port)
   const remoteInputter = async (key, def) => {

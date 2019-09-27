@@ -34,8 +34,8 @@ describe('config has correct members', () => {
   it('test configs are expected', () => {
     process.env['NODE_ENV'] = 'TEST'
     assert( arraysEqual([ 'info', 'warn', 'error' ], getConfig()['LOG_LEVELS']) )
-    assert.equal( getConfig()['ETH_URL'], 'http://test.arcology.nyc:8545' )
-    assert.equal( getConfig()['DB_URL'], 'http://test.arcology.nyc:7000' )
+    assert.equal( getConfig()['ETH_URL'], 'https://ganache.arcology.nyc:8547' )
+    assert.equal( getConfig()['DB_URL'], 'https://ganache.arcology.nyc:7001' )
     assert.equal( getConfig()['DEPLOYER_ADDRESS'],
       '0x5153952607794179dba5cbde2f4c6c3391012978' )
     assert.equal( getConfig()['DEPLOYER_PASSWORD'],
@@ -48,8 +48,8 @@ describe('config has correct members', () => {
   it('rinkeby configs are expected', () => {
     process.env['NODE_ENV'] = 'RINKEBY'
     assert( arraysEqual([ 'warn', 'error' ], getConfig()['LOG_LEVELS']) )
-    assert.equal( getConfig()['ETH_URL'], 'https://rinkeby.infura.io/1234567890' )
-    assert.equal( getConfig()['DB_URL'], 'http://ganache.arcology.nyc:7000' )
+    assert.equal( getConfig()['ETH_URL'], 'https://rinkeby.infura.io/v3/590812d0023e4798aba2a764c477f504' )
+    assert.equal( getConfig()['DB_URL'], 'https://ganache.arcology.nyc:7001' )
     assert.notOk( getConfig()['DEPLOYER_PASSWORD'],
       'Rinkeby deployer password should not be defined in .env' )
   })
@@ -57,8 +57,8 @@ describe('config has correct members', () => {
   it('mainnet configs are expected', () => {
     process.env['NODE_ENV'] = 'MAINNET'
     assert( arraysEqual([ 'warn', 'error' ], getConfig()['LOG_LEVELS']) )
-    assert.equal( getConfig()['ETH_URL'], 'https://mainnet.infura.io/1234567890' )
-    assert.equal( getConfig()['DB_URL'], 'http://ganache.arcology.nyc:7000' )
+    assert.equal( getConfig()['ETH_URL'], 'https://mainnet.infura.io/v3/590812d0023e4798aba2a764c477f504' )
+    assert.equal( getConfig()['DB_URL'], 'https://ganache.arcology.nyc:7001' )
     assert.notOk( getConfig()['DEPLOYER_ADDRESS'],
       'Mainnet deployer address should not be defined in .env' )
   })

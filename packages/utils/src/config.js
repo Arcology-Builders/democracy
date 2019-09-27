@@ -42,7 +42,10 @@ const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
 
 const checkEnv = (config, vars) => {
   vars.forEach((v) => {
-    if (!process.env[v]) {
+    if (process.env[v] || (typeof window != 'undefined' && window.document
+                           && window[v])) {
+      return
+    } else { 
       LOGGER.errorAndThrow(`Environment variable ${v} needed but not defined.`)
     }
   })
@@ -57,64 +60,64 @@ configs.parseLogLevels = (string) => {
   return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
 }
 
-const createDevEnv = () => {
+const createDevEnv = (infuraProjectId) => {
   return createEnv({
-    'dbURL' : process.env[ 'DEVELOPMENT.DB_URL'  ] || 'http://localhost:7000',
-    'ethURL': process.env[ 'DEVELOPMENT.ETH_URL' ] || 'http://localhost:8545',
-    'shhURL': process.env[ 'DEVELOPMENT.SHH_URL' ] || 'ws://localhost:8546',
-    'gp'    : process.env[ 'DEVELOPMENT.GAS_PRICE' ] || 5,
-    'gl'    : process.env[ 'DEVELOPMENT.GAS_LIMIT' ] || '670000',
+    'dbURL' : getEnvVar( 'DEVELOPMENT.DB_URL'  ) || 'http://localhost:7000',
+    'ethURL': getEnvVar( 'DEVELOPMENT.ETH_URL' ) || 'http://localhost:8545',
+    'shhURL': getEnvVar( 'DEVELOPMENT.SHH_URL' ) || 'ws://localhost:8546',
+    'gp'    : getEnvVar( 'DEVELOPMENT.GAS_PRICE' ) || 5,
+    'gl'    : getEnvVar( 'DEVELOPMENT.GAS_LIMIT' ) || '670000',
     'db'    : 'dev',
-    'lo'    : process.env[ 'DEVELOPMENT.LOG_OUT' ],
-    'll'    : configs.parseLogLevels(process.env[ 'DEVELOPMENT.LOG_LEVELS' ]) ||
+    'lo'    : getEnvVar( 'DEVELOPMENT.LOG_OUT' ),
+    'll'    : configs.parseLogLevels(getEnvVar( 'DEVELOPMENT.LOG_LEVELS' )) ||
               [ 'info', 'warn', 'error' ],
-    'da'    : process.env[ 'DEVELOPMENT.DEPLOYER_ADDRESS' ],
-    'dp'    : process.env[ 'DEVELOPMENT.DEPLOYER_PASSWORD' ],
+    'da'    : getEnvVar( 'DEVELOPMENT.DEPLOYER_ADDRESS' ),
+    'dp'    : getEnvVar( 'DEVELOPMENT.DEPLOYER_PASSWORD' ),
   })
 }
 	
 const ENVIRONMENTS = {
   'DEVELOPMENT': createDevEnv,
   'DEV'        : createDevEnv,
-  'TEST'       : () => {
+  'TEST'       : (infuraProjectId) => {
     return createEnv({
-      'dbURL'  : process.env[ 'TEST.DB_URL'  ] || 'http://ganache.arcology.nyc:7000',
-      'ethURL' : process.env[ 'TEST.ETH_URL' ] || 'http://ganache.arcology.nyc:8545',
-      'shhURL' : process.env[ 'TEST.SHH_URL' ] || SHH_IP,
-      'gp'     : process.env[ 'TEST.GAS_PRICE' ] || 5,
-      'gl'     : process.env[ 'TEST.GAS_LIMIT' ] || '670000',
+      'dbURL'  : getEnvVar( 'TEST.DB_URL'  ) || 'https://ganache.arcology.nyc:7001',
+      'ethURL' : getEnvVar( 'TEST.ETH_URL' ) || 'https://ganache.arcology.nyc:8547',
+      'shhURL' : getEnvVar( 'TEST.SHH_URL' ) || SHH_IP,
+      'gp'     : getEnvVar( 'TEST.GAS_PRICE' ) || 5,
+      'gl'     : getEnvVar( 'TEST.GAS_LIMIT' ) || '670000',
       'db'     : 'test',
-      'lo'     : process.env[ 'TEST.LOG_OUT' ],
-      'll'     : configs.parseLogLevels(process.env[ 'TEST.LOG_LEVELS' ]) ||
+      'lo'     : getEnvVar( 'TEST.LOG_OUT' ),
+      'll'     : configs.parseLogLevels(getEnvVar( 'TEST.LOG_LEVELS' )) ||
                [ 'info', 'warn', 'error' ],
-      'da'    : process.env[ 'TEST.DEPLOYER_ADDRESS'  ],
-      'dp'    : process.env[ 'TEST.DEPLOYER_PASSWORD' ],
+      'da'    : getEnvVar( 'TEST.DEPLOYER_ADDRESS'  ),
+      'dp'    : getEnvVar( 'TEST.DEPLOYER_PASSWORD' ),
     }) },
-  'RINKEBY'    : () => { return checkEnv(createEnv({
-    'dbURL'  : process.env[ 'RINKEBY.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
-    'ethURL' : process.env[ 'RINKEBY.ETH_URL' ] || `https://rinkeby.infura.io/${process.env.INFURA_PROJECT_ID}`,
-    'shhURL' : process.env[ 'RINKEBY.SHH_URL' ] || SHH_IP,
+  'RINKEBY'    : (infuraProjectId) => { return checkEnv(createEnv({
+    'dbURL'  : getEnvVar( 'RINKEBY.DB_URL'  ) || 'https://rinkeby.arcology.nyc:8547',
+    'ethURL' : getEnvVar( 'RINKEBY.ETH_URL' ) || `https://rinkeby.infura.io/v3/${infuraProjectId}`,
+    'shhURL' : getEnvVar( 'RINKEBY.SHH_URL' ) || SHH_IP,
     'gp'     : 5,
     'gl'     : '670000',
     'db'     : 'rinkeby',
-    'lo'     : process.env[ 'RINKEBY.LOG_OUT' ],
-    'll'     : configs.parseLogLevels(process.env[ 'RINKEBY.LOG_LEVELS' ]) ||
+    'lo'     : getEnvVar( 'RINKEBY.LOG_OUT' ),
+    'll'     : configs.parseLogLevels(getEnvVar( 'RINKEBY.LOG_LEVELS' )) ||
                [ 'warn', 'error' ],
-    'da'    : process.env[ 'RINKEBY.DEPLOYER_ADDRESS'  ],
-    'dp'    : process.env[ 'RINKEBY.DEPLOYER_PASSWORD' ],
+    'da'    : getEnvVar( 'RINKEBY.DEPLOYER_ADDRESS'  ),
+    'dp'    : getEnvVar( 'RINKEBY.DEPLOYER_PASSWORD' ),
   }), ['INFURA_PROJECT_ID']) },
-  'MAINNET'    : () => { return checkEnv(createEnv({
-    'dbURL'  : process.env[ 'MAINNET.DB_URL'  ] || 'http://ganache.arcology.nyc:8545',
-    'ethURL' : process.env[ 'MAINNET.ETH_URL' ] || `https://mainnet.infura.io/${process.env.INFURA_PROJECT_ID}`,
-    'shhURL' : process.env[ 'MAINNET.SHH_URL' ] || SHH_IP,
+  'MAINNET'    : (infuraProjectId) => { return checkEnv(createEnv({
+    'dbURL'  : getEnvVar( 'MAINNET.DB_URL'  ) || 'https://mainnet.arcology.nyc:8545',
+    'ethURL' : getEnvVar( 'MAINNET.ETH_URL' ) || `https://mainnet.infura.io/v3/${infuraProjectId}`,
+    'shhURL' : getEnvVar( 'MAINNET.SHH_URL' ) || SHH_IP,
     'gp'     : 5,
     'gl'     : '670000',
     'db'     : 'mainnet',
-    'lo'     : process.env[ 'MAINNET.LOG_OUT' ],
-    'll'     : configs.parseLogLevels(process.env[ 'MAINNET.LOG_LEVELS' ]) ||
+    'lo'     : getEnvVar( 'MAINNET.LOG_OUT' ),
+    'll'     : configs.parseLogLevels(getEnvVar( 'MAINNET.LOG_LEVELS' )) ||
                [ 'warn', 'error' ],
-    'da'    : process.env[ 'MAINNET.DEPLOYER_ADDRESS'  ],
-    'dp'    : process.env[ 'MAINNET.DEPLOYER_PASSWORD' ],
+    'da'    : getEnvVar( 'MAINNET.DEPLOYER_ADDRESS'  ),
+    'dp'    : getEnvVar( 'MAINNET.DEPLOYER_PASSWORD' ),
   }), ['INFURA_PROJECT_ID']) },
 }
 
@@ -126,10 +129,23 @@ configs.isNetName = (_name) => {
 const lazyEval = (env) => {
   let config = ENVIRONMENTS[env]
   if (typeof(config) === 'function') {
-    ENVIRONMENTS[env] = config()
+    // Only warn / check for Infura ID when we need it
+    const infuraProjectId = getEnvVar('INFURA_PROJECT_ID')
+    ENVIRONMENTS[env] = config(infuraProjectId)
     config = ENVIRONMENTS[env]
   }
   return config
+}
+
+const getEnvVar = (varName) => {
+  if (typeof window != 'undefined' && window.document) {
+    return window[varName]
+  } else if (process.env[varName]) {
+    return process.env[varName]
+  } else {
+    console.warn(`No env var found called ${varName}`)
+    return ''
+  }
 }
 
 /**
@@ -138,9 +154,7 @@ const lazyEval = (env) => {
  * @memberof module:utils
  */
 configs.getConfig = (debugPrint) => {
-  const windowEnv = (typeof window != 'undefined' && window.document) ? window.NODE_ENV : ''
-  const processEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toUpperCase() : ''
-  const env = windowEnv ? windowEnv : processEnv
+  const env = getEnvVar('NODE_ENV').toUpperCase()
   debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
   let config = lazyEval(env)
   if (config) {

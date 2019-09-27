@@ -36,8 +36,6 @@ describe( 'transaction sender', () => {
     accounts = await eth.accounts()
     await wallet.init({autoConfig: false})
     let { address, password } = await wallet.createEncryptedAccount()
-    assert( wallet.accountsMap[address],
-           `Newly created account is not mapped to address ${address}`)
     senderAddress = address
     senderPassword = password
     assert( isValidAddress(senderAddress),
@@ -105,6 +103,8 @@ describe( 'transaction sender', () => {
     })
     await wallet.unlockEncryptedAccount({
       address: senderAddress, password: senderPassword })
+    assert( wallet.getAccountSync(senderAddress, true),
+           `Newly created account is not mapped to address ${senderAddress}`)
     assert.equal(signerEth.address, senderAddress)
     txHash = await txs.sendSignedTx({ rawTx: tx, signerEth: signerEth })
 

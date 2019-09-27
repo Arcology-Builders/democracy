@@ -56,7 +56,7 @@ describe('Signing and spending transactions', () => {
 
     // We create the signer just to register testAccounts[9] but then discard
     // it, since we don't need to sign transactions sent from test accounts
-    wallet.createSignerEth({
+    await wallet.createSignerEth({
       url: 'http://localhost:8545', address: testAccounts[9] })
 
     const fromAddress = testAccounts[9] 

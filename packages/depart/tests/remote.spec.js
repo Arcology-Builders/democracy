@@ -8,7 +8,7 @@ const expect  = require('chai').expect
 const assert  = chai.assert
 chai.use(require('chai-as-promised'))
 
-const { toWei } = require('ethjs-unit')
+const { toWei } = require('web3-utils')
 const utils = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
 const { getImmutableKey, setImmutableKey } = utils
@@ -16,9 +16,9 @@ const LOGGER = new Logger('remote.spec')
 
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
-const { createCompiler } = require('demo-compile')
 const { RESTServer } = require('demo-rest')
-const { argListMixin, bmMixin, compileMixin, deployerMixin, departMixin, run } = require('..')
+const { argListMixin, deployerMixin, run } = require('demo-transform')
+const { departMixin } = require('..')
 
 describe( 'Remote departures', () => {
   
@@ -59,9 +59,7 @@ describe( 'Remote departures', () => {
       sourcePathList: ["../../node_modules/demo-test-contracts/contracts"],
     }))
     const m1 = deployerMixin()
-    const m2 = bmMixin()
-    const m3 = compileMixin(createCompiler)
-    const m4 = departMixin()
+    const m2 = departMixin()
     const departFunc = async (state) => {
       const {compile, link, deploy, bm, deployerEth, deployerAddress} = state.toJS()
        
@@ -73,10 +71,12 @@ describe( 'Remote departures', () => {
         weiValue: toWei('0.1', 'ether'),
       }) 
 
+      //LOGGER.info( 'Compiling', Date.now() )
       const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
       assert(isCompile(cout),
              `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
       
+      //LOGGER.info( 'Linking', Date.now() )
       const lout = await link( 'DifferentSender', 'link' )
       assert(isLink(lout),
              `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
@@ -91,7 +91,7 @@ describe( 'Remote departures', () => {
       return new Map({ result: true })
     }
 
-    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
+    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
     bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)

@@ -77,6 +77,7 @@ api.depart        = require('demo-depart')
 api.contract      = require('demo-contract')
 api.keys          = require('demo-keys')
 api.tx            = require('demo-tx')
+api.transform     = require('demo-transform')
 api.immutable     = require('immutable')
 api.chai          = require('chai')
 api.secp256k1     = require('@aztec/secp256k1')
@@ -100,6 +101,25 @@ api.init = async({ unlockSeconds }) => {
   if (!demo.keys.wallet.initialized) {
     await demo.keys.wallet.init({ autoConfig: true, unlockSeconds })
   }
+}
+
+api.clientInit = async() => {
+	await demo.initFS({})
+	await demo.init({ unlockSeconds: 100000 }) // keep unlocked as long as we cache password
+	await demo.prepareCachedWallet({})
+	await demo.prepareErasePassword({
+		erasePasswordSeconds: 100000, // 100,000 seconds is 27.77 hours
+		erasePasswordCallback: () => { console.log("Erasing password") },
+	})
+	await demo.prepareUpdateWhileCached({
+		updateSeconds: 10,
+		updateCallback: (secondsLeft) => { console.log(`${secondsLeft} seconds left`) },
+	})
+	demo.chainId = await demo.eth.net_version()
+	const thisPassword = localStorage.getItem(`demo/${demo.chainId}/thisPassword`)
+	const { signerEth } = await demo.keys.wallet.prepareSignerEth({
+		address: demo.thisAddress, password: thisPassword })
+	demo.thisSignerEth = signerEth
 }
 
 /**
@@ -156,12 +176,12 @@ api.prepareCachedWallet = async ({
   newAddress  = address
   newPassword = password
 
-  if (['test', 'dev'].indexOf(demo.config.DB_NAMESPACE) !== -1 ) {
+//  if (['test', 'dev'].indexOf(demo.config.DB_NAMESPACE) !== -1 ) {
     localStorage.setItem(`demo/${api.chainId}/thisPassword`, newPassword)
-  } else {
-    console.warn("Passwords are not cached locally for production environments.")
-    console.warn("Consider using Oauth credentials.")
-  } 
+//  } else {
+//    console.warn("Passwords are not cached locally for production environments.")
+//    console.warn("Consider using Oauth credentials.")
+//  } 
 
   // Update thisAddress if we just created a new one
   api.assert( isValidAddress(newAddress) )

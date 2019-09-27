@@ -3,6 +3,7 @@ const assert      = require('chai').assert
 const { List, Map }
                   = require('immutable')
 const http        = require('http')
+const https       = require('https')
 const url         = require('url')
 const { Logger }  = require('demo-utils')
 const LOGGER      = new Logger('client')
@@ -44,10 +45,12 @@ const retryPromise = async (promCreator, bmHostName, bmPort, tag) => {
 
 client.RemoteDB = class {
 
-  constructor(host, port) {
+  constructor(host, port, isHTTPS) {
     this.host = host
     this.port = port
-    this.url  = `http://${host}:${port}`
+    this.scheme = (isHTTPS) ? 'https' : 'http'
+    this.protocol = (isHTTPS) ? https : http
+    this.url  = `${this.scheme}://${host}:${port}`
   } 
 
   async config() {
@@ -69,7 +72,7 @@ client.RemoteDB = class {
     }
     const postPromCreator = (resolve, reject) => {
       return new Promise((resolve, reject) => {
-        const post_req = http.request(post_options, (res) => {
+        const post_req = this.protocol.request(post_options, (res) => {
           res.setEncoding('utf8')
           const data = []
           res.on('data', (chunk) => {
@@ -108,7 +111,7 @@ client.RemoteDB = class {
     const getPromCreator = (resolve, reject) => {
       return new Promise((resolve, reject) => {
         const getURL = url.parse(this.url + _apiPath)
-        const req = http.get(getURL, (res) => {
+        const req = this.protocol.get(getURL, (res) => {
           const data = []
           res.on('data', (chunk) => {
             data.push(chunk);

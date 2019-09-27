@@ -47,7 +47,7 @@ wallet.prepareSignerEth = async ({ address, password }) => {
 
   await wallet.loadEncryptedAccount({ address: _address })
   await wallet.unlockEncryptedAccount({ address: _address, password: _password })
-  wallet.lastSignerEth = wallet.createSignerEth({ url: getEndpointURL(), address: _address }) 
+  wallet.lastSignerEth = await wallet.createSignerEth({ url: getEndpointURL(), address: _address }) // eslint-disable-line require-atomic-updates
   return {
     address   : _address,
     password  : _password,
@@ -55,6 +55,15 @@ wallet.prepareSignerEth = async ({ address, password }) => {
   }
 }
 
+/**
+ * Validate the given address and password combination.
+ *
+ * @method validatePassword
+ * @memberof module:wallet
+ * @param address {String} `0x`-prefixed Ethereum address
+ * @param password {String}
+ * @return true if a valid address and password combo, otherwise false.
+ */
 wallet.validatePassword = async ({ address, password }) => {
   try {
     await wallet.loadEncryptedAccount({ address })
@@ -65,6 +74,14 @@ wallet.validatePassword = async ({ address, password }) => {
   }
 }
 
+/**
+ * Create an account from a private string and save it to the outputter.
+ *
+ * @method createFromPrivateString
+ * @memberof module:wallet
+ * @param privateString {String} hex Ethereum private key, with on `0x`-prefix, to create an account from.
+ * @return {Object} password, address, result, account
+ */
 wallet.createFromPrivateString = async ({ privateString }) => {
   const account = keys.createFromPrivateString(privateString)
   const address = account.get('addressPrefixed')
@@ -94,7 +111,7 @@ wallet.createSignerEth = ({url, address}) => {
   const checksumAddress = toChecksumAddress(address)
   const provider = new SignerProvider(url, {
     signTransaction: async (rawTx, cb) => {
-      let account = wallet.accountsMap[checksumAddress]
+      let account = wallet.getAccountSync(checksumAddress)
       if ( keys.isAccount(account) ) {
         cb(null, ethsign(rawTx, account.get('privatePrefixed') ) )
       } else {
@@ -104,6 +121,7 @@ wallet.createSignerEth = ({url, address}) => {
     accounts: (cb) => cb(null, [checksumAddress]),
   })
   const newEth = new Eth(provider)
+  newEth.provider = provider
   newEth.address = checksumAddress
   wallet.signersMap[checksumAddress] = newEth
   LOGGER.debug(`Added a signer for ${address}`)
@@ -113,7 +131,7 @@ wallet.createSignerEth = ({url, address}) => {
 wallet.initialized = false
 wallet.inputter = null
 wallet.outputter = null
-wallet.accountsMap = {}
+wallet._accountsMap = {}
 wallet.signersMap = {}
 wallet.relockMap = {}
 wallet.eth = getNetwork()
@@ -138,11 +156,11 @@ wallet.init = async ({ autoConfig, unlockSeconds }) => {
     LOGGER.error('Missing keythereum, did you add a script tag?')
   }
   const inout = await createInOut({autoConfig: _autoConfig})
-  wallet.inputter = inout.inputter
-  wallet.outputter = inout.outputter
-  wallet.unlockSeconds = (unlockSeconds) ? unlockSeconds : wallet.UNLOCK_TIMEOUT_SECONDS
-  wallet.chainId = await wallet.eth.net_version()
-  wallet.initialized = true
+  wallet.inputter = inout.inputter     // eslint-disable-line require-atomic-updates
+  wallet.outputter = inout.outputter   // eslint-disable-line require-atomic-updates
+  wallet.unlockSeconds = (unlockSeconds) ? unlockSeconds : wallet.UNLOCK_TIMEOUT_SECONDS // eslint-disable-line require-atomic-updates
+  wallet.chainId = await wallet.eth.net_version() // eslint-disable-line require-atomic-updates 
+  wallet.initialized = true // eslint-disable-line require-atomic-updates
 }
 
 /**
@@ -176,6 +194,21 @@ wallet.createEncryptedAccount = async () => {
   }
 } 
 
+wallet._setAccountSync = (address, value) => {
+  const checksumAddress = toChecksumAddress(address)
+  wallet._accountsMap[checksumAddress] = value
+}
+
+wallet.getAccountSync = (address, expectUnlocked) => {
+  const checksumAddress = toChecksumAddress(address)
+  const account = wallet._accountsMap[checksumAddress]
+  LOGGER.debug('account', account)
+  if (expectUnlocked) {
+    assert( keys.isAccount(account), `Invalid account for ${checksumAddress}` )
+  }
+  return account
+}
+
 /**
  * Retrieves encrypted account for this address from a (possibly remote) persistent store.
  *
@@ -191,8 +224,7 @@ wallet.loadEncryptedAccount = async ({ address }) => {
     wallet.inputter(`keys/${wallet.chainId}/${address}`, null),
     (encryptedAccount) => {
       if (!encryptedAccount) { throw new Error(`Account not found for ${address}`) }
-      wallet.accountsMap[checksumAddress] =
-        toJS( encryptedAccount )
+      wallet._setAccountSync(checksumAddress, toJS( encryptedAccount ) )
       LOGGER.debug(`Loaded encrypted account for ${address}`)
       return toJS( encryptedAccount )
     }
@@ -210,10 +242,11 @@ wallet.loadEncryptedAccount = async ({ address }) => {
 wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
   if (!wallet.initialized) { LOGGER.error('Call wallet.init() first.') }
   const checksumAddress = toChecksumAddress(address)
-  if (wallet.accountsMap[checksumAddress]) {
+  if (wallet.getAccountSync(checksumAddress)) {
     throw new Error(`Attempting to overwrite existing account at ${address}`)
   }
-  wallet.accountsMap[checksumAddress] = encryptedAccount
+  wallet._setAccountSync(checksumAddress, encryptedAccount)
+  assert( wallet.getAccountSync(checksumAddress), `Saved account for ${checksumAddress} is not returned.` )
   return awaitOutputter(
     wallet.outputter( `keys/${wallet.chainId}/${address}`, fromJS(encryptedAccount) ),
     // Delay by one second, so that subsequent calls to inputter will return the newly
@@ -234,18 +267,18 @@ wallet.saveEncryptedAccount = async ({ address, encryptedAccount }) => {
  */
 wallet.unlockEncryptedAccount = async ({ address, password }) => {
   const checksumAddress = toChecksumAddress(address)
-  const encryptedAccount = wallet.accountsMap[checksumAddress]
+  const encryptedAccount = wallet.getAccountSync(checksumAddress)
   if ( keys.isAccount(encryptedAccount) ) {
     throw new Error(`Account ${address} already unlocked`)
   }
   if (!address || !password) {
     throw new Error(`Empty address ${address} or password`)
   }
-  wallet.accountsMap[checksumAddress] =
-    keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount,
-      password: password })
+  const account = keys.encryptedJSONToAccount({ encryptedJSON: encryptedAccount, password })
+  wallet._setAccountSync(checksumAddress, account)
   const relockFunc = () => {
-    wallet.accountsMap[checksumAddress] = encryptedAccount } 
+    wallet._setAccountSync(checksumAddress, encryptedAccount)
+  } 
   const id = setTimeout(relockFunc, wallet.unlockSeconds * 1000)
   wallet.relockMap[checksumAddress] = { id: id, relockFunc: relockFunc }
   return relockFunc

@@ -3,25 +3,20 @@ const fs        = require('fs')
 const path      = require('path')
 const { Map }   = require('immutable')
 const assert    = require('chai').assert
-const { toWei } = require('ethjs-unit')
+const { toWei } = require('web3-utils')
 const BN        = require('bn.js')
 
 const utils = require('demo-utils') 
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const { Contract, isContract, isCompile, isLink, isDeploy }
-                = require('demo-contract')
-const { getImmutableKey, setImmutableKey, getConfig }
-                = require('demo-utils')
+const LOGGER = new Logger('depart.spec')
+const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-contract')
+const { getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
 
-const { createCompiler }
-                = require('demo-compile')
-const { wallet }
-                = require('demo-keys')
-const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin } = require('..')
+const { wallet } = require('demo-keys')
+const { run, argListMixin, deployerMixin } = require('demo-transform')
+const { departMixin } = require('..')
 
-const LOGGER    = new Logger('depart.spec')
-
-describe( 'Departures with relinking', () => {
+describe( 'Departures', () => {
   
   let eth = getNetwork()
   let chainId
@@ -35,9 +30,7 @@ describe( 'Departures with relinking', () => {
     sourcePathList  : ["contracts-new"],
   }))
   const m1 = deployerMixin()
-  const m2 = bmMixin ()
-  const m3 = compileMixin(createCompiler)
-  const m4 = departMixin()
+  const m2 = departMixin()
 
   before(async () => {
     accounts = await eth.accounts()
@@ -45,7 +38,7 @@ describe( 'Departures with relinking', () => {
     chainId = await eth.net_version()
   })
 
-  it( 'departs twice, with a relink', async () => { 
+  it( 'executes a simple departure', async () => { 
     const departFunc = async (state) => {
       const { compile, link, deploy, deployed, deployerEth, minedTx,
         deployerAddress } = state.toJS() 
@@ -77,7 +70,7 @@ describe( 'Departures with relinking', () => {
       return new Map({ 'result': true })
     }
 
-    finalState = (await run( m0, m1, m2, m3, m4, departFunc )).toJS()
+    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
     return finalState
   })
 
@@ -90,8 +83,8 @@ describe( 'Departures with relinking', () => {
 
   it( 'cleaning happens', async () => {
     assert.notOk(fs.existsSync(path.join(DB_DIR, COMPILES_DIR, 'Relink.json')))
-    assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR,    'Relink-link.json')))
-    assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR,  'Relink-deploy.json')))
+    assert.notOk(fs.existsSync(path.join(DB_DIR, LINKS_DIR, 'Relink-link.json')))
+    assert.notOk(fs.existsSync(path.join(DB_DIR, DEPLOYS_DIR, 'Relink-deploy.json')))
   })
 
   after(() => {

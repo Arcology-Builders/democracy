@@ -1,6 +1,6 @@
 {
   "name": "demo-contract",
-  "version": "0.3.3-alpha.4",
+  "version": "0.3.7-alpha.0",
   "description": "Contract management for a distributed country",
   "keywords": [
     "contract",
@@ -27,18 +27,15 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "yarn test:mocha && yarn test:scripts",
-    "test:scripts": "./scripts/test.sh",
-    "test:mocha": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "doc": "documentation build src/** -f md -o docs/Contracts.md"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-client": "^0.3.3-alpha.4",
-    "demo-tx": "^0.3.3-alpha.4",
-    "demo-utils": "^0.3.3-alpha.4",
+    "demo-client": "^0.3.7-alpha.0",
+    "demo-utils": "^0.3.7-alpha.0",
     "ethereumjs-util": "6.1.0",
     "ethjs-abi": "0.2.1",
     "immutable": "4.0.0-rc.12"
