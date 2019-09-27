@@ -13,8 +13,8 @@ const { getImmutableKey, setImmutableKey } = require('demo-utils')
 const { createCompiler } = require('demo-compile')
 
 const { wallet } = require('demo-keys')
-const { run, argListMixin, bmMixin, compileMixin, deployerMixin, departMixin,
-  createEmptyCompiler } = require('..')
+const { argListMixin, deployerMixin, run } = require('demo-transform')
+const { bmMixin, compileMixin, departMixin, createEmptyCompiler } = require('..')
 
 describe( 'Departures', () => {
   
