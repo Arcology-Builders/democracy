@@ -730,17 +730,17 @@ delegates@^1.0.0:
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
   integrity sha1-hMbhWbgZBP3KWaDvRM2HDTElD5o=
 
-demo-client@^0.3.1-alpha.4:
-  version "0.3.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/demo-client/-/demo-client-0.3.1-alpha.4.tgz#bde0995f124e247edfd3d5e360750f37f4568072"
-  integrity sha512-IQMwaq2aXlG6Nk+JTj8OLTCjYMgepsk2qolK3ajjFBFAJ+V0X49COVmYPltKjzfLWW+LWlXUdiqBNl2QbpKFPg==
+demo-client@^0.3.7:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/demo-client/-/demo-client-0.3.7.tgz#51be85e4ff04f7d1383e52ca7878e64981ec9eb1"
+  integrity sha512-5eBQCvH/jBpz3H+ocMNFn4jnncOd2cXX3QF7xIy11EMr8uv3Ukk9Oh0zbUImrR6nPsump/gNE/zl8SvVG43CEg==
   dependencies:
-    demo-utils "^0.3.1-alpha.4"
+    demo-utils "^0.3.7"
 
-demo-utils@^0.3.1-alpha.4:
-  version "0.3.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/demo-utils/-/demo-utils-0.3.1-alpha.4.tgz#07217e16b948b3adf4dfc65a3669a208198d1f56"
-  integrity sha512-1wqHx1rmOgdgvl1IJl02qRdm8BtesdQBRraXqLKNnNhzpGUchdLEzOewXauoZOjU1u0dX0hjm+pjE+Wuq9C20A==
+demo-utils@^0.3.7:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/demo-utils/-/demo-utils-0.3.7.tgz#94d7a7e47a5705f319fb8ae50f58e7ed613c8d20"
+  integrity sha512-hxEgns0xmLj45N92rTOPY2jh3iy5rwGuh3Vq4B1BFgVpehPwaRWoTqTOojhvmdGrBUylCT55HyFO/hdpju1MdA==
   dependencies:
     colors "1.3.3"
     dotenv "7.0.0"
@@ -1821,9 +1821,9 @@ minizlib@^1.1.1:
     minipass "^2.2.1"
 
 mixin-deep@^1.2.0:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/mixin-deep/-/mixin-deep-1.3.1.tgz#a49e7268dce1a0d9698e45326c5626df3543d0fe"
-  integrity sha512-8ZItLHeEgaqEvd5lYBXfm4EZSFCX29Jb9K+lAHhDKzReKBQKj3R+7NOF6tjqYi9t4oI8VUfaWITJQm86wnXGNQ==
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/mixin-deep/-/mixin-deep-1.3.2.tgz#1120b43dc359a785dce65b55b82e257ccf479566"
+  integrity sha512-WRoDn//mXBiJ1H40rqa3vH0toePwSsGb45iInWlTySa+Uu4k3tYUSxa2v1KqAiLtvlrSzaExqS1gtk96A9zvEA==
   dependencies:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
