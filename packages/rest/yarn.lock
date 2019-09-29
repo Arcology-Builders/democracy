@@ -730,17 +730,17 @@ delegates@^1.0.0:
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
   integrity sha1-hMbhWbgZBP3KWaDvRM2HDTElD5o=
 
-demo-client@^0.3.1-alpha.4:
-  version "0.3.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/demo-client/-/demo-client-0.3.1-alpha.4.tgz#bde0995f124e247edfd3d5e360750f37f4568072"
-  integrity sha512-IQMwaq2aXlG6Nk+JTj8OLTCjYMgepsk2qolK3ajjFBFAJ+V0X49COVmYPltKjzfLWW+LWlXUdiqBNl2QbpKFPg==
+demo-client@^0.3.7:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/demo-client/-/demo-client-0.3.7.tgz#51be85e4ff04f7d1383e52ca7878e64981ec9eb1"
+  integrity sha512-5eBQCvH/jBpz3H+ocMNFn4jnncOd2cXX3QF7xIy11EMr8uv3Ukk9Oh0zbUImrR6nPsump/gNE/zl8SvVG43CEg==
   dependencies:
-    demo-utils "^0.3.1-alpha.4"
+    demo-utils "^0.3.7"
 
-demo-utils@^0.3.1-alpha.4:
-  version "0.3.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/demo-utils/-/demo-utils-0.3.1-alpha.4.tgz#07217e16b948b3adf4dfc65a3669a208198d1f56"
-  integrity sha512-1wqHx1rmOgdgvl1IJl02qRdm8BtesdQBRraXqLKNnNhzpGUchdLEzOewXauoZOjU1u0dX0hjm+pjE+Wuq9C20A==
+demo-utils@^0.3.7:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/demo-utils/-/demo-utils-0.3.7.tgz#94d7a7e47a5705f319fb8ae50f58e7ed613c8d20"
+  integrity sha512-hxEgns0xmLj45N92rTOPY2jh3iy5rwGuh3Vq4B1BFgVpehPwaRWoTqTOojhvmdGrBUylCT55HyFO/hdpju1MdA==
   dependencies:
     colors "1.3.3"
     dotenv "7.0.0"
@@ -1694,9 +1694,9 @@ lodash.merge@^4.6.0:
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
 lodash@^4.17.10, lodash@^4.17.11:
-  version "4.17.11"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
-  integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
+  version "4.17.15"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
 lru-cache@^4.1.2:
   version "4.1.5"
