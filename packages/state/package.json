@@ -1,0 +1,44 @@
+{
+  "name": "demo-state",
+  "version": "0.3.7",
+  "description": "State transformation mixins and pipelines for Democracy, using Typescript",
+  "keywords": [
+    "typescript",
+    "ethereum",
+    "democracy",
+    "state"
+  ],
+  "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/state#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "exit 0"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "@types/react": "16.9.3",
+    "@types/react-dom": "16.9.1",
+    "awesome-typescript-loader": "5.2.1",
+    "react": "16.10.0",
+    "react-dom": "16.10.0",
+    "source-map-loader": "0.2.4",
+    "ts-loader": "6.1.2",
+    "typescript": "3.6.3",
+    "webpack": "4.41.0",
+    "webpack-cli": "3.3.9"
+  }
+}
