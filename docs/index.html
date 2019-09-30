@@ -1,12 +1,40 @@
 <head>
   <title>Democracy.js</title>
   <link href="styles.css" rel="stylesheet"></link>
+  <script type="text/javascript">
+    window.NODE_ENV='MAINNET'
+    window.INFURA_PROJECT_ID= '590812d0023e4798aba2a764c477f504'
+    window['MAINNET.DB_URL'] = 'https://ganache.arcology.nyc:7001'
+  </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@invisible-college/keythereum@1.1.3/dist/keythereum-1.0.4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/demo-webify@0.3.5-alpha.4/dist/democracy.0.3.5_alpha.4.min.js"></script>
+
 </head>
 <body>
   <h1>Democracy.js</h1>
   <h2>A minimalist framework for a distributed country, currently on Ethereum</h2>
+  <p>
+    WARNING: This framework is still in ALPHA. Use at your own risk, in Cryptopia everything is trying to kill you and steal your private keys.
+  </p>
+  <p>
+    This page has been configured for network:
+    <span id="demoNetworkName"></span>
+  </p>
+  <p>
+    Your Ethereum account cached in localStorage has the following parameters:
+    <span id="demoAddress"></span>
+    <span id="demoPassword"></span>
+  </p>
   <ul>
     <li><a href="https://github.com/invisible-college/democracy">Democracy.js Github Monorepo</a></li>
     <li><a href="./jsdocs/index.html">API Documentation</a></li>
   </ul>
+  <script type="text/javascript">
+    demo.clientInit().then(() => {
+      const addressDiv = document.getElementById('demoAddress')
+      addressDiv.innerHTML = demo.thisAddress
+      const passwordDiv = document.getElementById('demoPassword')
+      passwordDiv.innerHTML = localStorage.get(`demo/${demo.chainId}/password`)
+    })
+  </script>
 </body>
