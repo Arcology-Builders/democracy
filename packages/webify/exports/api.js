@@ -73,7 +73,6 @@ api.process       = process
 api.processGlobal = require('processGlobal')
 api.buffer        = require('buffer')
 api.bufferGlobal  = require('bufferGlobal')
-api.depart        = require('demo-depart')
 api.contract      = require('demo-contract')
 api.keys          = require('demo-keys')
 api.tx            = require('demo-tx')
@@ -115,11 +114,6 @@ api.clientInit = async() => {
 		updateSeconds: 10,
 		updateCallback: (secondsLeft) => { console.log(`${secondsLeft} seconds left`) },
 	})
-	demo.chainId = await demo.eth.net_version()
-	const thisPassword = localStorage.getItem(`demo/${demo.chainId}/thisPassword`)
-	const { signerEth } = await demo.keys.wallet.prepareSignerEth({
-		address: demo.thisAddress, password: thisPassword })
-	demo.thisSignerEth = signerEth
 }
 
 /**
@@ -194,7 +188,10 @@ api.prepareCachedWallet = async ({
     localStorage.setItem(`demo/${api.chainId}/thisAddress`, newAddress )
   }
 
-  return newAddress
+  demo.thisAddress = newAddress
+  demo.thisSignerEth = signerEth
+
+  return { address: newAddress, password: newPassword, signerEth }
 }
 
 /**
