@@ -2,13 +2,26 @@
 
 import * as Immutable from "immutable"
 
-const { ITransform, Keccak256Hash } = require('..');
+const { transform } = require('..')
 
-class PublicKeyTransform extends ITransform {
+const { Keccak256Hash } = transform
 
-  func(signer: string): Immutable.Map<string,string> {
+import { ITransform } from '../src/transform'
+
+class PublicKeyTransform implements ITransform {
+
+  inputTypes = Immutable.fromJS({
+    'signer': 'string'
+  })
+  outputTypes = Immutable.fromJS({
+    'publicKey': 'number'
+  })
+
+  cacheable = true
+
+  func({signer: string}): Immutable.Map<string,string> {
     return Immutable.fromJS({
-      'publicKey': 2
+      'publicKey': '2'
     })
   }
 
