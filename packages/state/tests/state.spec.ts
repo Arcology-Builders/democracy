@@ -1,14 +1,15 @@
 'use strict';
 
 import * as Immutable from "immutable"
+import { assert } from "chai"
 
 const { transform } = require('..')
 
 const { Keccak256Hash } = transform
 
-import { ITransform } from '../src/transform'
+import { Transform, PipeHead } from '../src/transform'
 
-class PublicKeyTransform implements ITransform {
+class PublicKeyTransform extends Transform {
 
   inputTypes = Immutable.fromJS({
     'signer': 'string'
@@ -19,9 +20,9 @@ class PublicKeyTransform implements ITransform {
 
   cacheable = true
 
-  func({signer: string}): Immutable.Map<string,string> {
+  func = ({signer}: {signer: string}): Immutable.Map<string,string> => {
     return Immutable.fromJS({
-      'publicKey': '2'
+      'publicKey': signer.length
     })
   }
 
@@ -35,7 +36,16 @@ class PublicKeyTransform implements ITransform {
     },
   }
 
-  stringify(): string {
+  constructor(...args) {
+    super()
+    this.bindSelf(this)
+  }
+
+  __call__ = ({signer}:{signer: string}) => {
+    return this.func({signer})
+  }
+
+  stringify = (): string => {
     return JSON.stringify({
       'type'       : 'DemocracyTransform',
       'func'       : this.func,
@@ -51,6 +61,9 @@ class PublicKeyTransform implements ITransform {
 
 describe('Cached states', () => {
     it('creates a transform', async () => {
-    //const x: ITransform = new PublicKeyTransform() 
+      const x: Transform = new PublicKeyTransform()
+      const result = x({ signer: 'some starry night'})
+      assert.equal(result, 17)
+      const p = new PipeHead(x)
     });
 });

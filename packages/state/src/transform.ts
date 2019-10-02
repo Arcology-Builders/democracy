@@ -17,7 +17,7 @@ export class Keccak256Hash extends Object {
 
 }
 
-export interface ITransform {
+export class Transform extends Function {
   inputTypes  : Immutable.List<[string,string]>
   outputTypes : Immutable.List<[string,string]>
   cacheable   : boolean
@@ -31,6 +31,26 @@ export interface ITransform {
   } }
   toString    : () => string
   contentHash : Keccak256Hash
+  __self__ : any
+
+  constructor() {
+    super('...args', 'console.log(`SELF`, this); return this.__self__.__call__(...args)')
+    return this
+  }
+
+  bindSelf = (child: Transform) => {
+    var self = this.bind(child)
+    this.__self__ = this
+    console.log(`THIS`, this.__self__)
+    console.log(`CALL`, this.__call__)
+  }
+
+  __call__ = ({...args}) => {
+    console.log(`FUNC`,this.func)
+  //  return this.func({...args})
+  }
+  
+  // Add a `__call__` method in subclasses
 }
 
 export type Pipeline = PipeHead | PipeAppended
@@ -43,13 +63,13 @@ export class PipeHead {
 
   // A pipeline could have multiple transforms from its head
   // the newest transform (its own) is the last one added
-  lastTransform: ITransform
+  lastTransform: Transform
 
   contentHash : Keccak256Hash
 
   cacheable : boolean
 
-  constructor(lastTransform: ITransform) {
+  constructor(lastTransform: Transform) {
     this.lastTransform = lastTransform
     this.head = null
     this.contentHash = new Keccak256Hash(this.lastTransform.toString())
@@ -65,7 +85,7 @@ export class PipeHead {
     })
   }
 
-  append(newTransform: ITransform) {
+  append(newTransform: Transform) {
     if (this.prev) {
       assert( this.prev.lastTransform.outputTypes.isSubset(newTransform.inputTypes),
         `Input types of new transform ${newTransform.inputTypes.toString()}` +
@@ -81,7 +101,7 @@ export class PipeAppended extends PipeHead {
   head : Pipeline
   prev : Pipeline
 
-  constructor(transform: ITransform, prev: Pipeline) {
+  constructor(transform: Transform, prev: Pipeline) {
     super(transform)
     this.head = prev.head ? prev.head : prev
     this.prev = prev

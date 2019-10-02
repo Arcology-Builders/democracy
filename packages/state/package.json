@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "tsc index.ts src/*.ts tests/*.spec.ts",
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+    "test": "yarn build && NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
