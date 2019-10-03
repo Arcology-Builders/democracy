@@ -142,7 +142,9 @@ describe( 'Runners', () => {
     const m3 = subMixin('niece', 500, 'sub')
     const m4 = subMixin('nephew', 700, 'bass')
 
-    const finalState = await run( [ [ m0, m1 ], [ m3, m4 ], m2 ] )
+    const m5 = subMixin('ommer', 300, 'bass')
+
+    const finalState = await run( [ [ m0, m1 ], [ m3, m4 ], m2, m5 ] )
 
     const sub = finalState.get('sub')
     const bass = finalState.get('bass')
@@ -151,6 +153,7 @@ describe( 'Runners', () => {
     assert.equal(sub.get('nieceAddress'), '0x123')
     assert.equal(bass.get('receiverAddress'), '0x123')
     assert.equal(bass.get('nephewAddress'), '0x123')
+    assert.equal(bass.get('ommerAddress'), '0x123')
     assert(finalState.has('lastKey'))
     assert(bass.get('receiverEndTime')  - sub.get('senderEndTime') < 700)
     assert.equal(finalState.get('timeDiff'), bass.get('receiverEndTime')  - sub.get('senderEndTime'))

@@ -168,7 +168,7 @@ runners.run = async (mixinList) => {
             ))
             .then(outState => state.mergeDeep(outState))
         } else {
-          return mixin(state).then(outState => state.merge(outState))
+          return mixin(state).then(outState => state.mergeDeep(outState))
         }
       })
    }, Promise.resolve(Map({})))
