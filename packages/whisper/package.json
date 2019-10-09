@@ -1,6 +1,6 @@
 {
   "name": "demo-shh",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Distributed private messaging for a distributed country",
   "keywords": [
     "ethereum",

@@ -1,14 +1,12 @@
 {
   "name": "demo-state",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "A typed, async transformation pipeline for Democracy.js",
   "directories": {
     "tests": "tests"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
   },
   "devDependencies": {
     "demo-tools": "0.3.3-alpha.0"
