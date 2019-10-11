@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var immutable_1 = require("immutable");
 var chai_1 = require("chai");
 var utils_1 = require("./utils");
@@ -47,21 +47,34 @@ var ArgTypeEnum;
     ArgTypeEnum["MAP"] = "ImmutableMap";
     ArgTypeEnum["LIST"] = "ImmutableList";
 })(ArgTypeEnum = exports.ArgTypeEnum || (exports.ArgTypeEnum = {}));
-var makeType = function (typeName, checker) {
-    var callable = function (arg) { return checker(arg); };
-    chai_1.assert.equal(typeName.search('|'), 0, "Type name " + typeName + " cannot contain | character.");
+exports.makeRequired = function (checkerFunc, typeName) {
+    var callable = checkerFunc;
     callable.typeName = typeName;
     return callable;
 };
-// Standard arg types / checkers
-exports.TYPES = {
-    'string': makeType('string', function (arg) { return (typeof (arg) === 'string'); }),
-    'number': makeType('number', function (arg) { return (typeof (arg) === 'number'); }),
-    'boolean': makeType('boolean', function (arg) { return (typeof (arg) === 'boolean'); }),
-    'map': makeType('map', function (arg) { return (immutable_1["default"].Map.isMap(arg)); }),
-    'list': makeType('list', function (arg) { return (immutable_1["default"].List.isList(arg)); }),
-    'badType': makeType('badType', function (arg) { return false; })
+exports.makeOptional = function (checkerFunc, typeName) {
+    var callable = function (obj) { return ((obj === undefined) || checkerFunc(obj)); };
+    callable.typeName = typeName + '?';
+    return callable;
 };
+// Standard arg types / checkers
+var BASE_TYPES = immutable_1.default.Map({
+    'string': function (arg) { return (typeof (arg) === 'string'); },
+    'number': function (arg) { return (typeof (arg) === 'number'); },
+    'boolean': function (arg) { return (typeof (arg) === 'boolean'); },
+    'map': function (arg) { return (immutable_1.default.Map.isMap(arg)); },
+    'list': function (arg) { return (immutable_1.default.List.isList(arg)); },
+    'badType': function (arg) { return false; },
+    'any': function (arg) { return true; },
+    'integer': function (arg) { return Number.isInteger(arg); },
+    'float': function (arg) { return typeof (parseFloat(arg)) === 'number'; },
+});
+exports.TYPES_MAP = BASE_TYPES.map(function (checker, typeName) {
+    var requiredChecker = exports.makeRequired(checker, typeName);
+    requiredChecker.opt = exports.makeOptional(checker, typeName);
+    return requiredChecker;
+});
+exports.TYPES = exports.TYPES_MAP.toJSON();
 /*
 export const TYPE = (typeString : string): ArgCheckers =>
   Immutable.List(typeString.split('|').map(t => (TYPES[t] || TYPES.badType)))
@@ -74,11 +87,8 @@ const argCheckerSafe = (argType: string): ArgChecker => {
 //const argCheckers: ArgCheckers = Immutable.Map(argCheckerMap)
 exports.checkExtractArgs = function (args, argTypes) {
     return argTypes.map(function (argType, argName) {
-        var argCheckers = immutable_1["default"].List([argType]);
-        //const argCheckers = Immutable.List.isList(argType) ? argType : Immutable.List([argType])
-        chai_1.assert(args.has(argName), "Arg name " + argName + " not found in " + JSON.stringify(args.toJS()));
-        var arg = args.get(argName);
-        //const argCheckers: Immutable.List<ArgChecker> = argTypeList.map((argType) => argCheckerSafe(argType))
+        var argCheckers = immutable_1.default.List([argType]);
+        var arg = args.get(argName); // could be undefined
         var argIsCorrectType = argCheckers.reduce(function (orResult, checker, i, checkers) { return Boolean(orResult || checker(arg)); }, false);
         chai_1.assert(argIsCorrectType, arg + " did not have type " + argTypes + " for arg name " + argName);
         return arg;
@@ -124,7 +134,7 @@ exports.createTransform = function (transform) {
 var createOutputTypes = function (outLabel) {
     var outMap = {};
     outMap[outLabel ? outLabel : 'sum'] = exports.TYPES.number;
-    return immutable_1["default"].Map(outMap);
+    return immutable_1.default.Map(outMap);
 };
 exports.createInitialTransform = function (initialState, types) {
     // Initial input func is just a dummy that returns initial state and doesn't need anything
@@ -140,10 +150,10 @@ exports.createInitialTransform = function (initialState, types) {
         inputTypes: types,
         outputTypes: types,
         cacheable: false,
-        contentHash: new utils_1.Keccak256Hash(func)
+        contentHash: new utils_1.Keccak256Hash(func),
     });
 };
-exports.ADD_INPUT_TYPES = immutable_1["default"].Map({ firstArg: exports.TYPES.number, secondArg: exports.TYPES.number });
+exports.ADD_INPUT_TYPES = immutable_1.default.Map({ firstArg: exports.TYPES.number, secondArg: exports.TYPES.number });
 exports.createAddTransform = function (outLabel) {
     var func = function (_a) {
         var firstArg = _a.firstArg, secondArg = _a.secondArg;
@@ -153,7 +163,7 @@ exports.createAddTransform = function (outLabel) {
                 outMap = {};
                 outMap[outLabel ? outLabel : 'sum'] = Number(firstArg) + Number(secondArg);
                 return [2 /*return*/, new Promise(function (resolve) {
-                        setTimeout(function () { return resolve(immutable_1["default"].Map(outMap)); }, 500);
+                        setTimeout(function () { return resolve(immutable_1.default.Map(outMap)); }, 500);
                     })];
             });
         });
@@ -163,6 +173,6 @@ exports.createAddTransform = function (outLabel) {
         inputTypes: exports.ADD_INPUT_TYPES,
         outputTypes: createOutputTypes(outLabel),
         cacheable: false,
-        contentHash: new utils_1.Keccak256Hash(func)
+        contentHash: new utils_1.Keccak256Hash(func),
     });
 };

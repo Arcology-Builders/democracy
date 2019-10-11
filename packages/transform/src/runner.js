@@ -11,7 +11,9 @@ const { getConfig, getNetwork, Logger } = require('demo-utils')
 const { wallet, isAccount } = require('demo-keys')
 const { Map, List } = require('immutable')
 const { isValidChecksumAddress } = require('ethereumjs-util')
-const LOGGER = new Logger('runner.spec')
+const { DEMO_TYPES } = require('./types')
+const { TYPES, createTransform, createPipeline, PipeHead } = require('demo-state')
+const LOGGER = new Logger('runner')
 
 const runners = {}
 
@@ -24,13 +26,10 @@ const runners = {}
  * @return {Function} returns a mixin which takes no input state and returns an
  *   Immutable {Map} of `chainId`, `deployerAddress`, `deployerPassword`, `deployerEth`
  */
-runners.deployerMixin = () => {
-  return async (state) => {
-    LOGGER.debug('Deployer Input State', state)
-    const { testValueETH, testAccountIndex, unlockSeconds,
-            deployerAddress, deployerPassword } = state.toJS()
-
-    assert(Number.isInteger(unlockSeconds), `unlockSeconds not found in input state`)
+runners.deployerTransform = createTransform({
+  func: async ({
+    testValueETH, testAccountIndex, unlockSeconds, deployerAddress, deployerPassword
+  }) => {
 
     const configAddress  = getConfig()['DEPLOYER_ADDRESS']
     const configPassword = getConfig()['DEPLOYER_PASSWORD']
@@ -75,8 +74,22 @@ runners.deployerMixin = () => {
       deployerEth      : deployerEth,
       wallet           : wallet,
     })
-  }
-}
+  },
+  inputTypes: Map({
+    testValueETH     : TYPES.string,
+    testAccountIndex : DEMO_TYPES.integer,
+    unlockSeconds    : DEMO_TYPES.integer,
+    deployerAddress  : DEMO_TYPES.ethereumAddress.opt,
+    deployerPassword : TYPES.string.opt,
+  }),
+  outputTypes: Map({
+    chainId          : TYPES.string,
+    deployerAddress  : DEMO_TYPES.ethereumAddress,
+    deployerPassword : TYPES.string,
+    deployerEth      : DEMO_TYPES.ethSigner,
+    wallet           : DEMO_TYPES.wallet,
+  })
+})
 
 /**
  * Argument list mixin, takes in an Immutable Map of names to default values,
@@ -91,11 +104,10 @@ runners.deployerMixin = () => {
  *         the names in `argList` as keys and corresponding positional command-line args
  *         as values.
  */
-runners.argListMixin = (argDefaultMap) => {
-  return async (state) => {
-    assert( !argDefaultMap || Map.isMap(argDefaultMap),
-           `Pass in an Immutable Map or nothing for default args` )
-    const _argDefaultMap = argDefaultMap ? argDefaultMap : Map({})
+runners.createArgListTransform = (argTypes) => createTransform({
+  func: async ({ ...stateArgs }) => {
+    const _argDefaultMap = Map({...stateArgs})
+    LOGGER.debug('state', _argDefaultMap)
     LOGGER.debug('args', process.argv)
     const scriptName = path.basename(module.filename)
 
@@ -135,8 +147,10 @@ runners.argListMixin = (argDefaultMap) => {
     const finalArgMap = argMap.merge(defaultArgsFilled)
     LOGGER.debug('finalArgMap', finalArgMap)
     return finalArgMap
-  }
-}
+  },
+  inputTypes: argTypes,
+  outputTypes: argTypes,
+})
 
 /**
  * Runner for a main function that takes a list of mixins to extract, process,
@@ -152,26 +166,22 @@ runners.argListMixin = (argDefaultMap) => {
  * @return Immutable {Map} merging all output states of each mixin sequentially and finally
  *   mainFunc.
  */ 
-runners.run = async (mixinList) => {
+runners.runTransforms = async (_transformList, _initialState=Map({})) => {
   LOGGER.debug('Running a pipeline')
-  
-  return await mixinList.reduce((stateProm, mixin, i) => {
-    LOGGER.debug(`Running mixin ${i}`)
-    return stateProm
-      .then( (state) => {
-        LOGGER.debug(`on input state ${state}`) 
-        if (Array.isArray(mixin)) {
-          LOGGER.debug(`running ${mixin.length} mixins in parallel`)
-          return Promise.all(mixin.map(async (x) => await x(state)))
-            .then(listOfMaps => listOfMaps.reduce(
-              (reducedState, state) => state.mergeDeep(reducedState), Map({})
-            ))
-            .then(outState => state.mergeDeep(outState))
-        } else {
-          return mixin(state).then(outState => state.merge(outState))
-        }
-      })
-   }, Promise.resolve(Map({})))
+
+  const transformList = List.isList(_transformList) ? _transformList : List(_transformList)
+  assert( transformList.count() >= 1)
+  const firstPipe = new PipeHead(List([transformList.first()]))
+ 
+  const finalPipeline = transformList.slice(1).reduce(
+    (pipeSoFar, transform, i) =>
+      pipeSoFar.append(List.isList(transform) ? transform : List([transform])),
+    firstPipe
+  )
+
+  console.log('TRAVERSE LIST', finalPipeline.traverseList)
+  const pipe = createPipeline(finalPipeline)
+  return await pipe(_initialState)
 }
 
 module.exports = runners

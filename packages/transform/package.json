@@ -9,6 +9,7 @@
     "access": "public"
   },
   "dependencies": {
+    "demo-state": "^0.3.8",
     "demo-utils": "^0.3.7"
   },
   "devDependencies": {

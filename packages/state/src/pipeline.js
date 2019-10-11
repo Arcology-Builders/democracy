@@ -48,7 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Immutable = require("immutable");
 var chai_1 = require("chai");
 var transform_1 = require("./transform");
@@ -57,7 +57,7 @@ exports.isSubset = function (a, b) {
     return a.reduce(function (s, val, key, a) {
         var aTypes = Immutable.Set([val.typeName]);
         var bTypes = Immutable.Set([(b.get(key) || transform_1.TYPES.badType).typeName]);
-        return Boolean(s && aTypes.isSubset(bTypes));
+        return Boolean(s && (aTypes.isSubset(bTypes) || val(undefined)));
     }, true);
 };
 var PipeHead = /** @class */ (function () {
@@ -67,7 +67,7 @@ var PipeHead = /** @class */ (function () {
             return JSON.stringify({
                 lastCallables: _this.lastCallables.map(function (x) { return x.transform.toString(); }).toJS(),
                 contentHash: _this.contentHash.toString(),
-                traverseList: _this.traverseList.map(function (t) { return t.contentHash; })
+                traverseList: _this.traverseList.map(function (t) { return t.contentHash; }),
             });
         };
         this.lastCallables = lastCallables;
@@ -75,7 +75,7 @@ var PipeHead = /** @class */ (function () {
         this.cacheable = lastCallables.reduce(function (s, v, k, a) { return s && v.transform.cacheable; }, Boolean(true));
         // More needs to be added to this later
         var hashObj = Immutable.fromJS({
-            lastCallables: lastCallables
+            lastCallables: lastCallables,
         });
         this.contentHash = new utils_1.Keccak256Hash(hashObj);
         this.mergedInputTypes = lastCallables.reduce(function (s, v, k, a) { return s.mergeDeep(v.transform.inputTypes); }, Immutable.Map({}));
@@ -100,7 +100,6 @@ var PipeAppended = /** @class */ (function (_super) {
         _this.traverseList = prev.traverseList.push(_this);
         // This seems somewhat redundant with super class above
         var mergedOutputTypes = callables.reduce(function (s, v, k, a) { return s.mergeDeep(v.transform.outputTypes); }, Immutable.Map({}));
-        console.log("Prev merged output types", prev.mergedOutputTypes.toJS());
         _this.mergedOutputTypes = prev.mergedOutputTypes.mergeDeep(mergedOutputTypes);
         return _this;
     }
@@ -140,7 +139,6 @@ exports.createPipeline = function (pipeline) {
                                     case 0: return [4 /*yield*/, v(inState)];
                                     case 1:
                                         out = _a.sent();
-                                        console.log("Received an output state " + out);
                                         return [2 /*return*/, s.mergeDeep(out)];
                                 }
                             });

@@ -1,11 +1,12 @@
 'use strict'
-
 const assert = require('chai').assert
-const { run, argListMixin, deployerMixin } = require('../src/runner')
+const { runTransforms, createArgListTransform, deployerTransform } = require('../src/runner')
+const { DEMO_TYPES } = require('../src/types')
 
 const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
-const { Map } = require('immutable')
+const { Transform, TYPES, createTransform } = require('demo-state')
+const { Map, List } = require('immutable')
 const LOGGER = new Logger('tests/runner')
 
 describe( 'Runners', () => {
@@ -13,45 +14,95 @@ describe( 'Runners', () => {
   it( 'creates an arglist mixin', async () => {
   
     // Test reading default values for argList, with no argv's passed in
-    const alm0 = await argListMixin(Map({'anotherThing': 2, 'babaloo': 'eighteen'}))
-    const out0 = await alm0(Promise.resolve(Map({})))
+    const alm0 = await createArgListTransform(Map({
+        'anotherThing': DEMO_TYPES.integer,
+        'babaloo'     : TYPES.string,
+    }))
+    const out0 = await alm0(Map({
+      'anotherThing': 2,
+      'babaloo': 'eighteen'
+    }))
     assert.equal( out0.get('anotherThing'), 2 )
     assert.equal( out0.get('babaloo'), 'eighteen' )
 
     // Test reading the argv's
-    process.argv.push('--anotherThing', 'a', '--babaloo', '0x1010')
-    const alm = await argListMixin(Map({'anotherThing': 2, 'babaloo': 'eighteen'}))
-    const out = await alm(Promise.resolve(Map({})))
-    assert.equal( out.get('anotherThing'), 'a' )
+    process.argv.push('--anotherThing', '3', '--babaloo', '0x1010')
+    const out = await alm0(Map({
+      'anotherThing': 2,
+      'babaloo': 'eighteen'
+    }))
+    assert.equal( out.get('anotherThing'), 3 )
     assert.equal( out.get('babaloo'), '0x1010' )
+  })
+
+  it( 'create a simple pipeline', async () => {
   
     // Runs a function with mixins, depends on process.argv above
-    const alm2 = await argListMixin(Map({
+    const alm2 = await createArgListTransform(Map({
+      'anteater': TYPES.string,
+      'bugbear': DEMO_TYPES.any,
+      'unlockSeconds': DEMO_TYPES.integer,
+      'testAccountIndex': DEMO_TYPES.integer,
+      'testValueETH': DEMO_TYPES.string,
+    }))
+
+    /*
       'anteater': 'c', 'bugbear': undefined,
       'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
-    }))
-    const dm = await deployerMixin()
-    const mainFunc = async (finalStateProm) => {
-      const finalState = await finalStateProm
-      assert.equal( finalState.get('chainId'), '2222' )
-      assert.equal( finalState.get('anteater'), 'c' )
-    }
-    await run( [ alm2, dm, mainFunc] ) 
+     */
+    const dm = deployerTransform
+    const mainFunc = createTransform(new Transform(
+      async ({ chainId, anteater }) => {
+        assert.equal( chainId, '2222' )
+        assert.equal( anteater, 'c' )
+        return Map({
+          chainId: '2222',
+        })
+      },
+      Map({
+        chainId  : TYPES.string,
+        anteater : TYPES.string,
+      }),
+      Map({
+        chainId  : TYPES.string,
+      }),
+    ))
+    const result = await runTransforms(
+      [alm2],
+      Map({
+        anteater: 'aiai',
+        bugbear: false,
+        unlockSeconds: 2,
+        testAccountIndex: 5,
+        testValueETH: '0.2',
+      })
+    ) 
   })  
 
-  it( 'creates a deployer mixin', async () => {
-    const alm3 = await argListMixin(Map({
-      'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
+  it( 'creates a deployer transform', async () => {
+    const alm3 = createArgListTransform(Map({
+      'unlockSeconds'    : DEMO_TYPES.integer,
+      'testAccountIndex' : DEMO_TYPES.integer,
+      'testValueETH'     : TYPES.string,
+      'deployerAddress'  : DEMO_TYPES.ethereumAddress.opt,
+      'deployerPassword' : DEMO_TYPES.string.opt,
     }))
-    const dm = await deployerMixin()
-    const out = await dm(await alm3())
-    assert.equal( out.get('deployerAddress').length, 42 )
-    assert.equal( out.get('deployerPassword').length, 64 )
-    const actualId = await out.get('deployerEth').net_version()
+    const dm = deployerTransform
+    const out0 = await alm3(Map({
+      unlockSeconds    : 1,
+      testAccountIndex : 0,
+      testValueETH     : '0.1',
+      deployerAddress  : undefined,
+      deployerPassword : undefined,
+    }))
+    const out1 = await dm(out0)
+    assert.equal( out1.get('deployerAddress').length , 42 )
+    assert.equal( out1.get('deployerPassword').length, 64 )
+    const actualId = await out1.get('deployerEth').net_version()
     const expectedId = await getNetwork().net_version() 
     assert.equal( expectedId, actualId )
   })
-
+/*
   it( 'preserves deployer address and password in deployer mixin', async () => {
     const { address, password } = await wallet.createEncryptedAccount()
     const alm = await argListMixin(Map({
@@ -156,6 +207,6 @@ describe( 'Runners', () => {
     assert.equal(finalState.get('timeDiff'), bass.get('receiverEndTime')  - sub.get('senderEndTime'))
     assert.equal(finalState.count(), 4)
   }) 
-
+*/
 })
 
