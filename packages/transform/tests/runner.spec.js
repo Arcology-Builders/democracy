@@ -127,14 +127,12 @@ describe( 'Runners', () => {
     assert.equal( out.get('deployerPassword'), password )
   })
 
-  /*
   it( 'merges a parallel list of mixins', async () => {
-    const siblingMixin = (keyPrefix, timeout) => {
-      return async (state) => {
-        const { lastKey } = state.toJS()
+    const siblingMixin = (keyPrefix, timeout) => { return createTransform( new Transform(
+      async ({ lastKey }) => {
         const returnMap = {}
-        returnMap[keyPrefix + 'Address'] = '0x123'
-        returnMap[keyPrefix + 'Password'] = '0x456'
+        returnMap[keyPrefix + 'Address'  ] = '0x123'
+        returnMap[keyPrefix + 'Password' ] = '0x456'
         returnMap[keyPrefix + 'StartTime'] = Date.now()
         returnMap['lastKey'] = keyPrefix
         return new Promise((resolve, reject) => {
@@ -143,19 +141,34 @@ describe( 'Runners', () => {
             resolve(Map(returnMap))
           }, timeout)
         })
-      }
-    }
+      },
+      Map({
+        lastKey: TYPES.string,
+      }),
+      Map({ lastKey: TYPES.string })
+        .set(keyPrefix + 'Address'  , TYPES.string)
+        .set(keyPrefix + 'Password' , TYPES.string)
+        .set(keyPrefix + 'StartTime', TYPES.number)
+        .set(keyPrefix + 'EndTime'  , TYPES.number)
+      ,
+    ) )}
 
-    const m2 = async (state) => {
-      const { senderEndTime, receiverEndTime } = state.toJS()
-      return Map({
-        timeDiff: receiverEndTime - senderEndTime
-      })
-    }
+    const m2 = createTransform( new Transform(
+      async ({ senderEndTime, receiverEndTime }) => {
+        return Map({
+          timeDiff: receiverEndTime - senderEndTime
+        })
+      },
+      Map({
+        senderEndTime   : TYPES.number,
+        receiverEndTime : TYPES.number,
+      }),
+      Map({ timeDiff: TYPES.number }),
+    ) )
 
     const m0 = siblingMixin('sender', 1000)
     const m1 = siblingMixin('receiver', 1500)
-    const finalState = await run( [ [ m0, m1 ], m2 ] )
+    const finalState = await runTransforms( [ [ m0, m1 ], m2 ], Map({ lastKey: 'lastKey' }) )
 
     assert.equal(finalState.get('senderAddress'), '0x123')
     assert.equal(finalState.get('receiverAddress'), '0x123')
@@ -164,7 +177,7 @@ describe( 'Runners', () => {
     assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
     assert.equal(finalState.count(), 10)
   })
-
+/*
   it( 'merges substates deeply', async () => {
     const subMixin = (keyPrefix, timeout, subStateLabel) => {
       return async (state) => {

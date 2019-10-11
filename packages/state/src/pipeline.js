@@ -133,13 +133,16 @@ exports.createPipeline = function (pipeline) {
                     if (!(_i < _a.length)) return [3 /*break*/, 4];
                     pipe = _a[_i];
                     return [4 /*yield*/, pipe.lastCallables.reduce(function (s, v, k, a) { return __awaiter(void 0, void 0, void 0, function () {
-                            var out;
+                            var out, mergedOut;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0: return [4 /*yield*/, v(inState)];
                                     case 1:
                                         out = _a.sent();
-                                        return [2 /*return*/, s.mergeDeep(out)];
+                                        return [4 /*yield*/, s];
+                                    case 2:
+                                        mergedOut = (_a.sent()).mergeDeep(out);
+                                        return [2 /*return*/, mergedOut];
                                 }
                             });
                         }); }, inState)

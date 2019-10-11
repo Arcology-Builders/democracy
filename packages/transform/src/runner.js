@@ -152,6 +152,10 @@ runners.createArgListTransform = (argTypes) => createTransform({
   outputTypes: argTypes,
 })
 
+runners.makeList = (_list) => {
+  return List.isList(_list) ? _list : (Array.isArray(_list) ? List(_list) : List([_list]))
+}
+
 /**
  * Runner for a main function that takes a list of mixins to extract, process,
  * and return state. Agnostic to whether the main function is async or not.
@@ -167,19 +171,19 @@ runners.createArgListTransform = (argTypes) => createTransform({
  *   mainFunc.
  */ 
 runners.runTransforms = async (_transformList, _initialState=Map({})) => {
-  LOGGER.debug('Running a pipeline')
+  LOGGER.debug('Running a pipeline on initial state', _initialState)
 
-  const transformList = List.isList(_transformList) ? _transformList : List(_transformList)
-  assert( transformList.count() >= 1)
-  const firstPipe = new PipeHead(List([transformList.first()]))
+  const transformList = runners.makeList(_transformList)
+  assert( List.isList(transformList) )
+  assert( transformList.count() >= 1 )
+  const firstPipe = new PipeHead(runners.makeList(transformList.first()))
  
   const finalPipeline = transformList.slice(1).reduce(
     (pipeSoFar, transform, i) =>
-      pipeSoFar.append(List.isList(transform) ? transform : List([transform])),
+      pipeSoFar.append(runners.makeList(transform)),
     firstPipe
   )
 
-  console.log('TRAVERSE LIST', finalPipeline.traverseList)
   const pipe = createPipeline(finalPipeline)
   return await pipe(_initialState)
 }
