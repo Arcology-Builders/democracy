@@ -102,15 +102,24 @@ describe( 'Runners', () => {
     const expectedId = await getNetwork().net_version() 
     assert.equal( expectedId, actualId )
   })
-/*
+
   it( 'preserves deployer address and password in deployer mixin', async () => {
     const { address, password } = await wallet.createEncryptedAccount()
-    const alm = await argListMixin(Map({
-      'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1',
-      'deployerAddress': address, 'deployerPassword': password,
+    const alm = await createArgListTransform(Map({
+      'unlockSeconds'    : DEMO_TYPES.integer,
+      'testAccountIndex' : DEMO_TYPES.integer,
+      'testValueETH'     : TYPES.string,
+      'deployerAddress'  : DEMO_TYPES.ethereumAddress.opt,
+      'deployerPassword' : DEMO_TYPES.string.opt,
     }))
-    const dm = await deployerMixin()
-    const out1 = await alm()
+    const dm = deployerTransform
+    const out1 = await alm(Map({
+      'unlockSeconds'    : 1,
+      'testAccountIndex' : 0,
+      'testValueETH'     : '0.1',
+      'deployerAddress'  : address,
+      'deployerPassword' : password,
+    }))
     assert.equal( out1.get('deployerAddress'), address )
     assert.equal( out1.get('deployerPassword'), password )
     const out = await dm(out1)
@@ -118,6 +127,7 @@ describe( 'Runners', () => {
     assert.equal( out.get('deployerPassword'), password )
   })
 
+  /*
   it( 'merges a parallel list of mixins', async () => {
     const siblingMixin = (keyPrefix, timeout) => {
       return async (state) => {
