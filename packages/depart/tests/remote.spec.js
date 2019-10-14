@@ -17,8 +17,10 @@ const LOGGER = new Logger('remote.spec')
 const { wallet } = require('demo-keys')
 const { isCompile, isLink, isDeploy } = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { argListMixin, deployerMixin, run } = require('demo-transform')
-const { departMixin } = require('..')
+const { DEMO_TYPES: TYPES } = require('demo-transform')
+const { createTransform } = require('demo-state')
+const { departTransform } = require('..')
+const { runStandardTransforms } = require('./common')
 
 describe( 'Remote departures', () => {
   
@@ -37,6 +39,60 @@ describe( 'Remote departures', () => {
   before(async () => {
     chainId = await eth.net_version()
     testAccounts = await eth.accounts()
+    const departFunc = createTransform({
+      func: async ({compile, link, deploy, bm, deployerEth, deployerAddress }) => {
+				// We only need to do this here b/c tests are in NODE_ENV=DEVELOPMENT
+				// In an actual departure this isn't necessary 
+				await wallet.payTest({
+					fromAddress : testAccounts[5],
+					toAddress   : deployerAddress,
+					weiValue    : toWei('0.1', 'ether'),
+				}) 
+
+				//LOGGER.info( 'Compiling', Date.now() )
+				const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
+				assert(isCompile(cout),
+							 `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
+				
+				//LOGGER.info( 'Linking', Date.now() )
+				const lout = await link( 'DifferentSender', 'link' )
+				assert(isLink(lout),
+							 `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
+				assert( isLink( await bm.getLink('DifferentSender-link')) )
+
+				//LOGGER.info( 'Deploying', Date.now() )
+				const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
+				assert(isDeploy(dout),
+							 `Deploying output invalid: ${JSON.stringify(dout.toJS())}`)
+				
+				wallet.shutdownSync()
+				return new Map({ result: true })
+			},
+      inputTypes: Map({
+        compile         : TYPES['function'],
+        link            : TYPES['function'],
+        deploy          : TYPES['function'],
+        bm              : TYPES.bm,
+        deployerEth     : TYPES.ethereumSigner,
+        deployerAddress : TYPES.ethereumAddress,
+      }),
+      outputTypes: Map({
+        result          : TYPES.boolean,
+      }),
+    }) 
+
+    finalState = await runStandardTransforms(
+      departFunc,
+      Map({
+        testValueETH     : '0.1',
+        testAccountIndex : 0,
+        unlockSeconds    : 20,
+        departName       : "remote-departure",
+        autoConfig       : true,
+        sourcePathList   : ["../../node_modules/demo-test-contracts/contracts"],
+      })
+    )
+    bm = finalState.bm
 /*
     await wallet.init({ autoConfig: true, unlockSeconds: 10 })
 
@@ -53,46 +109,6 @@ describe( 'Remote departures', () => {
   })
 
   it( 'executing a remote departure', async () => {
-    const m0 = argListMixin(Map({
-      testValueETH: '0.1', testAccountIndex: 0, unlockSeconds: 20,
-      departName: "remote-departure", autoConfig: true,
-      sourcePathList: ["../../node_modules/demo-test-contracts/contracts"],
-    }))
-    const m1 = deployerMixin()
-    const m2 = departMixin()
-    const departFunc = async (state) => {
-      const {compile, link, deploy, bm, deployerEth, deployerAddress} = state.toJS()
-       
-      // We only need to do this here b/c tests are in NODE_ENV=DEVELOPMENT
-      // In an actual departure this isn't necessary 
-      await wallet.payTest({
-        fromAddress: testAccounts[5],
-        toAddress: deployerAddress,
-        weiValue: toWei('0.1', 'ether'),
-      }) 
-
-      //LOGGER.info( 'Compiling', Date.now() )
-      const cout = await compile( 'DifferentSender', 'DifferentSender.sol' )
-      assert(isCompile(cout),
-             `Compiling output invalid: ${JSON.stringify(cout.toJS())}`)
-      
-      //LOGGER.info( 'Linking', Date.now() )
-      const lout = await link( 'DifferentSender', 'link' )
-      assert(isLink(lout),
-             `Linking output invalid: ${JSON.stringify(lout.toJS())}`)
-      assert( isLink( await bm.getLink('DifferentSender-link')) )
-
-      //LOGGER.info( 'Deploying', Date.now() )
-      const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
-      assert(isDeploy(dout),
-             `Deploying output invalid: ${JSON.stringify(dout.toJS())}`)
-      
-      wallet.shutdownSync()
-      return new Map({ result: true })
-    }
-
-    finalState = (await run( [ m0, m1, m2, departFunc ] )).toJS()
-    bm = finalState.bm
     assert.notEqual(bm.inputter, getImmutableKey)
     assert.notEqual(bm.outputter, setImmutableKey)
     assert(Map.isMap(finalState.getCompiles()))

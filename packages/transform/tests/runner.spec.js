@@ -177,46 +177,72 @@ describe( 'Runners', () => {
     assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
     assert.equal(finalState.count(), 10)
   })
+// Re-enable these tests when we support substate / map types in demo-state
 /*
   it( 'merges substates deeply', async () => {
     const subMixin = (keyPrefix, timeout, subStateLabel) => {
-      return async (state) => {
-        const { lastKey } = state.toJS()
-        const returnMap = {}
-        returnMap[keyPrefix + 'Address'] = '0x123'
-        returnMap[keyPrefix + 'Password'] = '0x456'
-        returnMap[keyPrefix + 'StartTime'] = Date.now()
-        returnMap['lastKey'] = keyPrefix
-        let out
-        if (subStateLabel) { 
-          out = {}
-          out[subStateLabel] = returnMap
-        } else {
-          out = returnMap
-        }
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            returnMap[keyPrefix + 'EndTime'] = Date.now()
-            resolve(fromJS(out))
-          }, timeout)
-        })
-      }
+      return createTransform(new Transform(
+        async ({ lastKey }) => {
+          const returnMap = {}
+          returnMap[keyPrefix + 'Address'] = '0x123'
+          returnMap[keyPrefix + 'Password'] = '0x456'
+          returnMap[keyPrefix + 'StartTime'] = Date.now()
+          returnMap['lastKey'] = keyPrefix
+          let out
+          if (subStateLabel) { 
+            out = {}
+            out[subStateLabel] = returnMap
+          } else {
+            out = returnMap
+          }
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              returnMap[keyPrefix + 'EndTime'] = Date.now()
+              resolve(fromJS(out))
+            }, timeout)
+          })
+        },
+        Map({
+          lastKey: TYPES.string,
+        }),
+        Map({ lastKey: TYPES.string })
+          .set(keyPrefix + 'Address'  , TYPES.string)
+          .set(keyPrefix + 'Password' , TYPES.string)
+          .set(keyPrefix + 'StartTime', TYPES.number)
+          .set(keyPrefix + 'EndTime'  , TYPES.number)
+        ,
+      ))
     }
 
-    const m2 = async (state) => {
-      const { sub: { senderEndTime } , bass: { receiverEndTime } } = state.toJS()
-      return Map({
-        lastKey : 'no im the only one',
-        timeDiff: receiverEndTime - senderEndTime
-      })
-    }
+    const m2 = createTransform( new Transform(
+        async ({ sub: { senderEndTime } , bass: { receiverEndTime } }) => {
+          return Map({
+            lastKey : 'no im the only one',
+            timeDiff: receiverEndTime - senderEndTime
+          })
+        },
+        Map({
+          'sub': TYPES.map,
+          'bass': TYPES.map,
+        }),
+       Map({ 
+          'lastKey': TYPES.string,
+          'timeDiff': TYPES.number,
+       })
+    ) )
 
     const m0 = subMixin('sender', 1000, 'sub')
     const m1 = subMixin('receiver', 1500, 'bass')
     const m3 = subMixin('niece', 500, 'sub')
     const m4 = subMixin('nephew', 700, 'bass')
 
-    const finalState = await run( [ [ m0, m1 ], [ m3, m4 ], m2 ] )
+    const finalState = await runTransforms(
+      [ [ m0, m1 ], [ m3, m4 ], m2 ],
+      Map({
+        lastKey: '',
+        sub: Map({}),
+        bass: Map({}),
+      }) )
 
     const sub = finalState.get('sub')
     const bass = finalState.get('bass')

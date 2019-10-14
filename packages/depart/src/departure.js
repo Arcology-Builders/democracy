@@ -7,6 +7,8 @@ const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
+const { createTransform } = require('demo-state')
+const { DEMO_TYPES: TYPES } = require('demo-transform')
 
 const LOGGER = new utils.Logger('departure')
 
@@ -30,18 +32,16 @@ const departs = {}
  * @method depart
  * @memberof @module:depart
  */
-departs.departMixin = () => {
-  return async (state) => {
-
-    const{ chainId, deployerEth, deployerAddress, departName, autoConfig,
-      sourcePathList, compileFlatten, compileOutputFull } = state.toJS()
+departs.departTransform = createTransform({
+  func: async ({ chainId, deployerEth, deployerAddress, departName, autoConfig,
+      sourcePathList, compileFlatten, compileOutputFull }) => {
     assert( chainId, `chainId not in input state.` )
     assert( deployerEth, `deployerEth not in input state.` )
     assert( deployerAddress, `deployerAddress not in input state.` )
 
     const bm = await createBM({
       sourcePathList: sourcePathList,
-      chainId   : state.get('chainId'),
+      chainId,
       autoConfig: !(autoConfig === false),
     })
 
@@ -55,8 +55,8 @@ departs.departMixin = () => {
       bm: bm
     })
     const d = new Deployer({
-      bm: bm, chainId: state.get('chainId'),
-      eth: state.get('deployerEth'), address: state.get('deployerAddress')
+      bm, chainId,
+      eth: deployerEth, address: deployerAddress,
     })
 
     let compiles = new Map()
@@ -155,21 +155,42 @@ departs.departMixin = () => {
     }
 
     return new Map({
-      departName  : departName,
-      clean       : clean,
-      deploy      : deploy,
-      deployed    : deployed,
-      minedTx     : minedTx,
-      link        : link,
-      compile     : compile,
-      bm          : bm,
-      getCompiles : getCompiles,
-      getLinks    : getLinks,
-      getDeploys  : getDeploys,
+      departName  : departName ,
+      clean       : clean      ,
+      deploy      : deploy     ,
+      deployed    : deployed   ,
+      minedTx     : minedTx    ,
+      link        : link       ,
+      compile     : compile    ,
+      bm          : bm         ,
+      getCompiles,
+      getLinks   ,
+      getDeploys ,
     })
 
-  }
-
-}
+  },
+  inputTypes: Map({
+    chainId           : TYPES.string         ,
+    deployerEth       : TYPES.ethereumSigner ,
+    deployerAddress   : TYPES.ethereumAddress,
+    departName        : TYPES.string.opt     ,
+    autoConfig        : TYPES.boolean.opt    ,
+    sourcePathList    : TYPES.array          ,
+    compileFlatten    : TYPES.boolean.opt    ,
+    compileOutputFull : TYPES.boolean.opt    ,
+  }),
+  outputTypes: Map({
+    clean       : TYPES['function']   ,
+    deploy      : TYPES['function']   ,
+    deployed    : TYPES['function']   ,
+    minedTx     : TYPES['function']   ,
+    link        : TYPES['function']   ,
+    compile     : TYPES['function']   ,
+    bm          : TYPES.bm            ,
+    getCompiles    : TYPES['function'],
+    getLinks       : TYPES['function'],
+    getDeploys     : TYPES['function'],
+  })
+})
 
 module.exports = departs

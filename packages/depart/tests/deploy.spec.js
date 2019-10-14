@@ -2,8 +2,9 @@ const { assert } = require('chai')
 const { Map } = require('immutable')
 const { isAccount } = require('demo-keys')
 const { Logger } = require('demo-utils')
+const { DEMO_TYPES: TYPES } = require('demo-transform')
 const LOGGER = new Logger('depart/deploy.spec')
-const { deployerMixin, argListMixin, run } = require('demo-transform')
+const { deployerTransform, createArgListTransform, runTransforms } = require('demo-transform')
 
 describe('Deployer mixin', () => {
 
@@ -13,13 +14,24 @@ describe('Deployer mixin', () => {
   let result
 
   before(async () => {
-    const md = deployerMixin()
-    const ma = argListMixin(Map({
-      deployerAddress  : ADDRESS,
-      deployerPassword : PASSWORD,
-      unlockSeconds    : 5,
+    const md = deployerTransform
+    const ma = await createArgListTransform(Map({
+      deployerAddress  : TYPES.ethereumAddress,
+      deployerPassword : TYPES.string,
+      unlockSeconds    : TYPES.integer,
+      testAccountIndex : TYPES.integer,
+      testValueETH     : TYPES.string,
     }))
-    result = await run( [ ma, md ] ) 
+    result = await runTransforms(
+      [ ma, md ],
+      Map({
+				deployerAddress  : ADDRESS,
+				deployerPassword : PASSWORD,
+				unlockSeconds    : 5,
+        testAccountIndex : 0,
+        testValueETH     : '0.01',
+      })
+		) 
   })
   
   it('takes in deployerAddress/Password from state', async () => {

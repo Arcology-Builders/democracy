@@ -8,8 +8,9 @@ const fs = require('fs')
 const path = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
-const { run, deployerMixin, argListMixin } = require('demo-transform')
-const { departMixin } = require('demo-depart')
+const { runTransforms, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
+const { departTransform, argListTransform } = require('demo-depart')
+const { createTransform } = require('demo-state')
 const LOGGER = new Logger('demo-depart')
 
 let departOptions
@@ -19,38 +20,62 @@ const depart = (options, callback) => {
   departCallback = callback
 }
 
-const m0 = argListMixin(Map({
+const m0 = argListTransform
+
+const initialState = Map({
   'departFileName'   : 'depart.js', // --departFileName
-  'testValueEth'     : '0.1'      ,
+  'testValueETH'     : '0.1'      ,
   'testAccountIndex' : 0          ,
   'unlockSeconds'    : 30,
-}))
+  'sourcePathList'   : [],
+})
 
 // Insert this custom mixin to read in a departure file and save its name
 // and callback
-const m1 = async (state) => {
-  const { departFileName } = state.toJS()
-  LOGGER.info(`Depart filename ${departFileName}`)
-  const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
-  eval(departFile)
+const m1 = createTransform({
+  func: async ({ departFileName }) => {
+    LOGGER.info(`Depart filename ${departFileName}`)
+    const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
+    eval(departFile)
 
-  return Map({
-    departFile : departFile,
-    ...departOptions,
+    return Map({
+      departFile : departFile,
+      ...departOptions,
+    })
+  },
+  inputTypes: Map({
+    departFileName: TYPES.string,
+  }),
+  outputTypes: Map({
+    departFile: TYPES.string,
+  }),
+})
+
+const m2 = deployerTransform
+
+const m3 = departTransform
+
+const departFunc = createTransform({
+  func: async function({
+    bm, compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress, departFile
+  }) {
+    const result = await departCallback({...arguments[0]})
+    wallet.shutdownSync()
+    return new Map({ 'result': result })
+  },
+  inputTypes: Map({
+    compile: TYPES['function'],
+    link: TYPES['function'],
+    deploy: TYPES['function'],
+    deployed: TYPES['function'],
+    minedTx: TYPES['function'],
+    deployerEth: TYPES.ethereumSigner,
+    deployerAddress: TYPES.ethereumAddress,
+    departFile: TYPES.string,
+  }),
+  outputTypes: Map({
+    result: TYPES.any,
   })
-}
+})
 
-const m2 = deployerMixin()
-
-const m3 = departMixin()
-
-const departFunc = async (state) => {
-  const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
-          departFile } = state.toJS() 
-
-  const result = await departCallback({...state.toJS()})
-  wallet.shutdownSync()
-  return new Map({ 'result': result })
-}
-
-run( [ m0, m1, m2, m3, departFunc ] )
+runTransforms( [ m0, m1, m2, m3, departFunc ], initialState )

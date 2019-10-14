@@ -7,8 +7,9 @@ const fs = require('fs')
 const path = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
-const { run, argListMixin, deployerMixin } = require('./runner')
-const { departMixin, compileMixin, bmMixin } = require('./departure')
+const { runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
+const { createTransform } = require('demo-state')
+const { departTransform } = require('./departure')
 const LOGGER = new Logger('depart/top')
 const assert = require('chai').assert
 
@@ -20,37 +21,56 @@ const depart = (inputState, callback) => {
   departCallback = callback
 }
 
-// Insert this custom mixin to read in a departure file and save its name
-// and callback
-const m1 = async (state) => {
-  const { departFileName } = state.toJS()
-  LOGGER.info(`Depart filename ${departFileName}`)
-  const departFilePath = path.join(process.cwd(), departFileName)
-  const departFile = fs.existsSync(departFilePath) ?
-    fs.readFileSync(departFilePath).toString() : ''
-
-  // TODO If it's ever useful to save output state of eval, like console line,
-  // save the return value here and add it to the returned state below
-  eval(departFile)
-
-  return Map({
-    departFile : departFile,
-  }).merge(departInputState)
-}
-
-const m2 = deployerMixin()
-const m3 = bmMixin()
-const m4 = departMixin()
-
 const departs = {}
 
-departs.departFunc = async (state) => {
-  const { compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress,
-          departFile } = state.toJS() 
+departs.argListTransform = createArgListTransform(Map({
+	unlockSeconds    : TYPES.integer,
+	testValueETH     : TYPES.string,
+	testAccountIndex : TYPES.integer,
+	departName       : TYPES.string.opt,
+	autoConfig       : TYPES.boolean.opt,
+  departFileName   : TYPES.string,
+	sourcePathList   : TYPES.array,
+}))
 
-  const result = (departCallback) ? (await departCallback({...state.toJS()})) : null
-  return new Map({ 'result': result })
-}
+// Insert this custom mixin to read in a departure file and save its name
+// and callback
+const m1 = createTransform({
+  func: async ({ departFileName }) => {
+		LOGGER.info(`Depart filename ${departFileName}`)
+		const departFilePath = path.join(process.cwd(), departFileName)
+		const departFile = fs.existsSync(departFilePath) ?
+			fs.readFileSync(departFilePath).toString() : ''
+
+		// TODO If it's ever useful to save output state of eval, like console line,
+		// save the return value here and add it to the returned state below
+		eval(departFile)
+
+		return Map({
+			departFile : departFile,
+		}).merge(departInputState)
+  },
+  inputTypes: Map({
+    departFileName: TYPES.string
+	}),
+  outputTypes: Map({
+    departFile: TYPES.string
+  }),
+})
+
+const m2 = deployerTransform
+const m4 = departTransform
+
+departs.callbackTransform = createTransform({
+  func: async ({
+    compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress, departFile
+  }) => {
+		const result = (departCallback) ? (await departCallback({...state.toJS()})) : null
+		return new Map({ 'result': result })
+	},
+  inputTypes: Map({}),
+  outputTypes: Map({}),
+})
 
 departs.end = async (state) => {
   LOGGER.info('departs.end')
@@ -91,14 +111,22 @@ departs.top = async (inputState, createCompiler) => {
  * @param createCompiler {Function} a function to create a new language-specific compiler
  *   in a departure. If empty, defaults to departs.createEmptyCompiler
  */
-departs.begin = async (inputState, createCompiler) => {
-  const m0 = argListMixin(Map({
+departs.begin = async (inputState) => {
+  const initalState = Map({
     'departFileName'   : 'depart.js', // can be override on command-line --departFileName
     'testValueEth'     : '0.1'      ,
     'testAccountIndex' : 0          ,
     'unlockSeconds'    : 30,
-  }).merge(inputState))
-  return (await run( m0, m1, m2, m3, compileMixin(createCompiler), m4, departs.departFunc ))
+    'sourcePathList'   : [],
+  }).merge(inputState)
+  return (await runTransforms(
+    [
+      departs.argListTransform,
+      m1, m2, m3, 
+      m4, departs.callbackTransform
+    ],
+    initialState,
+ ))
 }
 
 module.exports = departs

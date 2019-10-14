@@ -86,7 +86,7 @@ runners.deployerTransform = createTransform({
     chainId          : TYPES.string,
     deployerAddress  : DEMO_TYPES.ethereumAddress,
     deployerPassword : TYPES.string,
-    deployerEth      : DEMO_TYPES.ethSigner,
+    deployerEth      : DEMO_TYPES.ethereumSigner,
     wallet           : DEMO_TYPES.wallet,
   })
 })
@@ -156,6 +156,10 @@ runners.makeList = (_list) => {
   return List.isList(_list) ? _list : (Array.isArray(_list) ? List(_list) : List([_list]))
 }
 
+runners.isTransform = (_obj) => {
+  return _obj['transform'] || (List.isList(_obj) && _obj.reduce((s,v) => Boolean(s || v['transform'])))
+}
+
 /**
  * Runner for a main function that takes a list of mixins to extract, process,
  * and return state. Agnostic to whether the main function is async or not.
@@ -179,8 +183,10 @@ runners.runTransforms = async (_transformList, _initialState=Map({})) => {
   const firstPipe = new PipeHead(runners.makeList(transformList.first()))
  
   const finalPipeline = transformList.slice(1).reduce(
-    (pipeSoFar, transform, i) =>
-      pipeSoFar.append(runners.makeList(transform)),
+    (pipeSoFar, transform, i) => {
+      assert( runners.isTransform(transform), `Item ${i} is not a transform`)
+      return pipeSoFar.append(runners.makeList(transform))
+    },
     firstPipe
   )
 
