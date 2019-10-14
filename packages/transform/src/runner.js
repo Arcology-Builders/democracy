@@ -1,4 +1,4 @@
- 'usestrict';
+ 'use strict';
 
 /**
  * Command-line runners and mixins for extracting arguments and configs of all kinds

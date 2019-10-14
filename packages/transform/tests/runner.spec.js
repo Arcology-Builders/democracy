@@ -231,10 +231,10 @@ describe( 'Runners', () => {
        })
     ) )
 
-    const m0 = subMixin('sender', 1000, 'sub')
-    const m1 = subMixin('receiver', 1500, 'bass')
-    const m3 = subMixin('niece', 500, 'sub')
-    const m4 = subMixin('nephew', 700, 'bass')
+    const m0 = subMixin('sender'   , 1000, 'sub')
+    const m1 = subMixin('receiver' , 1500, 'bass')
+    const m3 = subMixin('niece'    , 500 , 'sub')
+    const m4 = subMixin('nephew'   , 700 , 'bass')
 
     const finalState = await runTransforms(
       [ [ m0, m1 ], [ m3, m4 ], m2 ],
@@ -247,14 +247,16 @@ describe( 'Runners', () => {
     const sub = finalState.get('sub')
     const bass = finalState.get('bass')
 
-    assert.equal(sub.get('senderAddress'), '0x123')
-    assert.equal(sub.get('nieceAddress'), '0x123')
+    assert.equal(sub.get('senderAddress')   , '0x123')
+    assert.equal(sub.get('nieceAddress')    , '0x123')
     assert.equal(bass.get('receiverAddress'), '0x123')
-    assert.equal(bass.get('nephewAddress'), '0x123')
+    assert.equal(bass.get('nephewAddress')  , '0x123')
+    assert.equal(bass.get('ommerAddress')   , '0x123')
     assert(finalState.has('lastKey'))
     assert(bass.get('receiverEndTime')  - sub.get('senderEndTime') < 700)
     assert.equal(finalState.get('timeDiff'), bass.get('receiverEndTime')  - sub.get('senderEndTime'))
-    assert.equal(finalState.count(), 4)
+    assert.equal( finalState.count(), 5 )
+    assert.equal( finalState.get('survivor'), 'I am', `Main state initial key does not survive parallel substates` )
   }) 
 */
 })
