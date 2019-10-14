@@ -1,6 +1,6 @@
 {
   "name": "demo-state",
-  "version": "0.3.8",
+  "version": "0.4.0-alpha.0",
   "description": "A typed, async transformation pipeline for Democracy.js",
   "directories": {
     "tests": "tests"
