@@ -1,21 +1,31 @@
 'use strict'
 
 const { assert } = require('chai')
-const { isHexPrefixed, DEMO_TYPES, subbedKey } = require('..')
-const { getConfig } = require('demo-utils')
+const { isHexPrefixed, DEMO_TYPES, subStateKey } = require('..')
+const { getConfig, getNetwork } = require('demo-utils')
 const { wallet } = require('demo-keys')
-const { createBM } = require('demo-contract')
+const { createBM, getInstance } = require('demo-contract')
 
 describe('Transform types', () => {
 
   const TEST_ADDRESS = getConfig()['DEPLOYER_ADDRESS']
 
-  let bm
   let instance
+  let bm
 
   before(async () => {
     await wallet.init({ unlockSeconds: 10 })
-    bm = await createBM({ autoConfig: true })
+    bm = await createBM({ autoConfig: false, chainId: '2222' })
+    const deploy = await bm.getDeploy('DifferentSender-deploy')
+    const eth = getNetwork()
+    instance = await getInstance(eth, deploy)
+  })
+
+  it('substate key', async () => {
+    assert.equal( subStateKey('bidder', 'tradeSymbol'), 'bidderTradeSymbol',
+                 `bidderTradeSymbol key not generated correctly.`)
+    assert.equal( subStateKey('', 'tradeSymbol'), 'tradeSymbol',
+                 `tradeSymbol key not generated correctly.`)
   })
 
   it('detects prefixed hex', async () => {
@@ -46,8 +56,8 @@ describe('Transform types', () => {
            'Wallet is erroneously detected as a valid builds manager' )
   })
 
-  it('detects Democracy contract instances', async () => {
-    assert( DEMO_TYPES.contractInstance(instanc3),
+  it('detects Democracy contracts', async () => {
+    assert( DEMO_TYPES.contractInstance(instance),
            'Valid builds manager is not detected as such' )
     assert.notOk( DEMO_TYPES.bm(wallet),
            'Wallet is erroneously detected as a valid builds manager' )
