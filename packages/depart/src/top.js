@@ -112,9 +112,9 @@ departs.top = async (inputState, createCompiler) => {
  *   in a departure. If empty, defaults to departs.createEmptyCompiler
  */
 departs.begin = async (inputState) => {
-  const initalState = Map({
+  const initialState = Map({
     'departFileName'   : 'depart.js', // can be override on command-line --departFileName
-    'testValueEth'     : '0.1'      ,
+    'testValueETH'     : '0.1'      ,
     'testAccountIndex' : 0          ,
     'unlockSeconds'    : 30,
     'sourcePathList'   : [],
@@ -122,7 +122,7 @@ departs.begin = async (inputState) => {
   return (await runTransforms(
     [
       departs.argListTransform,
-      m1, m2, m3, 
+      m1, m2, 
       m4, departs.callbackTransform
     ],
     initialState,
