@@ -1,11 +1,12 @@
 'use strict'
 const assert = require('chai').assert
-const { runTransforms, createArgListTransform, deployerTransform } = require('../src/runner')
-const { DEMO_TYPES } = require('../src/types')
+const {
+  runTransforms, assembleCallablePipeline, createArgListTransform, deployerTransform
+} = require('../src/runner')
+const { DEMO_TYPES: TYPES, createTransform } = require('..')
 
 const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
-const { Transform, TYPES, createTransform } = require('demo-state')
 const { Map, List } = require('immutable')
 const LOGGER = new Logger('tests/runner')
 
@@ -15,7 +16,7 @@ describe( 'Runners', () => {
   
     // Test reading default values for argList, with no argv's passed in
     const alm0 = await createArgListTransform(Map({
-        'anotherThing': DEMO_TYPES.integer,
+        'anotherThing': TYPES.integer,
         'babaloo'     : TYPES.string,
     }))
     const out0 = await alm0(Map({
@@ -40,10 +41,10 @@ describe( 'Runners', () => {
     // Runs a function with mixins, depends on process.argv above
     const alm2 = await createArgListTransform(Map({
       'anteater': TYPES.string,
-      'bugbear': DEMO_TYPES.any,
-      'unlockSeconds': DEMO_TYPES.integer,
-      'testAccountIndex': DEMO_TYPES.integer,
-      'testValueETH': DEMO_TYPES.string,
+      'bugbear': TYPES.any,
+      'unlockSeconds': TYPES.integer,
+      'testAccountIndex': TYPES.integer,
+      'testValueETH': TYPES.string,
     }))
 
     /*
@@ -51,22 +52,22 @@ describe( 'Runners', () => {
       'unlockSeconds': 1, 'testAccountIndex': 0, 'testValueETH': '0.1'
      */
     const dm = deployerTransform
-    const mainFunc = createTransform(new Transform(
-      async ({ chainId, anteater }) => {
+    const mainFunc = createTransform({
+      func: async ({ chainId, anteater }) => {
         assert.equal( chainId, '2222' )
         assert.equal( anteater, 'c' )
         return Map({
           chainId: '2222',
         })
       },
-      Map({
+      inputTypes: Map({
         chainId  : TYPES.string,
         anteater : TYPES.string,
       }),
-      Map({
+      outputTypes: Map({
         chainId  : TYPES.string,
       }),
-    ))
+    })
     const result = await runTransforms(
       [alm2],
       Map({
@@ -81,11 +82,11 @@ describe( 'Runners', () => {
 
   it( 'creates a deployer transform', async () => {
     const alm3 = createArgListTransform(Map({
-      'unlockSeconds'    : DEMO_TYPES.integer,
-      'testAccountIndex' : DEMO_TYPES.integer,
+      'unlockSeconds'    : TYPES.integer,
+      'testAccountIndex' : TYPES.integer,
       'testValueETH'     : TYPES.string,
-      'deployerAddress'  : DEMO_TYPES.ethereumAddress.opt,
-      'deployerPassword' : DEMO_TYPES.string.opt,
+      'deployerAddress'  : TYPES.ethereumAddress.opt,
+      'deployerPassword' : TYPES.string.opt,
     }))
     const dm = deployerTransform
     const out0 = await alm3(Map({
@@ -106,11 +107,11 @@ describe( 'Runners', () => {
   it( 'preserves deployer address and password in deployer mixin', async () => {
     const { address, password } = await wallet.createEncryptedAccount()
     const alm = await createArgListTransform(Map({
-      'unlockSeconds'    : DEMO_TYPES.integer,
-      'testAccountIndex' : DEMO_TYPES.integer,
+      'unlockSeconds'    : TYPES.integer,
+      'testAccountIndex' : TYPES.integer,
       'testValueETH'     : TYPES.string,
-      'deployerAddress'  : DEMO_TYPES.ethereumAddress.opt,
-      'deployerPassword' : DEMO_TYPES.string.opt,
+      'deployerAddress'  : TYPES.ethereumAddress.opt,
+      'deployerPassword' : TYPES.string.opt,
     }))
     const dm = deployerTransform
     const out1 = await alm(Map({
@@ -128,8 +129,8 @@ describe( 'Runners', () => {
   })
 
   it( 'merges a parallel list of mixins', async () => {
-    const siblingMixin = (keyPrefix, timeout) => { return createTransform( new Transform(
-      async ({ lastKey }) => {
+    const siblingMixin = (keyPrefix, timeout) => createTransform({
+      func: async ({ lastKey }) => {
         const returnMap = {}
         returnMap[keyPrefix + 'Address'  ] = '0x123'
         returnMap[keyPrefix + 'Password' ] = '0x456'
@@ -142,33 +143,48 @@ describe( 'Runners', () => {
           }, timeout)
         })
       },
-      Map({
+      inputTypes: Map({
         lastKey: TYPES.string,
       }),
-      Map({ lastKey: TYPES.string })
+      outputTypes: Map({ lastKey: TYPES.string })
         .set(keyPrefix + 'Address'  , TYPES.string)
         .set(keyPrefix + 'Password' , TYPES.string)
         .set(keyPrefix + 'StartTime', TYPES.number)
         .set(keyPrefix + 'EndTime'  , TYPES.number)
       ,
-    ) )}
+    })
 
-    const m2 = createTransform( new Transform(
-      async ({ senderEndTime, receiverEndTime }) => {
+    const m2 = createTransform({
+      func: async ({ senderEndTime, receiverEndTime }) => {
         return Map({
           timeDiff: receiverEndTime - senderEndTime
         })
       },
-      Map({
+      inputTypes: Map({
         senderEndTime   : TYPES.number,
         receiverEndTime : TYPES.number,
       }),
-      Map({ timeDiff: TYPES.number }),
-    ) )
+      outputTypes: Map({ timeDiff: TYPES.number }),
+    })
+
+    assert( m2.transform.inputTypes, `${m2.transform} does not have inputTypes` )
 
     const m0 = siblingMixin('sender', 1000)
     const m1 = siblingMixin('receiver', 1500)
-    const finalState = await runTransforms( [ [ m0, m1 ], m2 ], Map({ lastKey: 'lastKey' }) )
+    
+    const callablePipeline1 = assembleCallablePipeline( [ [ m0, m1 ] ] )
+    assert( callablePipeline1.pipeline, `assembleCallablePipeline does not` )
+    const callablePipeline2 = assembleCallablePipeline( [ m2 ] )
+    assert( callablePipeline2.pipeline, `assembleCallablePipeline does not` )
+    const initialState = Map({ lastKey: 'lastKey' })
+
+    const finalState1 = await callablePipeline1( initialState )
+    assert( Map.isMap(finalState1), `result of callablePipeline was not an Immutable Map` )
+    const finalState2 = await callablePipeline2( finalState1 )
+
+    const finalState = await runTransforms( [ [ m0, m1 ], m2 ], initialState )
+    assert( immEqual( List(finalState2.keys()), List(finalState.keys()) ),
+           `Final state 2 ${JSON.stringify(finalState2.toJS())} different than final state ${JSON.stringify(finalState.toJS())}` )
 
     assert.equal(finalState.get('senderAddress'), '0x123')
     assert.equal(finalState.get('receiverAddress'), '0x123')

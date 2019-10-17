@@ -12,10 +12,17 @@ const { wallet, isAccount } = require('demo-keys')
 const { Map, List } = require('immutable')
 const { isValidChecksumAddress } = require('ethereumjs-util')
 const { DEMO_TYPES } = require('./types')
-const { TYPES, createTransform, createPipeline, PipeHead } = require('demo-state')
+const { TYPES, createTransform, Transform, createPipeline, PipeHead } = require('demo-state')
 const LOGGER = new Logger('runner')
 
 const runners = {}
+
+runners.createTransform = ({ func, inputTypes, outputTypes }) => {
+  assert.typeOf( func, 'function', `Func is not a function, instead ${func}` )
+  assert( Map.isMap(inputTypes), `inputTypes was not a function, instead ${func}` )
+  assert( Map.isMap(outputTypes), `outputTypes was not a function, instead ${func}` )
+  return createTransform(new Transform(func, inputTypes, outputTypes))
+}
 
 /**
  * Deployer mixing that extracts the deployer address/password from the config
@@ -177,6 +184,21 @@ runners.isTransform = (_obj) => {
 runners.runTransforms = async (_transformList, _initialState=Map({})) => {
   LOGGER.debug('Running a pipeline on initial state', _initialState)
 
+  const callablePipeline = runners.assembleCallablePipeline(_transformList)
+  assert( callablePipeline.pipeline )
+  return await callablePipeline(_initialState)
+  /*
+  const valuesMap = await callablePipeline(_initialState)
+  assert( Map.isMap( callablePipeline.pipeline.mergedOutputTypes ),
+         'Pipeline does not have mergedOutputTypes' )
+  
+  valuesMap.mergedOutputTypes = callablePipeline.pipeline.mergedOutputTypes
+  valuesMap.pipeline = callablePipeline.pipeline
+  return valuesMap
+ */
+}
+
+runners.assembleCallablePipeline = (_transformList) => {
   const transformList = runners.makeList(_transformList)
   assert( List.isList(transformList) )
   assert( transformList.count() >= 1 )
@@ -190,8 +212,7 @@ runners.runTransforms = async (_transformList, _initialState=Map({})) => {
     firstPipe
   )
 
-  const pipe = createPipeline(finalPipeline)
-  return await pipe(_initialState)
+  return createPipeline(finalPipeline)
 }
 
 module.exports = runners
