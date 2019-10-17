@@ -1,6 +1,6 @@
 {
   "name": "demo-console",
-  "version": "0.4.0-alpha.3",
+  "version": "0.4.0-alpha.4",
   "description": "Console for Democracy, a distributed country",
   "keywords": [
     "ethereum",
@@ -31,7 +31,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-depart": "^0.4.0-alpha.3"
+    "demo-depart": "^0.4.0-alpha.4"
   },
   "gitHead": "f84968f80e7184e4211b522cfad03303ed55cf99"
 }
