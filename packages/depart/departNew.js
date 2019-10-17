@@ -1,13 +1,15 @@
 'use strict'
+const { Map } = require('immutable')
+const { DEMO_TYPES: TYPES } = require('demo-transform')
 const BN = require('bn.js')
 const assert = require('chai').assert
 
-depart({
-  departName        : 'Test Departure',
-  sourcePathList    : ['contracts-new'],
-  compileFlatten    : true,
-  compileOutputFull : true,
-}, async ({ deployed, minedTx }) => {
+depart(Map({
+  departName        : Map({ type: TYPES.string , value: 'Test Departure'  }),
+  sourcePathList    : Map({ type: TYPES.array  , value: ['contracts-new'] }),
+  compileFlatten    : Map({ type: TYPES.boolean, value: true }),
+  compileOutputFull : Map({ type: TYPES.boolean, value: true }),
+}), async ({ deployed, minedTx }) => {
   const relink = await deployed( 'Relink' )
  
   //const instance = await relink.getInstance() 
