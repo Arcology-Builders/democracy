@@ -5,7 +5,7 @@ jobs:
       - image: cryptogoth/node-circle-test:663bbd5
     steps:
       - checkout
-      - run: . ~/.profile; lerna bootstrap; lerna run lint
+      - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
           command: . ~/.profile; ganache-cli -p 8545 -i 2222
           background: true
