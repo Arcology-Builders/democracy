@@ -7,8 +7,7 @@ const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
-const { createTransform } = require('demo-state')
-const { DEMO_TYPES: TYPES } = require('demo-transform')
+const { DEMO_TYPES: TYPES, createTransform } = require('demo-transform')
 
 const LOGGER = new utils.Logger('departure')
 

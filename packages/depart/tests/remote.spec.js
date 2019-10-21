@@ -7,18 +7,20 @@ const chai    = require('chai')
 const expect  = require('chai').expect
 const assert  = chai.assert
 chai.use(require('chai-as-promised'))
-
 const { toWei } = require('web3-utils')
+
 const utils = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, Logger } = utils
 const { getImmutableKey, setImmutableKey } = utils
 const LOGGER = new Logger('remote.spec')
 
-const { wallet } = require('demo-keys')
-const { isCompile, isLink, isDeploy } = require('demo-contract')
+const { wallet }     = require('demo-keys')
+const { isCompile, isLink, isDeploy }
+                     = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
+const { DEMO_TYPES: TYPES, createTransform }
+                     = require('demo-transform')
+
 const { departTransform } = require('..')
 const { runStandardTransforms } = require('./common')
 

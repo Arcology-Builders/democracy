@@ -10,12 +10,12 @@ const { assert } = require('chai')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger }
                  = require('demo-utils')
-const { runTransforms, deployerTransform, DEMO_TYPES: TYPES, assembleCallablePipeline }
-                 = require('demo-transform')
+const {
+  runTransforms, deployerTransform, DEMO_TYPES: TYPES, assembleCallablePipeline,
+  createTransform,
+}                = require('demo-transform')
 const { departTransform, argListTransform }
                  = require('demo-depart')
-const { createTransform }
-                 = require('demo-state')
 
 const LOGGER     = new Logger('demo-depart')
 

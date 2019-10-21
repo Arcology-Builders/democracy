@@ -11,8 +11,7 @@ const {
 } = require('demo-utils')
 const { Contract } = require('demo-contract')
 const { runStandardTransforms } = require('./common')
-const { DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
+const { DEMO_TYPES: TYPES, createTransform } = require('demo-transform')
 
 describe( 'Departures', () => {
   

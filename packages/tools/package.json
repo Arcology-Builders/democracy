@@ -29,6 +29,7 @@
   "dependencies": {
     "chai": "4.2.0",
     "coveralls": "^3.0.4",
+    "rimraf": "^3.0.0",
     "typography": "^0.16.19",
     "typography-theme-irving": "^0.16.19"
   },

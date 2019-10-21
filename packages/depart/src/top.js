@@ -2,16 +2,17 @@
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
 
-const { Map }   = require('immutable')
-const fs = require('fs')
-const path = require('path')
+const { Map }    = require('immutable')
+const fs         = require('fs')
+const path       = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
-const { runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
+const {
+  runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES, createTransform
+}                = require('demo-transform')
 const { departTransform } = require('./departure')
-const LOGGER = new Logger('depart/top')
-const assert = require('chai').assert
+const LOGGER     = new Logger('depart/top')
+const assert     = require('chai').assert
 
 let departInputState = null
 let departCallback = null

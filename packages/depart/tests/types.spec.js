@@ -1,9 +1,9 @@
 'use strict'
 
-const { Map } = require('immutable')
+const { Map }    = require('immutable')
 const { assert } = require('chai')
-const { isHexPrefixed, DEMO_TYPES, subbedKey } = require('demo-transform')
-const { createTransform } = require('demo-state')
+
+const { isHexPrefixed, DEMO_TYPES, subbedKey, createTransform } = require('demo-transform')
 const { wallet } = require('demo-keys')
 const { getConfig } = require('demo-utils')
 const { runStandardTransforms } = require('./common')

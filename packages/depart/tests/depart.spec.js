@@ -1,20 +1,25 @@
 'use strict'
-const fs        = require('fs')
-const path      = require('path')
-const { Map, List }   = require('immutable')
-const assert    = require('chai').assert
-const { toWei } = require('web3-utils')
+const fs            = require('fs')
+const path          = require('path')
+const { Map, List } = require('immutable')
+const assert        = require('chai').assert
+const { toWei }     = require('web3-utils')
 
-const utils = require('demo-utils') 
-const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger } = utils
-const LOGGER = new Logger('depart.spec')
-const { isContract, isCompile, isLink, isDeploy } = require('demo-contract')
-const { getImmutableKey, setImmutableKey, fromJS } = require('demo-utils')
+const utils         = require('demo-utils') 
+const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger }
+                    = utils
+const LOGGER        = new Logger('depart.spec')
+const { isContract, isCompile, isLink, isDeploy }
+                    = require('demo-contract')
+const { getImmutableKey, setImmutableKey, fromJS }
+                    = require('demo-utils')
 
-const { wallet } = require('demo-keys')
-const { runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
-const { departTransform } = require('..')
+const { wallet }    = require('demo-keys')
+const { runTransforms, createArgListTransform, deployerTransform,
+  DEMO_TYPES: TYPES, createTransform
+}                   = require('demo-transform')
+const { departTransform }
+                    = require('..')
 
 describe( 'Departures', () => {
   
