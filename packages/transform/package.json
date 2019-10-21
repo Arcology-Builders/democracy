@@ -1,6 +1,6 @@
 {
   "name": "demo-transform",
-  "version": "0.4.0-alpha.4",
+  "version": "0.4.0",
   "description": "Transform pipeline for a distributed country on Ethereum",
   "directories": {
     "tests": "tests"
@@ -12,10 +12,10 @@
     "@types/chai": "^4.2.3",
     "@types/mocha": "^5.2.7",
     "@types/prop-types": "^15.7.3",
-    "demo-utils": "^0.3.7"
+    "demo-utils": "^0.4.0"
   },
   "devDependencies": {
-    "demo-tools": "0.3.3-alpha.0"
+    "demo-tools": "^0.4.0"
   },
   "scripts": {
     "init": "yarn build",

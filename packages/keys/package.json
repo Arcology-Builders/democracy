@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "chai-as-promised": "7.1.1",
-    "demo-client": "^0.3.7",
-    "demo-utils": "^0.3.7",
+    "demo-client": "^0.4.0",
+    "demo-utils": "^0.4.0",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
     "ethjs-signer": "0.1.1",
@@ -21,7 +21,7 @@
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
-    "demo-tools": "0.3.3-alpha.0",
+    "demo-tools": "^0.4.0",
     "webpack": "4.29.5",
     "webpack-dev-server": "3.1.14"
   },
