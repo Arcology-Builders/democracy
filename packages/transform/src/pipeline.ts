@@ -2,7 +2,10 @@ import * as Immutable from 'immutable'
 import { string } from 'prop-types'
 import { assert } from 'chai'
 import {
-  Args, ArgType, ArgTypes, TYPES, Transform, CallableTransform, checkExtractArgs
+  Args, ArgType, ArgTypes, TYPES, checkExtractArgs
+} from './types'
+import {
+  Transform, CallableTransform
 } from './transform'
 import { Keccak256Hash } from './utils'
 
@@ -111,7 +114,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
     for (let pipe of traverseList.toJS()) {
        const outState = await pipe.lastCallables.reduce(async (s: Args,v:CallableTransform,k:number,a:Immutable.List<CallableTransform>) => {
          const out = await v(inState)
-         return s.mergeDeep(out)
+         return (await s).mergeDeep(out)
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs
        const checkedState = checkExtractArgs(outState, pipe.mergedOutputTypes)

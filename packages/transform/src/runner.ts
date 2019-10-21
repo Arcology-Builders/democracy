@@ -7,16 +7,19 @@
 const path = require('path')
 const assert = require('chai').assert
 const { toWei } = require('web3-utils')
+
 const { getConfig, getNetwork, Logger } = require('demo-utils')
-const { wallet, isAccount } = require('demo-keys')
-const { Map, List } = require('immutable')
-import * as Immutable from 'immutable'
-const { isValidChecksumAddress } = require('ethereumjs-util')
-const { DEMO_TYPES: TYPES } = require('./types')
-import { EthereumAddress } from './utils'
-import { createTransform, Transform, TransformFunc, CallableTransform, ArgCheckerFunc, Args, ArgTypes } from './transform'
-import { createPipeline, PipeHead, Pipeline } from './pipeline'
 const LOGGER = new Logger('runner')
+
+const { wallet, isAccount } = require('demo-keys')
+//const { Map, List } = require('immutable')
+import * as Imm from 'immutable'
+const { isValidChecksumAddress } = require('ethereumjs-util')
+import { DEMO_TYPES as TYPES } from './types'
+import { EthereumAddress } from './utils'
+import { ArgCheckerFunc, Args, ArgTypes } from './types'
+import { createTransform, Transform, TransformFunc, CallableTransform } from './transform'
+import { createPipeline, PipeAppended, PipeHead, Pipeline, CallablePipeline } from './pipeline'
 
 export type AnyObj = { [key: string]: any }
 
@@ -32,8 +35,8 @@ export const createTransformFromMap = ({
   outputTypes: ArgTypes
 }): CallableTransform => {
   assert.typeOf( func, 'function', `Func is not a function, instead ${func}` )
-  assert( Map.isMap(inputTypes), `inputTypes was not a function, instead ${func}` )
-  assert( Map.isMap(outputTypes), `outputTypes was not a function, instead ${func}` )
+  assert( Imm.Map.isMap(inputTypes), `inputTypes was not a function, instead ${func}` )
+  assert( Imm.Map.isMap(outputTypes), `outputTypes was not a function, instead ${func}` )
   return createTransform(new Transform(func, inputTypes, outputTypes))
 }
 
@@ -91,8 +94,10 @@ export const deployerTransform = createTransformFromMap({
       })
     }
 
-    LOGGER.debug( `Accounts Map is a map`, Map.isMap(wallet.getAccountSync(createdAddress)) )
-    return new Map({
+    LOGGER.debug( `Accounts Map is a map`,
+      Imm.Map.isMap(wallet.getAccountSync(createdAddress))
+    )
+    return Imm.Map({
       chainId          : chainId,
       deployerAddress  : createdAddress,
       deployerPassword : createdPassword,
@@ -100,14 +105,14 @@ export const deployerTransform = createTransformFromMap({
       wallet           : wallet,
     })
   },
-  inputTypes: Map({
+  inputTypes: Imm.Map({
     testValueETH     : TYPES.string,
     testAccountIndex : TYPES.integer,
     unlockSeconds    : TYPES.integer,
     deployerAddress  : TYPES.ethereumAddress.opt,
     deployerPassword : TYPES.string.opt,
   }),
-  outputTypes: Map({
+  outputTypes: Imm.Map({
     chainId          : TYPES.string,
     deployerAddress  : TYPES.ethereumAddress,
     deployerPassword : TYPES.string,
@@ -135,22 +140,23 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
     LOGGER.debug('args', process.argv)
     const scriptName = path.basename(module.filename)
 
-    const scriptArgs = List(process.argv).skipUntil(
+    const scriptArgs = Imm.List(process.argv).skipUntil(
       (x: string) => x.startsWith('--')
     ) 
     let found = true
     let args = scriptArgs
-    let argMap = new Map({})
+    let argMap = Imm.Map({})
     while (args.count() >= 2 && found) {
-      if (args.get(0).startsWith('--')) {
-        const key = args.get(0).slice(2)
-        if (!args.get(1).startsWith('--')) {
-          const value = args.get(1)
-          const floatVal = parseFloat(value)
-          const intVal = parseInt(value)
-          const convertedVal = value.startsWith('0x') ? value :
+      const first: string = String(args.get(0))
+      if (first.startsWith('--')) {
+        const key = first.slice(2)
+        const second: string = String(args.get(1))
+        if (!second.startsWith('--')) {
+          const floatVal: number = parseFloat(second)
+          const intVal: number = parseInt(second)
+          const convertedVal = second.startsWith('0x') ? second :
             Number.isFinite(floatVal) ? floatVal :
-            Number.isInteger(intVal) ? intVal : value
+            Number.isInteger(intVal) ? intVal : second
           argMap = argMap.set(key, convertedVal)
           LOGGER.debug(`found arg ${key}=${convertedVal}`)
           args = args.slice(2)
@@ -165,7 +171,7 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
         found = false
       }
     }
-    const defaultArgsFilled = Map(defaultArgs).map(
+    const defaultArgsFilled = Imm.Map(defaultArgs).map(
       (defaultVal: any, name: string, a: Args) => (argMap.get(name) || defaultVal)
     )
     const finalArgMap = argMap.merge(defaultArgsFilled)
@@ -177,11 +183,11 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
 })
 
 export const makeList = (_list: any) => {
-  return List.isList(_list) ? _list : (Array.isArray(_list) ? List(_list) : List([_list]))
+  return Imm.List.isList(_list) ? _list : (Array.isArray(_list) ? Imm.List(_list) : Imm.List([_list]))
 }
 
 export const isTransform = (_obj: any) => {
-  return _obj['transform'] || (List.isList(_obj) && _obj.reduce((s: boolean, v: any) => Boolean(s || v['transform'])))
+  return _obj['transform'] || (Imm.List.isList(_obj) && _obj.reduce((s: boolean, v: any) => Boolean(s || v['transform'])))
 }
 
 /**
@@ -199,8 +205,8 @@ export const isTransform = (_obj: any) => {
  *   mainFunc.
  */ 
 export const runTransforms = async (
-  _transformList: Immutable.List<CallableTransform>,
-  _initialState: Args =Map({})
+  _transformList: Imm.List<CallableTransform>,
+  _initialState: Args = Imm.Map({})
 ) => {
   LOGGER.debug('Running a pipeline on initial state', _initialState)
 
@@ -218,13 +224,13 @@ export const runTransforms = async (
  */
 }
 
-export const assembleCallablePipeline = (_transformList: Immutable.List<CallableTransform>) => {
+export const assembleCallablePipeline = (_transformList: Imm.List<CallableTransform>): CallablePipeline => {
   const transformList = makeList(_transformList)
-  assert( List.isList(transformList) )
+  assert( Imm.List.isList(transformList) )
   assert( transformList.count() >= 1 )
   const firstPipe = new PipeHead(makeList(transformList.first()))
  
-  const finalPipeline = transformList.slice(1).reduce(
+  const finalPipeline: PipeAppended = transformList.slice(1).reduce(
     (pipeSoFar: Pipeline, transform: Transform, i: number) => {
       assert( isTransform(transform), `Item ${i} is not a transform`)
       return pipeSoFar.append(makeList(transform))
