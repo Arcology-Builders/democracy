@@ -173,7 +173,7 @@ describe( 'Runners', () => {
 
     const m0 : CallableTransform = siblingMixin('sender', 1000)
     const m1 : CallableTransform = siblingMixin('receiver', 1500)
-/*    
+    
     const callablePipeline1 = assembleCallablePipeline( fromJS([ [ m0, m1 ] ]) )
     assert( callablePipeline1.pipeline, `assembleCallablePipeline does not` )
     const callablePipeline2 = assembleCallablePipeline( fromJS([ m2 ]) )
@@ -194,7 +194,7 @@ describe( 'Runners', () => {
     assert(finalState.get('receiverEndTime')  - finalState.get('senderEndTime') < 700)
     assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
     assert.equal(finalState.count(), 10)
-  */
+  
   })
 // Re-enable these tests when we support substate / map types in demo-state
 /*

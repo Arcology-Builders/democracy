@@ -18,6 +18,8 @@
     "demo-tools": "0.3.3-alpha.0"
   },
   "scripts": {
+    "clean": "rimraf src/*.js *.js tests/*.js",
+    "build": "tsc --build .",
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "exit 0",
     "lint:fix": "eslint --fix -c ../../.eslintrc.json *.js tests/*.js src/*.js",

@@ -1,10 +1,14 @@
-const { isValidChecksumAddress } = require('ethereumjs-util')
-const BN = require('bn.js')
-const { TYPES }  = require('demo-state')
-const { assert } = require('chai')
-const { Map, List }    = require('immutable')
-const { wallet } = require('demo-keys')
-const { isDeploy } = require('demo-contract')
+'use strict'
+
+const { isValidChecksumAddress }
+                    = require('ethereumjs-util')
+const BN            = require('bn.js')
+const { assert }    = require('chai')
+const { Map, List } = require('immutable')
+const { wallet }    = require('demo-keys')
+const { isDeploy }  = require('demo-contract')
+
+const { TYPES }     = require('./types')
 const { makeRequired, makeOptional, ArgCheckerFunc } = require('./transform')
 
 export const subStateKey = (subStateLabel: string, bareKey: string) => {
