@@ -10,7 +10,7 @@
   "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/console#readme",
   "publishConfig": {
-    "access": "private"
+    "access": "public"
   },
   "license": "MIT",
   "main": "index.js",
@@ -33,5 +33,5 @@
   "dependencies": {
     "demo-depart": "^0.4.2-alpha.0"
   },
-  "gitHead": "210c03d55cee372ca3a8696ea0874dbd516b55a0"
+  "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
 }
