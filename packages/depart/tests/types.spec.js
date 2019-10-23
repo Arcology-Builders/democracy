@@ -47,7 +47,7 @@ describe('Departure types', () => {
   it('detects contract instances', async () => {
     assert( DEMO_TYPES.contractInstance(result['ds']),
            'Contract instance is not detected as valid' )
-    assert.notOk( DEMO_TYPES.contractInstance(result),
+    assert( DEMO_TYPES.contractInstance(result)['error'],
            'Transform result is erroneously detected as a contract instance' )
   })
 
