@@ -13,6 +13,7 @@ export type Pipeline = PipeHead | PipeAppended
 
 export const isSubset = (a: ArgTypes, b: ArgTypes): boolean => {
   return a.reduce((s: boolean, val: ArgType, key: string, a: ArgTypes) => {
+    assert( val['typeName'], `${val} does not have typename` )
     const aTypes = Immutable.Set([val.typeName])
     const bTypes = Immutable.Set([(b.get(key) || TYPES.badType).typeName])
     return Boolean(s && (aTypes.isSubset(bTypes) || val(undefined)))
@@ -21,6 +22,7 @@ export const isSubset = (a: ArgTypes, b: ArgTypes): boolean => {
 
 export class PipeHead {
 
+  name? : string
   prev : Pipeline
   // PipeHead uses mergedInputTypes for the initial stage of typechecking
   mergedInputTypes : ArgTypes
@@ -35,7 +37,8 @@ export class PipeHead {
 
   cacheable : boolean
 
-  constructor(lastCallables: Immutable.List<CallableTransform>) {
+  constructor(lastCallables: Immutable.List<CallableTransform>, name?: string) {
+    this.name = name
     this.lastCallables = lastCallables
     this.prev = this
     this.cacheable = lastCallables.reduce((s,v,k,a) => { return s && v.transform.cacheable }, Boolean(true))
@@ -77,8 +80,8 @@ export class PipeAppended extends PipeHead {
 
   prev : Pipeline
 
-  constructor(callables: Immutable.List<CallableTransform>, prev: Pipeline) {
-    super(callables)
+  constructor(callables: Immutable.List<CallableTransform>, prev: Pipeline, name?: string) {
+    super(callables, name)
     this.prev = prev
     this.traverseList = prev.traverseList.push(this)
     // This seems somewhat redundant with super class above
@@ -112,9 +115,15 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
   const callable = async (initialState: Args) => {
     let inState = initialState
     for (let pipe of traverseList.toJS()) {
+       const i: Number = traverseList.indexOf(pipe)
        const outState = await pipe.lastCallables.reduce(async (s: Args,v:CallableTransform,k:number,a:Immutable.List<CallableTransform>) => {
-         const out = await v(inState)
-         return (await s).mergeDeep(out)
+         try {
+           const out = await v(inState)
+           return (await s).mergeDeep(out)
+         } catch(e) {
+           console.error(`Transform run error in pipe ${i} named ${pipe.name}.\n`, e.message)
+           throw e
+         }
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs
        const checkedState = checkExtractArgs(outState, pipe.mergedOutputTypes)

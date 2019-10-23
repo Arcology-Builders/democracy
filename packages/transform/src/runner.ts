@@ -32,11 +32,11 @@ export const createTransformFromMap = ({
 }: {
   func: TransformFunc,
   inputTypes: ArgTypes,
-  outputTypes: ArgTypes
+  outputTypes: ArgTypes,
 }): CallableTransform => {
   assert.typeOf( func, 'function', `Func is not a function, instead ${func}` )
-  assert( Imm.Map.isMap(inputTypes), `inputTypes was not a function, instead ${func}` )
-  assert( Imm.Map.isMap(outputTypes), `outputTypes was not a function, instead ${func}` )
+  assert( Imm.Map.isMap(inputTypes), `inputTypes was not a Map, instead ${inputTypes}` )
+  assert( Imm.Map.isMap(outputTypes), `outputTypes was not a Map, instead ${outputTypes}` )
   return createTransform(new Transform(func, inputTypes, outputTypes))
 }
 

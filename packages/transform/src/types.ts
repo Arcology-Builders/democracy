@@ -9,54 +9,69 @@ const { isDeploy }  = require('demo-contract')
 
 import * as Imm from 'immutable'
 
-export enum ArgTypeEnum {
-  STRING  = 'string',
-  NUMBER  = 'number',
-  BOOLEAN = 'boolean',
-  MAP     = 'ImmutableMap',
-  LIST    = 'ImmutableList',
-}
-
 // These don't ever need to be exported
-export type ArgCheckerFunc = (arg: any) => Boolean
+export type BooleanArgCheckerFunc = (arg: any) => Boolean
+export type ArgCheckerFunc = (arg: any) => {error?: string}
+
 type ArgCheckerBase = {
-  (arg: any): Boolean
+  (arg: any): {error?: string}
   typeName: string
-  opt: any
+  opt?: any
 }
 type ArgCheckerOptional = {
-  (arg: any): Boolean
+  (arg: any): {error?: string}
   typeName: string
   opt: ArgCheckerBase
 }
 type ArgChecker = ArgCheckerBase | ArgCheckerOptional
 
-/*
-type ArgCheckers = {
-  checkers: Immutable.List<ArgChecker>
-  typeName: string
-}
-*/
-// TODO When you're ready, uncomment the above and change below to | ArgCheckers
 export type ArgType = ArgChecker
 
 export type Args     = Imm.Map<string,any>
 export type ArgTypes = Imm.Map<string,ArgType>
 
-export const makeRequired = (checkerFunc: ArgCheckerFunc, typeName: string) => {
-  const callable: any = checkerFunc
+export const makeCheckerFromBoolean = (
+  booleanChecker : BooleanArgCheckerFunc,
+  typeName       : string,
+): ArgCheckerFunc => {
+  return (obj: any) => booleanChecker(obj) ?
+    {} : {error: `Arg ${obj} did not have type ${typeName}`}
+}
+
+export const makeRequired = (checkerFunc: ArgCheckerFunc, typeName: string): ArgType => {
+  const callable = (obj: any) => checkerFunc(obj)
   callable.typeName = typeName
   return callable
 }
 
-export const makeOptional = (checkerFunc: ArgCheckerFunc, typeName: string) => {
-  const callable = (obj: any) => ((obj === undefined) || checkerFunc(obj))
-  callable.typeName =  typeName + '?'
+export const makeOptional = (checkerFunc: ArgCheckerFunc, typeName: string): ArgType => {
+  const callable = (obj: any) => (obj === undefined) ? {} : checkerFunc(obj)
+  callable.typeName = typeName + '?'
   return callable
 }
 
+export const makeMapType = (subStateLabel: string, mapType: ArgTypes, typeName: string): ArgType => {
+  const checkerFunc: ArgCheckerFunc = (obj: any) => {
+    if (!Imm.Map.isMap(obj)) {
+      return {error: `Passed in a non-map arg to a map type ${typeName}`}
+    }
+    const errorString : string = mapType.reduce((s: string, subArgChecker: ArgType, subArgName: string) => {
+      const subArg = obj.get(subArgName)
+      const subSatisfied = subArgChecker(subArg)
+      if (subSatisfied['error']) {
+        return `Map-type sub-arg "${subArgName}: ${subArg}" does not have type ${subArgChecker.typeName} instead ${typeof(subArg)}. ${subSatisfied['error']}`
+      }
+      return s + (subSatisfied['error'] || '')
+    }, '')
+    return {error: errorString}
+  }
+  const newType = makeRequired(checkerFunc, typeName)
+  newType.opt   = makeOptional(checkerFunc, typeName)
+  return newType
+}
+
 // Standard arg types / checkers
-const BASE_TYPES: Imm.Map<string,ArgCheckerFunc> = Imm.Map({
+const BASE_TYPES: Imm.Map<string,BooleanArgCheckerFunc> = Imm.Map({
   'string' : (arg: any) => (typeof(arg) === 'string'),
   'number' : (arg: any) => (typeof(arg) === 'number'),
   'boolean': (arg: any) => (typeof(arg) === 'boolean'),
@@ -69,9 +84,10 @@ const BASE_TYPES: Imm.Map<string,ArgCheckerFunc> = Imm.Map({
 })
 
 export const TYPES_MAP: Imm.Map<string,ArgChecker> = BASE_TYPES.map(
-  (checker: ArgCheckerFunc, typeName: string): ArgChecker => {
+  (booleanChecker: BooleanArgCheckerFunc, typeName: string): ArgChecker => {
+    const checker = makeCheckerFromBoolean(booleanChecker, typeName)
     const requiredChecker = makeRequired(checker, typeName)
-    requiredChecker.opt = makeOptional(checker, typeName)
+    requiredChecker.opt   = makeOptional(checker, typeName)
     return requiredChecker
   }
 )
@@ -92,16 +108,18 @@ export const checkExtractArgs = (args: Imm.Map<string,any>, argTypes: ArgTypes) 
   return argTypes.map((argType: ArgType, argName: string) => {
     const argCheckers = Imm.List([argType])
     const arg = args.get(argName) // could be undefined
-    const argIsCorrectType: Boolean = argCheckers.reduce((
-        orResult: boolean,
+    const errorString: string = argCheckers.reduce((
+        errorString: string,
         checker: ArgChecker,
         i: number,
         checkers: Imm.List<ArgChecker>
-      ) => Boolean(orResult || checker(arg)),
-      false
+      ) => {
+        return errorString + (checker(arg)['error'] || '')
+      },
+      ''
     )
-    assert( argIsCorrectType,
-            `${arg} did not have type ${argTypes} for arg name ${argName}` )
+    assert.equal( errorString, '',
+            `Arg named ${argName} mismatched type ${argType.typeName} with error string ${errorString}` )
     return arg
   })
 }
@@ -142,7 +160,8 @@ const DEMO_CHECKER_FUNCS = Imm.Map({
   'any'             : (obj: any) => true,
 })
 
-export const DEMO_TYPES = DEMO_CHECKER_FUNCS.map((checker: (obj: any) => boolean, typeName: string) => {
+export const DEMO_TYPES = DEMO_CHECKER_FUNCS.map((booleanChecker: BooleanArgCheckerFunc, typeName: string) => {
+  const checker = makeCheckerFromBoolean(booleanChecker, typeName)
   const requiredChecker = makeRequired(checker, typeName)
   requiredChecker.opt = makeOptional(checker, typeName)
   return requiredChecker

@@ -5,7 +5,9 @@ import { assert } from 'chai'
 import {
   runTransforms, assembleCallablePipeline, createArgListTransform, deployerTransform
 } from '../src/runner'
-import { DEMO_TYPES as TYPES, createTransformFromMap, CallableTransform, CallablePipeline } from '..'
+import {
+  DEMO_TYPES as TYPES, makeMapType, createTransformFromMap, CallableTransform, CallablePipeline
+} from '..'
 
 const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
@@ -182,7 +184,7 @@ describe( 'Runners', () => {
 
     const finalState1 = await callablePipeline1( initialState )
     assert( Imm.Map.isMap(finalState1), `result of callablePipeline was not an Immutable Map` )
-    /*
+    
     const finalState2 = await callablePipeline2( finalState1 )
 
     const finalState = await runTransforms( fromJS([ [ m0, m1 ], m2 ]), initialState )
@@ -195,90 +197,8 @@ describe( 'Runners', () => {
     assert(finalState.get('receiverEndTime')  - finalState.get('senderEndTime') < 700)
     assert.equal(finalState.get('timeDiff'), finalState.get('receiverEndTime')  - finalState.get('senderEndTime'))
     assert.equal(finalState.count(), 10)
-   */ 
 
   })
-// Re-enable these tests when we support substate / map types in demo-state
-/*
-  it( 'merges substates deeply', async () => {
-    const subMixin = (keyPrefix, timeout, subStateLabel) => {
-      return createTransform(new Transform(
-        async ({ lastKey }) => {
-          const returnMap = {}
-          returnMap[keyPrefix + 'Address'] = '0x123'
-          returnMap[keyPrefix + 'Password'] = '0x456'
-          returnMap[keyPrefix + 'StartTime'] = Date.now()
-          returnMap['lastKey'] = keyPrefix
-          let out
-          if (subStateLabel) { 
-            out = {}
-            out[subStateLabel] = returnMap
-          } else {
-            out = returnMap
-          }
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              returnMap[keyPrefix + 'EndTime'] = Date.now()
-              resolve(fromJS(out))
-            }, timeout)
-          })
-        },
-        Map({
-          lastKey: TYPES.string,
-        }),
-        Map({ lastKey: TYPES.string })
-          .set(keyPrefix + 'Address'  , TYPES.string)
-          .set(keyPrefix + 'Password' , TYPES.string)
-          .set(keyPrefix + 'StartTime', TYPES.number)
-          .set(keyPrefix + 'EndTime'  , TYPES.number)
-        ,
-      ))
-    }
-
-    const m2 = createTransform( new Transform(
-        async ({ sub: { senderEndTime } , bass: { receiverEndTime } }) => {
-          return Map({
-            lastKey : 'no im the only one',
-            timeDiff: receiverEndTime - senderEndTime
-          })
-        },
-        Map({
-          'sub': TYPES.map,
-          'bass': TYPES.map,
-        }),
-       Map({ 
-          'lastKey': TYPES.string,
-          'timeDiff': TYPES.number,
-       })
-    ) )
-
-    const m0 = subMixin('sender'   , 1000, 'sub')
-    const m1 = subMixin('receiver' , 1500, 'bass')
-    const m3 = subMixin('niece'    , 500 , 'sub')
-    const m4 = subMixin('nephew'   , 700 , 'bass')
-
-    const finalState = await runTransforms(
-      [ [ m0, m1 ], [ m3, m4 ], m2 ],
-      Map({
-        lastKey: '',
-        sub: Map({}),
-        bass: Map({}),
-      }) )
-
-    const sub = finalState.get('sub')
-    const bass = finalState.get('bass')
-
-    assert.equal(sub.get('senderAddress')   , '0x123')
-    assert.equal(sub.get('nieceAddress')    , '0x123')
-    assert.equal(bass.get('receiverAddress'), '0x123')
-    assert.equal(bass.get('nephewAddress')  , '0x123')
-    assert.equal(bass.get('ommerAddress')   , '0x123')
-    assert(finalState.has('lastKey'))
-    assert(bass.get('receiverEndTime')  - sub.get('senderEndTime') < 700)
-    assert.equal(finalState.get('timeDiff'), bass.get('receiverEndTime')  - sub.get('senderEndTime'))
-    assert.equal( finalState.count(), 5 )
-    assert.equal( finalState.get('survivor'), 'I am', `Main state initial key does not survive parallel substates` )
-  }) 
-*/
+  
 })
 
