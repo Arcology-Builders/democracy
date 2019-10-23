@@ -1,6 +1,6 @@
 {
   "name": "demo-rest",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "a REST server/client for a distributed country's immutable data store",
   "keywords": [
     "rest",
@@ -40,13 +40,13 @@
   "dependencies": {
     "body-parser": "1.18.3",
     "chai": "4.2.0",
-    "demo-utils": "^0.4.0",
+    "demo-utils": "^0.4.1",
     "express": "4.16.4",
     "immutable": "4.0.0-rc.12"
   },
   "devDependencies": {
     "chai-as-promised": "7.1.1",
-    "demo-client": "^0.4.0",
+    "demo-client": "^0.4.1",
     "pm2": "3.3.1"
   },
   "gitHead": "7d4ca40dce9f79d4c1d565c9b554c64f6e90617d"

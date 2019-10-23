@@ -1,6 +1,6 @@
 {
   "name": "demo-client",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Web-first network clients for Democracy, a distributed country",
   "keywords": [
     "ethereum",
@@ -32,7 +32,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-utils": "^0.4.0"
+    "demo-utils": "^0.4.1"
   },
   "gitHead": "7d4ca40dce9f79d4c1d565c9b554c64f6e90617d"
 }
