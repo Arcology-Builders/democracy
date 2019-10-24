@@ -64,7 +64,6 @@ const m1 = createTransform({
 
     return Map({
       departFile    : departFile,
-      departOptions : departOptionsMap.map((v,k) => v.get('value')),
     })
   },
   inputTypes: Map({
@@ -72,7 +71,6 @@ const m1 = createTransform({
   }),
   outputTypes: Map({
     departFile     : TYPES.string,
-    departOptions  : TYPES.map,
   })
 })
 
@@ -93,21 +91,10 @@ const inputTypes = Map({
 
 const inputArgs = inputTypes.keys()
 
-const departFunc = createTransform({
-  func: async function({ ...inputArgs }) {
-    const result = await departCallback({...arguments[0]})
-    wallet.shutdownSync()
-    return new Map({ 'result': result })
-  },
-  inputTypes,
-  outputTypes: Map({
-    result: TYPES.any,
-  })
-})
-
 const placeHolderTransform = (placeHolderTypesValues) => createTransform({
   func: async ({ }) => {
-    return placeHolderTypesValues.map((v,k) => v.get('value'))
+    const valuesMap = placeHolderTypesValues.map((v,k) => v.get('value'))
+    return valuesMap
   },
   inputTypes: Map({}),
   outputTypes: placeHolderTypesValues.map((v,k) => v.get('type')),
@@ -116,10 +103,23 @@ const placeHolderTransform = (placeHolderTypesValues) => createTransform({
 const callablePipeline1 = assembleCallablePipeline( [m0, m1] )
 const pipeTail = callablePipeline1.pipeline
 callablePipeline1( initialState ).then((prevState) => {
-  // This is a pretty good alternative to injecting state into a pipeline
+
+  const depart = createTransform({
+    func: async function({ ...inputArgs }) {
+      const result = await departCallback({...arguments[0]})
+      wallet.shutdownSync()
+      return new Map({ 'result': result })
+    },
+    inputTypes: inputTypes.mergeDeep(departOptionsMap.map((v,k) => v.get('type'))),
+    outputTypes: Map({
+      result: TYPES.any,
+    })
+  })
+
+  // TODO: Improve this way of joining two pipelines, and injecting departOptionsMap
   const prevTypesValuesMap = callablePipeline1.pipeline.mergedOutputTypes.map((v,k) => Map({ type: v, value: prevState.get(k) }))
   validateTypesValuesMap(prevTypesValuesMap)
   const mp = placeHolderTransform(prevTypesValuesMap.mergeDeep(departOptionsMap))
-  const callablePipeline2 = assembleCallablePipeline( [ mp, m2, m3, departFunc ] ) 
+  const callablePipeline2 = assembleCallablePipeline( [ mp, m2, m3, depart ] ) 
   return callablePipeline2(Map({}))
 })
