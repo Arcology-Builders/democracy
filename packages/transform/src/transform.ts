@@ -1,7 +1,8 @@
 import Imm from 'immutable'
 import { assert } from 'chai'
 import { Keccak256Hash } from './utils'
-import { TYPES, Args, ArgTypes, checkExtractArgs, makeMapType } from './types'
+import { TYPES, Args, ArgType, ArgMapType, ArgTypes, checkExtractArgs, makeMapType } from './types'
+const { fromJS } = require('demo-utils')
 
 export type CallableTransform = {
   (state: Imm.Map<string,any>): Promise<Imm.Map<string, any>>
@@ -47,6 +48,14 @@ export class Transform {
   }
 }
 
+export const convertMapArgs = (jsonArgs: any, types: ArgTypes) : Args => {
+  return Imm.Map<string,any>(jsonArgs).map((argValue: any, argName: string) =>  {
+    const argType : ArgType = types.get(argName, TYPES.any)
+    const typeName : string = argType.typeName
+    return argType.childTypes ? convertMapArgs(argValue, argType.childTypes) : argValue
+  })
+}
+
 export const createTransform = (transform: Transform): CallableTransform => {
   const callable = async (state: Imm.Map<string,any>) => {
 
@@ -57,7 +66,7 @@ export const createTransform = (transform: Transform): CallableTransform => {
       console.error('Input types mismatch', e.message)
       throw e
     }
-
+/*
     const tuples : [string,any][] = Imm.List(inputArgs.keys()).toJS()
       .map( (y: string) => [y, inputArgs.get(y)] )
 
@@ -65,9 +74,10 @@ export const createTransform = (transform: Transform): CallableTransform => {
       (s: { [key: string]: any}, x: [string,any]) => { s[x[0]] = x[1]; return s },
       {} as [string,any]
     )
-
-    const output : Args = await transform.func(firstLevel)
-
+*/
+    const output = await transform.func(inputArgs.toJS()) 
+    const convertedOutput : Args = convertMapArgs(output, transform.outputTypes) 
+/*
     const outLevel = output.reduce((s: boolean, v: any, k: string) => {
       const typeName = transform.outputTypes.get(k, {typeName: ''}).typeName
       if (typeName.endsWith('MapType') && !Imm.Map.isMap(v)) {
@@ -78,15 +88,17 @@ export const createTransform = (transform: Transform): CallableTransform => {
         return true
       }
     }, true)
+*/
+    let outputArgs
 
     try {
-      const outputArgs = checkExtractArgs(output, transform.outputTypes) 
+      outputArgs = checkExtractArgs(convertedOutput, transform.outputTypes) 
     } catch(e) {
       console.error('Output types mismatch', e.message)
       throw e
     }
 
-    return output
+    return outputArgs
   }
   callable.transform = transform
   return callable

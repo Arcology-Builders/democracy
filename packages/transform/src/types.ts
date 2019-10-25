@@ -17,15 +17,24 @@ type ArgCheckerBase = {
   (arg: any): {error?: string}
   typeName: string
   opt?: any
+  childTypes?: any
 }
 type ArgCheckerOptional = {
   (arg: any): {error?: string}
   typeName: string
   opt: ArgCheckerBase
+  childTypes?: any
 }
-type ArgChecker = ArgCheckerBase | ArgCheckerOptional
+type ArgCheckerMap = {
+  (arg: any): {error?: string}
+  typeName: string
+  opt: ArgCheckerBase
+  childTypes: ArgTypes
+}
+type ArgChecker = ArgCheckerBase | ArgCheckerOptional | ArgCheckerMap
 
 export type ArgType = ArgChecker
+export type ArgMapType = ArgCheckerMap
 
 export type Args     = Imm.Map<string,any>
 export type ArgTypes = Imm.Map<string,ArgType>
@@ -67,6 +76,7 @@ export const makeMapType = (subStateLabel: string, mapType: ArgTypes, typeName: 
   }
   const newType = makeRequired(checkerFunc, typeName)
   newType.opt   = makeOptional(checkerFunc, typeName)
+  newType.childTypes = mapType
   return newType
 }
 

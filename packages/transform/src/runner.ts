@@ -178,9 +178,9 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
     }
     const finalArgMap = Imm.Map(defaultArgs).map(
       (defaultVal: any, name: string, a: Args) => {
-        const typeName = argTypes.get(name, {typeName: ''}).typeName
-        assert( !typeName.endsWith('MapType') || Imm.Map.isMap(defaultVal),
-          `typeName ${typeName} is map type but does not match type ${typeof(defaultVal)}` )
+        //const typeName = argTypes.get(name, {typeName: ''}).typeName
+        //assert( !typeName.endsWith('MapType') || Imm.Map.isMap(defaultVal),
+        //  `typeName ${typeName} is map type but does not match type ${typeof(defaultVal)}` )
         return (argMap.get(name) || defaultVal)
       }
     )
