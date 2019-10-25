@@ -113,7 +113,7 @@ const pipelineGenerator = async function* (head: Pipeline, initialState: Args) {
 export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
   const traverseList = pipeline.traverseList  
   const callable = async (initialState: Args) => {
-    let inState = initialState
+    let inState: Args = initialState
     for (let pipe of traverseList.toJS()) {
        const i: Number = traverseList.indexOf(pipe)
        const outState = await pipe.lastCallables.reduce(async (s: Args,v:CallableTransform,k:number,a:Immutable.List<CallableTransform>) => {
@@ -126,7 +126,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
          }
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs
-       const checkedState = checkExtractArgs(outState, pipe.mergedOutputTypes)
+       const checkedState : Args = checkExtractArgs(outState, pipe.mergedOutputTypes)
        inState = inState.mergeDeep(checkedState)
     }
     

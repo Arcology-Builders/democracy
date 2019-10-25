@@ -50,7 +50,7 @@ export class Transform {
 export const createTransform = (transform: Transform): CallableTransform => {
   const callable = async (state: Imm.Map<string,any>) => {
 
-    let inputArgs
+    let inputArgs : Args
     try {
       inputArgs = checkExtractArgs(state, transform.inputTypes)
     } catch(e) {
@@ -58,7 +58,26 @@ export const createTransform = (transform: Transform): CallableTransform => {
       throw e
     }
 
-    const output = await transform.func(inputArgs.toJS())
+    const tuples : [string,any][] = Imm.List(inputArgs.keys()).toJS()
+      .map( (y: string) => [y, inputArgs.get(y)] )
+
+    const firstLevel = tuples.reduce<{[key: string]: any}>(
+      (s: { [key: string]: any}, x: [string,any]) => { s[x[0]] = x[1]; return s },
+      {} as [string,any]
+    )
+
+    const output : Args = await transform.func(firstLevel)
+
+    const outLevel = output.reduce((s: boolean, v: any, k: string) => {
+      const typeName = transform.outputTypes.get(k, {typeName: ''}).typeName
+      if (typeName.endsWith('MapType') && !Imm.Map.isMap(v)) {
+        //console.log(k + ' was not an immutable map ' + JSON.stringify(v))
+        return false
+      } else {
+        //console.log(k + ' had type ' + typeof(v) + ' and was of type ' + typeName)
+        return true
+      }
+    }, true)
 
     try {
       const outputArgs = checkExtractArgs(output, transform.outputTypes) 

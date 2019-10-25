@@ -135,7 +135,12 @@ export const deployerTransform = createTransformFromMap({
  *         as values.
  */
 export const createArgListTransform = (argTypes: ArgTypes) => createTransformFromMap({
-  func: async (defaultArgs: AnyObj): Promise<Args> => {
+  func: async (defaultArgs: { [key: string]: any }): Promise<Args> => {
+    /*
+    LOGGER.info('defaultArgs', defaultArgs)
+    assert( Imm.Map.isMap(defaultArgs.get('babaloo', Imm.Map({}))),
+    JSON.stringify(defaultArgs.get('babaloo') ))
+    */
     LOGGER.debug('state', defaultArgs)
     LOGGER.debug('args', process.argv)
     const scriptName = path.basename(module.filename)
@@ -171,15 +176,19 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
         found = false
       }
     }
-    const defaultArgsFilled = Imm.Map(defaultArgs).map(
-      (defaultVal: any, name: string, a: Args) => (argMap.get(name) || defaultVal)
+    const finalArgMap = Imm.Map(defaultArgs).map(
+      (defaultVal: any, name: string, a: Args) => {
+        const typeName = argTypes.get(name, {typeName: ''}).typeName
+        assert( !typeName.endsWith('MapType') || Imm.Map.isMap(defaultVal),
+          `typeName ${typeName} is map type but does not match type ${typeof(defaultVal)}` )
+        return (argMap.get(name) || defaultVal)
+      }
     )
-    const finalArgMap = argMap.merge(defaultArgsFilled)
     LOGGER.debug('finalArgMap', finalArgMap)
     return finalArgMap
   },
-  inputTypes: argTypes,
-  outputTypes: argTypes,
+  inputTypes  : argTypes,
+  outputTypes : argTypes,
 })
 
 export const makeList = (_list: any) => {
