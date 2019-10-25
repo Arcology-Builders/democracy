@@ -7,7 +7,7 @@ const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract
   = require('demo-contract')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
-const { DEMO_TYPES: TYPES, createTransform } = require('demo-transform')
+const { DEMO_TYPES: TYPES, createTransformFromMap } = require('demo-transform')
 
 const LOGGER = new utils.Logger('departure')
 
@@ -31,7 +31,7 @@ const departs = {}
  * @method depart
  * @memberof @module:depart
  */
-departs.departTransform = createTransform({
+departs.departTransform = createTransformFromMap({
   func: async ({ chainId, deployerEth, deployerAddress, departName, autoConfig,
       sourcePathList, compileFlatten, compileOutputFull }) => {
     assert( chainId, `chainId not in input state.` )

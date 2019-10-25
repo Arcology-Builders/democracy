@@ -7,6 +7,7 @@ const { isHexPrefixed, DEMO_TYPES, subbedKey, createTransform } = require('demo-
 const { wallet } = require('demo-keys')
 const { getConfig } = require('demo-utils')
 const { runStandardTransforms } = require('./common')
+const { departTransform } = require('../src/departure')
 
 describe('Departure types', () => {
 
@@ -49,6 +50,10 @@ describe('Departure types', () => {
            'Contract instance is not detected as valid' )
     assert( DEMO_TYPES.contractInstance(result)['error'],
            'Transform result is erroneously detected as a contract instance' )
+  })
+
+  it('has a departTransform', async () => {
+    assert.equal( departTransform.transform.toString(), 'Transform', `departTransform is malformed` )
   })
 
   after(() => {
