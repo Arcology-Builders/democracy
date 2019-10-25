@@ -1,6 +1,6 @@
 {
   "name": "demo-depart",
-  "version": "0.4.2-alpha.3",
+  "version": "0.4.2-alpha.4",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
     "ethereum",
