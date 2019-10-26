@@ -1,8 +1,11 @@
 'use strict'
 const BN = require('bn.js')
 import * as Imm from 'immutable'
-const { Map: Map, List: List } = require('immutable')
-import { assert } from 'chai'
+const { OrderedMap, Map: Map, List: List } = require('immutable')
+import { assert, expect } from 'chai'
+const chai = require('chai')
+chai.use(require('chai-as-promised'))
+
 import {
   runTransforms, assembleCallablePipeline, createArgListTransform, deployerTransform
 } from '../src/runner'
@@ -104,7 +107,7 @@ describe( 'Runners', () => {
         }),
       })
       const result = await runTransforms(
-        List([alm2]),
+        OrderedMap({'alm2':[alm2]}),
         Map({
           anteater: 'aiai',
           bugbear: false,
@@ -165,7 +168,7 @@ describe( 'Runners', () => {
       assert.equal( out.get('deployerPassword'), password )
     },
   }, {
-    desc: 'merges a parallel list of mixins',
+    desc: 'merges a parallel list of transforms',
     func: async () => {
       const siblingMixin = (keyPrefix: string, timeout: number) => createTransformFromMap({
         func: async ({ lastKey }: { lastKey: string }) => {
@@ -203,15 +206,20 @@ describe( 'Runners', () => {
         }),
         outputTypes: Map({ timeDiff: TYPES.number }),
       })
-
+      
       assert( m2.transform.inputTypes, `${m2.transform} does not have inputTypes` )
       const m0 : CallableTransform = siblingMixin('sender', 1000)
       const m1 : CallableTransform = siblingMixin('receiver', 1500)
       const callablePipeline1: CallablePipeline = assembleCallablePipeline( fromJS([ [ m0, m1 ] ]) )
-      assert( callablePipeline1.pipeline, `assembleCallablePipeline does not` )
-      const callablePipeline2: CallablePipeline = assembleCallablePipeline( fromJS([ m2 ]) )
-      assert( callablePipeline2.pipeline, `assembleCallablePipeline does not` )
+
+      assert( callablePipeline1.pipeline, `assembleCallablePipeline does not assemble` )
+      const callablePipeline2: CallablePipeline = assembleCallablePipeline( OrderedMap({'m2': [ m2 ]}) )
+      assert( callablePipeline2.pipeline, `assembleCallablePipeline does not assemble` )
       const initialState = Imm.Map({ lastKey: 'lastKey' })
+
+      expect(
+        callablePipeline2( Map({}) )
+      ).to.be.rejectedWith(Error)
 
       const out = await m0(Imm.Map({ lastKey: 'last', senderEndTime: 123, receiverEndTime: 456}))
       assert( Imm.Map.isMap(out) )

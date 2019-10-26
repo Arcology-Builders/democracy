@@ -2,7 +2,8 @@ import Imm from 'immutable'
 import { assert } from 'chai'
 import { Keccak256Hash } from './utils'
 import { TYPES, Args, ArgType, ArgMapType, ArgTypes, checkExtractArgs, makeMapType } from './types'
-const { fromJS } = require('demo-utils')
+const { fromJS, Logger } = require('demo-utils')
+const LOGGER = new Logger('transform')
 
 export type CallableTransform = {
   (state: Imm.Map<string,any>): Promise<Imm.Map<string, any>>
@@ -63,7 +64,7 @@ export const createTransform = (transform: Transform): CallableTransform => {
     try {
       inputArgs = checkExtractArgs(state, transform.inputTypes)
     } catch(e) {
-      console.error('Input types mismatch', e.message)
+      LOGGER.error('Input types mismatch', e.message)
       throw e
     }
 /*
@@ -94,7 +95,7 @@ export const createTransform = (transform: Transform): CallableTransform => {
     try {
       outputArgs = checkExtractArgs(convertedOutput, transform.outputTypes) 
     } catch(e) {
-      console.error('Output types mismatch', e.message)
+      LOGGER.error('Output types mismatch', e.message)
       throw e
     }
 

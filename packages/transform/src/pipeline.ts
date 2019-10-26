@@ -8,6 +8,8 @@ import {
   Transform, CallableTransform
 } from './transform'
 import { Keccak256Hash } from './utils'
+const { Logger } = require('demo-utils')
+const LOGGER = new Logger('pipeline')
 
 export type Pipeline = PipeHead | PipeAppended
 
@@ -64,14 +66,14 @@ export class PipeHead {
     })
   }
 
-  append(newCallables: Immutable.List<CallableTransform>) {
+  append(newCallables: Immutable.List<CallableTransform>, name?: string) {
     const outputTypes: ArgTypes = newCallables.reduce((s,v,k,a) => s.mergeDeep(v.transform.outputTypes), Immutable.Map({}))
     const inputTypes: ArgTypes = newCallables.reduce((s,v,k,a) => s.mergeDeep(v.transform.inputTypes), Immutable.Map({}))
     assert( isSubset( inputTypes, this.mergedOutputTypes ),
       `Input types of new transform ${inputTypes.map((v,k) => v.typeName)} ` +
       `is not a subset of output types of last transform ${this.mergedOutputTypes.map((v,k) => v.typeName)}`
     )
-    return new PipeAppended(newCallables, this)
+    return new PipeAppended(newCallables, this, name)
   }
   
 }
@@ -121,7 +123,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
            const out = await v(inState)
            return (await s).mergeDeep(out)
          } catch(e) {
-           console.error(`Transform run error in pipe ${i} named ${pipe.name}.\n`, e.message)
+           LOGGER.error(`Transform run error in pipe ${i} named ${pipe.name}.\n`, e.message)
            throw e
          }
        }, inState) // start all siblings to merge from same state

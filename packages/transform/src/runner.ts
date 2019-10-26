@@ -214,7 +214,7 @@ export const isTransform = (_obj: any) => {
  *   mainFunc.
  */ 
 export const runTransforms = async (
-  _transformList: Imm.List<CallableTransform>,
+  _transformList: Imm.OrderedMap<string,CallableTransform>,
   _initialState: Args = Imm.Map({})
 ) => {
   LOGGER.debug('Running a pipeline on initial state', _initialState)
@@ -233,16 +233,18 @@ export const runTransforms = async (
  */
 }
 
-export const assembleCallablePipeline = (_transformList: Imm.List<CallableTransform>): CallablePipeline => {
+export const assembleCallablePipeline = (_transformOrderedMap: Imm.OrderedMap<string,CallableTransform>): CallablePipeline => {
+  const _transformList = Imm.List(_transformOrderedMap.values())
+  const _labelsList = Imm.List(_transformOrderedMap.keys())
   const transformList = makeList(_transformList)
   assert( Imm.List.isList(transformList) )
   assert( transformList.count() >= 1 )
-  const firstPipe = new PipeHead(makeList(transformList.first()))
+  const firstPipe = new PipeHead(makeList(transformList.first()), _labelsList.first())
  
   const finalPipeline: PipeAppended = transformList.slice(1).reduce(
     (pipeSoFar: Pipeline, transform: Transform, i: number) => {
       assert( isTransform(transform), `Item ${i} is not a transform`)
-      return pipeSoFar.append(makeList(transform))
+      return pipeSoFar.append(makeList(transform), _labelsList.get(i))
     },
     firstPipe
   )
