@@ -1,0 +1,72 @@
+{
+  "name": "demo-aztec-cli",
+  "type": "module",
+  "version": "0.1.1-alpha.0",
+  "description": "Democracy + AZTEC: issuing and trading zero-knowledge assets",
+  "main": "index.js",
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "src",
+    "depart.js",
+    "departZK.js",
+    "contracts",
+    "scripts"
+  ],
+  "dependencies": {
+    "@aztec/dev-utils": "1.10.0",
+    "@aztec/protocol": "0.8.1",
+    "@aztec/secp256k1": "1.0.1",
+    "aztec.js": "0.9.1",
+    "demo-aztec-lib": "^0.1.1-alpha.0",
+    "demo-rest": "^0.4.2-alpha.1",
+    "eslint-utils": "1.4.2",
+    "express": "^4.17.1",
+    "openzeppelin-solidity": "2.2.0",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-scripts": "3.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "chai": "4.2.0",
+    "dotenv": "7.0.0",
+    "pm2": "3.5.1",
+    "webpack-cli": "3.3.5"
+  },
+  "scripts": {
+    "depart:dev": "NODE_ENV=DEVELOPMENT yarn run demo-depart",
+    "departZK:dev": "NODE_ENV=DEVELOPMENT demo-depart --departFileName departZK.js AAA",
+    "depart:test": "NODE_ENV=TEST yarn run demo-depart",
+    "departZK:test": "NODE_ENV=TEST demo-depart --departFileName departZK.js AAA",
+    "build": "react-scripts build",
+    "ganache": "babel-node scripts/run ganache",
+    "monit": "pm2 monit",
+    "log": "pm2 log",
+    "heroku-postinstall": "yarn start:rest && yarn depart:test && yarn departkZK:test",
+    "test": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 100000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done",
+    "lint": "eslint -c ../../.eslintrc.json *.js tests/*.js src/*.js",
+    "lint:fix": "eslint --fix *.js tests/*.js src/*.js",
+    "start:build": "serve -s build",
+    "start:rest": "pm2 start rest.js",
+    "stop:rest": "pm2 stop rest.js; pm2 del rest",
+    "start:webpack": "webpack-dev-server --mode production",
+    "start:dev": "NODE_ENV=DEVELOPMENT react-scripts start",
+    "start:test": "NODE_ENV=TEST react-scripts start",
+    "start:ganache": "npm run ganache"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+const { mint, bs } = require('..')
+const { getConfig } = require('demo-utils')
+const { wallet } = require('demo-keys')
+const { Map } = require('immutable')
+const chai = require('chai')
+const assert = chai.assert
+const expect = chai.expect
+chai.use(require('chai-as-promised'))
+const { parsed } = require('dotenv').config()
+
+describe('Bilateral swap', () => {
+
+  const SELLER_TRADE_SYMBOL = 'AAA'
+  const BUYER_TRADE_SYMBOL = 'BBB'
+
+  // Utility methods for minting and confidential transfers pre-populated with
+  // addresses and public keys
+  // TODO: Make constants, test other senders/receivers besides deployer
+  
+  const doBS = async (sellerNoteHash, buyerNoteHash) => {
+    return result = await bs(Map({
+      sellerTradeSymbol : SELLER_TRADE_SYMBOL,
+      sellerAddress     : parsed['TEST_ADDRESS_1'],
+      sellerPassword    : parsed['TEST_PASSWORD_1'],
+      sellerPublicKey   : parsed['TEST_PUBLIC_KEY_1'],
+      sellerNoteHash,
+      buyerTradeSymbol  : BUYER_TRADE_SYMBOL,
+      buyerAddress   : parsed['TEST_ADDRESS_2'],
+      buyerPassword  : parsed['TEST_PASSWORD_2'],
+      buyerPublicKey : parsed['TEST_PUBLIC_KEY_2'],
+      buyerNoteHash,
+      testValueETH      : '0.2',
+    }))
+  }
+
+  it('succeeds in minting and private trade', async () => {
+    
+    const sellerResult = await mint(Map({
+      tradeSymbol     : SELLER_TRADE_SYMBOL,
+      minteeAddress   : parsed['TEST_ADDRESS_1'],
+      minteePublicKey : parsed['TEST_PUBLIC_KEY_1'],
+      minteeAmount    : 22,
+      unlockSeconds   : 100,
+    }))
+    wallet.shutdownSync()
+    const sellerNoteHash = sellerResult.get('minteeNoteHash')
+
+    const buyerResult = await mint(Map({
+      tradeSymbol     : BUYER_TRADE_SYMBOL,
+      minteeAddress   : parsed['TEST_ADDRESS_2'],
+      minteePublicKey : parsed['TEST_PUBLIC_KEY_2'],
+      minteeAmount    : 22,
+      unlockSeconds   : 100,
+    }))
+    wallet.shutdownSync()
+    const buyerNoteHash = buyerResult.get('minteeNoteHash')
+
+    const result = await doBS(sellerNoteHash, buyerNoteHash)
+    assert(result.get('receipt'), 'No receipt returned from bilateral swap')
+
+    // Trying to atomic swap a second time should fail
+    // Uncomment whenever bs does more than just validate
+    /*
+    expect(
+      doBS(sellerNoteHash, buyerNoteHash)
+    ).to.be.rejectedWith(Error)
+   */
+  })
+
+  after(() => {
+    wallet.shutdownSync()
+  })
+  
+})

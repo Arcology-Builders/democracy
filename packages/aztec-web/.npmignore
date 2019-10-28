@@ -1,0 +1,6 @@
+node_modules
+build
+public
+*.env
+report*.json
+// Sadly we cannot ignore README.md

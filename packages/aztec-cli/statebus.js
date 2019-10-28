@@ -1,0 +1,2 @@
+require('statebus').serve()
+

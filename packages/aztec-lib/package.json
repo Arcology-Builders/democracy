@@ -1,0 +1,41 @@
+{
+  "name": "demo-aztec-lib",
+  "version": "0.1.1-alpha.0",
+  "description": "Common library for Democracy+AZTEC",
+  "keywords": [
+    "democracy",
+    "aztec",
+    "zero-knowledge",
+    "ethereum",
+    "security",
+    "asset"
+  ],
+  "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/lib#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "directories": {
+    "lib": "src",
+    "test": "tests"
+  },
+  "files": [
+    "src",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/demo-aztec.git"
+  },
+  "scripts": {
+    "test": "echo 'Change this to yarn mocha when we have tests' && exit 0",
+    "mocha": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 100000 --trace-warnings --exit --colors --recursive --reporter spec; done"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/demo-aztec/issues"
+  },
+  "dependencies": {
+    "demo-depart": "^0.4.2-alpha.7",
+    "demo-tx": "^0.4.2-alpha.1",
+    "democracy.js": "^0.4.2-alpha.7"
+  }
+}
