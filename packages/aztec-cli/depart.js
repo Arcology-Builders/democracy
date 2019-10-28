@@ -38,7 +38,7 @@ depart(Map({
     value: ['../../node_modules/@aztec/protocol/contracts', '../lib/contracts', 'contracts'],
   }),
 }),
-  async ({deployed, minedTx}) => {
+async ({deployed, minedTx}) => {
   const ACE = await deployed( 'ACE' )
   const as = await deployed( 'AdjustSupply' )
   const bs = await deployed( 'BilateralSwap' )

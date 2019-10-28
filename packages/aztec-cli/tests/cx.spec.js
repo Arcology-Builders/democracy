@@ -82,7 +82,7 @@ describe('Confidential transfers', () => {
     ).to.be.rejectedWith(Error)
 
   })
-/*
+  /*
   it('transferring zero succeeds multiple times', async () => {
     const senderNoteHash = await doMintAmount({
       amount      : new BN(0),
