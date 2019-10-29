@@ -34,13 +34,10 @@
   },
   "dependencies": {
     "@babel/runtime-corejs2": "^7.4.3",
-    "demo-tools": "^0.4.0",
     "demo-utils": "^0.4.2-alpha.1"
   },
   "devDependencies": {
-    "webpack": "4.29.4",
-    "webpack-cli": "3.2.1",
-    "webpack-dev-server": "3.1.14"
+    "demo-tools": "^0.4.0"
   },
   "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
 }
