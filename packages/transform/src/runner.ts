@@ -243,8 +243,9 @@ export const assembleCallablePipeline = (_transformOrderedMap: Imm.OrderedMap<st
  
   const finalPipeline: PipeAppended = transformList.slice(1).reduce(
     (pipeSoFar: Pipeline, transform: Transform, i: number) => {
-      assert( isTransform(transform), `Item ${i} is not a transform`)
-      return pipeSoFar.append(makeList(transform), _labelsList.get(i))
+      const transformList = makeList(transform)
+      assert( isTransform(transformList), `Item ${i}:${transform} is not a transform`)
+      return pipeSoFar.append(transformList, _labelsList.get(i))
     },
     firstPipe
   )
