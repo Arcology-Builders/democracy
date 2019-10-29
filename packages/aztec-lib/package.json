@@ -1,6 +1,6 @@
 {
   "name": "demo-aztec-lib",
-  "version": "0.1.1-alpha.0",
+  "version": "0.4.4",
   "description": "Common library for Democracy+AZTEC",
   "keywords": [
     "democracy",
@@ -34,8 +34,8 @@
     "url": "https://github.com/invisible-college/demo-aztec/issues"
   },
   "dependencies": {
-    "demo-depart": "^0.4.2-alpha.7",
-    "demo-tx": "^0.4.2-alpha.1",
-    "democracy.js": "^0.4.2-alpha.7"
+    "demo-depart": "^0.4.4",
+    "demo-tx": "^0.4.4",
+    "democracy.js": "^0.4.4"
   }
 }

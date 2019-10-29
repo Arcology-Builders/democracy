@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.4.2-alpha.1",
+  "version": "0.4.4",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -21,7 +21,7 @@
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
-    "demo-tools": "^0.4.0"
+    "demo-tools": "^0.4.4"
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
