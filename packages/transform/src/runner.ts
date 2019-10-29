@@ -196,7 +196,7 @@ export const makeList = (_list: any) => {
 }
 
 export const isTransform = (_obj: any) => {
-  return _obj['transform'] || (Imm.List.isList(_obj) && _obj.reduce((s: boolean, v: any) => Boolean(s || v['transform'])))
+  return (_obj && _obj['transform']) || (Imm.List.isList(_obj) && _obj.reduce((s: boolean, v: any) => Boolean(s || v['transform'])))
 }
 
 /**
