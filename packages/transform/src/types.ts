@@ -9,31 +9,33 @@ const { isDeploy }  = require('demo-contract')
 
 import * as Imm from 'immutable'
 
-// These don't ever need to be exported
+// Currently returns an error string or empty argect
+// In the future, it could explicitly return a value or other information.
+export type Result = {error?: string}
 export type BooleanArgCheckerFunc = (arg: any) => Boolean
 export type ArgCheckerFunc = (arg: any) => {error?: string}
 
 type ArgCheckerBase = {
-  (arg: any): {error?: string}
+  (arg: any): Result
   typeName: string
   opt?: any
   childTypes?: any
 }
 type ArgCheckerOptional = {
-  (arg: any): {error?: string}
+  (arg: any): Result
   typeName: string
   opt: ArgCheckerBase
   childTypes?: any
 }
 type ArgCheckerMap = {
-  (arg: any): {error?: string}
+  (arg: any): Result
   typeName: string
   opt: ArgCheckerBase
   childTypes: ArgTypes
 }
 type ArgChecker = ArgCheckerBase | ArgCheckerOptional | ArgCheckerMap
 
-export type ArgType = ArgChecker
+export type ArgType    = ArgChecker
 export type ArgMapType = ArgCheckerMap
 
 export type Args     = Imm.Map<string,any>
@@ -43,30 +45,36 @@ export const makeCheckerFromBoolean = (
   booleanChecker : BooleanArgCheckerFunc,
   typeName       : string,
 ): ArgCheckerFunc => {
-  return (obj: any) => booleanChecker(obj) ?
-    {} : {error: `Arg ${obj} did not have type ${typeName}`}
+  return (arg: any) => booleanChecker(arg) ?
+    {} : {error: `Arg ${arg} did not have type ${typeName}`}
 }
 
 export const makeRequired = (checkerFunc: ArgCheckerFunc, typeName: string): ArgType => {
-  const callable = (obj: any) => checkerFunc(obj)
+  const callable = (arg: any) => checkerFunc(arg)
   callable.typeName = typeName
   return callable
 }
 
 export const makeOptional = (checkerFunc: ArgCheckerFunc, typeName: string): ArgType => {
-  const callable = (obj: any) => (obj === undefined) ? {} : checkerFunc(obj)
+  const callable = (arg: any) => (arg === undefined) ? {} : checkerFunc(arg)
   callable.typeName = typeName + '?'
   return callable
 }
 
-export const makeMapType = (subStateLabel: string, mapType: ArgTypes, typeName: string): ArgType => {
-  const checkerFunc: ArgCheckerFunc = (obj: any) => {
-    if (!Imm.Map.isMap(obj)) {
+export const makeMapType = (
+  mapType: ArgTypes,
+  typeName: string
+): ArgType => {
+  const checkerFunc: ArgCheckerFunc = (arg: any) => {
+    if (!Imm.Map.isMap(arg)) {
       return {error: `Passed in a non-map arg to a map type ${typeName}`}
     }
     const errorString : string = mapType.reduce((s: string, subArgChecker: ArgType, subArgName: string) => {
-      const subArg = obj.get(subArgName)
+      const subArg = arg.get(subArgName)
       const subSatisfied = subArgChecker(subArg)
+      if (!subSatisfied) {
+        return `Arg checker ${subArgChecker} for sub arg ${subArgName} returns null result`
+      }
       if (subSatisfied['error']) {
         return `Map-type sub-arg "${subArgName}: ${subArg}" does not have type ${subArgChecker.typeName} instead ${typeof(subArg)}. ${subSatisfied['error']}`
       }
@@ -80,39 +88,80 @@ export const makeMapType = (subStateLabel: string, mapType: ArgTypes, typeName: 
   return newType
 }
 
+type ArgMap = { [argName: string]: any }
+
+const HEX_CHARS = '01234567890abcdef'
+
+export const isHexPrefixed = (arg: any, length?: number, prefixed: boolean=true): Result => {
+  const allHexChars = (s: Result , v: string, k: number): Result =>
+    (HEX_CHARS.search(v.toLowerCase()) > -1) ? s :
+      {error: `Non-hex char ${v} found at position ${k}`}
+
+  if (typeof(arg) !== 'string') {
+    return {error: `${arg} has type ${typeof(arg)} instead of string`}
+  }
+  if (Boolean(prefixed) === true && arg.slice(0,2) !== '0x') {
+    return {error: `${arg} does not begin with 0x`}
+  }
+  if (length && arg.length !== length) {
+    return {error: `${arg} has length ${arg.length} instead of ${length}`}
+  }
+  return Imm.List(arg.slice(2)).reduce(allHexChars, {})
+}
+
+const contractCheckerFunc = (arg: any) =>  
+  Boolean(arg && isDeploy(arg.deploy) && arg.deployerEth['prepareSignerEth'])
+
+const contractInstanceCheckerFunc = (arg: any) =>
+  Boolean(arg && arg['abi'] && isValidChecksumAddress(arg['address']))
+
 // Standard arg types / checkers
-const BASE_TYPES: Imm.Map<string,BooleanArgCheckerFunc> = Imm.Map({
-  'string' : (arg: any) => (typeof(arg) === 'string'),
-  'number' : (arg: any) => (typeof(arg) === 'number'),
-  'boolean': (arg: any) => (typeof(arg) === 'boolean'),
-  'map'    : (arg: any) => (Imm.Map.isMap(arg)),
-  'list'   : (arg: any) => (Imm.List.isList(arg)),
-  'badType': (arg: any) => false,
-  'any'    : (arg: any) => true,
-  'integer': (arg: any) => Number.isInteger(arg),
-  'float'  : (arg: any) => typeof(parseFloat(arg)) === 'number',
+const BOOLEAN_CHECKERS: Imm.Map<string,BooleanArgCheckerFunc> = Imm.Map({
+  'string'      : (arg: any) => (typeof(arg) === 'string'),
+  'number'      : (arg: any) => (typeof(arg) === 'number'),
+  'boolean'     : (arg: any) => (typeof(arg) === 'boolean'),
+  'map'         : (arg: any) => (Imm.Map.isMap(arg)),
+  'list'        : (arg: any) => (Imm.List.isList(arg)),
+  'badType'     : (arg: any) => false,
+  'any'         : (arg: any) => true,
+  'integer'     : (arg: any) => Number.isInteger(arg),
+  'floatString' : (arg: any) => (
+    (typeof(arg) === 'string') && (String(parseFloat(arg)) === arg)
+  ),
+  'float'       : (arg: any) => typeof(parseFloat(arg)) === 'number',
+  'function'        : (arg: any) => (typeof(arg) === 'function'),
+  'keccak256Hash'   : (arg: any) => isHexPrefixed(arg, 66, false), 
+  'ethereumTxHash'  : (arg: any) => isHexPrefixed(arg, 66),
+  'ethereumAddress' : (arg: any) => isValidChecksumAddress(arg),
+  'ethereumSigner'  : (arg: any) => Boolean(arg && arg['net_version']),
+  'contract'        : contractCheckerFunc,
+  'contractInstance': contractInstanceCheckerFunc,
+  'bm'              : (arg: any) => Boolean(arg && arg['getDeploys']),
+  'wallet'          : (arg: any) => Boolean(arg && arg['prepareSignerEth']),
+  'array'           : (arg: any) => Array.isArray(arg),
+  'bn'              : (arg: any) => BN.isBN(arg),
 })
 
-export const TYPES_MAP: Imm.Map<string,ArgChecker> = BASE_TYPES.map(
+/**
+ * Create a checker function (that returns a [[Result]]) with an optional
+ * type (called `opt`) from a 
+ * boolean checker function (that returns `true` if the typecheck passes and
+ * `false` otherwise.
+ * @param booleanChecker the boolean checker function to convert
+ * @param typeName a short descriptive name for this type
+ */
+export const makeCheckerFuncFromBoolean = 
   (booleanChecker: BooleanArgCheckerFunc, typeName: string): ArgChecker => {
-    const checker = makeCheckerFromBoolean(booleanChecker, typeName)
-    const requiredChecker = makeRequired(checker, typeName)
-    requiredChecker.opt   = makeOptional(checker, typeName)
-    return requiredChecker
-  }
-)
+        const checker = makeCheckerFromBoolean(booleanChecker, typeName)
+        const requiredChecker = makeRequired(checker, typeName)
+        requiredChecker.opt = makeOptional(checker, typeName)
+        return requiredChecker
+}
+
+export const TYPES_MAP: Imm.Map<string,ArgChecker>
+  = BOOLEAN_CHECKERS.map(makeCheckerFuncFromBoolean)
 
 export const TYPES: { [key: string] : ArgChecker } = TYPES_MAP.toJSON()
-/*
-export const TYPE = (typeString : string): ArgCheckers =>
-  Immutable.List(typeString.split('|').map(t => (TYPES[t] || TYPES.badType)))
-const argCheckerSafe = (argType: string): ArgChecker => {
-    const argChecker = argCheckerMap[argType]
-    if (argChecker != undefined) { return argChecker }
-    else { return () => false }
-}
-*/
-//const argCheckers: ArgCheckers = Immutable.Map(argCheckerMap)
 
 export const checkExtractArgs = (args: Imm.Map<string,any>, argTypes: ArgTypes) => {
   return argTypes.map((argType: ArgType, argName: string) => {
@@ -129,50 +178,8 @@ export const checkExtractArgs = (args: Imm.Map<string,any>, argTypes: ArgTypes) 
       ''
     )
     assert.equal( errorString, '',
-            `Arg named ${argName} mismatched type ${argType.typeName} with error string ${errorString}` )
+      `Arg named ${argName} mismatched type ${argType.typeName} ` +
+      `with error string ${errorString}` )
     return arg
   })
 }
-
-type ArgMap = { [argName: string]: any }
-
-export const subStateKey = (subStateLabel: string, bareKey: string) => {
-  return (subStateLabel) ?
-        subStateLabel + bareKey[0].toUpperCase() + bareKey.slice(1) :
-        bareKey
-}
-
-const HEX_CHARS = '01234567890abcdef'
-
-export const isHexPrefixed = (obj: any) => {
-  const allHexChars = (s: boolean , v: string, k: number) => Boolean(s && HEX_CHARS.search(v.toLowerCase()) > -1)
-  return (typeof(obj) === 'string') && (obj.slice(0,2) === '0x') &&
-    Imm.List(obj.slice(2)).reduce(allHexChars, true)
-}
-
-const contractCheckerFunc = (obj: any) =>  
-  Boolean(obj && isDeploy(obj.deploy) && obj.deployerEth['prepareSignerEth'])
-
-const contractInstanceCheckerFunc = (obj: any) =>
-  Boolean(obj && obj['abi'] && isValidChecksumAddress(obj['address']))
-
-const DEMO_CHECKER_FUNCS = Imm.Map({
-  'function'        : (obj: any) => (typeof(obj) === 'function'),
-  'ethereumTxHash'  : (obj: any) => (isHexPrefixed(obj) && obj.length === 66),
-  'ethereumAddress' : (obj: any) => isValidChecksumAddress(obj),
-  'ethereumSigner'  : (obj: any) => Boolean(obj && obj['net_version']),
-  'contract'        : contractCheckerFunc,
-  'contractInstance': contractInstanceCheckerFunc,
-  'bm'              : (obj: any) => Boolean(obj && obj['getDeploys']),
-  'wallet'          : (obj: any) => Boolean(obj && obj['prepareSignerEth']),
-  'array'           : (obj: any) => Array.isArray(obj),
-  'bn'              : (obj: any) => BN.isBN(obj),
-  'any'             : (obj: any) => true,
-})
-
-export const DEMO_TYPES = DEMO_CHECKER_FUNCS.map((booleanChecker: BooleanArgCheckerFunc, typeName: string) => {
-  const checker = makeCheckerFromBoolean(booleanChecker, typeName)
-  const requiredChecker = makeRequired(checker, typeName)
-  requiredChecker.opt = makeOptional(checker, typeName)
-  return requiredChecker
-}).merge(TYPES_MAP).toJSON()

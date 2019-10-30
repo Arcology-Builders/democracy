@@ -4,14 +4,12 @@ const assert     = require('chai').assert
 const { toWei }  = require('web3-utils')
 const BN         = require('bn.js')
 
-const {
-  DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger
-}                = require('demo-utils')
+const { Logger } = require('demo-utils')
 const LOGGER     = new Logger('abi.spec')
 
 const { wallet } = require('demo-keys')
 const {
-  runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES,
+  runTransforms, createArgListTransform, deployerTransform, TYPES,
   createTransform,
 }                = require('demo-transform')
 const { departTransform }
@@ -38,20 +36,18 @@ describe( 'ABI swap', () => {
 
   it( 'departs with a shadowed ABI', async () => { 
     const departFunc = createTransform({
-      func: async ({ deployed, minedTx, deployerAddress }) => {
+      func: async ({ deployed, deployerAddress }) => {
         LOGGER.debug(`DEPLOYER ADDRESS ${deployerAddress}`)
 
-        // The new way of compiling: deployed and minedTx
         const shadowInterface = await deployed( 'ShadowInterface' )
         const shadow = await deployed( 'Shadow', { abi: shadowInterface.abi } )
         const result = await shadow.doTheThing(new BN(1234), deployerAddress, new BN(5678),
-                                               { from: deployerAddress, gas: 100000 } )
+          { from: deployerAddress, gas: 100000 } )
         //await minedTx( shadow.doTheThing, [new BN(1234), deployerAddress, new BN(5678)] )
         return new Map({ 'result': result['0'] })
       },
       inputTypes: Map({
         deployed: TYPES['function'],
-        minedTx: TYPES['function'],
         deployerAddress: TYPES.ethereumAddress,
       }),
       outputTypes: Map({
@@ -64,9 +60,9 @@ describe( 'ABI swap', () => {
         unlockSeconds     : 10,
         testValueETH      : '0.05',
         testAccountIndex  : 0,
-        departName        : "shadow",
+        departName        : 'shadow',
         autoConfig        : true,
-        sourcePathList    : ["contracts-new"],
+        sourcePathList    : ['contracts-new'],
       })
     )
     const result = finalState.get('result')

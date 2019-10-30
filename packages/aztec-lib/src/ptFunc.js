@@ -40,8 +40,8 @@ const createPtPrepareTransform = () => {
   })
 
   const inputTypes = Map({
-    seller            : makeMapType('seller', eachInputTypes, 'ptPrepInputsMapType'),
-    bidder            : makeMapType('bidder', eachInputTypes, 'ptPrepInputsMapType'),
+    seller            : makeMapType( eachInputTypes, 'ptPrepInputsMapType' ),
+    bidder            : makeMapType( eachInputTypes, 'ptPrepInputsMapType' ),
     deployerAddress   : TYPES.ethereumAddress,
     deployed          : TYPES['function'],
     proxyContractName : TYPES.string          ,
@@ -49,8 +49,8 @@ const createPtPrepareTransform = () => {
 
   const outputTypes = Map({
     proxy  : TYPES.contractInstance,
-    seller : makeMapType('seller', eachOutputTypes, 'ptPrepOutputsMapType'),
-    bidder : makeMapType('bidder', eachOutputTypes, 'ptPrepOutputsMapType'),
+    seller : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
+    bidder : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
   })
 
   return createTransformFromMap({
@@ -134,8 +134,8 @@ ptFuncs.swapTransform = (() => {
   const inputTypes = Map({
     proxy               : TYPES.contractInstance,
     proxySwapMethodName : TYPES.string,
-    seller : makeMapType('seller', eachType, 'ptSwapInputsMapType'),
-    bidder : makeMapType('bidder', eachType, 'ptSwapInputsMapType'),
+    seller : makeMapType( eachType, 'ptSwapInputsMapType' ),
+    bidder : makeMapType( eachType, 'ptSwapInputsMapType' ),
     minedTx             : TYPES['function'],
   })
 

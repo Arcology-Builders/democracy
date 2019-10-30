@@ -1,6 +1,6 @@
 'use strict'
 const { Map } = require('immutable')
-const { DEMO_TYPES: TYPES } = require('demo-transform')
+const { TYPES } = require('demo-transform')
 const BN = require('bn.js')
 const assert = require('chai').assert
 

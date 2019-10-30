@@ -36,7 +36,7 @@ transforms.createSignerTransform = (subStateLabel='unlabeled') => createTransfor
   },
   inputTypes: Map({
     wallet : TYPES.wallet,
-    [subStateLabel] : makeMapType(subStateLabel, Map({
+    [subStateLabel] : makeMapType(Map({
       senderAddress : TYPES.ethereumAddress,
       senderPassword : TYPES.string,
     }), 'signerInputsMapType'),
@@ -62,7 +62,7 @@ transforms.createPublicKeyTransform = (subStateLabel='unlabeled') => createTrans
   },
   inputTypes: Map({
     wallet : TYPES.wallet,
-    [subStateLabel] : makeMapType(subStateLabel, Map({
+    [subStateLabel] : makeMapType(Map({
       senderAddress : TYPES.ethereumAddress,
       senderPassword : TYPES.string,
     }), 'signerInputsMapType'),

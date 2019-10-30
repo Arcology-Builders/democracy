@@ -4,7 +4,7 @@ const { begin } = require('demo-depart')
 const { Map } = require('immutable')
 const { parsed } = require('dotenv').config()
 const { createTransform } = require('demo-state')
-const { runTransforms, DEMO_TYPES: TYPES } = require('demo-transform')
+const { runTransforms, TYPES } = require('demo-transform')
 
 const input = process.stdin
 input.setEncoding('utf-8')

@@ -15,7 +15,7 @@ const { wallet, isAccount } = require('demo-keys')
 //const { Map, List } = require('immutable')
 import * as Imm from 'immutable'
 const { isValidChecksumAddress } = require('ethereumjs-util')
-import { DEMO_TYPES as TYPES } from './types'
+import { TYPES } from './types'
 import { EthereumAddress } from './utils'
 import { ArgCheckerFunc, Args, ArgTypes } from './types'
 import { createTransform, Transform, TransformFunc, CallableTransform } from './transform'
@@ -233,18 +233,25 @@ export const runTransforms = async (
  */
 }
 
-export const assembleCallablePipeline = (_transformOrderedMap: Imm.OrderedMap<string,CallableTransform>): CallablePipeline => {
+export const assembleCallablePipeline = (
+  _transformOrderedMap: Imm.OrderedMap<string,CallableTransform>
+): CallablePipeline => {
+
   const _transformList = Imm.List(_transformOrderedMap.values())
   const _labelsList = Imm.List(_transformOrderedMap.keys())
   const transformList = makeList(_transformList)
   assert( Imm.List.isList(transformList) )
   assert( transformList.count() >= 1 )
+  const firstTransforms = makeList(transformList.first())
+  assert( isTransform(firstTransforms),
+    `Item ${0}:${transformList.first()} is not a transform`
+  )
   const firstPipe = new PipeHead(makeList(transformList.first()), _labelsList.first())
  
   const finalPipeline: PipeAppended = transformList.slice(1).reduce(
     (pipeSoFar: Pipeline, transform: Transform, i: number) => {
       const transformList = makeList(transform)
-      assert( isTransform(transformList), `Item ${i}:${transform} is not a transform`)
+      assert( isTransform(transformList), `Item ${i+1}:${transform} is not a transform`)
       return pipeSoFar.append(transformList, _labelsList.get(i))
     },
     firstPipe

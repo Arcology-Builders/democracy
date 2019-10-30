@@ -5,7 +5,7 @@ import { assert } from 'chai'
 import {
   runTransforms, assembleCallablePipeline, createArgListTransform, deployerTransform,
   ArgType, ArgTypes,
-  DEMO_TYPES as TYPES, makeMapType, createTransformFromMap, CallableTransform, CallablePipeline
+  TYPES, makeMapType, createTransformFromMap, CallableTransform, CallablePipeline
 } from '..'
 
 const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
@@ -30,7 +30,7 @@ describe( 'Transforms with substate labels', () => {
         (v: ArgType, k: string) => (k === 'lastKey') ? v : v.opt
       )
       
-      const REQUIRED_MAPTYPE1 = makeMapType(subStateLabel, REQUIRED_SUBTYPES, 'mapType1')
+      const REQUIRED_MAPTYPE1 = makeMapType(REQUIRED_SUBTYPES, 'mapType1')
       const OPTIONAL_MAPTYPE1 = REQUIRED_MAPTYPE1.opt
 
 
@@ -75,8 +75,8 @@ describe( 'Transforms with substate labels', () => {
         },
       inputTypes: Map({
           'survivor' : TYPES.string,
-          'sub'  : m3.transform.outputTypes.get('sub'),
-          'bass' : m4.transform.outputTypes.get('bass'),
+          'sub'      : m3.transform.outputTypes.get('sub'),
+          'bass'     : m4.transform.outputTypes.get('bass'),
         }),
       outputTypes: Map({ 
           'lastKey'  : TYPES.string,

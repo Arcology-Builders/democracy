@@ -3,9 +3,10 @@
 const { toJS, fromJS } = require('demo-utils')
 const { isAccount }    = require('demo-keys')
 const { Contract }     = require('demo-contract')
-const { DEMO_TYPES: TYPES, makeRequired, makeOptional }
+const { TYPES, makeRequired, makeOptional, isHexPrefixed }
                        = require('demo-transform')
 
+const { note } = require('aztec.js')
 const { publicToAddress, isValidPublic }
                        = require('ethereumjs-util')
 const { Map }          = require('immutable')
@@ -29,47 +30,42 @@ const aztecPublicKeyCheckerFunc = (obj) => {
   return {}
 }
 
-const aztecNoteHashCheckerFunc = (obj) => {
-  if (typeof(obj) !== 'string') {
-    return {error: `aztecNoteHash is not a string`}
+const aztecNoteHashCheckerFunc = (obj) => isHexPrefixed(obj, 66)
+
+const checkJsonHexStrings = (label, obj, tuples ) => {
+  const hexChecker = ({ key, length, prefixed }) => {
+    const result = isHexPrefixed(obj[key], length, prefixed)
+    return (result['error']) ?
+      { error: `${label}.${key} for length ${length} mismatches hex string with error ${result['error']} ` } :
+      {}
   }
-  if (obj.length !== 66) {
-    return {error: `aztecNoteHash has length ${obj.length} instead of 66`}
-  }
-  if (obj.slice(0,2) !== '0x') {
-    return {error: `aztecNoteHash does not begin with 0x`}
-  }
-  return {}
+  // Return the first error found
+  return tuples.reduce((s, tuple) => {
+    return (s['error']) ? s : hexChecker(tuple)
+  }, {})
 }
 
 const aztecPublicNoteCheckerFunc = (obj) => {
-  const { publicKey, viewingKey, k, a, noteHash } = obj
-  return (
-    typeof(publicKey) === 'string' &&
-    publicKey.length === 200 &&
-    publicKey.slice(0,2) === '0x' &&
-    viewingKey === '0x' &&
-    k === '0x' &&
-    a === '0x' &&
-    aztecNoteHashCheckerFunc(noteHash)
-  ) 
+
+  return checkJsonHexStrings('aztecPublicNote', obj, [
+    { key : 'publicKey'  , length : 200, prefixed : true },
+    { key : 'viewingKey' , length : 2  , prefixed : true },
+    { key : 'k'          , length : 2  , prefixed : true },
+    { key : 'a'          , length : 2  , prefixed : true },
+    { key : 'noteHash'   , length : 66 , prefixed : true },
+  ])
+
 }
 
 const aztecPrivateNoteCheckerFunc = (obj) => {
-  const { publicKey, viewingKey, k, a, noteHash } = obj
-  return (
-    typeof(publicKey) === 'string' &&
-    publicKey.length === 200 &&
-    publicKey.slice(0,2) === '0x' &&
-    typeof(viewingKey) === 'string' &&
-    viewingKey.length === 140 &&
-    viewingKey.slice(0,2) === '0x' &&
-    typeof(k) === 'string' &&
-    k.length === 64 &&
-    typeof(a) === 'string' &&
-    a.length === 64 &&
-    aztecNoteHashCheckerFunc(noteHash)
-  ) 
+
+  return checkJsonHexStrings('aztecPrivateNote', obj, [
+    { key : 'viewingKey' , length : 140 , prefixed : true },
+    { key : 'k'          , length : 64 , prefixed : false },
+    { key : 'a'          , length : 64 , prefixed : false },
+    { key : 'noteHash'   , length : 66 , prefixed : true },
+  ])
+
 }
 
 const AZTEC_CHECKER_FUNCS = Map({
@@ -77,6 +73,7 @@ const AZTEC_CHECKER_FUNCS = Map({
   'aztecNoteHash'    : aztecNoteHashCheckerFunc   ,
   'aztecPublicNote'  : aztecPublicNoteCheckerFunc ,
   'aztecPrivateNote' : aztecPrivateNoteCheckerFunc,
+  'tradeSymbol'      : (typeof(obj) === 'string' && obj.length >= 2 && obj.length <= 4),
 })
 
 utils.AZTEC_TYPES = AZTEC_CHECKER_FUNCS.map((checker, typeName) => {
@@ -121,6 +118,15 @@ utils.getAztecPublicKey = ({ address, wallet }) => {
   const publicString = Map.isMap(account) ?
     account.get('publicString') : account.publicString
   return '0x04' + publicString
+}
+
+// This is sync, but we'll call it async to make it consistent
+utils.exportAztecPublicNote = async (fullNote) => {
+  return note.fromPublicKey(fullNote.exportNote().publicKey).exportNote()
+}
+
+utils.exportAztecPrivateNote = async (fullNote) => {
+  return (await note.fromViewKey(fullNote.exportNote().viewingKey)).exportNote()
 }
 
 module.exports = utils

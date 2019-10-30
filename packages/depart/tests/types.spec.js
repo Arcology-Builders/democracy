@@ -3,7 +3,7 @@
 const { Map }    = require('immutable')
 const { assert } = require('chai')
 
-const { isHexPrefixed, DEMO_TYPES, subbedKey, createTransform } = require('demo-transform')
+const { isHexPrefixed, TYPES, subbedKey, createTransform } = require('demo-transform')
 const { wallet } = require('demo-keys')
 const { getConfig } = require('demo-utils')
 const { runStandardTransforms } = require('./common')
@@ -16,16 +16,16 @@ describe('Departure types', () => {
   const mainTransform = createTransform({
     func: async ({ deployed }) => {
       const ds = await deployed( 'DifferentSender' )
-      assert( DEMO_TYPES.contractInstance(ds) )
+      assert( TYPES.contractInstance(ds) )
       return Map({
         ds: ds
       })
     },
     inputTypes: Map({
-      deployed: DEMO_TYPES['function'],
+      deployed: TYPES['function'],
     }),
     outputTypes: Map({
-      ds: DEMO_TYPES.contractInstance,
+      ds: TYPES.contractInstance,
     }),
   })
 
@@ -46,9 +46,9 @@ describe('Departure types', () => {
   })
 
   it('detects contract instances', async () => {
-    assert( DEMO_TYPES.contractInstance(result['ds']),
+    assert( TYPES.contractInstance(result['ds']),
            'Contract instance is not detected as valid' )
-    assert( DEMO_TYPES.contractInstance(result)['error'],
+    assert( TYPES.contractInstance(result)['error'],
            'Transform result is erroneously detected as a contract instance' )
   })
 

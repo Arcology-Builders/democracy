@@ -24,8 +24,8 @@ const eachTypes = Map({
 
 const m0 = createArgListTransform(Map({
   unlockSeconds     : TYPES.integer,
-  seller            : makeMapType('seller', eachTypes, 'ptInputsMapType'),
-  bidder            : makeMapType('bidder', eachTypes, 'ptInputsMapType'),
+  seller            : makeMapType(eachTypes, 'ptInputsMapType'),
+  bidder            : makeMapType(eachTypes, 'ptInputsMapType'),
   testValueETH      : TYPES.string,
   testAccountIndex  : TYPES.integer,
   wallet            : TYPES.wallet,

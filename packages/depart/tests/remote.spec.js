@@ -18,7 +18,7 @@ const { wallet }     = require('demo-keys')
 const { isCompile, isLink, isDeploy }
                      = require('demo-contract')
 const { RESTServer } = require('demo-rest')
-const { DEMO_TYPES: TYPES, createTransform }
+const { TYPES, createTransform }
                      = require('demo-transform')
 
 const { departTransform } = require('..')

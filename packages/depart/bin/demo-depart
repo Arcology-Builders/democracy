@@ -11,7 +11,7 @@ const { wallet } = require('demo-keys')
 const { getConfig, Logger }
                  = require('demo-utils')
 const {
-  runTransforms, deployerTransform, DEMO_TYPES: TYPES, assembleCallablePipeline,
+  runTransforms, deployerTransform, TYPES, assembleCallablePipeline,
   createTransform,
 }                = require('demo-transform')
 const { departTransform, argListTransform }

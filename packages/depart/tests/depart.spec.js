@@ -16,7 +16,7 @@ const { getImmutableKey, setImmutableKey, fromJS }
 
 const { wallet }    = require('demo-keys')
 const { runTransforms, createArgListTransform, deployerTransform,
-  DEMO_TYPES: TYPES, createTransform
+  TYPES, createTransform
 }                   = require('demo-transform')
 const { departTransform }
                     = require('..')

@@ -8,7 +8,7 @@ const path       = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
 const {
-  runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES, createTransform
+  runTransforms, createArgListTransform, deployerTransform, TYPES, createTransform
 }                = require('demo-transform')
 const { departTransform } = require('./departure')
 const LOGGER     = new Logger('depart/top')

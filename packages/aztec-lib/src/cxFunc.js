@@ -15,7 +15,7 @@ const { fromJS, toJS, Logger, getConfig }
 const { isAccount }
                 = require('demo-keys')
 const { createTransformFromMap, makeMapType } = require('demo-transform')
-const { checkPublicKey, AZTEC_TYPES: TYPES } = require('./utils')
+const { checkPublicKey, AZTEC_TYPES: TYPES, exportAztecPrivateNote } = require('./utils')
 
 const LOGGER    = new Logger('cxFunc')
 
@@ -58,12 +58,12 @@ cxFuncs.createCxTokenContractsTransform = (subStateLabel='unlabeled') => {
     },
     inputTypes : Map({
       deployed : TYPES['function'],
-      [subStateLabel]: makeMapType(subStateLabel, Map({
+      [subStateLabel]: makeMapType(Map({
         tradeSymbol : TYPES.string,
       }), 'cxTokenContractsInputsMapType'),
     }),
     outputTypes : Map({
-      [subStateLabel]: makeMapType(subStateLabel, Map({
+      [subStateLabel]: makeMapType(Map({
         erc20Token     : TYPES.contractInstance,
         zkToken        : TYPES.contractInstance,
         zkTokenAddress : TYPES.ethereumAddress,
@@ -99,7 +99,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
   })
 
   const inputTypes = Map({
-    [subStateLabel]: makeMapType(subStateLabel, subStateInputTypes, 'cxPrepareInputsMapType')
+    [subStateLabel]: makeMapType(subStateInputTypes, 'cxPrepareInputsMapType')
   }).merge(commonTypes)
 
   const subStateOutputTypes = Map({
@@ -115,7 +115,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
   })
 
   const outputTypes = Map({
-    [subStateLabel]: makeMapType(subStateLabel, subStateOutputTypes, 'cxPrepareOutputsMapType')
+    [subStateLabel]: makeMapType(subStateOutputTypes, 'cxPrepareOutputsMapType')
   })
 
   const func = async ({ 
@@ -240,11 +240,11 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
       jsProofData     : proofData,
       jsSignatures    : signatures,
       jsSenderKey     : senderKey,
-      jsSenderNote    : senderNote,
+      jsSenderNote    : await exportAztecPrivateNote(senderNote),
       jsChangeKey     : changeKey,
-      jsChangeNote    : changeNote,
+      jsChangeNote    : await exportAztecPrivateNote(changeNote),
       jsReceiverKey   : receiverKey,
-      jsReceiverNote  : receiverNote,
+      jsReceiverNote  : await exportAztecPrivateNote(receiverNote),
       jsTransferValue : transferValue,
     })
     // The output subState can potentially be extended an input subState
@@ -271,7 +271,7 @@ cxFuncs.createCxTransferTransform = (subStateLabel='unlabeled') => createTransfo
     LOGGER.debug('Mined tx hash', txHash)
   },
   inputTypes: Map({
-    [subStateLabel]: makeMapType(subStateLabel, Map({
+    [subStateLabel]: makeMapType(Map({
       transferFunc: TYPES['function'],
       zkToken      : TYPES.contractInstance,
       jsProofData  : TYPES.string,
@@ -295,14 +295,14 @@ cxFuncs.createCxFinishTransform = (subStateLabel='unlabeled') => createTransform
 
 		const changeNoteCreated = await bm.outputter(jsChangeKey, Map({
 			zkNoteHash: jsChangeNote.noteHash,
-			viewingKey: jsChangeNote.exportNote().viewingKey,
+			viewingKey: jsChangeNote.viewingKey,
 		}))
 		assert.equal( jsChangeNote.noteHash, JSON.parse( changeNoteCreated ).zkNoteHash )
 		LOGGER.debug('Change Note Created', changeNoteCreated)
 
 		const receiverNoteCreated = await bm.outputter(jsReceiverKey, Map({
 			zkNoteHash: jsReceiverNote.noteHash,
-			viewingKey: jsReceiverNote.exportNote().viewingKey
+			viewingKey: jsReceiverNote.viewingKey
 		}))
 		assert.equal( jsReceiverNote.noteHash, JSON.parse( receiverNoteCreated ).zkNoteHash )
 		LOGGER.debug('Receiver Note Created', receiverNoteCreated)
@@ -317,7 +317,7 @@ cxFuncs.createCxFinishTransform = (subStateLabel='unlabeled') => createTransform
 	},
 	inputTypes: Map({
 		bm                : TYPES.bm,
-		[subStateLabel]: makeMapType(subStateLabel, Map({
+		[subStateLabel]: makeMapType(Map({
 			jsChangeKey     : TYPES.string,
 			jsChangeNote    : TYPES.aztecPrivateNote,
 			jsReceiverKey   : TYPES.string,
@@ -326,7 +326,7 @@ cxFuncs.createCxFinishTransform = (subStateLabel='unlabeled') => createTransform
 		}), 'cxFinishInputsMapType'),
 	}),
 	outputTypes: Map({
-		[subStateLabel]: makeMapType(subStateLabel, Map({
+		[subStateLabel]: makeMapType(Map({
 			receiverNoteHash : TYPES.aztecNoteHash,
 			changeNoteHash   : TYPES.aztecNoteHash,
 		}), 'cxFinishOutputsMapType'),

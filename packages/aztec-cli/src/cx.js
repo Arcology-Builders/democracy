@@ -26,7 +26,7 @@ const LOGGER    = new Logger('cx')
 
 const m0 = createArgListTransform(Map({
   unlockSeconds     : TYPES.integer,
-  unlabeled         : makeMapType('unlabeled', Map({
+  unlabeled         : makeMapType(Map({
     senderAddress     : TYPES.ethereumAddress,
     senderPassword    : TYPES.string,
     senderPublicKey   : TYPES.aztecPublicKey,
@@ -70,7 +70,7 @@ const createCxTransferParams = (subStateLabel='unlabeled') => createTransformFro
     deployerAddress : TYPES.ethereumAddress,
   }),
   outputTypes: Map({
-    [subStateLabel] : makeMapType(subStateLabel, Map({
+    [subStateLabel] : makeMapType(Map({
       transfererAddress : TYPES.ethereumAddress,
       transferFunc      : TYPES['function'],
     }), 'cxTransferParamsMapType'),

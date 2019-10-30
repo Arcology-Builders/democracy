@@ -12,7 +12,7 @@ const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-cont
 
 const { wallet } = require('demo-keys')
 const {
-  runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES,
+  runTransforms, createArgListTransform, deployerTransform, TYPES,
   createTransform,
 }               = require('demo-transform')
 const { departTransform } = require('..')

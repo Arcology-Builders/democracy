@@ -3,14 +3,17 @@ const BN = require('bn.js')
 import * as Imm from 'immutable'
 const { OrderedMap, Map: Map, List: List } = require('immutable')
 import { assert, expect } from 'chai'
+
 const chai = require('chai')
 chai.use(require('chai-as-promised'))
 
 import {
   runTransforms, assembleCallablePipeline, createArgListTransform, deployerTransform
 } from '../src/runner'
+
 import {
-  DEMO_TYPES as TYPES, makeMapType, createTransformFromMap, CallableTransform, CallablePipeline
+  TYPES, makeMapType, createTransformFromMap, CallableTransform,
+  CallablePipeline
 } from '..'
 
 const { immEqual, fromJS, getNetwork, Logger } = require('demo-utils')
@@ -21,7 +24,7 @@ const LOGGER = new Logger('tests/runner')
 describe( 'Runners', () => {
 
   const itList = [ {
-    desc: 'creates an arglist mixin',
+    desc: 'creates an arglist transform',
     func: async () => {
   
       // Test reading default values for argList, with no argv's passed in
@@ -56,7 +59,7 @@ describe( 'Runners', () => {
       // Test reading default values for argList, with no argv's passed in
       const alm0 = await createArgListTransform(Map({
           'anotherThing': TYPES.integer,
-          'babaloo'     : makeMapType('babloo', Map({
+          'babaloo'     : makeMapType(Map({
             'ceecee' : TYPES.bn,
             'doodoo' : TYPES.integer,
           }), 'argListMapType'),
@@ -213,6 +216,7 @@ describe( 'Runners', () => {
       const callablePipeline1: CallablePipeline = assembleCallablePipeline( fromJS([ [ m0, m1 ] ]) )
 
       assert( callablePipeline1.pipeline, `assembleCallablePipeline does not assemble` )
+
       const callablePipeline2: CallablePipeline = assembleCallablePipeline( OrderedMap({'m2': [ m2 ]}) )
       assert( callablePipeline2.pipeline, `assembleCallablePipeline does not assemble` )
       const initialState = Imm.Map({ lastKey: 'lastKey' })

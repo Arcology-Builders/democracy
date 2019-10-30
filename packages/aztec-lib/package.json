@@ -27,7 +27,7 @@
     "url": "git+https://github.com/invisible-college/demo-aztec.git"
   },
   "scripts": {
-    "test": "echo 'Change this to yarn mocha when we have tests' && exit 0",
+    "test": "yarn mocha",
     "mocha": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 100000 --trace-warnings --exit --colors --recursive --reporter spec; done"
   },
   "bugs": {
