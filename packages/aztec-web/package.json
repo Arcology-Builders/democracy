@@ -1,13 +1,13 @@
 {
   "name": "demo-aztec-web",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@cryptogoth/react-npm-boilerplate": "^1.0.2",
-    "demo-aztec-lib": "^0.4.4",
+    "demo-aztec-lib": "^0.4.5",
     "react": "16.7.0-alpha.1",
     "react-cache": "2.0.0-alpha.1",
     "react-dom": "16.7.0-alpha.1"
