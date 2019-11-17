@@ -6,6 +6,7 @@ const cx      = require('./src/cx')
 const bs      = require('./src/bs')
 const pt      = require('./src/pt')
 const cheatPt = require('./src/cheatPt')
+const viz     = require('./src/viz')
 const departs = require('./src/departs')
 
 const all = {
@@ -15,6 +16,7 @@ const all = {
   ...bs     ,
   ...pt     ,
   ...cheatPt,
+  ...viz    ,
   ...departs,
 }
 

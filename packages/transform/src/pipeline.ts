@@ -69,6 +69,8 @@ export class PipeHead {
   append(newCallables: Immutable.List<CallableTransform>, name?: string) {
     const outputTypes: ArgTypes = newCallables.reduce((s,v,k,a) => s.mergeDeep(v.transform.outputTypes), Immutable.Map({}))
     const inputTypes: ArgTypes = newCallables.reduce((s,v,k,a) => s.mergeDeep(v.transform.inputTypes), Immutable.Map({}))
+    inputTypes.map((v,k) => assert( typeof(v) === 'function', `Invalid type ${v} for ${k}` ))
+    outputTypes.map((v,k) => assert( typeof(v) === 'function', `Invalid type ${v} for ${k}` ))
     assert( isSubset( inputTypes, this.mergedOutputTypes ),
       `Input types of new transform ${inputTypes.map((v,k) => v.typeName)} ` +
       `is not a subset of output types of last transform ${this.mergedOutputTypes.map((v,k) => v.typeName)}`

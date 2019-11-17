@@ -117,18 +117,18 @@ const contractInstanceCheckerFunc = (arg: any) =>
 
 // Standard arg types / checkers
 const BOOLEAN_CHECKERS: Imm.Map<string,BooleanArgCheckerFunc> = Imm.Map({
-  'string'      : (arg: any) => (typeof(arg) === 'string'),
-  'number'      : (arg: any) => (typeof(arg) === 'number'),
-  'boolean'     : (arg: any) => (typeof(arg) === 'boolean'),
-  'map'         : (arg: any) => (Imm.Map.isMap(arg)),
-  'list'        : (arg: any) => (Imm.List.isList(arg)),
-  'badType'     : (arg: any) => false,
-  'any'         : (arg: any) => true,
-  'integer'     : (arg: any) => Number.isInteger(arg),
-  'floatString' : (arg: any) => (
+  'string'          : (arg: any) => (typeof(arg) === 'string'),
+  'number'          : (arg: any) => (typeof(arg) === 'number'),
+  'boolean'         : (arg: any) => (typeof(arg) === 'boolean'),
+  'map'             : (arg: any) => (Imm.Map.isMap(arg)),
+  'list'            : (arg: any) => (Imm.List.isList(arg)),
+  'badType'         : (arg: any) => false,
+  'any'             : (arg: any) => true,
+  'integer'         : (arg: any) => Number.isInteger(arg),
+  'floatString'     : (arg: any) => (
     (typeof(arg) === 'string') && (String(parseFloat(arg)) === arg)
   ),
-  'float'       : (arg: any) => typeof(parseFloat(arg)) === 'number',
+  'float'           : (arg: any) => typeof(parseFloat(arg)) === 'number',
   'function'        : (arg: any) => (typeof(arg) === 'function'),
   'keccak256Hash'   : (arg: any) => isHexPrefixed(arg, 66, false), 
   'ethereumTxHash'  : (arg: any) => isHexPrefixed(arg, 66),

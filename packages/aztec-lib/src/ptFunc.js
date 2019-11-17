@@ -5,7 +5,7 @@ const { Map, OrderedMap }   = require('immutable')
 const assert    = require('chai').assert
 
 const { Logger } = require('demo-utils')
-const { assembleCallablePipeline, createTransformFromMap, makeMapType, isTransform } = require('demo-transform')
+const { createTransformFromMap, makeMapType } = require('demo-transform')
 const {
   createCxPrepareTransform, createCxFinishTransform, createCxTokenContractsTransform,
   cxJsContractTransform,
@@ -34,7 +34,7 @@ const createPtPrepareTransform = () => {
   const eachInputTypes = Map({
     tradeSymbol       : TYPES.string,
     address           : TYPES.ethereumAddress,
-    password          : TYPES.string,
+    password          : TYPES.string.opt,
     publicKey         : TYPES.aztecPublicKey,
     noteHash          : TYPES.aztecNoteHash,
   })

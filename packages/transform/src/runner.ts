@@ -141,7 +141,6 @@ export const createArgListTransform = (argTypes: ArgTypes) => createTransformFro
     assert( Imm.Map.isMap(defaultArgs.get('babaloo', Imm.Map({}))),
     JSON.stringify(defaultArgs.get('babaloo') ))
     */
-    LOGGER.debug('state', defaultArgs)
     LOGGER.debug('args', process.argv)
     const scriptName = path.basename(module.filename)
 

@@ -15,7 +15,8 @@ const { fromJS, toJS, Logger, getConfig }
 const { isAccount }
                 = require('demo-keys')
 const { createTransformFromMap, makeMapType } = require('demo-transform')
-const { checkPublicKey, AZTEC_TYPES: TYPES, exportAztecPrivateNote } = require('./utils')
+const { checkPublicKey, AZTEC_TYPES: TYPES,
+  exportAztecPrivateNote, exportAztecPublicNote } = require('./utils')
 
 const LOGGER    = new Logger('cxFunc')
 
@@ -174,6 +175,8 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     })
     const senderNoteRaw   = await bm.inputter(senderKey)
     const senderNote      = await aztec.note.fromViewKey(senderNoteRaw.get('viewingKey'))
+    const senderPublicNote = await exportAztecPublicNote(senderNote)
+    senderPublicNote.a = senderNote.a
     senderNote.owner      = senderAddress
     const senderNoteValue = new BN(parseInt(senderNote.k))
     LOGGER.debug('Sender URL'       , senderKey)
@@ -195,6 +198,8 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     // Change, if any, to refund back to sender
     const changeValue     = new BN(senderNoteValue).sub(new BN(transferValue))
     const changeNote      = await aztec.note.create(senderPublicKey, changeValue )
+    const changePublicNote  = await exportAztecPublicNote(changeNote)
+    changePublicNote.a = changeNote.a
     const changeKey       = buildWriteKey({
       ownerAddress : senderAddress,
       noteHash     : changeNote.noteHash
@@ -205,6 +210,8 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
 
     // Receiving information
     const receiverNote = await aztec.note.create(receiverPublicKey, transferValue)
+    const receiverPublicNote = await exportAztecPublicNote(receiverNote)
+    receiverPublicNote.a = receiverNote.a
     const receiverKey  = buildWriteKey({
       ownerAddress : receiverAddress,
       noteHash     : receiverNote.noteHash
@@ -212,12 +219,16 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     LOGGER.debug('Receiver Key'       , receiverKey)
     LOGGER.debug('Receiver Public Key', receiverPublicKey)
     LOGGER.debug('Receiver Value'     , transferValue.toNumber())
-    LOGGER.debug('Receiver Note Hash' , receiverNote.noteHash)
+    LOGGER.debug('Receiver Note Hash' , receiverPublicNote.noteHash)
     //assert.equal( receiverNote.noteHash, receiverNoteCreated.get('zkNoteHash') )
 
     const argMap =  {
       inputNotes       : [senderNote],
       outputNotes      : [receiverNote, changeNote],
+      /* Public notes cannot be encoded in join split, ask AZTEC about it
+      inputNotes       : [senderPublicNote],
+      outputNotes      : [receiverPublicNote, changePublicNote],
+      */
       senderAddress    : transfererAddress,
       inputNoteOwners  : [sender],
       publicOwner      : deployerAddress,

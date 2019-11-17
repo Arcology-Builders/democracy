@@ -19,17 +19,19 @@ const eachTypes = Map({
   password    : TYPES.string,
   publicKey   : TYPES.aztecPublicKey,
   noteHash    : TYPES.aztecNoteHash,
-  tradeSymbol       : TYPES.string,
+  tradeSymbol : TYPES.string,
 })
 
 const m0 = createArgListTransform(Map({
-  unlockSeconds     : TYPES.integer,
-  seller            : makeMapType(eachTypes, 'ptInputsMapType'),
-  bidder            : makeMapType(eachTypes, 'ptInputsMapType'),
-  testValueETH      : TYPES.string,
-  testAccountIndex  : TYPES.integer,
-  wallet            : TYPES.wallet,
-  sourcePathList    : TYPES.array,
+  unlockSeconds       : TYPES.integer,
+  seller              : makeMapType(eachTypes, 'ptInputsMapType'),
+  bidder              : makeMapType(eachTypes, 'ptInputsMapType'),
+  testValueETH        : TYPES.string,
+  testAccountIndex    : TYPES.integer,
+  proxyContractName   : TYPES.string,
+  proxySwapMethodName : TYPES.string,
+  wallet              : TYPES.wallet,
+  sourcePathList      : TYPES.array,
 }))
 
 // Default values that we don't expect to be supplied by the client
@@ -44,8 +46,6 @@ const initialState = Map({
 })
 
 const pts = {}
-
-assert( swapTransform, 'swap transform is not. ${swapTransform}' )
 
 pts.ptPipeline = constructPtTransformOrderedMap([
   [ 'argList' , m0 ],
