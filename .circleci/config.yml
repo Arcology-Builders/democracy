@@ -9,12 +9,12 @@ jobs:
       - run: pwd && ls
       - restore_cache:
           keys:
-            - ganache-db-v2-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+            - ganache-db-v3-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - restore_cache:
           keys:
-            - yarn-packages-v2-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
-            - yarn-packages-v2-{{ .Branch }}-
-            - yarn-packages-v2-
+            - yarn-packages-v3-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+            - yarn-packages-v3-{{ .Branch }}-
+            - yarn-packages-v3-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
           command: . ~/.profile; sh ./scripts/start-ganache.sh
@@ -25,13 +25,13 @@ jobs:
             sleep 7 && wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8545
             :
       - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
-      - run: . ~/.profile; bash -c "[ -e 'ganache_db' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
+      - run: . ~/.profile; bash -c "[ -d 'ganache-db' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
       - run: . ~/.profile; lerna run test
       - save_cache: # ** special step to save dependency cache **
           paths:
             - /root/project/ganache-db
-          key: ganache-db-v2-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+          key: ganache-db-v3-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
-            - ~/.cache/yarn
-          key: yarn-packages-v2-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+            - ./node_modules
+          key: yarn-packages-v3-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
