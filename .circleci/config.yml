@@ -15,7 +15,7 @@ jobs:
             - yarn-packages-v1-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
-          command: . ~/.profile; bash -c "([ -e 'ganache_db' ] && sh ./scripts/start-ganache.sh) || ganache-cli -p 8545 -i 2222 --debug"
+          command: . ~/.profile; bash -c "([ -e 'ganache_db' ] && sh ./scripts/start-ganache.sh) || ganache-cli -p 8545 -i 2222 --debug --db ./ganache-db"
           background: true
       - run:
           shell: /bin/sh
