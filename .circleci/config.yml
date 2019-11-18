@@ -4,24 +4,31 @@ jobs:
     docker:
       - image: cryptogoth/node-circle-test:663bbd5
     steps:
-      - checkout
+      - run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files | xargs tar -c | tar -xv -C /root/project --exclude "d*" --exclude "logs"
+        #  checkout
       - run: pwd && ls
       - restore_cache:
           keys:
+            - ganache-db-v1-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
             - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
             - yarn-packages-v1-{{ .Branch }}-
             - yarn-packages-v1-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
-          command: . ~/.profile; sh ./scripts/start-ganache.sh
+          command: . ~/.profile; bash -c "([ -e 'ganache_db' ] && sh ./scripts/start-ganache.sh) || ganache-cli -p 8545 -i 2222 --debug"
+          background: true
       - run:
           shell: /bin/sh
           command: |
             sleep 7 && wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8545
             :
       - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
-      # sh ./scripts/depart.js
+      - run: . ~/.profile; bash -c "[ -e 'ganache_db' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
       - run: . ~/.profile; lerna run test
+      - save_cache: # ** special step to save dependency cache **
+          paths:
+            - /root/project/ganache-db
+          key: ganache-db-v1-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
             - ~/.cache/yarn
