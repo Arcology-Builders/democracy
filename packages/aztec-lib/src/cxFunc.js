@@ -104,15 +104,16 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
   }).merge(commonTypes)
 
   const subStateOutputTypes = Map({
-    jsProofData     : TYPES.string,
-    jsSignatures    : TYPES.string,
-    jsSenderKey     : TYPES.string,
-    jsSenderNote    : TYPES.aztecPrivateNote,
-    jsChangeKey     : TYPES.string,
-    jsChangeNote    : TYPES.aztecPrivateNote,
-    jsReceiverKey   : TYPES.string,
-    jsReceiverNote  : TYPES.aztecPrivateNote,
-    jsTransferValue : TYPES.bn,
+    swapMethodParams : TYPES.array,
+    jsProofData      : TYPES.string,
+    jsSignatures     : TYPES.string,
+    jsSenderKey      : TYPES.string,
+    jsSenderNote     : TYPES.aztecPrivateNote,
+    jsChangeKey      : TYPES.string,
+    jsChangeNote     : TYPES.aztecPrivateNote,
+    jsReceiverKey    : TYPES.string,
+    jsReceiverNote   : TYPES.aztecPrivateNote,
+    jsTransferValue  : TYPES.bn,
   })
 
   const outputTypes = Map({
@@ -248,6 +249,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     LOGGER.info('Validated join-split.', validateResult)
     LOGGER.info('Signatures', signatures)
     const subStateMap = Map({
+      swapMethodParams : [ signatures ],
       jsProofData     : proofData,
       jsSignatures    : signatures,
       jsSenderKey     : senderKey,

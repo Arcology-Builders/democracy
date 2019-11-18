@@ -129,6 +129,7 @@ ptFuncs.swapTransform = (() => {
     transfererAddress : TYPES.ethereumAddress,
     jsProofData       : TYPES.string,
     jsSignatures      : TYPES.string,
+    swapMethodParams  : TYPES.array.opt,
   })
 
   const inputTypes = Map({
@@ -148,15 +149,19 @@ ptFuncs.swapTransform = (() => {
       minedTx,
     }) => {
       LOGGER.debug('Seller', seller)
-      LOGGER.debug('Buyer' , bidder)
+      LOGGER.debug('Bidder' , bidder)
       LOGGER.debug('Seller Token Address', seller.zkToken.address)
       LOGGER.debug('Buyer Token Address' , bidder.zkToken.address)
       LOGGER.debug('Swap Method Name'    , proxySwapMethodName)
       assert( proxySwapMethodName, 'Proxy swap method name' )
+      const sellerParams = seller['swapMethodParams'] ? [ ...seller.swapMethodParams ] : []
+      const bidderParams = bidder['swapMethodParams'] ? [ ...bidder.swapMethodParams ] : []
       let txReceipt = await minedTx(proxy[proxySwapMethodName],
         [ seller.zkToken.address, bidder.zkToken.address ,
           seller.jsProofData    , bidder.jsProofData     ,
-          seller.jsSignatures   , bidder.jsSignatures    , ] )
+          //seller.jsSignatures   , bidder.jsSignatures    ,
+          ...sellerParams, ...bidderParams,
+        ] )
       return Map({ ptTxHash : txReceipt['transactionHash'] })
     },
     inputTypes,
