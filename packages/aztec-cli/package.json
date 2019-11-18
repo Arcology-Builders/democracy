@@ -38,7 +38,7 @@
   },
   "scripts": {
     "depart:dev": "NODE_ENV=DEVELOPMENT yarn run demo-depart",
-    "departZK:dev": "NODE_ENV=DEVELOPMENT demo-depart --departFileName departZK.js AAA",
+    "departZK:dev": "NODE_ENV=DEVELOPMENT yarn run demo-depart --departFileName departZK.js AAA",
     "depart:test": "NODE_ENV=TEST yarn run demo-depart",
     "departZK:test": "NODE_ENV=TEST demo-depart --departFileName departZK.js AAA",
     "build": "react-scripts build",
@@ -46,7 +46,7 @@
     "monit": "pm2 monit",
     "log": "pm2 log",
     "heroku-postinstall": "yarn start:rest && yarn depart:test && yarn departkZK:test",
-    "test": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 100000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done",
+    "test": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 150000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done",
     "lint": "echo 'rename lint:disabled when it passes' && exit 0",
     "lint:disabled": "eslint -c ../../.eslintrc.json *.js tests/*.js src/*.js",
     "lint:fix": "eslint --fix *.js tests/*.js src/*.js",
