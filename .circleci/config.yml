@@ -26,7 +26,7 @@ jobs:
             :
       - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
       - run: . ~/.profile; bash -c "[ -d './packages/aztec-cli/db/deploys/2222/ZkAssetMintable-deployBBB.json' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
-      - ls -lh ./ganache-db ./node_modules
+      - bash -c 'ls -lh ./ganache-db ./node_modules'
       - run: . ~/.profile; lerna run test
       - save_cache: # ** special step to save dependency cache **
           paths:
