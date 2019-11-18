@@ -27,9 +27,11 @@ jobs:
       - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
       - run: . ~/.profile; bash -c "[ -d './packages/aztec-cli/db/deploys/2222/ZkAssetMintable-deployBBB.json' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
       - run: . ~/.profile; lerna run test
+      - ls -lh ./ganache-db
       - save_cache: # ** special step to save dependency cache **
           paths:
-            - /root/project/ganache-db
+            - ./ganache-db
+            - ./packages/aztec-cli/db/deploys
           key: ganache-db-v3-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
