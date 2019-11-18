@@ -10,6 +10,8 @@ jobs:
       - restore_cache:
           keys:
             - ganache-db-v1-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+      - restore_cache:
+          keys:
             - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
             - yarn-packages-v1-{{ .Branch }}-
             - yarn-packages-v1-
