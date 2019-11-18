@@ -5,12 +5,15 @@ jobs:
       - image: cryptogoth/node-circle-test:663bbd5
     steps:
       - checkout
-      - restore_cache: # **restores saved dependency cache if the Branch key template or yarn.lock files have not changed since the previous run**
-          key: deps1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      - run: pwd && ls
+      - restore_cache:
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
           command: . ~/.profile; sh ./scripts/start-ganache.sh
-          background: true
       - run:
           shell: /bin/sh
           command: |
@@ -20,6 +23,6 @@ jobs:
       # sh ./scripts/depart.js
       - run: . ~/.profile; lerna run test
       - save_cache: # ** special step to save dependency cache **
-          key: deps1-{{ .Branch }}-{{ checksum "yarn.lock" }}
           paths:
-            - "node_modules"
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
