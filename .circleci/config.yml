@@ -9,14 +9,15 @@ jobs:
           key: deps1-{{ .Branch }}-{{ checksum "yarn.lock" }}
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
-          command: . ~/.profile; ganache-cli -p 8545 -i 2222
+          command: . ~/.profile; sh ./scripts/start-ganache.sh
           background: true
       - run:
           shell: /bin/sh
           command: |
             sleep 7 && wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:8545
             :
-      - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest; sh ./scripts/depart.js
+      - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
+      # sh ./scripts/depart.js
       - run: . ~/.profile; lerna run test
       - save_cache: # ** special step to save dependency cache **
           key: deps1-{{ .Branch }}-{{ checksum "yarn.lock" }}
