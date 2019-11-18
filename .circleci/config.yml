@@ -9,15 +9,15 @@ jobs:
       - run: pwd && ls
       - restore_cache:
           keys:
-            - ganache-db-v1-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+            - ganache-db-v2-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - restore_cache:
           keys:
-            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
-            - yarn-packages-v1-{{ .Branch }}-
-            - yarn-packages-v1-
+            - yarn-packages-v2-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+            - yarn-packages-v2-{{ .Branch }}-
+            - yarn-packages-v2-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
-          command: . ~/.profile; bash -c "([ -e 'ganache_db' ] && sh ./scripts/start-ganache.sh) || ganache-cli -p 8545 -i 2222 --debug --db ./ganache-db"
+          command: . ~/.profile; bash -c "([ -e 'ganache_db' ] && sh ./scripts/start-ganache.sh) || ganache-cli -p 8545 -i 2222 --debug --db /root/project/ganache-db"
           background: true
       - run:
           shell: /bin/sh
@@ -30,8 +30,8 @@ jobs:
       - save_cache: # ** special step to save dependency cache **
           paths:
             - /root/project/ganache-db
-          key: ganache-db-v1-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+          key: ganache-db-v2-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
             - ~/.cache/yarn
-          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+          key: yarn-packages-v2-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
