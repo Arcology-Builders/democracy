@@ -9,7 +9,7 @@ jobs:
       - run: pwd && ls
       - restore_cache:
           keys:
-            - ganache-db-v3-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+            - ganache-db-v4-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - restore_cache:
           keys:
             - yarn-packages-v3-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
@@ -26,13 +26,13 @@ jobs:
             :
       - run: . ~/.profile; cd packages/aztec-cli; yarn start:rest
       - run: . ~/.profile; bash -c "[ -d './packages/aztec-cli/db/deploys/2222/ZkAssetMintable-deployBBB.json' ] || (cd packages/aztec-cli; sh ./scripts/depart.js)"
+      - ls -lh ./ganache-db ./node_modules
       - run: . ~/.profile; lerna run test
-      - ls -lh ./ganache-db
       - save_cache: # ** special step to save dependency cache **
           paths:
             - ./ganache-db
             - ./packages/aztec-cli/db/deploys
-          key: ganache-db-v3-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+          key: ganache-db-v4-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
             - ./node_modules
