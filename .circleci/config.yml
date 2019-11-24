@@ -10,11 +10,11 @@ jobs:
       #- restore_cache:
       #  keys:
       #    - ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
-      - restore_cache:
-          keys:
-            - yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
-            - yarn-packages-v4-{{ .Branch }}-
-            - yarn-packages-v4-
+      #- restore_cache:
+      #    keys:
+      #      - yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+      #      - yarn-packages-v4-{{ .Branch }}-
+      #      - yarn-packages-v4-
       - run: . ~/.profile; yarn global add typescript; lerna bootstrap; lerna run init; lerna run lint
       - run:
           command: . ~/.profile; sh ./scripts/start-ganache.sh
@@ -35,7 +35,7 @@ jobs:
       #      - ./ganache-db
       #      - ./packages/aztec-cli/db/deploys
       #    key: ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
-      - save_cache: # ** special step to save dependency cache **
-          paths:
-            - ./node_modules
-          key: yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
+      #- save_cache: # ** special step to save dependency cache **
+      #    paths:
+      #      - ./node_modules
+      #    key: yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
