@@ -1,6 +1,6 @@
 // Confidential transfer of an amount from a sender to a receiver with change back.
 'use strict'
-const { Map, OrderedMap }   = require('immutable')
+const { List, Map, OrderedMap }   = require('immutable')
 
 const assert    = require('chai').assert
 
@@ -154,13 +154,19 @@ ptFuncs.swapTransform = (() => {
       LOGGER.debug('Buyer Token Address' , bidder.zkToken.address)
       LOGGER.debug('Swap Method Name'    , proxySwapMethodName)
       assert( proxySwapMethodName, 'Proxy swap method name' )
-      const sellerParams = seller['swapMethodParams'] ? [ ...seller.swapMethodParams ] : []
-      const bidderParams = bidder['swapMethodParams'] ? [ ...bidder.swapMethodParams ] : []
+      const sellerParamList = seller['swapMethodParams'] ? [ ...seller.swapMethodParams ] : []
+      const bidderParamList = bidder['swapMethodParams'] ? [ ...bidder.swapMethodParams ] : []
+
+      const sellerParams = List(sellerParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+      const bidderParams = List(bidderParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+
+      LOGGER.debug('Seller Params', sellerParams)
+      LOGGER.debug('Bidder Params', bidderParams)
       let txReceipt = await minedTx(proxy[proxySwapMethodName],
-        [ seller.zkToken.address, bidder.zkToken.address ,
+        [
+          sellerParams          , bidderParams           ,
           seller.jsProofData    , bidder.jsProofData     ,
-          //seller.jsSignatures   , bidder.jsSignatures    ,
-          ...sellerParams, ...bidderParams,
+          seller.jsSignatures   , bidder.jsSignatures    ,
         ] )
       return Map({ ptTxHash : txReceipt['transactionHash'] })
     },

@@ -52,4 +52,16 @@ describe('AZTEC types', () => {
       `New AZTEC note did not detect missing noteHash` )
   })
 
+  it('checks tradeSymbol type', async () => {
+    assert( TYPES.tradeSymbol('AAA'), `AAA is not detected as a tradeSymbol` )
+    assert( TYPES.tradeSymbol('A')['error'], `A should not be a tradeSymbol` )
+    assert( TYPES.tradeSymbol('ABCDEF')['error'], `ABCDEF should not be a tradeSymbol` )
+  })
+
+  it('checks isHexPrefixed type', async () => {
+    assert( TYPES.hexPrefixed('0x123'), `0x123 is not detected as a hexPrefixed` )
+    assert( TYPES.hexPrefixed( '0x_ZE' )['error'], `0x_ZE should not be a hexPrefixed` )
+    assert( TYPES.hexPrefixed( '123' )['error'], `123 should not be a hexPrefixed` )
+  })
+
 })

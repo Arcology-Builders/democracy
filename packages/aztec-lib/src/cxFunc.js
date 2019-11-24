@@ -246,10 +246,10 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     joinSplitContract.validateJoinSplit(proofData, transfererAddress, constants.CRS)
     assert.notEqual(validateResult['0'], '0x',
       'Invalid join split. Did you deploy all the contracts?')
-    LOGGER.info('Validated join-split.', validateResult)
-    LOGGER.info('Signatures', signatures)
+    LOGGER.debug('Validated join-split.', validateResult)
+    LOGGER.debug('Signatures', signatures)
     const subStateMap = Map({
-      swapMethodParams : [ signatures ],
+      swapMethodParams : [ zkTokenAddress, senderNoteHash ],
       jsProofData     : proofData,
       jsSignatures    : signatures,
       jsSenderKey     : senderKey,

@@ -68,12 +68,27 @@ const aztecPrivateNoteCheckerFunc = (obj) => {
 
 }
 
+const tradeSymbolCheckerFunc = (obj) => {
+  if (typeof(obj) !== 'string') {
+    return {error: `${obj} should be a string`}
+  }
+  if (obj.length < 2 || obj.length > 4) {
+    return {error: `${obj.length} should be between 2 and 4` }
+  }
+  return {}
+}
+
+const hexPrefixedCheckerFunc = (obj) => {
+  if (isHexPrefixed(obj)) {
+  }
+}
+
 const AZTEC_CHECKER_FUNCS = Map({
   'aztecPublicKey'   : aztecPublicKeyCheckerFunc  ,
   'aztecNoteHash'    : aztecNoteHashCheckerFunc   ,
   'aztecPublicNote'  : aztecPublicNoteCheckerFunc ,
   'aztecPrivateNote' : aztecPrivateNoteCheckerFunc,
-  'tradeSymbol'      : (typeof(obj) === 'string' && obj.length >= 2 && obj.length <= 4),
+  'tradeSymbol'      : tradeSymbolCheckerFunc     ,
 })
 
 utils.AZTEC_TYPES = AZTEC_CHECKER_FUNCS.map((checker, typeName) => {
