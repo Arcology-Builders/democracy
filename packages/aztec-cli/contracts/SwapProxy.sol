@@ -1,5 +1,6 @@
 pragma solidity >=0.5.0;
 
+import "./ParamUtils.sol";
 import "ERC1724/ZkAssetMintable.sol";
 import "ACE/ACE.sol";
 
@@ -20,17 +21,49 @@ contract SwapProxy {
         token.confidentialTransfer(_proof, _signature);
     }
 
-    function twoSidedTransfer(
-        address _sellerTokenAddress,
-        address _buyerTokenAddress,
-        bytes memory _sellerProof,
-        bytes memory _buyerProof,
-        bytes memory _sellerSignatures,
-        bytes memory _buyerSignatures
-    ) public {
-        ZkAssetMintable sellerToken = ZkAssetMintable(_sellerTokenAddress);
-        ZkAssetMintable buyerToken = ZkAssetMintable(_buyerTokenAddress);
-        sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
-        buyerToken.confidentialTransfer(_buyerProof, _buyerSignatures);
+    function getAddress(
+        bytes memory _params
+    ) public pure returns (address) {
+        return ParamUtils.getAddress(_params, 0);
     }
+
+    function linkedTransfer(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProof,
+        bytes memory _bidderProof,
+        bytes memory _sellerSignatures,
+        bytes memory _bidderSignatures
+    ) public {
+        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 0);
+        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
+        ZkAssetMintable sellerToken = ZkAssetMintable(sellerTokenAddress);
+        ZkAssetMintable bidderToken = ZkAssetMintable(bidderTokenAddress);
+        sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
+        bidderToken.confidentialTransfer(_bidderProof, _bidderSignatures);
+
+        //bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
+        //bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
+    }
+
+    function twoSidedTransfer(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProof,
+        bytes memory _bidderProof,
+        bytes memory _sellerSignatures,
+        bytes memory _bidderSignatures
+    ) public returns (bytes32,bytes32) {
+        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 0);
+        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
+        ZkAssetMintable sellerToken = ZkAssetMintable(sellerTokenAddress);
+        ZkAssetMintable bidderToken = ZkAssetMintable(bidderTokenAddress);
+        sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
+        bidderToken.confidentialTransfer(_bidderProof, _bidderSignatures);
+
+        bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
+        bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
+        return (sellerNoteHash,bidderNoteHash);
+    }
+
 }

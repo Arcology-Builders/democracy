@@ -34,8 +34,10 @@ const m0 = createArgListTransform(Map({
   sourcePathList      : TYPES.array,
 }))
 
+const pts = {}
+
 // Default values that we don't expect to be supplied by the client
-const initialState = Map({
+pts.ptInitialState = Map({
   unlockSeconds       : 30,
   testValueETH        : '0.1',
   testAccountIndex    : 0,
@@ -45,19 +47,21 @@ const initialState = Map({
   wallet,
 })
 
-const pts = {}
-
-pts.ptPipeline = constructPtTransformOrderedMap([
+pts.ptEarlyLabeledTransforms =  [
   [ 'argList' , m0 ],
   [ 'deployer', deployerTransform],
   [ 'depart'  , departTransform],
+]
+
+pts.ptPipeline = constructPtTransformOrderedMap([
+  ...pts.ptEarlyLabeledTransforms,
   [ 'ptPrep'  , ptPrepareTransform ],
 ], [
   ['swapTransform', swapTransform],
 ])
 
 pts.pt = async (state) => {
-  return await runTransforms( pts.ptPipeline, initialState.merge(state) )
+  return await runTransforms( pts.ptPipeline, pts.ptInitialState.merge(state) )
 }
 
 module.exports = pts

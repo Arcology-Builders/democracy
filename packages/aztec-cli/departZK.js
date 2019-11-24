@@ -21,7 +21,7 @@ depart(Map({
   }),
   testAccountIndex : Map({
     type: TYPES.integer,
-    value: 0,
+    value: 6,
   }),
   sourcePathList   : Map({
     type: TYPES.array,

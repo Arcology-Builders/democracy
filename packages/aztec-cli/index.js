@@ -5,8 +5,8 @@ const mint    = require('./src/mint')
 const cx      = require('./src/cx')
 const bs      = require('./src/bs')
 const pt      = require('./src/pt')
+const lt      = require('./src/lt')
 const cheatPt = require('./src/cheatPt')
-const viz     = require('./src/viz')
 const departs = require('./src/departs')
 
 const all = {
@@ -15,8 +15,8 @@ const all = {
   ...cx     ,
   ...bs     ,
   ...pt     ,
+  ...lt     ,
   ...cheatPt,
-  ...viz    ,
   ...departs,
 }
 

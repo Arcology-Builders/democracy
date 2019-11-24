@@ -3,6 +3,9 @@
 
 const { Map } = require('immutable')
 const { AZTEC_TYPES: TYPES } = require('demo-aztec-lib')
+const { Logger } = require('demo-utils')
+
+const LOGGER = new Logger('departSP')
 
 const {
   constants,
@@ -25,19 +28,27 @@ depart(Map({
   }),
   testAccountIndex : Map({
     type : TYPES.integer,
-    value : 0,
+    value : 6,
   }),
   unlockSeconds : Map({
     type: TYPES.integer,
     value: 50,
+  }),
+  compileOutputFull : Map({
+    type: TYPES.boolean,
+    value: true,
   }),
   sourcePathList: Map({
     type: TYPES.array,
     value: ['../../node_modules/@aztec/protocol/contracts', '../lib/contracts', 'contracts'],
   }),
 }),
-async ({deployed, minedTx}) => {
+async ({deployed, compile, link, minedTx}) => {
   const ACE = await deployed( 'ACE' )
+  const pu = await deployed( 'ParamUtils' )
+  LOGGER.info( 'ParamUtils', pu.address )
+  await compile( 'SwapProxy', 'SwapProxy.sol' )
+  await link( 'SwapProxy', 'link', Map({ 'ParamUtils': 'deploy' }) )
   const sp = await deployed( 'SwapProxy',
     { ctorArgList: new Map({ _aceAddress: ACE.address }) })
 

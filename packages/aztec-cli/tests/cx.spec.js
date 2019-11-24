@@ -1,7 +1,7 @@
 'use strict'
 const BN = require('bn.js')
 const { mint, cx, doMintAmount } = require('..')
-const { getConfig } = require('demo-utils')
+const { getConfig, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { parsed } = require('dotenv').config()
 const { Map, List } = require('immutable')
@@ -9,6 +9,8 @@ const chai = require('chai')
 const assert = chai.assert
 const expect = chai.expect
 chai.use(require('chai-as-promised'))
+
+const LOGGER = new Logger('cx.spec')
 
 describe('Confidential transfers', () => {
 
@@ -40,7 +42,7 @@ describe('Confidential transfers', () => {
         transferAmount    : new BN(amount),
         transferAll       : transferAll,
       }),
-      unlockSeconds     : 200,
+      unlockSeconds     : 400,
     }))
   }
 
@@ -82,7 +84,7 @@ describe('Confidential transfers', () => {
     ).to.be.rejectedWith(Error)
 
   })
-  /*
+
   it('transferring zero succeeds multiple times', async () => {
     const senderNoteHash = await doMintAmount({
       amount      : new BN(0),
@@ -132,18 +134,20 @@ describe('Confidential transfers', () => {
     ).to.be.rejectedWith(Error)
   })
 
+  /*
   it('succeed transferring partial amount after minting', async () => {
 
     const senderNoteHash = await doMintAmount({
       amount: new BN(33),
       senderIndex: 1,
     })
-    const cxResult = await doCxAmount({
+    const cxResult = (await doCxAmount({
       amount         : 11,
       senderNoteHash,
       senderIndex    : 1,
-    })
-    const receiverNoteHash = result.get('receiverNoteHash')
+    }))
+    console.log('cxResult', cxResult.keys())
+    const receiverNoteHash = cxResult.unlabeled.receiverNoteHash
     assert.equal( receiverNoteHash.length, 66, 'receiverNoteHash should be a 256-bit hash' )
 
   })
@@ -154,7 +158,7 @@ describe('Confidential transfers', () => {
     })
 
     await expect(
-      doCxAmount({ amount: 22, senderNoteHash })
+      doCxAmount({ amount: 22, senderNoteHash, senderIndex: 1 })
     ).to.be.rejectedWith(Error)
   })
 */

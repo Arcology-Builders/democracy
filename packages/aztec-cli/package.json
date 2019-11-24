@@ -45,6 +45,7 @@
     "ganache": "babel-node scripts/run ganache",
     "monit": "pm2 monit",
     "log": "pm2 log",
+    "init": "NODE_ENV=DEVELOPMENT demo-depart --departFileName departSP.js",
     "heroku-postinstall": "yarn start:rest && yarn depart:test && yarn departkZK:test",
     "test": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 150000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done",
     "lint": "echo 'rename lint:disabled when it passes' && exit 0",
