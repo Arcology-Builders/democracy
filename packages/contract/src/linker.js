@@ -108,6 +108,9 @@ linker.Linker = class {
     LOGGER.debug('replaceMap', replaceMap)
 
     const replacedCode = solcLinker.linkBytecode(code, replaceMap)
+    if (replacedCode.search('__') > -1 ) {
+      throw new Error('Found unresolve library reference. Did you deploy any used libraries beforehand and pass their deploys into this link as a dependency map?')
+    }
 
     const now = new Date()
 
