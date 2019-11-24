@@ -125,8 +125,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
            const out = await v(inState)
            return (await s).mergeDeep(out)
          } catch(e) {
-           LOGGER.error(`Transform run error in pipe ${i} named ${pipe.name}.\n`, e.message)
-           throw e
+           throw new Error(`Transform run error in pipe ${i} (indexed from 0) named ${pipe.name}.\n${e.message}`)
          }
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs

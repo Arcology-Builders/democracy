@@ -251,7 +251,7 @@ export const assembleCallablePipeline = (
     (pipeSoFar: Pipeline, transform: Transform, i: number) => {
       const transformList = makeList(transform)
       assert( isTransform(transformList), `Item ${i+1}:${transform} is not a transform`)
-      return pipeSoFar.append(transformList, _labelsList.get(i))
+      return pipeSoFar.append(transformList, _labelsList.get(i+1))
     },
     firstPipe
   )

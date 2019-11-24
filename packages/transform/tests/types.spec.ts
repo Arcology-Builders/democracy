@@ -23,7 +23,19 @@ describe('Democracy types', () => {
 
   })
 
-  it('check hex string correctly', async () => {
+  it('checks hex string correctly', async () => {
+
+    assert.notOk( TYPES.hexPrefixed('0x123')['error'],
+      `0x123 should be a valid hexPrefixed`
+    )
+    const result = TYPES.hexPrefixed('0xZ')
+    assert( result['error'],
+      `A prefixed hex string doesn't pass with error ${result['error']}`
+    )
+
+  })
+
+  it('checks keccak256Hash correctly', async () => {
 
     const result = TYPES.keccak256Hash(prefixedKeccakHash)
     assert.notOk( result['error'],

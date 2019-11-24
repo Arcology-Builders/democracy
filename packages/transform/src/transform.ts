@@ -64,8 +64,7 @@ export const createTransform = (transform: Transform): CallableTransform => {
     try {
       inputArgs = checkExtractArgs(state, transform.inputTypes)
     } catch(e) {
-      LOGGER.error('Input types mismatch', e.message)
-      throw e
+      throw new Error(`Input types mismatch ${e.message}`)
     }
 /*
     const tuples : [string,any][] = Imm.List(inputArgs.keys()).toJS()

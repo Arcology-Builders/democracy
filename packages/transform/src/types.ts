@@ -158,8 +158,16 @@ export const makeCheckerFuncFromBoolean =
         return requiredChecker
 }
 
+export const makeCheckerFunc = 
+  (checker: ArgCheckerFunc, typeName: string): ArgChecker => {
+        const requiredChecker = makeRequired(checker, typeName)
+        requiredChecker.opt = makeOptional(checker, typeName)
+        return requiredChecker
+}
+
 export const TYPES_MAP: Imm.Map<string,ArgChecker>
-  = BOOLEAN_CHECKERS.map(makeCheckerFuncFromBoolean)
+  = BOOLEAN_CHECKERS.map(makeCheckerFuncFromBoolean).
+  merge({'hexPrefixed' : makeCheckerFunc((arg: any) => isHexPrefixed(arg), 'hexPrefixed') })
 
 export const TYPES: { [key: string] : ArgChecker } = TYPES_MAP.toJSON()
 
