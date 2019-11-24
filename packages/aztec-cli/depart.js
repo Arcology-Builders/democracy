@@ -45,8 +45,6 @@ async ({deployed, minedTx}) => {
   const js = await deployed( 'JoinSplit' )
   const pr = await deployed( 'PrivateRange' )
   const dc = await deployed( 'DividendComputation' )
-  const sp = await deployed( 'SwapProxy',
-    { ctorArgList: new Map({ _aceAddress: ACE.address }) })
 
   await minedTx( ACE.setCommonReferenceString, [constants.CRS] )
   LOGGER.debug( 'Set common reference string' )
