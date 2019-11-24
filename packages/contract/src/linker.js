@@ -10,6 +10,7 @@ const { isContract } = require('./contractsManager')
 const { BuildsManager } = require('./buildsManager')
 const { awaitOutputter, isDeploy, isLink } = require('./utils')
 const { keccak } = require('ethereumjs-util')
+const solcLinker = require('solc/linker')
 
 const linker = {}
 
@@ -50,6 +51,7 @@ linker.Linker = class {
       LOGGER.debug(`with input hash ${inputHash}`)
     }
 
+    /* 
     let matches = Map({})
     let match
     while (match = LIB_PATTERN.exec(code)) {
@@ -98,6 +100,14 @@ linker.Linker = class {
     }, code)
 
     assert(replacedCode.match(LIB_PATTERN) === null) // All placeholders should be replaced
+*/
+    const deploys = await this.bm.getDeploys()
+    const depMap = Map.isMap(_depMap) ? _depMap : new Map({})
+    const replaceMap = depMap.map((deployId, contractName) => deploys.get(`${contractName}-${deployId}`).get('deployAddress')).mapKeys((k) => k+'.sol:'+k).toJS()
+
+    LOGGER.debug('replaceMap', replaceMap)
+
+    const replacedCode = solcLinker.linkBytecode(code, replaceMap)
 
     const now = new Date()
 
