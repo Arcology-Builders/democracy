@@ -7,9 +7,9 @@ jobs:
       #- run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files | xargs tar -c | tar -xv -C /root/project --exclude "d*" --exclude "logs"
       - checkout
       - run: pwd && ls
-      - restore_cache:
-          keys:
-            - ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+      #- restore_cache:
+      #  keys:
+      #    - ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - restore_cache:
           keys:
             - yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn_deps_checksum" }}
@@ -29,11 +29,11 @@ jobs:
       - run: ls -lhd ./ganache-db ./node_modules
       - run: ls -lhR ./packages/aztec-cli/db/deploys/2222
       - run: . ~/.profile; lerna run test
-      - save_cache: # ** special step to save dependency cache **
-          paths:
-            - ./ganache-db
-            - ./packages/aztec-cli/db/deploys
-          key: ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
+      #- save_cache: # ** special step to save dependency cache **
+      #  paths:
+      #      - ./ganache-db
+      #      - ./packages/aztec-cli/db/deploys
+      #    key: ganache-db-v5-{{ .Branch }}-{{ checksum "ganache_deps_checksum" }}
       - save_cache: # ** special step to save dependency cache **
           paths:
             - ./node_modules
