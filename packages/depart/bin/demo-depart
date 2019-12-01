@@ -79,6 +79,7 @@ const m2 = deployerTransform
 const m3 = departTransform
 
 const inputTypes = Map({
+  chainId         : TYPES.string,
   compile         : TYPES['function'],
   link            : TYPES['function'],
   deploy          : TYPES['function'],
