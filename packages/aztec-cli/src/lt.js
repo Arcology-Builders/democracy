@@ -28,6 +28,8 @@ const m0 = createArgListTransform(Map({
   unlockSeconds       : TYPES.integer,
   seller              : makeMapType(eachTypes, 'ptInputsMapType'),
   bidder              : makeMapType(eachTypes, 'ptInputsMapType'),
+  saleExpireTimeSeconds : TYPES.integer,
+  bidExpireTimeSeconds  : TYPES.integer,
   testValueETH        : TYPES.string,
   testAccountIndex    : TYPES.integer,
   proxyContractName   : TYPES.string,
@@ -41,7 +43,9 @@ const lts = {}
 // Default values that we don't expect to be supplied by the client
 lts.ltInitialState = Map({
   unlockSeconds       : 30,
-  testValueETH        : '0.1',
+  saleExpireTimeSeconds : Math.round(Date.now() / 1000) + 1000,
+  bidExpireTimeSeconds  : Math.round(Date.now() / 1000) + 1000,
+  testValueETH        : '0.2',
   testAccountIndex    : 0,
   proxyContractName   : 'SwapProxy',
   proxySwapMethodName : 'linkedTransfer',

@@ -7,19 +7,20 @@ const secp256k1 = require('@aztec/secp256k1')
 const abi = require('ethereumjs-abi')
 const util = require('ethereumjs-util')
 const { createTransformFromMap, makeMapType } = require('demo-transform')
-const { Logger } = require('demo-utils')
+const { Logger, timeStampSecondsToBlockNumber } = require('demo-utils')
 const { AZTEC_TYPES: TYPES } = require('./utils')
 const { padRight } = require('web3-utils');
 
 const LOGGER = new Logger('eip712')
 
-const DOMAIN_SALT = '0x2c0839bc15be62d229094ac4709dd2f8fa39d56d8d25d29c580ca773fd195ddb'
+const DOMAIN_SALT = '0x655a1a74fefc4b03038d941491a1d60fc7fbd77cf347edea72ca51867fb5a3dc'
 const DOMAIN_TYPEHASH = abi.soliditySHA3(["string"],["EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"])
-const BID_TYPEHASH = abi.soliditySHA3(["string"],["Bid(bytes32 sellerNoteHash,bytes32 bidderNoteHash,bytes proofData"])
+const TRADE_TYPE = "Trade(address bidderAddress,address sellerAddress,address bidderTokenAddress,address sellerTokenAddress,bytes32 bidderInputNoteHash,bytes32 sellerOutputNoteHash,bytes32 sellerInputNoteHash,bytes32 bidderOutputNoteHash,uint256 bidExpireBlockNumber,uint256 saleExpireBlockNumber)";
+const TRADE_TYPEHASH = abi.soliditySHA3(["string"],[ TRADE_TYPE ])
 
 const getDomainData = (chainId, verifyingContract) => {
   return {
-    name              : "Democracy.js",
+    name              : "Democracy.js Linked Trade Validator",
     version           : "1",
     chainId           : parseInt(chainId, 10),
     verifyingContract : verifyingContract,
@@ -44,18 +45,32 @@ const getDomainSeparator = (domainData) => {
 
 const getMessageHash = (message) => {
   const params = [
-    BID_TYPEHASH,
-    message.sellerNoteHash,
-    message.bidderNoteHash,
-    Buffer.from(message.jsProof_BidderToSeller.slice(2), 'hex'),
+    TRADE_TYPEHASH               ,
+    message.bidderAddress        ,
+    message.sellerAddress        ,
+    message.bidderTokenAddress   ,
+    message.sellerTokenAddress   ,
+    message.bidderInputNoteHash  ,
+    message.sellerOutputNoteHash ,
+    message.sellerInputNoteHash  ,
+    message.bidderOutputNoteHash ,
+    message.bidExpireBlockNumber ,
+    message.saleExpireBlockNumber,
   ] 
   LOGGER.info('Message Hash', params)
   return abi.soliditySHA3(
     [
       'bytes32',
+      'address',
+      'address',
+      'address',
+      'address',
       'bytes32',
       'bytes32',
-      'bytes',
+      'bytes32',
+      'bytes32',
+      'uint256',
+      'uint256',
     ],
     params
   )
@@ -86,14 +101,28 @@ const signTypedDataTransform = createTransformFromMap({
     chainId,
     proxy,
     wallet,
+    deployed,
+    saleExpireTimeSeconds,
+    bidExpireTimeSeconds,
   }) => {
+    const validator = await deployed('TradeValidator')
 
-    const domainData = getDomainData(chainId, proxy.address)
+    const bidExpireBlockNumber  = await timeStampSecondsToBlockNumber(bidExpireTimeSeconds)
+    const saleExpireBlockNumber = await timeStampSecondsToBlockNumber(saleExpireTimeSeconds)
+
+    const domainData = getDomainData(chainId, validator.address)
     const domainSeparator = getDomainSeparator(domainData)
     const message = {
-      sellerNoteHash         : seller.noteHash,
-      bidderNoteHash         : bidder.noteHash,
-      jsProof_BidderToSeller : bidder.jsProofData,
+      bidderAddress         : bidder.address,
+      sellerAddress         : seller.address,
+      bidderTokenAddress    : bidder.zkToken.address,
+      sellerTokenAddress    : seller.zkToken.address,
+      bidderInputNoteHash   : bidder.jsSenderNote.noteHash,
+      sellerOutputNoteHash  : bidder.jsReceiverNote.noteHash,
+      sellerInputNoteHash   : seller.jsSenderNote.noteHash,
+      bidderOutputNoteHash  : seller.jsReceiverNote.noteHash,
+      bidExpireBlockNumber,
+      saleExpireBlockNumber,
     }
     const messageHash = getMessageHash(message)
     const finalHash = abi.soliditySHA3(
@@ -113,12 +142,15 @@ const signTypedDataTransform = createTransformFromMap({
       sigR,
       sigS,
       sigV,
+      validator,
       finalHash       : finalHash.toString('hex'),
       messageHash     : messageHash.toString('hex'),
       DOMAIN_TYPEHASH : DOMAIN_TYPEHASH.toString('hex'),
-      BID_TYPEHASH    : BID_TYPEHASH.toString('hex'),
+      TRADE_TYPEHASH  : TRADE_TYPEHASH.toString('hex'),
       DOMAIN_SALT     : DOMAIN_SALT.slice(2),
       domainSeparator : domainSeparator.toString('hex'),
+      saleExpireBlockNumber,
+      bidExpireBlockNumber,
     })
   },
   inputTypes: Map({
@@ -126,19 +158,25 @@ const signTypedDataTransform = createTransformFromMap({
     'seller'         : signSellerMapType,
     'chainId'        : TYPES.string,
     'proxy'          : TYPES.contractInstance,
+    'deployed'       : TYPES['function'],
     'wallet'         : TYPES.wallet,
+    'saleExpireTimeSeconds' : TYPES.integer,
+    'bidExpireTimeSeconds'  : TYPES.integer,
   }),
   outputTypes: Map({
-    'sigR'             : TYPES.keccak256Hash,
-    'sigS'             : TYPES.keccak256Hash,
-    'sigV'             : TYPES.integer,
-    'DOMAIN_TYPEHASH'  : TYPES.keccak256Hash,
-    'DOMAIN_SALT'      : TYPES.keccak256Hash,
-    'BID_TYPEHASH'     : TYPES.keccak256Hash,
-    'finalHash'        : TYPES.keccak256Hash,
-    'messageHash'        : TYPES.keccak256Hash,
-    'domainData'       : TYPES.any,
-    'domainSeparator'  : TYPES.keccak256Hash,
+    'validator'             : TYPES.contractInstance,
+    'sigR'                  : TYPES.keccak256Hash,
+    'sigS'                  : TYPES.keccak256Hash,
+    'sigV'                  : TYPES.integer,
+    'DOMAIN_TYPEHASH'       : TYPES.keccak256Hash,
+    'DOMAIN_SALT'           : TYPES.keccak256Hash,
+    'TRADE_TYPEHASH'        : TYPES.keccak256Hash,
+    'finalHash'             : TYPES.keccak256Hash,
+    'messageHash'           : TYPES.keccak256Hash,
+    'domainData'            : TYPES.any,
+    'domainSeparator'       : TYPES.keccak256Hash,
+    'saleExpireBlockNumber' : TYPES.bn,
+    'bidExpireBlockNumber'  : TYPES.bn,
   }),
 })
 

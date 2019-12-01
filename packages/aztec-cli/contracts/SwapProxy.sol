@@ -1,15 +1,33 @@
 pragma solidity >=0.5.0;
 
 import "./ParamUtils.sol";
+import "./TradeValidator.sol";
 import "ERC1724/ZkAssetMintable.sol";
 import "ACE/ACE.sol";
+import "libs/NoteUtils.sol";
+import "interfaces/IAZTEC.sol";
 
-contract SwapProxy {
+contract SwapProxy is IAZTEC {
+    using NoteUtils for bytes;
 
     ACE public ace;
+    TradeValidator public tv;
 
-    constructor(address _aceAddress) public {
+    constructor(
+        address _aceAddress,
+        address _tvAddress
+    ) public {
         ace = ACE(_aceAddress);
+        tv = TradeValidator(_tvAddress);
+    }
+
+    function getNotes(
+        bytes memory _proofData,
+        address _signer
+    ) public returns (bytes memory) {
+        bytes memory _proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, _signer, _proofData);
+        return _proofOutputs;
+        //return _proofOutputs.get(0).extractProofOutput();
     }
 
     function oneSidedTransfer(
@@ -27,6 +45,12 @@ contract SwapProxy {
         return ParamUtils.getAddress(_params, 0);
     }
 
+    function getUint256(
+        bytes memory _params
+    ) public pure returns (uint256) {
+        return ParamUtils.getUint256(_params, 32);
+    }
+
     function linkedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
@@ -39,6 +63,9 @@ contract SwapProxy {
         address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
         ZkAssetMintable sellerToken = ZkAssetMintable(sellerTokenAddress);
         ZkAssetMintable bidderToken = ZkAssetMintable(bidderTokenAddress);
+        bool isValid = tv.extractAndVerify(_sellerParams, _bidderParams, _sellerProof, _bidderProof);
+        require( isValid, "Invalid trade signature for bidder." );
+
         sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
         bidderToken.confidentialTransfer(_bidderProof, _bidderSignatures);
 

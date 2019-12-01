@@ -43,13 +43,25 @@ depart(Map({
     value: ['../../node_modules/@aztec/protocol/contracts', '../lib/contracts', 'contracts'],
   }),
 }),
-async ({deployed, compile, link, minedTx}) => {
+async ({deployed, compile, link, minedTx, chainId }) => {
+  assert( chainId, `No chainId passed to departure. You should fix this in demo-depart.` )
   const ACE = await deployed( 'ACE' )
   const pu = await deployed( 'ParamUtils' )
+  await compile( 'TradeValidator', 'TradeValidator.sol' )
+  await link( 'TradeValidator', 'link', Map({
+    'ParamUtils'     : 'deploy',
+  }) )
+  const tv = await deployed( 'TradeValidator',
+    { ctorArgList: new Map({ _chainId: chainId }) })
+
   LOGGER.info( 'ParamUtils', pu.address )
   await compile( 'SwapProxy', 'SwapProxy.sol' )
-  await link( 'SwapProxy', 'link', Map({ 'ParamUtils': 'deploy' }) )
+  await link( 'SwapProxy', 'link', Map({
+    'ParamUtils'     : 'deploy',
+    'TradeValidator' : 'deploy',
+  }) )
   const sp = await deployed( 'SwapProxy',
-    { ctorArgList: new Map({ _aceAddress: ACE.address }) })
+    { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }) })
+
 
 })

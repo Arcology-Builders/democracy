@@ -1,5 +1,5 @@
 const { mint, pt, cheatPt, doPt } = require('..')
-const { getConfig } = require('demo-utils')
+const { getConfig, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { Map } = require('immutable')
 const BN = require('bn.js')
@@ -8,6 +8,8 @@ const assert = chai.assert
 const expect = chai.expect
 chai.use(require('chai-as-promised'))
 const { parsed } = require('dotenv').config()
+
+const LOGGER = new Logger('pt.spec')
 
 describe('Private trade', () => {
 
@@ -38,8 +40,15 @@ describe('Private trade', () => {
     }))
     const bidderNoteHash = bidderResult.get('minteeNoteHash')
 
-    const result = await doPt({ sellerNoteHash, bidderNoteHash })
-    assert(result.get('ptTxHash'))
+    const result = (await doPt({ sellerNoteHash, bidderNoteHash })).toJS()
+    assert(result.ptTxHash)
+
+    const minedTx = result.minedTx
+
+    const params = [result.seller.jsProofData, result.seller.transfererAddress]
+    LOGGER.info( 'getNotes Params ', ...params )
+    const sellerNotes = await minedTx( result.proxy.getNotes, params )
+    LOGGER.info('sellerNotes', sellerNotes)
 
     // Trying to atomic swap a second time should fail
     expect(

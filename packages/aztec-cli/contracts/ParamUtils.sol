@@ -18,4 +18,10 @@ library ParamUtils {
        return first;
     }
 
+    function getUint256(bytes memory _data, uint8 offset) public pure returns (uint256) {
+       uint[1] memory uints;
+       assembly { mstore(uints, mload(add(_data, offset))) }
+       return uints[0];
+    }
+
 }

@@ -7,6 +7,7 @@ const assert = chai.assert
 chai.use(require('chai-as-promised'))
 const { parsed } = require('dotenv').config()
 
+const { padLeft } = require('web3-utils')
 const { Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { runTransforms, deployerTransform, createArgListTransform } = require('demo-transform')
@@ -64,6 +65,21 @@ describe('Param utils ', () => {
     const bytes32 = keccak(parsed['TEST_PUBLIC_KEY_1']).toString('hex')
     assert.equal( toChecksumAddress(address['0']),
       parsed['TEST_ADDRESS_1'],
+      `Unpacked address does not match.`
+    )
+
+  })
+  
+  it('calls getUint256 within SwapProxy', async () => {
+
+    const result = (await runTransforms( earlyPipeline, initialState )).toJS()
+
+    const sp = await result.deployed( 'SwapProxy' )
+    const params = padLeft(parsed['TEST_ADDRESS_3'], 64)
+    LOGGER.info('params', params)
+    const uint = await sp.getUint256(params)
+    LOGGER.info('uint', uint)
+    assert( uint['0'].eq(new BN(parsed['TEST_ADDRESS_3'].slice(2), 16)),
       `Unpacked address does not match.`
     )
 
