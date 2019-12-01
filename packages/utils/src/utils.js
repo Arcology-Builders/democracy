@@ -1,10 +1,12 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-
+const { assert } = require('chai')
 const { Logger } = require('./logger')
 const LOGGER = new Logger('utils/utils')
 const { Seq, Map, List } = require('immutable')
+const BN = require('bn.js')
+
 const utils = {}
 
 utils.DB_DIR       = 'db'
@@ -265,6 +267,20 @@ utils.awaitInputter = (inputCallResult, afterInput) => {
   } else {
     return afterInput(inputCallResult)
   }
+}
+
+/**
+ * Convert a unix timestamp to a block number
+ * @param timestamp {Number}
+ */
+utils.timeStampSecondsToBlockNumber = async (timeStampSeconds) => {
+  const eth = utils.getNetwork()
+  const now = Date.now() / 1000
+  const blocksFromNow = Math.round(((Number(timeStampSeconds)) - now) / 15)
+  assert( blocksFromNow > 0 )
+  const blockNow = await eth.blockNumber()
+  const block = blockNow.add(new BN(blocksFromNow))
+  return block
 }
 
 module.exports = utils
