@@ -1,15 +1,17 @@
+const BN         = require('bn.js')
 const { parsed } = require('dotenv').config()
 const { pt }     = require('./pt')
+const { cx }     = require('./cx')
 const { mint }   = require('./mint')
 const { Map }    = require('immutable')
 
-const { getConfig } = require('demo-utils')
+const { getConfig }       = require('demo-utils')
 
 const SELLER_TRADE_SYMBOL = 'AAA'
 const BUYER_TRADE_SYMBOL  = 'BBB'
 
-const DEPLOYER_ADDRESS  = getConfig()['DEPLOYER_ADDRESS' ]
-const DEPLOYER_PASSWORD = getConfig()['DEPLOYER_PASSWORD']
+const DEPLOYER_ADDRESS    = getConfig()['DEPLOYER_ADDRESS' ]
+const DEPLOYER_PASSWORD   = getConfig()['DEPLOYER_PASSWORD']
 
 const commons = {}
 
@@ -18,6 +20,10 @@ commons.SOURCE_PATH_LIST = [
   '../../node_modules/demo-aztec-cli/contracts',
   '../../node_modules/@aztec/protocol/contracts',
 ]
+
+let lastResult = Map({})
+
+commons.getLastResult = () => lastResult
 
 commons.doMintAmount = async ({
   amount,
@@ -33,7 +39,36 @@ commons.doMintAmount = async ({
     unlockSeconds,
     sourcePathList  : commons.SOURCE_PATH_LIST,
   }))
+  lastResult = result
   return result.get('minteeNoteHash')
+}
+
+commons.doCxAmount = async ({
+  amount,
+  senderNoteHash,
+  transferAll = true,
+  senderIndex = 1,
+  tradeSymbol = 'AAA',
+}) => {
+  const senderAddress   = parsed[`TEST_ADDRESS_${senderIndex}`   ]
+  const senderPassword  = parsed[`TEST_PASSWORD_${senderIndex}`  ]
+  const senderPublicKey = parsed[`TEST_PUBLIC_KEY_${senderIndex}`]
+
+  lastResult = await cx(Map({
+    unlabeled: Map({
+      tradeSymbol,
+      senderAddress,
+      senderPassword,
+      senderPublicKey,
+      receiverAddress   : parsed['TEST_ADDRESS_1'],
+      receiverPublicKey : parsed['TEST_PUBLIC_KEY_1'],
+      senderNoteHash    : senderNoteHash,
+      transferAmount    : new BN(amount),
+      transferAll       : transferAll,
+    }),
+    unlockSeconds     : 500,
+  }))
+  return lastResult
 }
 
 commons.doPt = async ({
@@ -49,7 +84,7 @@ commons.doPt = async ({
   const bidderAddress     = parsed[`TEST_ADDRESS_${bidderIndex}`   ]
   const bidderPassword    = parsed[`TEST_PASSWORD_${bidderIndex}`  ]
   const bidderPublicKey   = parsed[`TEST_PUBLIC_KEY_${bidderIndex}`]
-  return result = await _pt(Map({
+  lastResult = await _pt(Map({
     seller: Map({
       tradeSymbol       : SELLER_TRADE_SYMBOL,
       address     : sellerAddress      ,
@@ -68,6 +103,7 @@ commons.doPt = async ({
     sourcePathList       : commons.SOURCE_PATH_LIST,
     unlockSeconds        : 80,
   }))
+  return lastResult
 }
 
 module.exports = commons

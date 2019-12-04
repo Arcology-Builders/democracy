@@ -109,10 +109,10 @@ cxs.preCx = async (state) => {
   return await runTransforms( constructValidatePipeline(), initialState.merge(state) )
 }
 
+cxs.cxPipeline = cxs.constructCxPipeline()
+
 cxs.cx = async (state) => {
-  const pipeline = cxs.constructCxPipeline()
-  LOGGER.info('Pipeline', pipeline)
-  return await runTransforms( pipeline, initialState.merge(state) )
+  return await runTransforms( cxs.cxPipeline, initialState.merge(state) )
 }
 
 module.exports = cxs

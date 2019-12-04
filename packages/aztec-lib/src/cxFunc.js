@@ -3,10 +3,12 @@
 const BN        = require('bn.js')
 const { Map }   = require('immutable')
 const util      = require('ethereumjs-util')
+const { soliditySHA3 } = require('ethereumjs-abi')
 const assert    = require('chai').assert
 
 const aztec     = require('aztec.js')
-const { constants, proofs }
+const { outputCoder } = aztec.abiEncoder
+const { constants, proofs : { JOIN_SPLIT_PROOF } }
                 = require('@aztec/dev-utils')
 const secp256k1 = require('@aztec/secp256k1') 
 
@@ -105,8 +107,10 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
 
   const subStateOutputTypes = Map({
     swapMethodParams : TYPES.array,
-    jsProofData      : TYPES.string,
-    jsSignatures     : TYPES.string,
+    jsProofData      : TYPES.hexPrefixed,
+    jsProofOutput    : TYPES.hexPrefixed,
+    jsProofHash      : TYPES.keccak256Hash,
+    jsSignatures     : TYPES.hexPrefixed,
     jsSenderKey      : TYPES.string,
     jsSenderNote     : TYPES.aztecPrivateNote,
     jsChangeKey      : TYPES.string,
@@ -159,7 +163,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
 
     LOGGER.debug('Transfer Amount', transferAmount)
     LOGGER.debug('Transfer All'   , transferAll)
-    LOGGER.debug('SUBSTATE'   , subStateLabel)
+    LOGGER.debug('SUBSTATE'       , subStateLabel)
 
     const buildWriteKey = ({ ownerAddress, noteHash }) => {
       return `zkNotes/${chainId}/${ownerAddress}/${zkTokenAddress}/${noteHash}`
@@ -221,7 +225,6 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     LOGGER.debug('Receiver Public Key', receiverPublicKey)
     LOGGER.debug('Receiver Value'     , transferValue.toNumber())
     LOGGER.debug('Receiver Note Hash' , receiverPublicNote.noteHash)
-    //assert.equal( receiverNote.noteHash, receiverNoteCreated.get('zkNoteHash') )
 
     const argMap =  {
       inputNotes       : [senderNote],
@@ -242,16 +245,33 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
       = aztec.proof.joinSplit.encodeJoinSplitTransaction(argMap)
     LOGGER.debug('Join split proof encoded')
     
+    const ace = await deployed( 'ACE' )
+       
+    const proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+    LOGGER.debug('proofOutputs', expectedOutput)
+    LOGGER.debug('proofOutput', proofOutput)
+    const proofHash = outputCoder.hashProofOutput(proofOutput);
+    LOGGER.debug('proofHash', proofHash)
+
+    // This should be false, b/c we haven't validated first yet to cache the result
+    const validateResult0 = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, zkTokenAddress)
+    assert.notOk( Boolean(validateResult0['0']), `Previous proof with hash ${proofHash} should not have been cached yet.` )
+                 
     const validateResult = await
     joinSplitContract.validateJoinSplit(proofData, transfererAddress, constants.CRS)
     assert.notEqual(validateResult['0'], '0x',
       'Invalid join split. Did you deploy all the contracts?')
     LOGGER.debug('Validated join-split.', validateResult)
     LOGGER.debug('Signatures', signatures)
+
+    assert.equal( validateResult['0'], expectedOutput, 'Return value of validate result is the proofOutputs (plural)' )
+
     const subStateMap = Map({
       swapMethodParams : [ zkTokenAddress, senderNoteHash ],
       jsProofData     : proofData,
       jsSignatures    : signatures,
+      jsProofOutput   : expectedOutput,
+      jsProofHash     : proofHash,
       jsSenderKey     : senderKey,
       jsSenderNote    : await exportAztecPrivateNote(senderNote),
       jsChangeKey     : changeKey,
@@ -287,8 +307,10 @@ cxFuncs.createCxTransferTransform = (subStateLabel='unlabeled') => createTransfo
     [subStateLabel]: makeMapType(Map({
       transferFunc: TYPES['function'],
       zkToken      : TYPES.contractInstance,
-      jsProofData  : TYPES.string,
-      jsSignatures : TYPES.string,
+      jsProofData  : TYPES.hexPrefixed,
+      jsProofOutput : TYPES.hexPrefixed,
+      jsProofHash  : TYPES.keccak256Hash,
+      jsSignatures : TYPES.hexPrefixed,
     }), 'cxTransferInputsMapType'),
   }),
   outputTypes: Map({}),
