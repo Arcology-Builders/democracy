@@ -91,7 +91,7 @@ const signBidderMapType = makeMapType(Map({
   address     : TYPES.ethereumAddress,
   zkToken     : TYPES.contractInstance,
   noteHash    : TYPES.aztecNoteHash,
-  jsProofData : TYPES.string,
+  jsProofData : TYPES.hexPrefixed,
 }), 'signBidderMapType')
 
 const signTypedDataTransform = createTransformFromMap({

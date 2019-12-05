@@ -14,7 +14,7 @@ const {
   signTypedDataTransform,
 } = require('demo-aztec-lib')
 
-const LOGGER    = new Logger('pt')
+const LOGGER    = new Logger('lt')
 
 const eachTypes = Map({
   address     : TYPES.ethereumAddress,
@@ -53,23 +53,57 @@ lts.ltInitialState = Map({
   wallet,
 })
 
+const ltTvAddressTransform = createTransformFromMap({
+  func: async ({
+    deployed,
+  }) => {
+    const tv = await deployed('TradeValidator')
+    const ace = await deployed('ACE')
+    return Map({
+      transfererAddress: tv.address,
+      tv               : tv,
+      ace              : ace,
+    })
+  },
+  inputTypes: Map({
+    deployed: TYPES['function'],
+  }),
+  outputTypes: Map({
+    transfererAddress : TYPES.ethereumAddress,
+    tv                : TYPES.contractInstance,
+    ace               : TYPES.contractInstance,
+  }),
+})
+
 const ltPrepareTransform = createTransformFromMap({
   func: async ({
     sigR, sigS, sigV,
     bidder : {
       address  : bidderAddress,
       noteHash : bidderNoteHash,
+      zkToken : {
+        address : bidderTokenAddress
+      },
+      transfererAddress : sellerTransfererAddress,
     },
     seller : {
+      address  : sellerAddress,
       noteHash : sellerNoteHash,
+      zkToken : {
+        address : sellerTokenAddress,
+      },
+      transfererAddress : bidderTransfererAddress,
     },
   }) => {
+    assert( sellerTransfererAddress, `Null sellerTransfererAddress` )
+    assert.equal( sellerTransfererAddress, bidderTransfererAddress, `Seller and bidder transferer addresses differ.` )
+
     return Map({
       seller : {
-        swapMethodParams : [ sellerNoteHash ],
+        swapMethodParams : [ sellerTokenAddress, saleExpireBlockNumber, sellerTransfererAddress ],
       },
       bidder : {
-        swapMethodParams : [ bidderAddress, bidderNoteHash, sigR, sigS, '0x' + Number(sigV).toString(16) ],
+        swapMethodParams : [ bidderTokenAddress, bidExpireBlockNumber, sigR, sigS, '0x' + Number(sigV).toString(16) ],
       },
     })
   },
@@ -79,11 +113,16 @@ const ltPrepareTransform = createTransformFromMap({
     sigV : TYPES.integer,
     bidder : makeMapType(Map({
       address : TYPES.ethereumAddress,
-      noteHash : TYPES.aztecNoteHash,
+      zkToken : TYPES.contractInstance,
+      transfererAddress     : TYPES.ethereumAddress,
     }), 'ltPrepareBidderInputMapType'),
     seller : makeMapType(Map({
-      noteHash : TYPES.aztecNoteHash,
+      address : TYPES.ethereumAddress,
+      zkToken : TYPES.contractInstance,
+      transfererAddress     : TYPES.ethereumAddress,
     }), 'ltPrepareSellerInputMapType'),
+    saleExpireBlockNumber : TYPES.bn,
+    bidExpireBlockNumber  : TYPES.bn,
   }),
   outputTypes : Map({
     seller : makeMapType(Map({
@@ -103,7 +142,8 @@ lts.ltEarlyLabeledTransforms =  [
 
 lts.ltPipeline = constructPtTransformOrderedMap([
   ...lts.ltEarlyLabeledTransforms,
-  [ 'ptPrep'  , ptPrepareTransform ],
+  [ 'tvAddress', ltTvAddressTransform ],
+  [ 'ptPrep'   , ptPrepareTransform ],
 ], [
   [ 'eip712'  , signTypedDataTransform ],
   [ 'ltPrep'  , ltPrepareTransform ],

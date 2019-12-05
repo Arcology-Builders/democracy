@@ -24,10 +24,9 @@ contract TradeValidator is IAZTEC {
     string public constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
     bytes32 public constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
 
-    bytes32 public sellerInputNoteHash;
-    bytes32 public bidderOutputNoteHash;
-    bytes32 public bidderInputNoteHash;
-    bytes32 public sellerOutputNoteHash;
+    bytes public lastProofOutput;
+    bytes32 public lastInputNoteHash;
+    bytes32 public lastOutputNoteHash;
 
     constructor(uint256 _chainId, address _aceAddress) public {
         chainId = _chainId;
@@ -86,86 +85,82 @@ contract TradeValidator is IAZTEC {
     }
 
     function extractAndVerifyNoteHashes(
-        bytes memory _sellerProof,
-        bytes memory _bidderProof,
-        address _sellerSenderAddress,
-        address _bidderSenderAddress,
-        bytes32 _sellerProofHash,
-        bytes32 _bidderProofHash,
-        address _transferer
-    ) public returns (uint256, uint256, uint256, uint256) {
+        bytes memory proofOutput,
+        address _transferer,
+        bytes32 _proofOutputHash
+    ) public view returns (bytes32, bytes32) {
 
-        (bytes memory sellerProofOutput, bytes32 sellerProofOutputHash)
-            = validateAndGetFirstProofOutput(_sellerProof, _transferer);
-        require( _sellerProofHash == sellerProofOutputHash,
-          "Seller proof output hash mismatch" );
+        // We pass in both proof and proofData for now to make this a pure function
+        //(bytes memory proofOutput,)
+        //    = validateAndGetFirstProofOutput(_proofData, _transferer);
+        
+        //lastProofOutput = proofOutput;
+
+        // These mismatch for now, but we'll just have bidder send proofOutputHash to
+        // to seller in bid
+        require( _proofOutputHash == keccak256(proofOutput),
+          "Proof output hash mismatch" );
+
         require( ace.validateProofByHash(
-            JOIN_SPLIT_PROOF, sellerProofOutputHash, _sellerSenderAddress
-            ), "Seller proof output is invalid" );
-        (bytes memory sellerInputNotes, bytes memory bidderOutputNotes, ,)
-            = extractProofOutput(sellerProofOutput);
+            JOIN_SPLIT_PROOF, _proofOutputHash, _transferer
+            ), "proof output is invalid" );
+        (bytes memory inputNotes, bytes memory outputNotes, ,)
+            = proofOutput.extractProofOutput();
 
-        (bytes memory bidderProofOutput, bytes32 bidderProofOutputHash)
-            = validateAndGetFirstProofOutput(_bidderProof, _transferer);
-        require( _bidderProofHash == bidderProofOutputHash,
-          "Bidder proof output hash mismatch" );
-        require( ace.validateProofByHash(
-            JOIN_SPLIT_PROOF, bidderProofOutputHash, _bidderSenderAddress
-            ), "Bidder proof output is invalid" );
-        (bytes memory bidderInputNotes, bytes memory sellerOutputNotes, ,)
-            = extractProofOutput(bidderProofOutput);
+        require( inputNotes.getLength()  >= 1, "Number of seller input notes is different than 1" );
+        require( outputNotes.getLength() >= 2, "Number of seller output notes is different than 2" );
+        (,bytes32 inputNoteHash,) = inputNotes.get(0).extractNote();
+        (,bytes32 outputNoteHash,) = outputNotes.get(0).extractNote();
 
-        require( sellerInputNotes.getLength()  == 1, "Number of seller input notes is different than 1" );
-        require( sellerOutputNotes.getLength() == 2, "Number of seller output notes is different than 2" );
-        require( bidderInputNotes.getLength()  == 1, "Number of bidder input notes is different than 1" );
-        require( bidderOutputNotes.getLength() == 2, "Number of bidder output notes is different than 2" );
-        return (0, 0, 0, 0);
-/*
-        (address sellerInputAddress , bytes32 _sellerInputNoteHash ,) = sellerInputNotes.get(0).extractNote();
-        (address bidderOutputAddress, bytes32 _bidderOutputNoteHash,) = bidderOutputNotes.get(0).extractNote();
-        (address bidderInputAddress , bytes32 _bidderInputNoteHash ,) = bidderInputNotes.get(0).extractNote();
-        (address sellerOutputAddress, bytes32 _sellerOutputNoteHash,) = sellerOutputNotes.get(0).extractNote();
-
-        require( sellerInputAddress == sellerOutputAddress, "Seller addresses don't match between input and output" );
-        require( bidderInputAddress == bidderOutputAddress, "Bidder addresses don't match between input and output" );
-
-        sellerInputNoteHash  = _sellerInputNoteHash;
-        bidderOutputNoteHash = _bidderOutputNoteHash;
-        bidderInputNoteHash  = _bidderInputNoteHash;
-        sellerOutputNoteHash = _sellerOutputNoteHash;
-
-        return (sellerInputNoteHash, bidderOutputNoteHash, bidderInputNoteHash, sellerOutputNoteHash);
-*/
+        return (inputNoteHash, outputNoteHash);
     }
-/*
-    function extractAndVerify(
+
+    function extractAllNoteHashes(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
-        bytes memory _sellerProof,
-        bytes memory _bidderProof
-    ) public returns (bool) {
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public returns (bytes32, bytes32, bytes32, bytes32) {
 
-        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 0);
-        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
         bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
         bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
         address transferer = ParamUtils.getAddress(_sellerParams, 52);
-        //(
-        //    bytes32 sellerInputNoteHash,
-        //    bytes32 bidderOutputNoteHash,
-        //    bytes32 bidderInputNoteHash,
-        //    bytes32 sellerOutputNoteHash
-        //) =
 
-        extractAndVerifyNoteHashes(
-            _sellerProof,
-            _bidderProof,
-            transferer,
-            transferer,
-            sellerNoteHash,
-            bidderNoteHash,
-            transferer
-        );
+        (bytes32 sellerInputNoteHash, bytes32 bidderOutputNoteHash)
+            = extractAndVerifyNoteHashes(
+                _sellerProofOutput,
+                transferer,
+                sellerNoteHash
+            );
+        (bytes32 bidderInputNoteHash, bytes32 sellerOutputNoteHash)
+            = extractAndVerifyNoteHashes(
+                _bidderProofOutput,
+                transferer,
+                bidderNoteHash
+            );
+        lastInputNoteHash = sellerInputNoteHash;
+        lastOutputNoteHash = bidderOutputNoteHash;
+        return (sellerInputNoteHash, bidderOutputNoteHash, bidderInputNoteHash, sellerOutputNoteHash);
+    }
+
+    function extractAndVerify(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public returns (bool) {
+
+        (
+            bytes32 sellerInputNoteHash,
+            bytes32 bidderOutputNoteHash,
+            bytes32 bidderInputNoteHash,
+            bytes32 sellerOutputNoteHash
+        ) = extractAllNoteHashes(
+                _sellerParams,
+                _bidderParams,
+                _sellerProofOutput,
+                _bidderProofOutput
+            );
 
         bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 62);
         bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 84);
@@ -182,7 +177,7 @@ contract TradeValidator is IAZTEC {
         );
         return bidderAddress == ecrecover(hash, sigV, sigR, sigS);
     }
-*/
+
     function getDomainSeparator() public view returns (bytes32 _domainSeparator) {
         return keccak256(abi.encodePacked(
             EIP712_DOMAIN_TYPEHASH,

@@ -50,7 +50,7 @@ contract SwapProxy is IAZTEC {
     ) public pure returns (uint256) {
         return ParamUtils.getUint256(_params, 32);
     }
-
+/*
     function linkedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
@@ -72,7 +72,7 @@ contract SwapProxy is IAZTEC {
         //bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
         //bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
     }
-
+*/
     function twoSidedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,

@@ -42,9 +42,10 @@ const createPtPrepareTransform = () => {
   const inputTypes = Map({
     seller            : makeMapType( eachInputTypes, 'ptPrepInputsMapType' ),
     bidder            : makeMapType( eachInputTypes, 'ptPrepInputsMapType' ),
-    deployerAddress   : TYPES.ethereumAddress,
-    deployed          : TYPES['function'],
-    proxyContractName : TYPES.string          ,
+    deployerAddress   : TYPES.ethereumAddress    ,
+    deployed          : TYPES['function']        ,
+    proxyContractName : TYPES.string             ,
+    transfererAddress : TYPES.ethereumAddress.opt,
   })
 
   const outputTypes = Map({
@@ -60,12 +61,14 @@ const createPtPrepareTransform = () => {
       deployerAddress,
       deployed,
       proxyContractName,
+      transfererAddress,
     }) => {
 
       assert( bidder.noteHash, 'bidderNote hash is null' + JSON.stringify(bidder) )
       assert( seller.noteHash, 'sellerNoteHash is null' + JSON.stringify(seller) )
       const proxy = proxyContractName ? await deployed( proxyContractName ) : null
-      const transfererAddress = proxy ? proxy.address : deployerAddress
+      const _transfererAddress = transfererAddress ||
+        (proxy ? proxy.address : deployerAddress)
 
       const bidderMap = Map({
         tradeSymbol : bidder.tradeSymbol,
@@ -73,7 +76,7 @@ const createPtPrepareTransform = () => {
         senderPassword    : bidder.password,
         senderPublicKey   : bidder.publicKey,
         senderNoteHash    : bidder.noteHash,
-        transfererAddress,
+        transfererAddress : _transfererAddress,
         transferAll       : true,
         receiverAddress   : seller.address,
         receiverPublicKey : seller.publicKey,
@@ -86,7 +89,7 @@ const createPtPrepareTransform = () => {
         senderPassword      : seller.password,
         senderPublicKey     : seller.publicKey,
         senderNoteHash      : seller.noteHash,
-        transfererAddress,
+        transfererAddress   : _transfererAddress,
         transferAll         : true,
         receiverAddress     : bidder.address,
         receiverPublicKey   : bidder.publicKey,
@@ -127,8 +130,8 @@ ptFuncs.swapTransform = (() => {
   const eachType = Map({
     zkToken           : TYPES.contractInstance,
     transfererAddress : TYPES.ethereumAddress,
-    jsProofData       : TYPES.string,
-    jsSignatures      : TYPES.string,
+    jsProofData       : TYPES.hexPrefixed,
+    jsSignatures      : TYPES.hexPrefixed,
     swapMethodParams  : TYPES.array.opt,
   })
 

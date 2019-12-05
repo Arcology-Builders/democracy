@@ -6,6 +6,9 @@ const { wallet } = require('demo-keys')
 const { partialPipeline, runSubIts, setInitialState } = require('demo-tests')
 const { Map, List } = require('immutable')
 const { padLeft } = require('web3-utils')
+const { abiEncoder : { outputCoder } } = require('aztec.js')
+const { proofs : { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils')
+const randombytes = require('randombytes')
 const BN = require('bn.js')
 const chai = require('chai')
 const assert = chai.assert
@@ -46,18 +49,18 @@ describe('Linked trade', () => {
 
     const initialState = ltInitialState.merge(Map({
       seller: Map({
-        tradeSymbol       : SELLER_TRADE_SYMBOL,
-        address     : parsed['TEST_ADDRESS_1']      ,
-        password    : parsed['TEST_PASSWORD_1']     ,
-        publicKey   : parsed['TEST_PUBLIC_KEY_1']    ,
-        noteHash    : sellerNoteHash     ,
+        tradeSymbol : SELLER_TRADE_SYMBOL        ,
+        address     : parsed['TEST_ADDRESS_1']   ,
+        password    : parsed['TEST_PASSWORD_1']  ,
+        publicKey   : parsed['TEST_PUBLIC_KEY_1'],
+        noteHash    : sellerNoteHash             ,
       }),
       bidder : Map({
-        tradeSymbol       : BIDDER_TRADE_SYMBOL ,
-        address     : parsed['TEST_ADDRESS_2']      ,
-        password    : parsed['TEST_PASSWORD_2']    ,
-        publicKey   : parsed['TEST_PUBLIC_KEY_2']    ,
-        noteHash    : bidderNoteHash     ,
+        tradeSymbol : BIDDER_TRADE_SYMBOL        ,
+        address     : parsed['TEST_ADDRESS_2']   ,
+        password    : parsed['TEST_PASSWORD_2']  ,
+        publicKey   : parsed['TEST_PUBLIC_KEY_2'],
+        noteHash    : bidderNoteHash             ,
       }),
     }))
     setInitialState( initialState, ltPipeline )
@@ -76,7 +79,7 @@ describe('Linked trade', () => {
   const asyncIts = [{
     desc: 'EIP712 signing',
     func: async() => {
-      const result = (await partialPipeline(10)).toJS()
+      const result = (await partialPipeline(11)).toJS()
       
 			assert.equal( result.sigR.length, 64, `${result.sigR} not a 32-byte hash` )
 			assert.equal( result.sigS.length, 64, `${result.sigS} not a 32-byte hash` )
@@ -91,7 +94,9 @@ describe('Linked trade', () => {
 				result.sigS,
 				result.sigV,
 			)
-			
+
+      // Check basic EIP712 parameters
+
       const chainId = await result.validator.chainId()
 			assert.equal( parseInt(result.chainId, 10), parseInt(chainId['0'], 10), `Mismatched chainId` )
 			const salt = await result.validator.SALT()
@@ -111,15 +116,127 @@ describe('Linked trade', () => {
 			LOGGER.info('EIP712 TRADE TYPEHASH', JSON.stringify(tradeTypeHash))
 			assert.equal( result.TRADE_TYPEHASH, tradeTypeHash['0'].slice(2), `Mismatched bid typehash` )
       
-      const proofParams = [ result.seller.jsProofData, result.bidder.jsProofData ]
-      LOGGER.info('Proof Params', proofParams)
-
+      assert( result.transfererAddress, `Transferer address missing.` )
+/*
       const sellerNotes = await result.validator.getNotes(result.seller.jsProofData)
       LOGGER.info('Seller Notes ', sellerNotes)
+*/
+      assert( result.minedTx, `MinedTx method missing from result` )
+      const sellerValidation = await result.minedTx(
+        result.validator.validateAndGetFirstProofOutput,
+        [result.seller.jsProofData, result.transfererAddress] )
+      LOGGER.info('Seller Validate & Proof Outputs', sellerValidation)
+      const sellerGasUsed = new BN(sellerValidation.gasUsed, 16).toNumber()
+      assert( sellerGasUsed > 796000 && sellerGasUsed < 800000, `sellerGasUsed between 796,000 and 800,000` )
+      // We expect about 700,000 gas for a join-split involving 2-3 three notes (sender, receiver, change)
 
-      const noteHashes = await result.validator.extractAndVerifyNoteHashes( ...proofParams, {from: getConfig()['DEPLOYER_ADDRESS'], gas: getConfig()['GAS_LIMIT'] } )
-      LOGGER.info('noteHashes', noteHashes)
-		
+      const bidderValidation = await result.minedTx( result.validator.validateAndGetFirstProofOutput, [result.bidder.jsProofData, result.bidder.transfererAddress] )
+      LOGGER.info('Bidder Validate & Proof Outputs', bidderValidation)
+      const bidderGasUsed = new BN(bidderValidation.gasUsed, 16).toNumber()
+      assert( bidderGasUsed > 796000 && bidderGasUsed < 800000, `bidderGasUsed between 796,000 and 800,000` )
+      // Likewise for bidder side, we expect about 700,000 gas for a join-split involving 2-3 three notes (sender, receiver, change)
+
+      //const validateAndProofOutputs = await result.minedTx( result.validator.extractProofOutput, [result.seller.jsProofData, result.seller.transfererAddress] )
+      //LOGGER.info('ValidateAndProofOutputs', validateAndProofOutputs)
+      const sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutput, 0)
+      const sellerFormattedProofOutput =  '0x' + sellerProofOutput.slice(0x40)
+      const sellerProofHash   = outputCoder.hashProofOutput(sellerProofOutput);
+      const bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutput, 0);
+      const bidderFormattedProofOutput =  '0x' + bidderProofOutput.slice(0x40)
+      const bidderProofHash   = outputCoder.hashProofOutput(bidderProofOutput);
+      
+      const validateResult = await result.ace.validateProofByHash(
+        JOIN_SPLIT_PROOF, sellerProofHash, result.seller.transfererAddress,
+      )
+      assert.ok( Boolean(validateResult['0']), `seller proof hash should be valid` )
+
+      const validateResult2 = await result.ace.validateProofByHash(
+        JOIN_SPLIT_PROOF, sellerProofHash, result.seller.zkToken.address,
+      )
+      assert.notOk( Boolean(validateResult2['0']),
+        `seller proof hash associated with transferer/sender, not token address`
+      )
+
+      const sellerProofComponents = await result.validator.extractProofOutput(
+        sellerFormattedProofOutput
+      )
+      LOGGER.info('Seller Proof Components', sellerProofComponents)
+      
+      const formattedInputNotes  = `0x${sellerProofComponents['_inputNotes'].slice(0x40)}`
+      const formattedOutputNotes = `0x${sellerProofComponents['_outputNotes'].slice(0x40)}`
+      const inputLength          = await result.validator.getLength(
+        sellerProofComponents['_inputNotes']
+      )
+      const outputLength         = await result.validator.getLength(
+        sellerProofComponents['_outputNotes']
+      )
+      LOGGER.info('Seller Notes Length', inputLength, outputLength)
+
+      assert.equal( inputLength['0'].toNumber(), 1,
+        `Number of seller input notes is not 1` )
+      assert.equal( outputLength['0'].toNumber(), 2,
+        `Number of bidder output  notes is not 2` )
+
+      const sellerParams = [
+        sellerFormattedProofOutput,
+        result.seller.transfererAddress,
+        sellerProofHash,
+      ]
+      LOGGER.info('Seller Params', sellerParams)
+      const sellerNoteHashes = await result.validator.extractAndVerifyNoteHashes(
+        ...sellerParams
+      )
+
+      assert.equal( sellerNoteHashes['0'], result.seller.jsSenderNote.noteHash,
+        `seller input note hash doesn't match`
+      )
+      assert.equal( sellerNoteHashes['1'], result.seller.jsReceiverNote.noteHash,
+        `bidder output note hash doesn't match`
+      )
+      
+      //const sellerNoteHashValidation = await result.minedTx(
+      //  result.validator.extractAndVerifyNoteHashes, sellerParams
+      //)
+      // We expect this to be much less than 700,000 gas, since we already validated and cached the above proofs above
+      //LOGGER.info('Seller Note Hash Validation', sellerNoteHashValidation)
+      
+      const randomHash = randombytes(32).toString('hex')
+
+      expect(
+        result.minedTx( result.validator.extractAndVerifyNoteHashes, [
+          result.seller.jsProofData,
+          result.seller.transfererAddress,
+          randomHash,
+        ] )
+      ).to.be.rejectedWith(Error)
+
+      // Re-enable if extractAndVerifyNoteHashes changes from view to default
+      // and we save lastProofOutput instead of passing it in
+      //const recoveredSellerProofOutput = await result.validator.lastProofOutput()
+      //assert.equal( sellerProofOutput.slice(0x40), recoveredSellerProofOutput['0'].slice(2),
+      //  `Seller proofOutput doesn't match` )
+
+      const bidderParams = [
+        bidderFormattedProofOutput,
+        result.bidder.transfererAddress,
+        bidderProofHash,
+      ]
+      LOGGER.info('Bidder Params', bidderParams)
+      const bidderNoteHashes = await result.validator.extractAndVerifyNoteHashes(
+        ...bidderParams
+      )
+      //  , {from: getConfig()['DEPLOYER_ADDRESS'], gas: getConfig()['GAS_LIMIT'] } )
+      // We expect this to be much less than 700,000 gas, since we already validated and cached the above proofs above
+      LOGGER.info('Bidder Note Hashes', bidderNoteHashes)
+
+      assert.equal( bidderNoteHashes['0'], result.bidder.jsSenderNote.noteHash,
+        `bidder input note hash doesn't match`
+      )
+      assert.equal( bidderNoteHashes['1'], result.bidder.jsReceiverNote.noteHash,
+        `seller output note hash doesn't match`
+      )
+      
+	/*	
       assert( noteHashes['0'], `bidderInputNoteHash null` )
       assert( noteHashes['1'], `sellerOnputNoteHash null` )
       assert( noteHashes['2'], `sellerInputNoteHash null` )
@@ -163,7 +280,7 @@ describe('Linked trade', () => {
 				result.sigV,
 			)
 			assert( isValid['0'], `Signature is not valid from ${result.bidder.address}` )
-		
+	*/	
 		}
   }]
 

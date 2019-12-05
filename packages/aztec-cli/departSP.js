@@ -52,7 +52,7 @@ async ({deployed, compile, link, minedTx, chainId }) => {
     'ParamUtils'     : 'deploy',
   }) )
   const tv = await deployed( 'TradeValidator',
-    { ctorArgList: new Map({ _chainId: chainId }) })
+    { ctorArgList: new Map({ _chainId: chainId, _aceAddress: ACE.address }) })
 
   LOGGER.info( 'ParamUtils', pu.address )
   await compile( 'SwapProxy', 'SwapProxy.sol' )
