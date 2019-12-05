@@ -28,7 +28,14 @@ testers.setInitialState = (initialState, _pipeline) => {
   pipeline = _pipeline
 }
 
-testers.runSubIts = (subIts) => 
-  subIts.reduce((s, t) => s.then(it(t.desc, t.func)), Promise.resolve(true))
+testers.runSubIts = (itList) => {
+  it(itList[0].desc, itList[0].func)
+  return itList.reduce(async (prom, {desc, func}) => {
+    await prom
+    //console.log(desc)
+    it(desc, func)
+    return prom 
+  }, Promise.resolve(true))
+}
 
 module.exports = testers
