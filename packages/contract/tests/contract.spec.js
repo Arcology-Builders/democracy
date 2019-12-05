@@ -36,7 +36,7 @@ describe( 'Contract parent class', () => {
     deployerEth = signerEth
     deployerAddress = address
     await wallet.payTest({
-      fromAddress : accounts[0],
+      fromAddress : accounts[1],
       toAddress   : address,
       weiValue    : toWei('0.1', 'ether'),
     })
