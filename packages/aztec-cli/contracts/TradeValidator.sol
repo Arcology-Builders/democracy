@@ -199,7 +199,7 @@ contract TradeValidator is IAZTEC {
         bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 84);
         uint8 sigV   = uint8(_bidderParams[95] & 0xFF);
 
-        address bidderAddress = ParamUtils.getAddress(_bidderParams, 20);
+        address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
         return bidderAddress == ecrecover(hash, sigV, sigR, sigS);
     }
 
@@ -244,11 +244,9 @@ contract TradeValidator is IAZTEC {
             _sellerInputNoteHash,
             _bidderOutputNoteHash,
             _bidderInputNoteHash,
-            _sellerOutputNoteHash
-/*
+            _sellerOutputNoteHash,
             saleExpireBlockNumber,
             bidExpireBlockNumber
-*/
         ));
     } 
 

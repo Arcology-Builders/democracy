@@ -32,18 +32,20 @@ testers.setInitialState = (initialState, _pipeline) => {
 
 testers.runSubIts = async (itList) => {
   //it(itList.get(0).desc, itList.get(0).func)
-  return itList.reduce((prom, {desc, func}) => {
+  return await itList.reduce((prom, {desc, func}) => {
     //const result = await prom
-    console.log(desc, typeof(func))
-    it(desc, func)
-    /*
+    
     const newProm = new Promise((resolve, reject) => {
       const wrappedFunc = async () => {
+        const result = await prom
+        LOGGER.info('Outgoing result', result)
         const newResult = func(result)
+        LOGGER.info('Incoming result', newResult)
         resolve(newResult)
       }
-    })*/
-    return prom
+      it(desc, wrappedFunc)
+    })
+    return newProm
   }, Promise.resolve(true))
 }
 

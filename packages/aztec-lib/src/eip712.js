@@ -54,10 +54,8 @@ const getMessageHash = (message) => {
     message.bidderOutputNoteHash ,
     message.bidderInputNoteHash  ,
     message.sellerOutputNoteHash ,
-    /*
     message.saleExpireBlockNumber,
     message.bidExpireBlockNumber ,
-  */
   ] 
   LOGGER.info('Message Hash', params)
   return abi.soliditySHA3(
@@ -71,10 +69,8 @@ const getMessageHash = (message) => {
       'bytes32',
       'bytes32',
       'bytes32',
-      /*
       'uint256',
       'uint256',
-    */
     ],
     params
   )

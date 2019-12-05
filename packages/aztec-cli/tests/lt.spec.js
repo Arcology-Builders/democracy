@@ -21,8 +21,8 @@ const LOGGER = new Logger('lt.spec')
 
 describe('Linked trade', () => {
 
-  let sellerParams
-  let bidderParams
+  let sellerEncodedParams
+  let bidderEncodedParams
 
   const SELLER_TRADE_SYMBOL = 'AAA'
   const BIDDER_TRADE_SYMBOL  = 'BBB'
@@ -244,14 +244,67 @@ describe('Linked trade', () => {
         `seller output note hash doesn't match`
       )
 
-      const sellerEncodedParams = List(result.seller.swapMethodParams)
+      sellerEncodedParams = List(result.seller.swapMethodParams)
         .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
-      const bidderEncodedParams = List(result.bidder.swapMethodParams)
+      bidderEncodedParams = List(result.bidder.swapMethodParams)
         .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+      return {
+        sellerProofOutput,
+        bidderProofOutput,
+      }
     }
   }, {
     desc: 'extractAllNoteHashes',
-    func: async () => {
+    func: async ({ sellerProofOutput, bidderProofOutput }) => {
+      
+      const result = (await partialPipeline(11)).toJS()
+
+      const noteHashes = await result.validator.extractAllNoteHashes(
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+        result.seller.transfererAddress,
+      )
+      assert.equal( noteHashes['0'], result.seller.jsSenderNote.noteHash,
+        `seller input note hash doesn't match`
+      )
+      assert.equal( noteHashes['1'], result.seller.jsReceiverNote.noteHash,
+        `bidder output note hash doesn't match`
+      )
+      assert.equal( noteHashes['2'], result.bidder.jsSenderNote.noteHash,
+        `bidder input note hash doesn't match`
+      )
+      assert.equal( noteHashes['3'], result.bidder.jsReceiverNote.noteHash,
+        `seller output note hash doesn't match`
+      )
+      return {
+        sellerProofOutput,
+        bidderProofOutput,
+      }
+    }
+  }, {
+    desc: 'extractAndHash',
+    func: async ({ sellerProofOutput, bidderProofOutput }) => {
+      /*
+      const result = (await partialPipeline(11)).toJS()
+
+      const hash = await result.validator.extractAndHash(
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      assert.equal( noteHashes['0'], result.seller.jsSenderNote.noteHash,
+        `seller input note hash doesn't match`
+      )
+      assert.equal( noteHashes['1'], result.seller.jsReceiverNote.noteHash,
+        `bidder output note hash doesn't match`
+      )
+      assert.equal( noteHashes['2'], result.bidder.jsSenderNote.noteHash,
+        `bidder input note hash doesn't match`
+      )
+      assert.equal( noteHashes['3'], result.bidder.jsReceiverNote.noteHash,
+        `seller output note hash doesn't match`
+      )
     }
   }, {
     desc: 'parameter encodings',
@@ -354,7 +407,9 @@ describe('Linked trade', () => {
 			assert( isValid['0'], `Signature is not valid from ${result.bidder.address}` )
 	*/	
 		}
-  }]
+  }
+
+  ]
 
   runSubIts(List(asyncIts))
   /*
