@@ -2,12 +2,14 @@
 
 const { assert } = require('chai')
 const { runTransforms } = require('demo-transform')
-const testers = {}
+const { Logger } = require('demo-utils')
 
 // Local module state, last stage computed
 let prevStage = 0
 let pipeline
 const resultMap = {}
+const LOGGER = new Logger('tester')
+const testers = {}
 
 testers.partialPipeline = async (latestStage) => {
   assert(latestStage <= pipeline.count(),
@@ -28,13 +30,20 @@ testers.setInitialState = (initialState, _pipeline) => {
   pipeline = _pipeline
 }
 
-testers.runSubIts = (itList) => {
-  it(itList[0].desc, itList[0].func)
-  return itList.reduce(async (prom, {desc, func}) => {
-    await prom
-    //console.log(desc)
+testers.runSubIts = async (itList) => {
+  //it(itList.get(0).desc, itList.get(0).func)
+  return itList.reduce((prom, {desc, func}) => {
+    //const result = await prom
+    console.log(desc, typeof(func))
     it(desc, func)
-    return prom 
+    /*
+    const newProm = new Promise((resolve, reject) => {
+      const wrappedFunc = async () => {
+        const newResult = func(result)
+        resolve(newResult)
+      }
+    })*/
+    return prom
   }, Promise.resolve(true))
 }
 

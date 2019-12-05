@@ -5,6 +5,7 @@ const { getConfig, Logger } = require('demo-utils')
 const { wallet } = require('demo-keys')
 const { partialPipeline, runSubIts, setInitialState } = require('demo-tests')
 const { Map, List } = require('immutable')
+const { toChecksumAddress } = require('ethereumjs-util')
 const { padLeft } = require('web3-utils')
 const { abiEncoder : { outputCoder } } = require('aztec.js')
 const { proofs : { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils')
@@ -20,65 +21,61 @@ const LOGGER = new Logger('lt.spec')
 
 describe('Linked trade', () => {
 
+  let sellerParams
+  let bidderParams
+
   const SELLER_TRADE_SYMBOL = 'AAA'
   const BIDDER_TRADE_SYMBOL  = 'BBB'
 
-  // Utility methods for minting and confidential transfers pre-populated with
-  // addresses and public keys
-  // TODO: Make constants, test other senders/receivers besides deployer
-  
-  before(async () => {
-    
-    const sellerResult = await mint(Map({
-      tradeSymbol     : SELLER_TRADE_SYMBOL,
-      minteeAddress   : parsed['TEST_ADDRESS_1'],
-      minteePublicKey : parsed['TEST_PUBLIC_KEY_1'],
-      minteeAmount    : new BN(22),
-      unlockSeconds   : 200,
-    }))
-    const sellerNoteHash = sellerResult.get('minteeNoteHash')
-
-    const bidderResult = await mint(Map({
-      tradeSymbol     : BIDDER_TRADE_SYMBOL,
-      minteeAddress   : parsed['TEST_ADDRESS_2'],
-      minteePublicKey : parsed['TEST_PUBLIC_KEY_2'],
-      minteeAmount    : new BN(22),
-      unlockSeconds   : 200,
-    }))
-    const bidderNoteHash = bidderResult.get('minteeNoteHash')
-
-    const initialState = ltInitialState.merge(Map({
-      seller: Map({
-        tradeSymbol : SELLER_TRADE_SYMBOL        ,
-        address     : parsed['TEST_ADDRESS_1']   ,
-        password    : parsed['TEST_PASSWORD_1']  ,
-        publicKey   : parsed['TEST_PUBLIC_KEY_1'],
-        noteHash    : sellerNoteHash             ,
-      }),
-      bidder : Map({
-        tradeSymbol : BIDDER_TRADE_SYMBOL        ,
-        address     : parsed['TEST_ADDRESS_2']   ,
-        password    : parsed['TEST_PASSWORD_2']  ,
-        publicKey   : parsed['TEST_PUBLIC_KEY_2'],
-        noteHash    : bidderNoteHash             ,
-      }),
-    }))
-    setInitialState( initialState, ltPipeline )
-    /*
-
-    const result = await doPt({ sellerNoteHash, bidderNoteHash, _pt: lt })
-    assert(result.get('ptTxHash'))
-
-    // Trying to atomic swap a second time should fail
-    expect(
-      doPt({ sellerNoteHash, bidderNoteHash })
-    ).to.be.rejectedWith(Error)
-  */
-  })
-
   const asyncIts = [{
+    desc: 'empty test',
+    func: async () => {
+    },
+  }, {
+    desc: 'beforeAll',
+    func: async () => {
+      const sellerResult = await mint(Map({
+        tradeSymbol     : SELLER_TRADE_SYMBOL,
+        minteeAddress   : parsed['TEST_ADDRESS_1'],
+        minteePublicKey : parsed['TEST_PUBLIC_KEY_1'],
+        minteeAmount    : new BN(22),
+        unlockSeconds   : 200,
+        testAccountIndex : 1,
+      }))
+      const sellerNoteHash = sellerResult.get('minteeNoteHash')
+
+      const bidderResult = await mint(Map({
+        tradeSymbol     : BIDDER_TRADE_SYMBOL,
+        minteeAddress   : parsed['TEST_ADDRESS_2'],
+        minteePublicKey : parsed['TEST_PUBLIC_KEY_2'],
+        minteeAmount    : new BN(22),
+        unlockSeconds   : 200,
+        testAccountIndex : 1,
+      }))
+      const bidderNoteHash = bidderResult.get('minteeNoteHash')
+
+      const initialState = ltInitialState.merge(Map({
+        seller: Map({
+          tradeSymbol : SELLER_TRADE_SYMBOL        ,
+          address     : parsed['TEST_ADDRESS_1']   ,
+          password    : parsed['TEST_PASSWORD_1']  ,
+          publicKey   : parsed['TEST_PUBLIC_KEY_1'],
+          noteHash    : sellerNoteHash             ,
+        }),
+        bidder : Map({
+          tradeSymbol : BIDDER_TRADE_SYMBOL        ,
+          address     : parsed['TEST_ADDRESS_2']   ,
+          password    : parsed['TEST_PASSWORD_2']  ,
+          publicKey   : parsed['TEST_PUBLIC_KEY_2'],
+          noteHash    : bidderNoteHash             ,
+        }),
+        testAccountIndex: 1,
+      }))
+      setInitialState( initialState, ltPipeline )
+    },
+  }, {
     desc: 'EIP712 signing',
-    func: async() => {
+    func: async () => {
       const result = (await partialPipeline(11)).toJS()
       
 			assert.equal( result.sigR.length, 64, `${result.sigR} not a 32-byte hash` )
@@ -88,8 +85,8 @@ describe('Linked trade', () => {
 			LOGGER.info('EIP712 Result',
 				result.bidder,
 				result.seller,
-				result.saleExpireTime,
-				result.bidExpireTime,
+				result.saleExpireBlockNumber,
+				result.bidExpireBlockNumber,
 				result.sigR,
 				result.sigS,
 				result.sigV,
@@ -140,8 +137,20 @@ describe('Linked trade', () => {
       //LOGGER.info('ValidateAndProofOutputs', validateAndProofOutputs)
       const sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutput, 0)
       const sellerFormattedProofOutput =  '0x' + sellerProofOutput.slice(0x40)
-      const sellerProofHash   = outputCoder.hashProofOutput(sellerProofOutput);
+      //assert.equal( parseInt(sellerProofOutput.slice(0, 0x40), 16), 0,
+      //  `Sliced prefix sellerProofOutput was not all zeroes` )
+      const recoveredSellerProofHash
+        = await result.validator.hashValidatedProof(
+          sellerFormattedProofOutput,
+        );
+      const sellerProofHash = outputCoder.hashProofOutput(sellerProofOutput);
+
+      assert.equal( recoveredSellerProofHash['0'], sellerProofHash,
+        `seller proof hash doesn't match` )
+
       const bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutput, 0);
+      //assert.equal( parseInt(bidderProofOutput.slice(0, 0x40), 16), 0,
+      //  `Sliced prefix bidderProofOutput was not all zeroes` )
       const bidderFormattedProofOutput =  '0x' + bidderProofOutput.slice(0x40)
       const bidderProofHash   = outputCoder.hashProofOutput(bidderProofOutput);
       
@@ -177,14 +186,13 @@ describe('Linked trade', () => {
       assert.equal( outputLength['0'].toNumber(), 2,
         `Number of bidder output  notes is not 2` )
 
-      const sellerParams = [
-        sellerFormattedProofOutput,
+      const sellerProofParams = [
+        '0x' + sellerProofOutput,
         result.seller.transfererAddress,
-        sellerProofHash,
       ]
-      LOGGER.info('Seller Params', sellerParams)
+      LOGGER.info('Seller Params', sellerProofParams)
       const sellerNoteHashes = await result.validator.extractAndVerifyNoteHashes(
-        ...sellerParams
+        ...sellerProofParams
       )
 
       assert.equal( sellerNoteHashes['0'], result.seller.jsSenderNote.noteHash,
@@ -204,7 +212,8 @@ describe('Linked trade', () => {
 
       expect(
         result.minedTx( result.validator.extractAndVerifyNoteHashes, [
-          result.seller.jsProofData,
+          // should be jsProofOutput
+          result.seller.jsProofData, // this might run out of gas
           result.seller.transfererAddress,
           randomHash,
         ] )
@@ -216,14 +225,13 @@ describe('Linked trade', () => {
       //assert.equal( sellerProofOutput.slice(0x40), recoveredSellerProofOutput['0'].slice(2),
       //  `Seller proofOutput doesn't match` )
 
-      const bidderParams = [
-        bidderFormattedProofOutput,
+      const bidderProofParams = [
+        '0x' + bidderProofOutput,
         result.bidder.transfererAddress,
-        bidderProofHash,
       ]
-      LOGGER.info('Bidder Params', bidderParams)
+      LOGGER.info('Bidder Params', bidderProofParams)
       const bidderNoteHashes = await result.validator.extractAndVerifyNoteHashes(
-        ...bidderParams
+        ...bidderProofParams
       )
       //  , {from: getConfig()['DEPLOYER_ADDRESS'], gas: getConfig()['GAS_LIMIT'] } )
       // We expect this to be much less than 700,000 gas, since we already validated and cached the above proofs above
@@ -235,33 +243,97 @@ describe('Linked trade', () => {
       assert.equal( bidderNoteHashes['1'], result.bidder.jsReceiverNote.noteHash,
         `seller output note hash doesn't match`
       )
+
+      const sellerEncodedParams = List(result.seller.swapMethodParams)
+        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+      const bidderEncodedParams = List(result.bidder.swapMethodParams)
+        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+    }
+  }, {
+    desc: 'extractAllNoteHashes',
+    func: async () => {
+    }
+  }, {
+    desc: 'parameter encodings',
+    func: async () => {
+
+      const result = (await partialPipeline(11)).toJS()
+
+      sellerParams = [
+        result.seller.address,
+        result.seller.zkToken.address,
+        padLeft('0x' + result.saleExpireBlockNumber.toString('hex'), 64)
+      ].reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' )
+      LOGGER.info('Seller Params', sellerParams)
+
+		  bidderParams = [
+        result.bidder.address,
+        result.bidder.zkToken.address,
+        padLeft('0x' + result.bidExpireBlockNumber.toString('hex'), 64)
+      ].reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' )
+      LOGGER.info('Bidder Params', bidderParams)
       
-	/*	
-      assert( noteHashes['0'], `bidderInputNoteHash null` )
-      assert( noteHashes['1'], `sellerOnputNoteHash null` )
-      assert( noteHashes['2'], `sellerInputNoteHash null` )
-      assert( noteHashes['3'], `bidderOutputNoteHash null` )
-      assert.equal( noteHashes['0'], result.bidder.jsSenderNote.noteHash, `bidderInputNoteHash mismatch` )
-      assert.equal( noteHashes['1'], result.bidder.jsReceiverNote.noteHash, `sellerOnputNoteHash mismatch` )
-      assert.equal( noteHashes['2'], result.seller.jsSenderNote.noteHash, `sellerInputNoteHash mismatch` )
-      assert.equal( noteHashes['3'], result.seller.jsReceiverNote.noteHash, `bidderOutputNoteHash mismatch` )
+      const sellerAddress = await result.paramUtils.getAddress(sellerParams, 0)
+      LOGGER.info('sellerAddress', sellerAddress)
+      assert.equal( toChecksumAddress(sellerAddress['0']), result.seller.address,
+        'seller address mismatched'
+      )
+      const bidderAddress = await result.paramUtils.getAddress(bidderParams, 0)
+      LOGGER.info('bidderAddress', bidderAddress)
+      assert.equal( toChecksumAddress(bidderAddress['0']), result.bidder.address,
+        'bidder address mismatched'
+      )
+
+      const sellerTokenAddress = await result.paramUtils.getAddress(sellerParams, 20)
+      LOGGER.info('sellerTokenAddress', sellerTokenAddress)
+      assert.equal( toChecksumAddress(sellerTokenAddress['0']), result.seller.zkToken.address,
+        'seller token address mismatched'
+      )
+      const bidderTokenAddress = await result.paramUtils.getAddress(bidderParams, 20)
+      LOGGER.info('bidderTokenAddress', bidderTokenAddress)
+      assert.equal( toChecksumAddress(bidderTokenAddress['0']), result.bidder.zkToken.address,
+        'bidder token address mismatched'
+      )
+
+      const saleExpireBlockNumber = await result.paramUtils.getUint256(sellerParams, 72)
+      assert.equal(
+        saleExpireBlockNumber['0'].toNumber(), result.saleExpireBlockNumber.toNumber(),
+        'Sale expire block number mismatched'
+      )
+      
+      const saleExpireBlockNumber2 = await result.paramUtils.getUint256(sellerParams, 73)
+      assert.notEqual(
+        saleExpireBlockNumber2['0'].toNumber(), result.saleExpireBlockNumber.toNumber(),
+        'Incorrect offset for sale expire block number matched anyway'
+      )
+      
+      const bidExpireBlockNumber = await result.paramUtils.getUint256(bidderParams, 72)
+      assert.equal(
+        bidExpireBlockNumber['0'].toNumber(), result.bidExpireBlockNumber.toNumber(),
+        'Bid expire block number mismatched'
+      )
+      return result
+    },
+  }, {
+    desc: 'hashMessage',
+    func: async () => {
+
+      const result = (await partialPipeline(11)).toJS()
 
 			const hashMessageArgs = [
-				[ result.bidder.address, result.bidder.zkToken.address, padLeft('0x' + Number(result.bidExpireBlockNumber).toString(16), 64) ]
-          .reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' ),
-				[ result.seller.address, result.seller.zkToken.address, padLeft('0x' + Number(result.saleExpireBlockNumber).toString(16), 64) ]
-          .reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' ),
-				result.bidder.jsSenderNote.noteHash,
-				result.bidder.jsReceiverNote.noteHash,
+        sellerParams,
+        bidderParams,
 				result.seller.jsSenderNote.noteHash,
 				result.seller.jsReceiverNote.noteHash,
+				result.bidder.jsSenderNote.noteHash,
+				result.bidder.jsReceiverNote.noteHash,
 			]
 
 			LOGGER.info('hashMessage args', hashMessageArgs)
 
 			const messageHash = await result.validator.hashMessage(...hashMessageArgs)
 			assert.equal( result.messageHash, messageHash['0'].slice(2), `Mismatched messageHash` )
-
+/*
 			const finalHash = await result.validator.hashTrade( ...hashMessageArgs )
 			assert.equal( result.finalHash, finalHash['0'].slice(2), `Mismatched finalHash` )
 
@@ -284,11 +356,12 @@ describe('Linked trade', () => {
 		}
   }]
 
+  runSubIts(List(asyncIts))
+  /*
+  it( asyncIts[1].desc, asyncIts[1].func )
   it('super it', async () => {
-    await asyncIts[0].func()
-    //await List(asyncIts).reduce((s, t) => s.then(async () => await it(t.desc, t.func)), Promise.resolve(true))
   })
-  
+ */ 
   after(() => {
     wallet.shutdownSync()
   })

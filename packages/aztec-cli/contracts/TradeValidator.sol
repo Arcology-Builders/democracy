@@ -18,7 +18,7 @@ contract TradeValidator is IAZTEC {
 
     bytes32 public constant SALT = 0x655a1a74fefc4b03038d941491a1d60fc7fbd77cf347edea72ca51867fb5a3dc;
 
-    string public constant TRADE_TYPE = "Trade(address bidderAddress,address sellerAddress,address bidderTokenAddress,address sellerTokenAddress,bytes32 bidderInputNoteHash,bytes32 sellerOutputNoteHash,bytes32 sellerInputNoteHash,bytes32 bidderOutputNoteHash,uint256 bidExpireBlockNumber,uint256 saleExpireBlockNumber)";
+    string public constant TRADE_TYPE = "Trade(address sellerAddress,address bidderAddress,address sellerTokenAddress,address bidderTokenAddress,bytes32 sellerInputNoteHash,bytes32 bidderOutputNoteHash,bytes32 bidderInputNoteHash,bytes32 sellerOutputNoteHash,uint256 saleExpireBlockNumber,uint256 bidExpireBlockNumber)";
     bytes32 public constant TRADE_TYPEHASH = keccak256(abi.encodePacked(TRADE_TYPE));
 
     string public constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
@@ -59,7 +59,13 @@ contract TradeValidator is IAZTEC {
     function extractFirstProofOutput(
         bytes memory _proofData,
         address _transferer
-    ) public returns (bytes memory _inputNotes, bytes memory _outputNotes, address _owner, int256 _publicValue, bytes32 _proofHash) {
+    ) public returns (
+        bytes memory _inputNotes,
+        bytes memory _outputNotes,
+        address _owner,
+        int256 _publicValue,
+        bytes32 _proofHash
+    ) {
         (bytes memory proofOutput, bytes32 proofHash) = validateAndGetFirstProofOutput(_proofData, _transferer);
         (bytes memory inputNotes, bytes memory outputNotes, address owner, int256 publicValue) = proofOutput.extractProofOutput();
         return (inputNotes, outputNotes, owner, publicValue, proofHash);
@@ -69,6 +75,12 @@ contract TradeValidator is IAZTEC {
         bytes memory _proofOutput
     ) public pure returns (bytes memory _inputNotes, bytes memory _outputNotes, address _owner, int256 _publicValue) {
         return _proofOutput.extractProofOutput();
+    }
+
+    function hashValidatedProof(
+        bytes memory _formattedProofOutput
+    ) public pure returns (bytes32) {
+        return keccak256(_formattedProofOutput);
     }
 
     function getNote(
@@ -85,30 +97,33 @@ contract TradeValidator is IAZTEC {
     }
 
     function extractAndVerifyNoteHashes(
-        bytes memory proofOutput,
-        address _transferer,
-        bytes32 _proofOutputHash
+        bytes memory _proofOutput,
+        address _transferer
     ) public view returns (bytes32, bytes32) {
 
         // We pass in both proof and proofData for now to make this a pure function
         //(bytes memory proofOutput,)
         //    = validateAndGetFirstProofOutput(_proofData, _transferer);
         
-        //lastProofOutput = proofOutput;
-
-        // These mismatch for now, but we'll just have bidder send proofOutputHash to
-        // to seller in bid
-        require( _proofOutputHash == keccak256(proofOutput),
-          "Proof output hash mismatch" );
-
+        bytes memory formattedProofOutput = ParamUtils.sliceBytes(_proofOutput, 32);
+        bytes32 proofHash = keccak256(formattedProofOutput);
+        
+        // Validation currently fails because I can't construct the right
+        // hash from proofOutput
         require( ace.validateProofByHash(
-            JOIN_SPLIT_PROOF, _proofOutputHash, _transferer
+            JOIN_SPLIT_PROOF, proofHash, _transferer
             ), "proof output is invalid" );
         (bytes memory inputNotes, bytes memory outputNotes, ,)
-            = proofOutput.extractProofOutput();
+            = formattedProofOutput.extractProofOutput();
 
-        require( inputNotes.getLength()  >= 1, "Number of seller input notes is different than 1" );
-        require( outputNotes.getLength() >= 2, "Number of seller output notes is different than 2" );
+        require(
+            inputNotes.getLength()  >= 1,
+            "Number of seller input notes is different than 1"
+        );
+        require(
+           outputNotes.getLength() >= 2,
+           "Number of seller output notes is different than 2"
+        );
         (,bytes32 inputNoteHash,) = inputNotes.get(0).extractNote();
         (,bytes32 outputNoteHash,) = outputNotes.get(0).extractNote();
 
@@ -116,39 +131,34 @@ contract TradeValidator is IAZTEC {
     }
 
     function extractAllNoteHashes(
-        bytes memory _sellerParams,
-        bytes memory _bidderParams,
         bytes memory _sellerProofOutput,
-        bytes memory _bidderProofOutput
-    ) public returns (bytes32, bytes32, bytes32, bytes32) {
-
-        bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
-        bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
-        address transferer = ParamUtils.getAddress(_sellerParams, 52);
+        bytes memory _bidderProofOutput,
+        address transferer
+    ) public view returns (bytes32, bytes32, bytes32, bytes32) {
 
         (bytes32 sellerInputNoteHash, bytes32 bidderOutputNoteHash)
             = extractAndVerifyNoteHashes(
                 _sellerProofOutput,
-                transferer,
-                sellerNoteHash
+                transferer
             );
         (bytes32 bidderInputNoteHash, bytes32 sellerOutputNoteHash)
             = extractAndVerifyNoteHashes(
                 _bidderProofOutput,
-                transferer,
-                bidderNoteHash
+                transferer
             );
-        lastInputNoteHash = sellerInputNoteHash;
-        lastOutputNoteHash = bidderOutputNoteHash;
+        //lastInputNoteHash = sellerInputNoteHash;
+        //lastOutputNoteHash = bidderOutputNoteHash;
         return (sellerInputNoteHash, bidderOutputNoteHash, bidderInputNoteHash, sellerOutputNoteHash);
     }
 
-    function extractAndVerify(
+    function extractAndHash(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
         bytes memory _sellerProofOutput,
         bytes memory _bidderProofOutput
-    ) public returns (bool) {
+    ) public view returns (bytes32) {
+
+        address transferer = ParamUtils.getAddress(_sellerParams, 52); 
 
         (
             bytes32 sellerInputNoteHash,
@@ -156,18 +166,12 @@ contract TradeValidator is IAZTEC {
             bytes32 bidderInputNoteHash,
             bytes32 sellerOutputNoteHash
         ) = extractAllNoteHashes(
-                _sellerParams,
-                _bidderParams,
                 _sellerProofOutput,
-                _bidderProofOutput
+                _bidderProofOutput,
+                transferer
             );
 
-        bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 62);
-        bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 84);
-        uint8 sigV   = uint8(_bidderParams[95] & 0xFF);
-
-        address bidderAddress = ParamUtils.getAddress(_bidderParams, 20);
-        bytes32 hash = hashMessage(
+        return hashMessage(
           _bidderParams,
           _sellerParams,
           sellerInputNoteHash,
@@ -175,6 +179,27 @@ contract TradeValidator is IAZTEC {
           bidderInputNoteHash,
           sellerOutputNoteHash
         );
+    }
+
+    function extractAndVerify(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public view returns (bool) {
+
+        bytes32 hash = extractAndHash(
+            _sellerParams,
+            _bidderParams,
+            _sellerProofOutput,
+            _bidderProofOutput
+        );
+
+        bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 62);
+        bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 84);
+        uint8 sigV   = uint8(_bidderParams[95] & 0xFF);
+
+        address bidderAddress = ParamUtils.getAddress(_bidderParams, 20);
         return bidderAddress == ecrecover(hash, sigV, sigR, sigS);
     }
 
@@ -190,18 +215,18 @@ contract TradeValidator is IAZTEC {
     }
 
     function hashMessage(
-        bytes memory _bidderParams,
         bytes memory _sellerParams,
+        bytes memory _bidderParams,
         bytes32 _sellerInputNoteHash,
         bytes32 _bidderOutputNoteHash,
         bytes32 _bidderInputNoteHash,
         bytes32 _sellerOutputNoteHash
     ) public view returns (bytes32) {
 
-        address sellerTokenAddress    = ParamUtils.getAddress(_sellerParams, 0);
-        address bidderTokenAddress    = ParamUtils.getAddress(_bidderParams, 0);
-        address sellerAddress         = ParamUtils.getAddress(_sellerParams, 20);
-        address bidderAddress         = ParamUtils.getAddress(_bidderParams, 20);
+        address sellerAddress         = ParamUtils.getAddress(_sellerParams, 0);
+        address bidderAddress         = ParamUtils.getAddress(_bidderParams, 0);
+        address sellerTokenAddress    = ParamUtils.getAddress(_sellerParams, 20);
+        address bidderTokenAddress    = ParamUtils.getAddress(_bidderParams, 20);
 
         // uint256's begin at the end and count back 32 bytes to 40
         uint256 saleExpireBlockNumber = ParamUtils.getUint256(_sellerParams, 72);
@@ -212,16 +237,18 @@ contract TradeValidator is IAZTEC {
 
       return keccak256(abi.encodePacked(
             TRADE_TYPEHASH,
-            bidderAddress,
             sellerAddress,
-            bidderTokenAddress,
+            bidderAddress,
             sellerTokenAddress,
+            bidderTokenAddress,
             _sellerInputNoteHash,
             _bidderOutputNoteHash,
             _bidderInputNoteHash,
-            _sellerOutputNoteHash,
-            bidExpireBlockNumber,
-            saleExpireBlockNumber
+            _sellerOutputNoteHash
+/*
+            saleExpireBlockNumber,
+            bidExpireBlockNumber
+*/
         ));
     } 
 

@@ -15,7 +15,7 @@ const LOGGER = new Logger('eip712')
 
 const DOMAIN_SALT = '0x655a1a74fefc4b03038d941491a1d60fc7fbd77cf347edea72ca51867fb5a3dc'
 const DOMAIN_TYPEHASH = abi.soliditySHA3(["string"],["EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"])
-const TRADE_TYPE = "Trade(address bidderAddress,address sellerAddress,address bidderTokenAddress,address sellerTokenAddress,bytes32 bidderInputNoteHash,bytes32 sellerOutputNoteHash,bytes32 sellerInputNoteHash,bytes32 bidderOutputNoteHash,uint256 bidExpireBlockNumber,uint256 saleExpireBlockNumber)";
+const TRADE_TYPE = "Trade(address sellerAddress,address bidderAddress,address sellerTokenAddress,address bidderTokenAddress,bytes32 sellerInputNoteHash,bytes32 bidderOutputNoteHash,bytes32 bidderInputNoteHash,bytes32 sellerOutputNoteHash,uint256 saleExpireBlockNumber,uint256 bidExpireBlockNumber)";
 const TRADE_TYPEHASH = abi.soliditySHA3(["string"],[ TRADE_TYPE ])
 
 const getDomainData = (chainId, verifyingContract) => {
@@ -46,16 +46,18 @@ const getDomainSeparator = (domainData) => {
 const getMessageHash = (message) => {
   const params = [
     TRADE_TYPEHASH               ,
-    message.bidderAddress        ,
     message.sellerAddress        ,
-    message.bidderTokenAddress   ,
+    message.bidderAddress        ,
     message.sellerTokenAddress   ,
-    message.bidderInputNoteHash  ,
-    message.sellerOutputNoteHash ,
+    message.bidderTokenAddress   ,
     message.sellerInputNoteHash  ,
     message.bidderOutputNoteHash ,
-    message.bidExpireBlockNumber ,
+    message.bidderInputNoteHash  ,
+    message.sellerOutputNoteHash ,
+    /*
     message.saleExpireBlockNumber,
+    message.bidExpireBlockNumber ,
+  */
   ] 
   LOGGER.info('Message Hash', params)
   return abi.soliditySHA3(
@@ -69,8 +71,10 @@ const getMessageHash = (message) => {
       'bytes32',
       'bytes32',
       'bytes32',
+      /*
       'uint256',
       'uint256',
+    */
     ],
     params
   )
@@ -106,6 +110,7 @@ const signTypedDataTransform = createTransformFromMap({
     bidExpireTimeSeconds,
   }) => {
     const validator = await deployed('TradeValidator')
+    const paramUtils = await deployed('ParamUtils')
 
     const bidExpireBlockNumber  = await timeStampSecondsToBlockNumber(bidExpireTimeSeconds)
     const saleExpireBlockNumber = await timeStampSecondsToBlockNumber(saleExpireTimeSeconds)
@@ -113,16 +118,16 @@ const signTypedDataTransform = createTransformFromMap({
     const domainData = getDomainData(chainId, validator.address)
     const domainSeparator = getDomainSeparator(domainData)
     const message = {
-      bidderAddress         : bidder.address,
       sellerAddress         : seller.address,
-      bidderTokenAddress    : bidder.zkToken.address,
+      bidderAddress         : bidder.address,
       sellerTokenAddress    : seller.zkToken.address,
-      bidderInputNoteHash   : bidder.jsSenderNote.noteHash,
-      sellerOutputNoteHash  : bidder.jsReceiverNote.noteHash,
+      bidderTokenAddress    : bidder.zkToken.address,
       sellerInputNoteHash   : seller.jsSenderNote.noteHash,
       bidderOutputNoteHash  : seller.jsReceiverNote.noteHash,
-      bidExpireBlockNumber,
+      bidderInputNoteHash   : bidder.jsSenderNote.noteHash,
+      sellerOutputNoteHash  : bidder.jsReceiverNote.noteHash,
       saleExpireBlockNumber,
+      bidExpireBlockNumber,
     }
     const messageHash = getMessageHash(message)
     const finalHash = abi.soliditySHA3(
@@ -143,6 +148,7 @@ const signTypedDataTransform = createTransformFromMap({
       sigS,
       sigV,
       validator,
+      paramUtils,
       finalHash       : finalHash.toString('hex'),
       messageHash     : messageHash.toString('hex'),
       DOMAIN_TYPEHASH : DOMAIN_TYPEHASH.toString('hex'),
@@ -165,6 +171,7 @@ const signTypedDataTransform = createTransformFromMap({
   }),
   outputTypes: Map({
     'validator'             : TYPES.contractInstance,
+    'paramUtils'            : TYPES.contractInstance,
     'sigR'                  : TYPES.keccak256Hash,
     'sigS'                  : TYPES.keccak256Hash,
     'sigV'                  : TYPES.integer,

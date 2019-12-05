@@ -100,10 +100,22 @@ const ltPrepareTransform = createTransformFromMap({
 
     return Map({
       seller : {
-        swapMethodParams : [ sellerTokenAddress, saleExpireBlockNumber, sellerTransfererAddress ],
+        swapMethodParams : [
+          sellerAddress,
+          sellerTokenAddress,
+          saleExpireBlockNumber,
+          sellerTransfererAddress,
+        ],
       },
       bidder : {
-        swapMethodParams : [ bidderTokenAddress, bidExpireBlockNumber, sigR, sigS, '0x' + Number(sigV).toString(16) ],
+        swapMethodParams : [
+          bidderAddress,
+          bidderTokenAddress,
+          bidExpireBlockNumber,
+          sigR,
+          sigS,
+          '0x' + Number(sigV).toString(16),
+        ],
       },
     })
   },
