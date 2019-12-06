@@ -151,6 +151,37 @@ contract TradeValidator is IAZTEC {
         return (sellerInputNoteHash, bidderOutputNoteHash, bidderInputNoteHash, sellerOutputNoteHash);
     }
 
+    function extractAndHashTrade(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public view returns (bytes32) {
+
+        address transferer = ParamUtils.getAddress(_sellerParams, 72); 
+
+        (
+            bytes32 sellerInputNoteHash,
+            bytes32 bidderOutputNoteHash,
+            bytes32 bidderInputNoteHash,
+            bytes32 sellerOutputNoteHash
+        ) = extractAllNoteHashes(
+                _sellerProofOutput,
+                _bidderProofOutput,
+                transferer
+            );
+
+        return hashTrade(
+          _sellerParams,
+          _bidderParams,
+          sellerInputNoteHash,
+          bidderOutputNoteHash,
+          bidderInputNoteHash,
+          sellerOutputNoteHash
+        );
+    }
+
+    // For testing only, for production we use extractAndHashTrade
     function extractAndHash(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
@@ -172,8 +203,8 @@ contract TradeValidator is IAZTEC {
             );
 
         return hashMessage(
-          _bidderParams,
           _sellerParams,
+          _bidderParams,
           sellerInputNoteHash,
           bidderOutputNoteHash,
           bidderInputNoteHash,
@@ -181,14 +212,41 @@ contract TradeValidator is IAZTEC {
         );
     }
 
-    function extractAndVerify(
+    function recoverAddress(
+         bytes32 _hash,
+         bytes32 _sigR,
+         bytes32 _sigS,
+         uint8 _sigV
+    ) public pure returns (address) {
+        return ecrecover(_hash, _sigV, _sigR, _sigS);
+    }
+
+    function verifyTrade(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
         bytes memory _sellerProofOutput,
         bytes memory _bidderProofOutput
     ) public view returns (bool) {
 
-        bytes32 hash = extractAndHash(
+        address recoveredSigner = extractAndRecover(
+            _sellerParams,
+            _bidderParams,
+            _sellerProofOutput,
+            _bidderProofOutput
+        );
+
+        address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
+        return bidderAddress ==recoveredSigner;
+    }
+
+    function extractAndRecover(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public view returns (address) {
+
+        bytes32 hash = extractAndHashTrade(
             _sellerParams,
             _bidderParams,
             _sellerProofOutput,
@@ -197,10 +255,10 @@ contract TradeValidator is IAZTEC {
 
         bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 72);
         bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 104);
-        uint8 sigV   = uint8(_bidderParams[136] & 0xFF);
+        uint8 sigV   = ParamUtils.getUint8(_bidderParams, 136);
 
-        address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
-        return bidderAddress == ecrecover(hash, sigV, sigR, sigS);
+        //address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
+        return ecrecover(hash, sigV, sigR, sigS);
     }
 
     function getDomainSeparator() public view returns (bytes32 _domainSeparator) {

@@ -323,10 +323,16 @@ describe('Linked trade', () => {
         'sigS mismatched'
       )
 
-      const sigVIndex = 136*2
-      const sigV = parseInt(bidderParams.slice(2).slice(sigVIndex, sigVIndex+2), 16)
+      const sigV = await result.paramUtils.getUint8(bidderParams, 136)
       LOGGER.info('sigV', sigV)
-      assert.equal( sigV, result.sigV,
+      assert.equal( sigV['0'], result.sigV,
+        'sigV mismatched'
+      )
+
+      const sigVIndex = 136*2
+      const sigV2 = parseInt(bidderParams.slice(2).slice(sigVIndex, sigVIndex+2), 16)
+      LOGGER.info('sigV', sigV2)
+      assert.equal( sigV2, result.sigV,
         'sigV mismatched'
       )
 
@@ -381,6 +387,42 @@ describe('Linked trade', () => {
       }
     },
   }, {
+    desc: 'hashMessage and hashTrade',
+    func: async ({ sellerParams, bidderParams }) => {
+
+      const result = (await partialPipeline(11)).toJS()
+
+			const hashMessageArgs = [
+        sellerParams,
+        bidderParams,
+				result.seller.jsSenderNote.noteHash,
+				result.seller.jsReceiverNote.noteHash,
+				result.bidder.jsSenderNote.noteHash,
+				result.bidder.jsReceiverNote.noteHash,
+			]
+
+			LOGGER.info('hashMessage args', hashMessageArgs)
+
+			const messageHash = await result.validator.hashMessage(...hashMessageArgs)
+			assert.equal( result.messageHash, messageHash['0'].slice(2), `Mismatched messageHash` )
+			const finalHash = await result.validator.hashTrade( ...hashMessageArgs )
+			assert.equal( result.finalHash, finalHash['0'].slice(2), `Mismatched finalHash` )
+
+      const recoveredAddress = await result.validator.recoverAddress(
+        finalHash['0'],
+        '0x'+result.sigR,
+        '0x'+result.sigS,
+        '0x'+Number(result.sigV).toString(16),
+      );
+      assert.equal( toChecksumAddress( recoveredAddress['0'] ), result.bidder.address,
+        `recovered address mismatched` )
+
+      return {
+        sellerParams,
+        bidderParams,
+      }
+    },
+  }, {
     desc: 'ltPrepareTransform swapMethodParams',
     func: async({ sellerParams, bidderParams }) => {
 
@@ -419,53 +461,54 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       
-      assert.equal( hash['0'], result.messageHash, 'message hash mismatch' )
+      assert.equal( hash['0'], '0x' + result.messageHash, 'message hash mismatch' )
+      return {
+        sellerEncodedParams,
+        bidderEncodedParams,
+      }
+
     }
   }, {
-      desc: 'extractAndVerify',
-      func: async () => {
-        const result = (await partialPipeline(11)).toJS()
-
-        const isValid = await result.validator.extractAndVerify(
-          sellerEncodedParams,
-          bidderEncodedParams,
-          '0x' + sellerProofOutput,
-          '0x' + bidderProofOutput,
-        )
-        LOGGER.info('extractAndVerify', sellerEncodedParams, bidderEncodedParams,
-          sellerProofOutput, bidderProofOutput
-        )
-        assert( Boolean(isValid['0']), 'invalid trade proof from params' )
-
-        const isValid2 = await result.validator.extractAndVerify(
-          fuzz(sellerEncodedParams, 7),
-          fuzz(bidderEncodedParams, 7),
-          '0x' + sellerProofOutput,
-          '0x' + bidderProofOutput,
-        )
-        assert.notOk( Boolean(isValid['0']), 'invalid trade proof from params' )
-      } 
-  }, {
-    desc: 'hashMessage',
-    func: async () => {
-
+    desc: 'extractAndRecover',
+    func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
       const result = (await partialPipeline(11)).toJS()
 
-			const hashMessageArgs = [
-        sellerParams,
-        bidderParams,
-				result.seller.jsSenderNote.noteHash,
-				result.seller.jsReceiverNote.noteHash,
-				result.bidder.jsSenderNote.noteHash,
-				result.bidder.jsReceiverNote.noteHash,
-			]
+      const recoveredAddress = await result.validator.extractAndRecover(
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      LOGGER.info('extractAndRecover', sellerEncodedParams, bidderEncodedParams,
+        sellerProofOutput, bidderProofOutput
+      )
+      assert.equal( toChecksumAddress(recoveredAddress['0']), result.bidder.address,
+        'invalid trade proof from params' )
 
-			LOGGER.info('hashMessage args', hashMessageArgs)
+      const recoveredAddress2 = await result.validator.extractAndRecover(
+        fuzz(sellerEncodedParams, 7),
+        fuzz(bidderEncodedParams, 7),
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      assert.notEqual( recoveredAddress2['0'], result.bidder.address,
+        'invalid trade proof from params' )
 
-			const messageHash = await result.validator.hashMessage(...hashMessageArgs)
-			assert.equal( result.messageHash, messageHash['0'].slice(2), `Mismatched messageHash` )
-			const finalHash = await result.validator.hashTrade( ...hashMessageArgs )
-			assert.equal( result.finalHash, finalHash['0'].slice(2), `Mismatched finalHash` )
+      const isValid = await result.validator.verifyTrade( 
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      assert( Boolean(isValid['0']), 'valid trade not verified' )
+
+      const isValid2 = await result.validator.verifyTrade( 
+        fuzz(sellerEncodedParams, 14),
+        fuzz(bidderEncodedParams, 14),
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      assert.notOk( Boolean(isValid2['0']), 'invalid trade was verified' )
 /*
 
 			const isValid = await result.proxy.verifySignature(
@@ -484,10 +527,8 @@ describe('Linked trade', () => {
 			)
 			assert( isValid['0'], `Signature is not valid from ${result.bidder.address}` )
 	*/	
-		}
-  }
-
-  ]
+    },
+  }]
 
   runSubIts(List(asyncIts))
   /*

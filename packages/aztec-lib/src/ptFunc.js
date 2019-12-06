@@ -157,8 +157,8 @@ ptFuncs.swapTransform = (() => {
       LOGGER.debug('Buyer Token Address' , bidder.zkToken.address)
       LOGGER.debug('Swap Method Name'    , proxySwapMethodName)
       assert( proxySwapMethodName, 'Proxy swap method name' )
-      const sellerParamList = seller['swapMethodParams'] ? [ ...seller.swapMethodParams ] : []
-      const bidderParamList = bidder['swapMethodParams'] ? [ ...bidder.swapMethodParams ] : []
+      const sellerParamList = seller['swapMethodParams'] || []
+      const bidderParamList = bidder['swapMethodParams'] || []
 
       const sellerParams = List(sellerParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
       const bidderParams = List(bidderParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
