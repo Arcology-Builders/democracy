@@ -39,18 +39,7 @@ contract SwapProxy is IAZTEC {
         token.confidentialTransfer(_proof, _signature);
     }
 
-    function getAddress(
-        bytes memory _params
-    ) public pure returns (address) {
-        return ParamUtils.getAddress(_params, 0);
-    }
 
-    function getUint256(
-        bytes memory _params
-    ) public pure returns (uint256) {
-        return ParamUtils.getUint256(_params, 32);
-    }
-/*
     function linkedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
@@ -59,20 +48,22 @@ contract SwapProxy is IAZTEC {
         bytes memory _sellerSignatures,
         bytes memory _bidderSignatures
     ) public {
-        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 0);
-        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
+        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 20);
+        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 20);
         ZkAssetMintable sellerToken = ZkAssetMintable(sellerTokenAddress);
         ZkAssetMintable bidderToken = ZkAssetMintable(bidderTokenAddress);
-        bool isValid = tv.extractAndVerify(_sellerParams, _bidderParams, _sellerProof, _bidderProof);
+        bool isValid = tv.verifyTrade(
+            _sellerParams,
+            _bidderParams,
+            _sellerProof,
+            _bidderProof
+        );
         require( isValid, "Invalid trade signature for bidder." );
 
         sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
         bidderToken.confidentialTransfer(_bidderProof, _bidderSignatures);
-
-        //bytes32 sellerNoteHash = ParamUtils.getBytes32(_sellerParams, 20);
-        //bytes32 bidderNoteHash = ParamUtils.getBytes32(_bidderParams, 20);
     }
-*/
+
     function twoSidedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,

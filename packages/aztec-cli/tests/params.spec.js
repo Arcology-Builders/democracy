@@ -37,7 +37,6 @@ const initialState = Map({
 describe('Param utils ', () => {
 
   let pu
-  let sp
 
   const earlyPipeline = OrderedMap([
     [ 'argList' , m0 ],
@@ -48,7 +47,6 @@ describe('Param utils ', () => {
   before(async () => {
     const result = (await runTransforms( earlyPipeline, initialState )).toJS()
     pu = await result.deployed( 'ParamUtils' )
-    sp = await result.deployed( 'SwapProxy' )
   })
 
   it('calls getAddress', async () => {
@@ -62,7 +60,7 @@ describe('Param utils ', () => {
 
   it('calls getAddress within SwapProxy', async () => {
 
-    const address = await sp.getAddress( parsed['TEST_ADDRESS_1'] + '1234' )
+    const address = await pu.getAddress( parsed['TEST_ADDRESS_1'] + '1234', 0 )
     LOGGER.info('address', address)
     const bytes32 = keccak(parsed['TEST_PUBLIC_KEY_1']).toString('hex')
     assert.equal( toChecksumAddress(address['0']),
@@ -76,7 +74,9 @@ describe('Param utils ', () => {
 
     const params = padLeft(parsed['TEST_ADDRESS_3'], 64)
     LOGGER.info('params', params)
-    const uint = await sp.getUint256(params)
+    // This is a usability prob, but uint256's get an offset at the ending bit index
+    // not the beginning. offset 32 means beginning at 0.
+    const uint = await pu.getUint256(params, 32)
     LOGGER.info('uint', uint)
     assert( uint['0'].eq(new BN(parsed['TEST_ADDRESS_3'].slice(2), 16)),
       `Unpacked address does not match.`

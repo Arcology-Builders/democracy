@@ -1,5 +1,9 @@
 pragma solidity >= 0.4.22;
 
+// Utilities for unpacking different parameters
+// from a bytes array, useful for getting around
+// Solidity's stack depth for local variables and parameters
+// in function signature.
 library ParamUtils {
 
     function getAddress(bytes memory _data, uint8 offset) public pure returns (address) {
@@ -12,7 +16,9 @@ library ParamUtils {
     }
 
     function getBytes32(bytes memory _data, uint8 offset) public pure returns (bytes32) {
-        require( offset < _data.length, "Offset beyond bytes array length." );
+        // If offset >= data.length - 32,
+        // it would mean a shorter than 32-byte quantity, or running off the end
+        require( offset < (_data.length - 32), "Offset beyond bytes array length." );
         bytes32 first = 0;
         for (uint8 i = 0; i < 32; i++) {
             first |= bytes32(_data[i+offset] & 0xFF) >> (i*8);
@@ -20,8 +26,12 @@ library ParamUtils {
         return first;
     }
 
+    // offset's for a uint256 is the ending index in the bytes array
+    // so an offset of x means the uint256 (with zero padding) begins at index x-32
     function getUint256(bytes memory _data, uint8 offset) public pure returns (uint256) {
-        require( offset < _data.length, "Offset beyond bytes array length." );
+        // offset can be equal to _data.length if the uint256 ends exactly at the end
+        // of the bytes array
+        require( offset <= _data.length, "Offset beyond bytes array length." );
         uint[1] memory uints;
         assembly { mstore(uints, mload(add(_data, offset))) }
         return uints[0];
