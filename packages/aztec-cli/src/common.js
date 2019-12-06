@@ -77,6 +77,7 @@ commons.doPt = async ({
   _pt         =pt,
   sellerIndex =1,
   bidderIndex =2,
+  testAccountIndex = 3,
 }) => {
   const sellerAddress     = parsed[`TEST_ADDRESS_${sellerIndex}`     ]
   const sellerPassword    = parsed[`TEST_PASSWORD_${sellerIndex}`    ]
@@ -100,6 +101,7 @@ commons.doPt = async ({
       noteHash    : bidderNoteHash     ,
     }),
     testValueETH         : '0.2',
+    testAccountIndex,
     sourcePathList       : commons.SOURCE_PATH_LIST,
     unlockSeconds        : 80,
   }))

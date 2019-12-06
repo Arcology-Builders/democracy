@@ -158,7 +158,7 @@ contract TradeValidator is IAZTEC {
         bytes memory _bidderProofOutput
     ) public view returns (bytes32) {
 
-        address transferer = ParamUtils.getAddress(_sellerParams, 52); 
+        address transferer = ParamUtils.getAddress(_sellerParams, 72); 
 
         (
             bytes32 sellerInputNoteHash,
@@ -195,9 +195,9 @@ contract TradeValidator is IAZTEC {
             _bidderProofOutput
         );
 
-        bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 62);
-        bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 84);
-        uint8 sigV   = uint8(_bidderParams[95] & 0xFF);
+        bytes32 sigR = ParamUtils.getBytes32(_bidderParams, 72);
+        bytes32 sigS = ParamUtils.getBytes32(_bidderParams, 104);
+        uint8 sigV   = uint8(_bidderParams[136] & 0xFF);
 
         address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
         return bidderAddress == ecrecover(hash, sigV, sigR, sigS);

@@ -2,6 +2,7 @@
 'use strict'
 const { Map }   = require('immutable')
 const { assert } = require('chai')
+const { padLeft } = require('web3-utils')
 
 const { departTransform } = require('demo-depart')
 const { makeMapType, runTransforms, createArgListTransform, deployerTransform,
@@ -94,6 +95,8 @@ const ltPrepareTransform = createTransformFromMap({
       },
       transfererAddress : bidderTransfererAddress,
     },
+    saleExpireBlockNumber,
+    bidExpireBlockNumber,
   }) => {
     assert( sellerTransfererAddress, `Null sellerTransfererAddress` )
     assert.equal( sellerTransfererAddress, bidderTransfererAddress, `Seller and bidder transferer addresses differ.` )
@@ -103,7 +106,7 @@ const ltPrepareTransform = createTransformFromMap({
         swapMethodParams : [
           sellerAddress,
           sellerTokenAddress,
-          saleExpireBlockNumber,
+          padLeft('0x' + saleExpireBlockNumber.toString('hex'), 64),
           sellerTransfererAddress,
         ],
       },
@@ -111,7 +114,7 @@ const ltPrepareTransform = createTransformFromMap({
         swapMethodParams : [
           bidderAddress,
           bidderTokenAddress,
-          bidExpireBlockNumber,
+          padLeft('0x' + bidExpireBlockNumber.toString('hex'), 64),
           sigR,
           sigS,
           '0x' + Number(sigV).toString(16),

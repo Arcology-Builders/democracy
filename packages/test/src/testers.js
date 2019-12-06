@@ -1,6 +1,7 @@
 'use strict'
 
 const { assert } = require('chai')
+const { Map } = require('immutable')
 const { runTransforms } = require('demo-transform')
 const { Logger } = require('demo-utils')
 
@@ -39,9 +40,15 @@ testers.runSubIts = async (itList) => {
       const wrappedFunc = async () => {
         const result = await prom
         LOGGER.info('Outgoing result', result)
-        const newResult = func(result)
-        LOGGER.info('Incoming result', newResult)
-        resolve(newResult)
+        LOGGER.info('Desc', desc)
+        try {
+          const newResult = await func(result)
+          //LOGGER.info('Incoming result', Map(newResult).keys())
+          resolve(newResult)
+        } catch(e) {
+          console.error(e.message)
+          reject(e)
+        }
       }
       it(desc, wrappedFunc)
     })

@@ -32,7 +32,7 @@ depart(Map({
   }),
   unlockSeconds : Map({
     type: TYPES.integer,
-    value: 50,
+    value: 60,
   }),
   compileOutputFull : Map({
     type: TYPES.boolean,

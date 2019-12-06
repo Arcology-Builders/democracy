@@ -19,10 +19,18 @@ const { parsed } = require('dotenv').config()
 
 const LOGGER = new Logger('lt.spec')
 
+const fuzz = (hexPrefixed, amount) => {
+  const hexString = hexPrefixed.slice(2)
+  const randomIndex = Math.round(Math.random() * (hexString.length - amount))
+  const randomFuzz = randombytes(amount).toString('hex').slice(0,amount)
+  return '0x' + hexString.slice(0,randomIndex)
+    + randomFuzz + hexString.slice(randomIndex+amount,hexString.length)
+}
+
 describe('Linked trade', () => {
 
-  let sellerEncodedParams
-  let bidderEncodedParams
+  let sellerProofOutput
+  let bidderProofOutput
 
   const SELLER_TRADE_SYMBOL = 'AAA'
   const BIDDER_TRADE_SYMBOL  = 'BBB'
@@ -30,6 +38,7 @@ describe('Linked trade', () => {
   const asyncIts = [{
     desc: 'empty test',
     func: async () => {
+      assert( true, 'intentional success' )
     },
   }, {
     desc: 'beforeAll',
@@ -135,7 +144,7 @@ describe('Linked trade', () => {
 
       //const validateAndProofOutputs = await result.minedTx( result.validator.extractProofOutput, [result.seller.jsProofData, result.seller.transfererAddress] )
       //LOGGER.info('ValidateAndProofOutputs', validateAndProofOutputs)
-      const sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutput, 0)
+      sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutput, 0)
       const sellerFormattedProofOutput =  '0x' + sellerProofOutput.slice(0x40)
       //assert.equal( parseInt(sellerProofOutput.slice(0, 0x40), 16), 0,
       //  `Sliced prefix sellerProofOutput was not all zeroes` )
@@ -148,7 +157,7 @@ describe('Linked trade', () => {
       assert.equal( recoveredSellerProofHash['0'], sellerProofHash,
         `seller proof hash doesn't match` )
 
-      const bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutput, 0);
+      bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutput, 0);
       //assert.equal( parseInt(bidderProofOutput.slice(0, 0x40), 16), 0,
       //  `Sliced prefix bidderProofOutput was not all zeroes` )
       const bidderFormattedProofOutput =  '0x' + bidderProofOutput.slice(0x40)
@@ -244,10 +253,6 @@ describe('Linked trade', () => {
         `seller output note hash doesn't match`
       )
 
-      sellerEncodedParams = List(result.seller.swapMethodParams)
-        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
-      bidderEncodedParams = List(result.bidder.swapMethodParams)
-        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
       return {
         sellerProofOutput,
         bidderProofOutput,
@@ -282,50 +287,54 @@ describe('Linked trade', () => {
       }
     }
   }, {
-    desc: 'extractAndHash',
-    func: async ({ sellerProofOutput, bidderProofOutput }) => {
-      /*
-      const result = (await partialPipeline(11)).toJS()
-
-      const hash = await result.validator.extractAndHash(
-        sellerEncodedParams,
-        bidderEncodedParams,
-        '0x' + sellerProofOutput,
-        '0x' + bidderProofOutput,
-      )
-      assert.equal( noteHashes['0'], result.seller.jsSenderNote.noteHash,
-        `seller input note hash doesn't match`
-      )
-      assert.equal( noteHashes['1'], result.seller.jsReceiverNote.noteHash,
-        `bidder output note hash doesn't match`
-      )
-      assert.equal( noteHashes['2'], result.bidder.jsSenderNote.noteHash,
-        `bidder input note hash doesn't match`
-      )
-      assert.equal( noteHashes['3'], result.bidder.jsReceiverNote.noteHash,
-        `seller output note hash doesn't match`
-      )
-    }
-  }, {
     desc: 'parameter encodings',
     func: async () => {
+      LOGGER.info('parameter encodings')
 
       const result = (await partialPipeline(11)).toJS()
 
-      sellerParams = [
+      const sellerParams = [
         result.seller.address,
         result.seller.zkToken.address,
-        padLeft('0x' + result.saleExpireBlockNumber.toString('hex'), 64)
+        padLeft('0x' + result.saleExpireBlockNumber.toString('hex'), 64),
+        result.seller.transfererAddress,
       ].reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' )
       LOGGER.info('Seller Params', sellerParams)
 
-		  bidderParams = [
+		  const bidderParams = [
         result.bidder.address,
         result.bidder.zkToken.address,
-        padLeft('0x' + result.bidExpireBlockNumber.toString('hex'), 64)
+        padLeft('0x' + result.bidExpireBlockNumber.toString('hex'), 64),
+        result.sigR,
+        result.sigS,
+        '0x' + Number(result.sigV).toString(16),
       ].reduce((s,v) => s + (v.startsWith('0x') ? v.slice(2) : v), '0x' )
       LOGGER.info('Bidder Params', bidderParams)
-      
+
+      const sigR = await result.paramUtils.getBytes32(bidderParams, 72)
+      LOGGER.info('sigR', sigR)
+      assert.equal( sigR['0'], '0x' + result.sigR,
+        'sigR mismatched'
+      )
+
+      const sigS = await result.paramUtils.getBytes32(bidderParams, 104)
+      LOGGER.info('sigS', sigS)
+      assert.equal( sigS['0'], '0x' + result.sigS,
+        'sigS mismatched'
+      )
+
+      const sigVIndex = 136*2
+      const sigV = parseInt(bidderParams.slice(2).slice(sigVIndex, sigVIndex+2), 16)
+      LOGGER.info('sigV', sigV)
+      assert.equal( sigV, result.sigV,
+        'sigV mismatched'
+      )
+
+      const transfererAddress = await result.paramUtils.getAddress(sellerParams, 72)
+      LOGGER.info('transfererAddress', transfererAddress)
+      assert.equal( toChecksumAddress(transfererAddress['0']), result.seller.transfererAddress,
+        'transferer address mismatched'
+      )
       const sellerAddress = await result.paramUtils.getAddress(sellerParams, 0)
       LOGGER.info('sellerAddress', sellerAddress)
       assert.equal( toChecksumAddress(sellerAddress['0']), result.seller.address,
@@ -365,8 +374,77 @@ describe('Linked trade', () => {
         bidExpireBlockNumber['0'].toNumber(), result.bidExpireBlockNumber.toNumber(),
         'Bid expire block number mismatched'
       )
-      return result
+
+      return {
+        sellerParams,
+        bidderParams,
+      }
     },
+  }, {
+    desc: 'ltPrepareTransform swapMethodParams',
+    func: async({ sellerParams, bidderParams }) => {
+
+      const result = (await partialPipeline(12)).toJS()
+
+      LOGGER.info('seller swapMethodParams', result.seller.swapMethodParams)
+      const sellerEncodedParams = List(result.seller.swapMethodParams)
+        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+      LOGGER.info('sellerEncodedParams', sellerEncodedParams)
+      LOGGER.info('bidder swapMethodParams', result.bidder.swapMethodParams)
+      const bidderEncodedParams = List(result.bidder.swapMethodParams)
+        .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+      LOGGER.info('bidderEncodedParams', bidderEncodedParams)
+      assert.equal( sellerParams, sellerEncodedParams,
+                `encoded seller params did not match` )
+      assert.equal( bidderParams, bidderEncodedParams,
+                `encoded bidder params did not match` )
+
+      return {
+        sellerEncodedParams,
+        bidderEncodedParams,
+      }
+    },
+  }, {
+    desc: 'extractAndHash',
+    func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
+      
+      const result = (await partialPipeline(11)).toJS()
+
+      LOGGER.info( 'Encoded Params', sellerEncodedParams, bidderEncodedParams )
+      LOGGER.info( 'Proof Output', sellerProofOutput, bidderProofOutput )
+      const hash = await result.validator.extractAndHash(
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      
+      assert.equal( hash['0'], result.messageHash, 'message hash mismatch' )
+    }
+  }, {
+      desc: 'extractAndVerify',
+      func: async () => {
+        const result = (await partialPipeline(11)).toJS()
+
+        const isValid = await result.validator.extractAndVerify(
+          sellerEncodedParams,
+          bidderEncodedParams,
+          '0x' + sellerProofOutput,
+          '0x' + bidderProofOutput,
+        )
+        LOGGER.info('extractAndVerify', sellerEncodedParams, bidderEncodedParams,
+          sellerProofOutput, bidderProofOutput
+        )
+        assert( Boolean(isValid['0']), 'invalid trade proof from params' )
+
+        const isValid2 = await result.validator.extractAndVerify(
+          fuzz(sellerEncodedParams, 7),
+          fuzz(bidderEncodedParams, 7),
+          '0x' + sellerProofOutput,
+          '0x' + bidderProofOutput,
+        )
+        assert.notOk( Boolean(isValid['0']), 'invalid trade proof from params' )
+      } 
   }, {
     desc: 'hashMessage',
     func: async () => {
@@ -386,9 +464,9 @@ describe('Linked trade', () => {
 
 			const messageHash = await result.validator.hashMessage(...hashMessageArgs)
 			assert.equal( result.messageHash, messageHash['0'].slice(2), `Mismatched messageHash` )
-/*
 			const finalHash = await result.validator.hashTrade( ...hashMessageArgs )
 			assert.equal( result.finalHash, finalHash['0'].slice(2), `Mismatched finalHash` )
+/*
 
 			const isValid = await result.proxy.verifySignature(
 				result.bidder.address,
