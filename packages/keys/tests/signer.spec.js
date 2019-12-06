@@ -59,7 +59,7 @@ describe('Signing and spending transactions', () => {
     await wallet.createSignerEth({
       url: 'http://localhost:8545', address: testAccounts[9] })
 
-    const fromAddress = testAccounts[9] 
+    const fromAddress = testAccounts[7] 
     const txHash = await wallet.payTest({
       eth        : eth,
       weiValue   : toWei('1', 'ether'),
@@ -76,7 +76,7 @@ describe('Signing and spending transactions', () => {
     const balance = await eth.getBalance(newAccounts.get(0).get('addressPrefixed'))
     assert.equal(toWei('1', 'ether').toString(), balance)
     const newBalance = await eth.getBalance(fromAddress)
-    const expectedBalance =  new BN(testBalances[9])
+    const expectedBalance =  new BN(testBalances[7])
       .sub(new BN(toWei('1', 'ether')))
       .sub(gasValue)
     const actualBalance = new BN(newBalance)
