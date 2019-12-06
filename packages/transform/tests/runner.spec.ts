@@ -133,7 +133,7 @@ describe( 'Runners', () => {
       const dm = deployerTransform
       const out0 = await alm3(Map({
         unlockSeconds    : 1,
-        testAccountIndex : 0,
+        testAccountIndex : 2,
         testValueETH     : '0.1',
         deployerAddress  : undefined,
         deployerPassword : undefined,
@@ -159,7 +159,7 @@ describe( 'Runners', () => {
       const dm = deployerTransform
       const out1 = await alm(Map({
         'unlockSeconds'    : 1,
-        'testAccountIndex' : 0,
+        'testAccountIndex' : 2,
         'testValueETH'     : '0.1',
         'deployerAddress'  : address,
         'deployerPassword' : password,

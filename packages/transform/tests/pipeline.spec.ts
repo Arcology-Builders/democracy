@@ -39,7 +39,7 @@ describe('Pipelines', () => {
     }), Map({
         unlockSeconds    : 10   ,
         testValueETH     : '0.1',
-        testAccountIndex : 0    ,
+        testAccountIndex : 2    ,
       })
     )
 
@@ -71,7 +71,7 @@ describe('Pipelines', () => {
     }), Map({
         unlockSeconds    : 10   ,
         testValueETH     : '0.1',
-        testAccountIndex : 0    ,
+        testAccountIndex : 2    ,
         x                : 22   ,
       })
     )

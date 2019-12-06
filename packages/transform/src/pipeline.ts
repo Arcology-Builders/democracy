@@ -8,7 +8,7 @@ import {
   Transform, CallableTransform
 } from './transform'
 import { Keccak256Hash } from './utils'
-const { Logger } = require('demo-utils')
+const { Logger, mergeNonLists } = require('demo-utils')
 const LOGGER = new Logger('pipeline')
 
 export type Pipeline = PipeHead | PipeAppended
@@ -24,12 +24,12 @@ export const isSubset = (a: ArgTypes, b: ArgTypes): boolean => {
 
 export class PipeHead {
 
-  name? : string
-  prev : Pipeline
+  name?             : string
+  prev              : Pipeline
   // PipeHead uses mergedInputTypes for the initial stage of typechecking
-  mergedInputTypes : ArgTypes
+  mergedInputTypes  : ArgTypes
   mergedOutputTypes : ArgTypes
-  traverseList : Immutable.List<Pipeline>
+  traverseList      : Immutable.List<Pipeline>
 
   // A pipeline could have multiple transforms from its head
   // the newest transform (its own) is the last one added
@@ -123,14 +123,15 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
        const outState = await pipe.lastCallables.reduce(async (s: Args,v:CallableTransform,k:number,a:Immutable.List<CallableTransform>) => {
          try {
            const out = await v(inState)
-           return (await s).mergeDeep(out)
+           const prevState = await s
+           return mergeNonLists( prevState, out )
          } catch(e) {
            throw new Error(`Transform run error in pipe ${i} (indexed from 0) named ${pipe.name}.\n${e.message}`)
          }
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs
        const checkedState : Args = checkExtractArgs(outState, pipe.mergedOutputTypes)
-       inState = inState.mergeDeep(checkedState)
+       inState = mergeNonLists(inState, checkedState)
     }
     
     return inState
