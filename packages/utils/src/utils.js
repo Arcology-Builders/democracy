@@ -4,7 +4,7 @@ const path = require('path')
 const { assert } = require('chai')
 const { Logger } = require('./logger')
 const LOGGER = new Logger('utils/utils')
-const { Seq, Map, List } = require('immutable')
+const { Seq, Set, Map, List } = require('immutable')
 const BN = require('bn.js')
 
 const utils = {}
@@ -52,6 +52,37 @@ utils.equal = (a,b) => {
   if (List.isList(a) && List.isList(b)) { return utils.immEqual(a,b) }
   return utils.deepEqual(a,b)
 }
+
+/**
+ * Deep merging of Maps but not lists
+ * @param a {Object} first object to merge
+ * @param b {Object} second object to merge
+ * @return {Map} a merged Immutable map that recursively merges all Maps and no Lists in a and b
+ */
+utils.mergeNonLists = (a,b) => {
+  assert( Map.isMap(a), `a is not a Map` )
+  assert( Map.isMap(b), `b is not a Map` )
+  const aKeys = Set(a.keys())
+  const bKeys = Set(b.keys())
+  const commonKeys = aKeys.intersect(bKeys)
+  LOGGER.debug('commonKeys', commonKeys)
+  // For non-maps, b's value of common keys overrides
+  const mergedSubMaps = a
+    .filter((v,k) => commonKeys.has(k))
+    .map((v,k) => Map.isMap(v) ? utils.mergeNonLists(v, b.get(k)) : b.get(k))
+  const aOnlyKeys = aKeys.subtract(commonKeys)
+  LOGGER.debug('aOnly Keys', aOnlyKeys)
+  const bOnlyKeys = bKeys.subtract(commonKeys)
+  LOGGER.debug('bOnly Keys', bOnlyKeys)
+  const aOnly = a.filter((v,k) => aOnlyKeys.has(k))
+  LOGGER.debug('aOnly', aOnly)
+  const bOnly = b.filter((v,k) => bOnlyKeys.has(k))
+  LOGGER.debug('bOnly', bOnly)
+
+  return mergedSubMaps
+    .merge(aOnly)
+    .merge(bOnly)
+} 
 
 /**
  * Determines if two newline delimited texts are equal by line.
