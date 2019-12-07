@@ -56,10 +56,10 @@ describe('Private trade', () => {
     assert.equal( result.sourcePathList.length, 3,
       `Source path list has wrong length.` )
     LOGGER.info('seller swapMethodParams', result.seller.swapMethodParams)
-    assert.equal( result.seller.swapMethodParams.length, 2,
+    assert.equal( result.seller.swapMethodParams.length, 1,
       `Swap method params has wrong length. Check pipeline.ts using mergeNonList` )
     LOGGER.info('bidder swapMethodParams', result.bidder.swapMethodParams)
-    assert.equal( result.bidder.swapMethodParams.length, 2,
+    assert.equal( result.bidder.swapMethodParams.length, 1,
       `Swap method params has wrong length. Check pipeline.ts using mergeNonList` )
 
     // Trying to atomic swap a second time should fail

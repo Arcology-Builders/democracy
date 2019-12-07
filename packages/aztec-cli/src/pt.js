@@ -9,7 +9,9 @@ const { makeMapType, runTransforms, createArgListTransform, deployerTransform,
 } = require('demo-transform')
 const { wallet } = require('demo-keys')
 const { Logger } = require('demo-utils')
-const { AZTEC_TYPES: TYPES, swapTransform, ptPrepareTransform, constructPtTransformOrderedMap,
+const {
+  AZTEC_TYPES: TYPES, swapTransform, ptPrepareTransform, ptPrepareSwapTransform,
+  constructPtTransformOrderedMap,
 } = require('demo-aztec-lib')
 
 const LOGGER    = new Logger('pt')
@@ -57,7 +59,8 @@ pts.ptPipeline = constructPtTransformOrderedMap([
   ...pts.ptEarlyLabeledTransforms,
   [ 'ptPrep'  , ptPrepareTransform ],
 ], [
-  ['swapTransform', swapTransform],
+  ['prepSwap', ptPrepareSwapTransform],
+  ['swap', swapTransform],
 ])
 
 pts.pt = async (state) => {

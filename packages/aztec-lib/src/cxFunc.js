@@ -247,10 +247,10 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     
     const ace = await deployed( 'ACE' )
        
-    const proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+    const jsProofOutput = outputCoder.getProofOutput(expectedOutput, 0);
     LOGGER.debug('proofOutputs', expectedOutput)
-    LOGGER.debug('proofOutput', proofOutput)
-    const proofHash = outputCoder.hashProofOutput(proofOutput);
+    LOGGER.debug('proofOutput', jsProofOutput)
+    const proofHash = outputCoder.hashProofOutput(jsProofOutput);
     LOGGER.debug('proofHash', proofHash)
 
     // This should be false, b/c we haven't validated first yet to cache the result
@@ -267,10 +267,11 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     assert.equal( validateResult['0'], expectedOutput, 'Return value of validate result is the proofOutputs (plural)' )
 
     const subStateMap = Map({
-      swapMethodParams : [ zkTokenAddress, senderNoteHash ],
+      swapMethodParams : [ zkTokenAddress ],
       jsProofData     : proofData,
       jsSignatures    : signatures,
-      jsProofOutput   : expectedOutput,
+      jsProofOutputs  : expectedOutput,
+      jsProofOutput   : '0x' + jsProofOutput,
       jsProofHash     : proofHash,
       jsSenderKey     : senderKey,
       jsSenderNote    : await exportAztecPrivateNote(senderNote),

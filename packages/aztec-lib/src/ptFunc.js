@@ -49,9 +49,9 @@ const createPtPrepareTransform = () => {
   })
 
   const outputTypes = Map({
-    proxy  : TYPES.contractInstance,
-    seller : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
-    bidder : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
+    proxy                 : TYPES.contractInstance,
+    seller                : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
+    bidder                : makeMapType( eachOutputTypes, 'ptPrepOutputsMapType' ),
   })
 
   return createTransformFromMap({
@@ -97,7 +97,7 @@ const createPtPrepareTransform = () => {
       LOGGER.info('sellerMap', sellerMap)
 
       return Map({
-        proxy             : proxy,
+        proxy,
       })
         .merge(Map({ 'seller' : sellerMap }))
         .merge(Map({ 'bidder' : bidderMap }))
@@ -126,51 +126,77 @@ ptFuncs.tokenContractsBidder = createCxTokenContractsTransform('bidder')
 ptFuncs.prepSeller           = createCxPrepareTransform('seller')
 ptFuncs.prepBidder           = createCxPrepareTransform('bidder')
 
+ptFuncs.ptPrepareSwapTransform = (() => {
+
+  const eachTypes = Map({
+    swapMethodParams : TYPES.array,
+    jsProofData      : TYPES.hexPrefixed,
+    jsSignatures     : TYPES.hexPrefixed,
+  })
+  
+  const func = async ({ seller, bidder }) => {
+    const sellerParamList = seller['swapMethodParams'] || []
+    const bidderParamList = bidder['swapMethodParams'] || []
+    const sellerParams = List(sellerParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+    const bidderParams = List(bidderParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+
+    LOGGER.debug('Seller Params', sellerParams)
+    LOGGER.debug('Bidder Params', bidderParams)
+    const proxySwapMethodParams = [
+      sellerParams          , bidderParams           ,
+      seller.jsProofData    , bidder.jsProofData     ,
+      seller.jsSignatures   , bidder.jsSignatures    ,
+    ]
+
+    return Map({
+      proxySwapMethodParams,
+    })
+  }
+
+  return createTransformFromMap({
+    func,
+    inputTypes: Map({
+      'bidder': makeMapType(eachTypes, 'ptPrepSwapInputMapType'),
+      'seller': makeMapType(eachTypes, 'ptPrepSwapInputMapType'),
+    }),
+    outputTypes: Map({
+      proxySwapMethodParams : TYPES.array,
+    }),
+  })
+})()
+
 ptFuncs.swapTransform = (() => {
   const eachType = Map({
-    zkToken           : TYPES.contractInstance,
-    transfererAddress : TYPES.ethereumAddress,
-    jsProofData       : TYPES.hexPrefixed,
-    jsSignatures      : TYPES.hexPrefixed,
-    swapMethodParams  : TYPES.array.opt,
+    zkToken             : TYPES.contractInstance,
+    transfererAddress   : TYPES.ethereumAddress,
   })
 
   const inputTypes = Map({
-    proxy               : TYPES.contractInstance,
-    proxySwapMethodName : TYPES.string,
-    seller : makeMapType( eachType, 'ptSwapInputsMapType' ),
-    bidder : makeMapType( eachType, 'ptSwapInputsMapType' ),
-    minedTx             : TYPES['function'],
+    proxy                 : TYPES.contractInstance,
+    proxySwapMethodName   : TYPES.string,
+    proxySwapMethodParams : TYPES.array,
+    seller                : makeMapType( eachType, 'ptSwapInputsMapType' ),
+    bidder                : makeMapType( eachType, 'ptSwapInputsMapType' ),
+    minedTx               : TYPES['function'],
   })
 
   return createTransformFromMap({
     func: async ({
       proxy,
       proxySwapMethodName,
+      proxySwapMethodParams,
       seller,
       bidder,
       minedTx,
     }) => {
-      LOGGER.debug('Seller', seller)
+      LOGGER.debug('Seller' , seller)
       LOGGER.debug('Bidder' , bidder)
       LOGGER.debug('Seller Token Address', seller.zkToken.address)
       LOGGER.debug('Buyer Token Address' , bidder.zkToken.address)
       LOGGER.debug('Swap Method Name'    , proxySwapMethodName)
       assert( proxySwapMethodName, 'Proxy swap method name' )
-      const sellerParamList = seller['swapMethodParams'] || []
-      const bidderParamList = bidder['swapMethodParams'] || []
 
-      const sellerParams = List(sellerParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
-      const bidderParams = List(bidderParamList).reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
-
-      LOGGER.debug('Seller Params', sellerParams)
-      LOGGER.debug('Bidder Params', bidderParams)
-      let txReceipt = await minedTx(proxy[proxySwapMethodName],
-        [
-          sellerParams          , bidderParams           ,
-          seller.jsProofData    , bidder.jsProofData     ,
-          seller.jsSignatures   , bidder.jsSignatures    ,
-        ] )
+      let txReceipt = await minedTx( proxy[proxySwapMethodName], proxySwapMethodParams )
       return Map({ ptTxHash : txReceipt['transactionHash'] })
     },
     inputTypes,
@@ -206,7 +232,7 @@ ptFuncs.constructPtTransformOrderedMap = (initialTransforms, doItTransforms) => 
     ['publicKey'     , [ptFuncs.publicKeySeller     , ptFuncs.publicKeyBidder      ]],
     ['prep'          , [ptFuncs.prepSeller          , ptFuncs.prepBidder           ]],
     ...doItTransforms,
-    ['finish'        , [finishSeller        , finishBidder                         ]],
+    ['finish'        , [finishSeller                , finishBidder                 ]],
   ])
 }
 
