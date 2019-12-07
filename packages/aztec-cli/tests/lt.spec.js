@@ -450,7 +450,7 @@ describe('Linked trade', () => {
     desc: 'extractAndHash',
     func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
       
-      const result = (await partialPipeline(11)).toJS()
+      const result = (await partialPipeline(12)).toJS()
 
       LOGGER.info( 'Encoded Params', sellerEncodedParams, bidderEncodedParams )
       LOGGER.info( 'Proof Output', sellerProofOutput, bidderProofOutput )
@@ -471,7 +471,8 @@ describe('Linked trade', () => {
   }, {
     desc: 'extractAndRecover',
     func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
-      const result = (await partialPipeline(11)).toJS()
+
+      const result = (await partialPipeline(12)).toJS()
 
       const recoveredAddress = await result.validator.extractAndRecover(
         sellerEncodedParams,
@@ -509,24 +510,30 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       assert.notOk( Boolean(isValid2['0']), 'invalid trade was verified' )
-/*
+      return {
+        sellerEncodedParams,
+        bidderEncodedParams,
+      }
 
-			const isValid = await result.proxy.verifySignature(
-				result.bidder.address,
-				//result.seller.address,
-				result.bidder.zkToken.address,
-				result.seller.zkToken.address,
-				//result.bidder.noteHash,
-				result.seller.noteHash,
-				//result.saleExpireTime,
-				//result.bidExpireTime,
-				result.bidder.jsProofData,
-				'0x' + result.sigR,
-				'0x' + result.sigS,
-				result.sigV,
-			)
-			assert( isValid['0'], `Signature is not valid from ${result.bidder.address}` )
-	*/	
+    },
+  }, {
+    desc: 'linkedTransfer',
+    func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
+/*
+      const result = (await partialPipeline(13)).toJS()
+
+      const isValid = await result.proxy.linkedTransfer( 
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+        result.seller.jsSignatures,
+        result.bidder.jsSignatures,
+        result.seller.jsProofData,
+        result.bidder.jsProofData,
+      )
+      assert( Boolean(isValid['0']), 'valid trade not verified' )
+ */     
     },
   }]
 

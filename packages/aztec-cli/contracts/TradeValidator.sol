@@ -101,15 +101,9 @@ contract TradeValidator is IAZTEC {
         address _transferer
     ) public view returns (bytes32, bytes32) {
 
-        // We pass in both proof and proofData for now to make this a pure function
-        //(bytes memory proofOutput,)
-        //    = validateAndGetFirstProofOutput(_proofData, _transferer);
-        
         bytes memory formattedProofOutput = ParamUtils.sliceBytes(_proofOutput, 32);
         bytes32 proofHash = keccak256(formattedProofOutput);
         
-        // Validation currently fails because I can't construct the right
-        // hash from proofOutput
         require( ace.validateProofByHash(
             JOIN_SPLIT_PROOF, proofHash, _transferer
             ), "proof output is invalid" );

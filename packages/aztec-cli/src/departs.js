@@ -3,7 +3,15 @@ const { Map } = require('immutable')
 
 const funcs = {}
 
-funcs.departZkFunc = async function({ deployed, minedTx, tradeSymbol, canConvert }) {
+funcs.departZkFunc = async function({
+  compile,
+  link,
+  deployed,
+  minedTx,
+  tradeSymbol,
+  canConvert,
+  chainId
+}) {
   
   const testERC20 = await deployed( 'TestERC20', {
     ctorArgList: Map({}),
@@ -16,9 +24,21 @@ funcs.departZkFunc = async function({ deployed, minedTx, tradeSymbol, canConvert
   console.log('ACE Addresss', aceContract.address)
   console.log('TestERC20', testERC20.address)
 
+  const pu = await deployed( 'ParamUtils' )
+  await compile( 'TradeValidator', 'TradeValidator.sol' )
+  await link( 'TradeValidator', 'link', Map({
+    'ParamUtils' : 'deploy',
+  }) )
+  const tv = await deployed( 'TradeValidator',
+    { ctorArgList: new Map({ _chainId: chainId, _aceAddress: aceContract.address }) })
+
   // initialise the private asset 
-  const zkAssetMintable = await deployed(
-    'ZkAssetMintable',
+  await compile( 'ZkAssetTradeable', 'ZkAssetTradeable.sol' )
+  await link( 'ZkAssetTradeable', 'link', Map({
+    'ParamUtils' : 'deploy',
+  }) )
+  const zkAssetTradeable = await deployed(
+    'ZkAssetTradeable',
     { ctorArgList: new Map({
       _aceAddress: aceContract.address,
       _linkedTokenAddress: testERC20.address,

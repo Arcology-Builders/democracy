@@ -28,15 +28,17 @@ describe('ACE validateProofByHash', () => {
 
     const senderNoteHash = await doMintAmount({
       amount: new BN(500),
-      senderIndex: 1,
+      senderIndex      : 1,
+      testAccountIndex : 3,
     })
     
     // Do the thing; transfers and also validates
     const cxResult = (await doCxAmount({
-      amount         : 0,
+      amount           : 0,
       senderNoteHash,
-      transferAll    : true,
-      senderIndex    : 1,
+      transferAll      : true,
+      senderIndex      : 1,
+      testAccountIndex : 3,
     })).toJS()
     
     const proofData = cxResult.unlabeled.jsProofData

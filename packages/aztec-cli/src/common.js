@@ -27,17 +27,19 @@ commons.getLastResult = () => lastResult
 
 commons.doMintAmount = async ({
   amount,
-  tradeSymbol    = 'AAA',
-  minteeIndex    = 1,
-  unlockSeconds  = 200,
+  tradeSymbol      = 'AAA',
+  minteeIndex      = 1,
+  unlockSeconds    = 200,
+  testAccountIndex = 3,
 }) => { 
   const result = await mint(Map({
-    tradeSymbol     : tradeSymbol,
-    minteeAddress   : parsed[`TEST_ADDRESS_${minteeIndex}`   ],
-    minteePublicKey : parsed[`TEST_PUBLIC_KEY_${minteeIndex}`],
-    minteeAmount    : amount,
+    tradeSymbol       : tradeSymbol,
+    minteeAddress     : parsed[`TEST_ADDRESS_${minteeIndex}`   ],
+    minteePublicKey   : parsed[`TEST_PUBLIC_KEY_${minteeIndex}`],
+    minteeAmount      : amount,
     unlockSeconds,
-    sourcePathList  : commons.SOURCE_PATH_LIST,
+    sourcePathList    : commons.SOURCE_PATH_LIST,
+    testAccountIndex,
   }))
   lastResult = result
   return result.get('minteeNoteHash')
@@ -46,9 +48,10 @@ commons.doMintAmount = async ({
 commons.doCxAmount = async ({
   amount,
   senderNoteHash,
-  transferAll = true,
-  senderIndex = 1,
-  tradeSymbol = 'AAA',
+  transferAll      = true,
+  senderIndex      = 1,
+  tradeSymbol      = 'AAA',
+  testAccountIndex = 0,
 }) => {
   const senderAddress   = parsed[`TEST_ADDRESS_${senderIndex}`   ]
   const senderPassword  = parsed[`TEST_PASSWORD_${senderIndex}`  ]
@@ -66,7 +69,8 @@ commons.doCxAmount = async ({
       transferAmount    : new BN(amount),
       transferAll       : transferAll,
     }),
-    unlockSeconds     : 500,
+    unlockSeconds       : 500,
+    testAccountIndex,
   }))
   return lastResult
 }
@@ -74,9 +78,9 @@ commons.doCxAmount = async ({
 commons.doPt = async ({
   sellerNoteHash,
   bidderNoteHash,
-  _pt         =pt,
-  sellerIndex =1,
-  bidderIndex =2,
+  _pt              = pt,
+  sellerIndex      = 1,
+  bidderIndex      = 2,
   testAccountIndex = 3,
 }) => {
   const sellerAddress     = parsed[`TEST_ADDRESS_${sellerIndex}`     ]
