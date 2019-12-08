@@ -5,6 +5,7 @@ const { Map } = require('immutable')
 const { AZTEC_TYPES: TYPES } = require('demo-aztec-lib')
 const { Logger } = require('demo-utils')
 
+const { toChecksumAddress } = require('ethereumjs-util')
 const LOGGER = new Logger('departSP')
 
 const {
@@ -62,7 +63,15 @@ async ({deployed, compile, link, minedTx, chainId }) => {
     'TradeValidator' : 'deploy',
   }) )
   const sp = await deployed( 'SwapProxy',
-    { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }) })
+    { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }),
+    })
 
+  const tvAddress = toChecksumAddress( await sp.tv()['0'] )
+  if (tvAddress !== tv.address) {
+    const sp = await deployed( 'SwapProxy',
+      { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }),
+        force: true,
+      })
+    }
 
 })
