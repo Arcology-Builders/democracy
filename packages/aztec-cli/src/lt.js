@@ -1,8 +1,8 @@
 // A linked trade, one with signatures connecting the two confidential transfers to each other
 'use strict'
-const { Map }   = require('immutable')
-const { assert } = require('chai')
-const { padLeft } = require('web3-utils')
+const { Map, List } = require('immutable')
+const { assert }    = require('chai')
+const { padLeft }   = require('web3-utils')
 
 const { departTransform } = require('demo-depart')
 const { makeMapType, runTransforms, createArgListTransform, deployerTransform,
@@ -76,93 +76,109 @@ const ltTvAddressTransform = createTransformFromMap({
   }),
 })
 
-const ltPrepareTransform = createTransformFromMap({
-  func: async ({
+const ltPrepareTransform = (() => {
+
+  const eachInputType = makeMapType(Map({
+    address           : TYPES.ethereumAddress,
+    zkToken           : TYPES.contractInstance,
+    transfererAddress : TYPES.ethereumAddress,
+    jsProofOutputs    : TYPES.hexPrefixed,
+    jsProofData       : TYPES.hexPrefixed,
+    jsSignatures      : TYPES.hexPrefixed,
+  }), 'ltPrepareInputMapType')
+
+  const eachOutputType = makeMapType(Map({
+    swapMethodParams  : TYPES.array,
+  }), 'ltPrepareOutputMapType')
+
+  const func = async ({
     sigR, sigS, sigV,
-    bidder : {
-      address  : bidderAddress,
-      noteHash : bidderNoteHash,
-      zkToken : {
-        address : bidderTokenAddress
-      },
-      transfererAddress : sellerTransfererAddress,
-    },
-    seller : {
-      address  : sellerAddress,
-      noteHash : sellerNoteHash,
-      zkToken : {
-        address : sellerTokenAddress,
-      },
-      transfererAddress : bidderTransfererAddress,
-    },
+    bidder,
+    seller,
     saleExpireBlockNumber,
     bidExpireBlockNumber,
   }) => {
-    assert( sellerTransfererAddress, `Null sellerTransfererAddress` )
-    assert.equal( sellerTransfererAddress, bidderTransfererAddress, `Seller and bidder transferer addresses differ.` )
+
+    const sellerParamList = [
+      seller.address,
+      seller.zkToken.address,
+      padLeft('0x' + saleExpireBlockNumber.toString('hex'), 64),
+      seller.transfererAddress,
+    ]
+    const bidderParamList = [
+      bidder.address,
+      bidder.zkToken.address,
+      padLeft('0x' + bidExpireBlockNumber.toString('hex'), 64),
+      sigR,
+      sigS,
+      '0x' + Number(sigV).toString(16),
+    ]
+    const sellerParams = List(sellerParamList).reduce(
+      (s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+    const bidderParams = List(bidderParamList).reduce(
+      (s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
+
+    LOGGER.debug('Seller Params', sellerParams)
+    LOGGER.debug('Bidder Params', bidderParams)
+    const proxySwapMethodParams = [
+      sellerParams          , bidderParams           ,
+      seller.jsProofOutputs , bidder.jsProofOutputs  ,
+      seller.jsSignatures   , bidder.jsSignatures    ,
+      seller.jsProofData    , bidder.jsProofData     ,
+    ]
+
+    assert.equal( seller.transfererAddress, bidder.transfererAddress,
+      `Seller and bidder transferer addresses differ.` )
 
     return Map({
-      seller : {
-        swapMethodParams : [
-          sellerAddress,
-          sellerTokenAddress,
-          padLeft('0x' + saleExpireBlockNumber.toString('hex'), 64),
-          sellerTransfererAddress,
-        ],
-      },
-      bidder : {
-        swapMethodParams : [
-          bidderAddress,
-          bidderTokenAddress,
-          padLeft('0x' + bidExpireBlockNumber.toString('hex'), 64),
-          sigR,
-          sigS,
-          '0x' + Number(sigV).toString(16),
-        ],
-      },
+      proxySwapMethodParams,
+      seller : Map({
+        swapMethodParams : sellerParamList, // we return these for testing
+      }),
+      bidder : Map({
+        swapMethodParams : bidderParamList, // we return these for testing
+      }),
     })
-  },
-  inputTypes : Map({
-    sigR : TYPES.keccak256Hash,
-    sigS : TYPES.keccak256Hash,
-    sigV : TYPES.integer,
-    bidder : makeMapType(Map({
-      address : TYPES.ethereumAddress,
-      zkToken : TYPES.contractInstance,
-      transfererAddress     : TYPES.ethereumAddress,
-    }), 'ltPrepareBidderInputMapType'),
-    seller : makeMapType(Map({
-      address : TYPES.ethereumAddress,
-      zkToken : TYPES.contractInstance,
-      transfererAddress     : TYPES.ethereumAddress,
-    }), 'ltPrepareSellerInputMapType'),
+  }
+
+  const inputTypes = Map({
+    sigR                  : TYPES.keccak256Hash,
+    sigS                  : TYPES.keccak256Hash,
+    sigV                  : TYPES.integer,
+    bidder                : eachInputType,
+    seller                : eachInputType,
     saleExpireBlockNumber : TYPES.bn,
     bidExpireBlockNumber  : TYPES.bn,
-  }),
-  outputTypes : Map({
-    seller : makeMapType(Map({
-      swapMethodParams : TYPES.array,
-    }), 'ltPrepareSellerOutputMapType'),
-    bidder : makeMapType(Map({
-      swapMethodParams : TYPES.array,
-    }), 'ltPrepareBidderOutputMapType'),
-  }),
-})
+  })
+
+  const outputTypes = Map({
+    proxySwapMethodParams : TYPES.array,
+    bidder                : eachOutputType,
+    seller                : eachOutputType,
+  })
+
+  return createTransformFromMap({
+    func       ,
+    inputTypes ,
+    outputTypes,
+  })
+
+})()
 
 lts.ltEarlyLabeledTransforms =  [
-  [ 'argList' , m0 ],
-  [ 'deployer', deployerTransform],
-  [ 'depart'  , departTransform],
+  [ 'argList' , m0                ],
+  [ 'deployer', deployerTransform ],
+  [ 'depart'  , departTransform   ],
 ]
 
 lts.ltPipeline = constructPtTransformOrderedMap([
   ...lts.ltEarlyLabeledTransforms,
-  [ 'tvAddress', ltTvAddressTransform ],
-  [ 'ptPrep'   , ptPrepareTransform ],
+  [ 'tvAddress', ltTvAddressTransform  ],
+  [ 'ptPrep'   , ptPrepareTransform    ],
 ], [
-  [ 'eip712'  , signTypedDataTransform ],
-  [ 'ltPrep'  , ltPrepareTransform ],
-  ['swapTransform', swapTransform],
+  [ 'eip712'   , signTypedDataTransform ],
+  [ 'ltPrep'   , ltPrepareTransform     ],
+  [ 'swap'     , swapTransform          ],
 ])
 
 lts.lt = async (state) => {

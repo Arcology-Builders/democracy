@@ -144,7 +144,7 @@ describe('Linked trade', () => {
 
       //const validateAndProofOutputs = await result.minedTx( result.validator.extractProofOutput, [result.seller.jsProofData, result.seller.transfererAddress] )
       //LOGGER.info('ValidateAndProofOutputs', validateAndProofOutputs)
-      sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutput, 0)
+      sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutputs, 0)
       const sellerFormattedProofOutput =  '0x' + sellerProofOutput.slice(0x40)
       //assert.equal( parseInt(sellerProofOutput.slice(0, 0x40), 16), 0,
       //  `Sliced prefix sellerProofOutput was not all zeroes` )
@@ -157,7 +157,7 @@ describe('Linked trade', () => {
       assert.equal( recoveredSellerProofHash['0'], sellerProofHash,
         `seller proof hash doesn't match` )
 
-      bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutput, 0);
+      bidderProofOutput = outputCoder.getProofOutput(result.bidder.jsProofOutputs, 0);
       //assert.equal( parseInt(bidderProofOutput.slice(0, 0x40), 16), 0,
       //  `Sliced prefix bidderProofOutput was not all zeroes` )
       const bidderFormattedProofOutput =  '0x' + bidderProofOutput.slice(0x40)
@@ -432,10 +432,12 @@ describe('Linked trade', () => {
       const sellerEncodedParams = List(result.seller.swapMethodParams)
         .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
       LOGGER.info('sellerEncodedParams', sellerEncodedParams)
+
       LOGGER.info('bidder swapMethodParams', result.bidder.swapMethodParams)
       const bidderEncodedParams = List(result.bidder.swapMethodParams)
         .reduce((s, v) => s + ((v.startsWith('0x')) ? v.slice(2) : v), '0x' )
       LOGGER.info('bidderEncodedParams', bidderEncodedParams)
+
       assert.equal( sellerParams, sellerEncodedParams,
                 `encoded seller params did not match` )
       assert.equal( bidderParams, bidderEncodedParams,
@@ -485,7 +487,7 @@ describe('Linked trade', () => {
       )
       assert.equal( toChecksumAddress(recoveredAddress['0']), result.bidder.address,
         'invalid trade proof from params' )
-
+/*
       const recoveredAddress2 = await result.validator.extractAndRecover(
         fuzz(sellerEncodedParams, 7),
         fuzz(bidderEncodedParams, 7),
@@ -494,7 +496,7 @@ describe('Linked trade', () => {
       )
       assert.notEqual( recoveredAddress2['0'], result.bidder.address,
         'invalid trade proof from params' )
-
+*/
       const isValid = await result.validator.verifyTrade( 
         sellerEncodedParams,
         bidderEncodedParams,
@@ -502,7 +504,7 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       assert( Boolean(isValid['0']), 'valid trade not verified' )
-
+/*
       const isValid2 = await result.validator.verifyTrade( 
         fuzz(sellerEncodedParams, 14),
         fuzz(bidderEncodedParams, 14),
@@ -510,6 +512,36 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       assert.notOk( Boolean(isValid2['0']), 'invalid trade was verified' )
+      */
+      LOGGER.info('Seller Proof Outputs', result.seller.jsProofOutputs )
+      LOGGER.info('Bidder Proof Outputs', result.bidder.jsProofOutputs )
+
+      const recoveredAddress2 = await result.proxy.extractAndRecover(
+        sellerEncodedParams,
+        bidderEncodedParams,
+        '0x' + sellerProofOutput,
+        '0x' + bidderProofOutput,
+      )
+      LOGGER.info('extractAndRecover', sellerEncodedParams, bidderEncodedParams,
+        sellerProofOutput, bidderProofOutput
+      )
+
+      const sellerProofOutput2 = outputCoder.getProofOutput(result.seller.jsProofOutputs, 0)
+      
+      assert.equal( '0x' + sellerProofOutput2, result.seller.jsProofOutput,
+        'seller proof output mismatch' )
+
+      assert.equal( toChecksumAddress(recoveredAddress2['0']), result.bidder.address,
+        'invalid trade proof from params' )
+      const isValid2 = await result.proxy.verifyTrade( 
+        sellerEncodedParams,
+        bidderEncodedParams,
+        result.seller.jsProofOutput,
+        result.bidder.jsProofOutput,
+      )
+      assert( Boolean(isValid2['0']), 'valid trade not verified' )
+
+
       return {
         sellerEncodedParams,
         bidderEncodedParams,
@@ -521,19 +553,21 @@ describe('Linked trade', () => {
     func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
 /*
       const result = (await partialPipeline(13)).toJS()
-
-      const isValid = await result.proxy.linkedTransfer( 
+      sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutputs, 0)
+*/
+/*
+      const isValid2 = await result.proxy.linkedTransfer( 
         sellerEncodedParams,
         bidderEncodedParams,
-        '0x' + sellerProofOutput,
-        '0x' + bidderProofOutput,
+        result.seller.jsProofOutputs,
+        result.bidder.jsProofOutputs,
         result.seller.jsSignatures,
         result.bidder.jsSignatures,
         result.seller.jsProofData,
         result.bidder.jsProofData,
       )
-      assert( Boolean(isValid['0']), 'valid trade not verified' )
- */     
+      assert( Boolean(isValid2['0']), 'valid trade not verified' )
+ */    
     },
   }]
 

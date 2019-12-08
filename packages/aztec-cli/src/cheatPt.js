@@ -52,9 +52,9 @@ const cheatingSwap = async (state) => {
   LOGGER.debug('Assume we are an Adversary, either an authorized proxy contract,')
   LOGGER.debug('one of the buyers / sellers')
 
-  const sellerToken = await deployed( 'ZkAssetMintable',
+  const sellerToken = await deployed( 'ZkAssetTradeable',
     { deployID: `deploy${sellerTradeSymbol}`} )
-  const buyerToken  = await deployed( 'ZkAssetMintable',
+  const buyerToken  = await deployed( 'ZkAssetTradeable',
     { deployID: `deploy${buyerTradeSymbol}` } )
 
   let txHash1 = await minedTx( sellerToken.confidentialTransfer,

@@ -32,13 +32,29 @@ funcs.departZkFunc = async function({
   const tv = await deployed( 'TradeValidator',
     { ctorArgList: new Map({ _chainId: chainId, _aceAddress: aceContract.address }) })
 
-  // initialise the private asset 
+  // initialise the private assets
+  //
+  // ZkAssetTradeable is for linkedTrade (lt)
   await compile( 'ZkAssetTradeable', 'ZkAssetTradeable.sol' )
   await link( 'ZkAssetTradeable', 'link', Map({
     'ParamUtils' : 'deploy',
   }) )
   const zkAssetTradeable = await deployed(
     'ZkAssetTradeable',
+    { ctorArgList: new Map({
+      _aceAddress: aceContract.address,
+      _linkedTokenAddress: testERC20.address,
+      _scalingFactor: 1,
+      _canAdjustSupply: true,
+      _canConvert: (canConvert !== false),
+    }),
+    deployID: `deploy${tradeSymbol}`
+    }
+  )
+
+  // ZkAssetMintable is for two-sided privateTrade (pt)
+  await deployed(
+    'ZkAssetMintable',
     { ctorArgList: new Map({
       _aceAddress: aceContract.address,
       _linkedTokenAddress: testERC20.address,

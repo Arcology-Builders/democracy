@@ -7,7 +7,7 @@ const Fetcher = unstable_createResource(async ({ownerAddress, chainId, bm}) => {
   const deploys = await bm.getDeploys()
   const securities   = deploys.filter((val, name) => name.match(/deploy[A-Z][A-Z][A-Z]/))
   const erc20Tokens  = securities.filter((val, name) => name.match(/ERC20/))
-  const zkTokens     = securities.filter((val, name) => name.match(/ZkAssetMintable/))
+  const zkTokens     = securities.filter((val, name) => name.match(/ZkAssetTradeable/))
 
 	return new Map((await Promise.all(List(zkTokens.map(
 		async (val, name) =>

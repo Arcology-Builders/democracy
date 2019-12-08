@@ -35,7 +35,7 @@ const statusFunc = async (state) => {
   const erc20Token         = await deployed( 'TestERC20',
     {deployID: `deploy${tradeSymbol}` } )
   const ace                = await deployed( 'ACE' )
-  const token              = await deployed( 'ZkAssetMintable',
+  const token              = await deployed( 'ZkAssetTradeable',
     { deployID: `deploy${tradeSymbol}` } )
   LOGGER.info('ACE'                              , ace.address)
   LOGGER.info('ZkAsset (Registry Owner) Address ', token.address)

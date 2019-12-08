@@ -47,7 +47,7 @@ cxFuncs.createCxTokenContractsTransform = (subStateLabel='unlabeled') => {
 
       const erc20Token = await deployed( 'TestERC20',
         {deployID: `deploy${tradeSymbol}` } )
-      const zkToken    = await deployed( 'ZkAssetMintable',
+      const zkToken    = await deployed( 'ZkAssetTradeable',
         { deployID: `deploy${tradeSymbol}` } )
       LOGGER.debug('ZkAsset Address ', zkToken.address)
 
@@ -109,6 +109,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     swapMethodParams : TYPES.array,
     jsProofData      : TYPES.hexPrefixed,
     jsProofOutput    : TYPES.hexPrefixed,
+    jsProofOutputs   : TYPES.hexPrefixed,
     jsProofHash      : TYPES.keccak256Hash,
     jsSignatures     : TYPES.hexPrefixed,
     jsSenderKey      : TYPES.string,

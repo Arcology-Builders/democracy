@@ -39,24 +39,56 @@ contract SwapProxy is IAZTEC {
         token.confidentialTransfer(_proof, _signature);
     }
 
+    function extractAndRecover(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public view returns (address) {
+
+        return tv.extractAndRecover(
+            _sellerParams,
+            _bidderParams,
+            _sellerProofOutput,
+            _bidderProofOutput
+        );
+    }
+
+    function verifyTrade(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutput,
+        bytes memory _bidderProofOutput
+    ) public view returns (bool) {
+
+        return tv.verifyTrade(
+            _sellerParams,
+            _bidderParams,
+            _sellerProofOutput,
+            _bidderProofOutput
+        );
+    }
 
     function linkedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
-        bytes memory _sellerProofOutput,
-        bytes memory _bidderProofOutput,
+        bytes memory _sellerProofOutputs,
+        bytes memory _bidderProofOutputs,
         bytes memory _sellerSignatures,
         bytes memory _bidderSignatures,
         bytes memory _sellerProofData,
         bytes memory _bidderProofData
     ) public {
 
+        bytes memory sellerProofOutput = _sellerProofOutputs.get(0);
+        bytes memory bidderProofOutput = _bidderProofOutputs.get(0);
+
         // First check and fail early if trade is not valid
         bool isValid = tv.verifyTrade(
             _sellerParams,
             _bidderParams,
-            _sellerProofOutput,
-            _bidderProofOutput
+            sellerProofOutput,
+            bidderProofOutput
         );
         require( isValid, "Invalid trade signature for bidder." );
 
@@ -66,13 +98,13 @@ contract SwapProxy is IAZTEC {
         ZkAssetTradeable sellerToken = ZkAssetTradeable(sellerTokenAddress);
         ZkAssetTradeable bidderToken = ZkAssetTradeable(bidderTokenAddress);
         sellerToken.confidentialTrade(
-            _sellerProofOutput,
+            _sellerProofOutputs,
             _sellerSignatures,
             _sellerProofData,
             transferer
         );
         bidderToken.confidentialTrade(
-            _bidderProofOutput,
+            _bidderProofOutputs,
             _bidderSignatures,
             _bidderProofData,
             transferer
@@ -82,17 +114,17 @@ contract SwapProxy is IAZTEC {
     function twoSidedTransfer(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
-        bytes memory _sellerProof,
-        bytes memory _bidderProof,
+        bytes memory _sellerProofData,
+        bytes memory _bidderProofData,
         bytes memory _sellerSignatures,
         bytes memory _bidderSignatures
     ) public {
-        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 20);
-        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 20);
-        ZkAssetMintable sellerToken = ZkAssetMintable(sellerTokenAddress);
-        ZkAssetMintable bidderToken = ZkAssetMintable(bidderTokenAddress);
-        sellerToken.confidentialTransfer(_sellerProof, _sellerSignatures);
-        bidderToken.confidentialTransfer(_bidderProof, _bidderSignatures);
+        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 0);
+        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 0);
+        ZkAssetTradeable sellerToken = ZkAssetTradeable(sellerTokenAddress);
+        ZkAssetTradeable bidderToken = ZkAssetTradeable(bidderTokenAddress);
+        sellerToken.confidentialTransfer(_sellerProofData, _sellerSignatures);
+        bidderToken.confidentialTransfer(_bidderProofData, _bidderSignatures);
     }
 
 }
