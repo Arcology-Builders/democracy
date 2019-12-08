@@ -29,7 +29,7 @@ describe('Confidential transfers', () => {
       amount        : new BN(22),
       tradeSymbol   : 'AAA',
       senderIndex   : 1,
-      unlockSeconds : 200,
+      unlockSeconds : 250,
     })
     const cxResult = await doCxAmount({ amount: 22, senderNoteHash, senderIndex: 1 })
     

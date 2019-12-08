@@ -136,7 +136,10 @@ describe('Linked trade', () => {
       assert( sellerGasUsed > 796000 && sellerGasUsed < 800000, `sellerGasUsed between 796,000 and 800,000` )
       // We expect about 700,000 gas for a join-split involving 2-3 three notes (sender, receiver, change)
 
-      const bidderValidation = await result.minedTx( result.validator.validateAndGetFirstProofOutput, [result.bidder.jsProofData, result.bidder.transfererAddress] )
+      const bidderValidation = await result.minedTx(
+        result.validator.validateAndGetFirstProofOutput,
+        [result.bidder.jsProofData, result.bidder.transfererAddress]
+      )
       LOGGER.info('Bidder Validate & Proof Outputs', bidderValidation)
       const bidderGasUsed = new BN(bidderValidation.gasUsed, 16).toNumber()
       assert( bidderGasUsed > 796000 && bidderGasUsed < 800000, `bidderGasUsed between 796,000 and 800,000` )
@@ -504,6 +507,12 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       assert( Boolean(isValid['0']), 'valid trade not verified' )
+
+      // Check tradeValidator address within SwapProxy
+      const tv = await result.proxy.tv()
+      assert.equal( toChecksumAddress( tv['0'] ), result.validator.address,
+        'TradeValidator address incorrect within SwapProxy'
+      )
 /*
       const isValid2 = await result.validator.verifyTrade( 
         fuzz(sellerEncodedParams, 14),
@@ -551,11 +560,9 @@ describe('Linked trade', () => {
   }, {
     desc: 'linkedTransfer',
     func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
-/*
+
       const result = (await partialPipeline(13)).toJS()
-      sellerProofOutput = outputCoder.getProofOutput(result.seller.jsProofOutputs, 0)
-*/
-/*
+
       const isValid2 = await result.proxy.linkedTransfer( 
         sellerEncodedParams,
         bidderEncodedParams,
@@ -567,7 +574,7 @@ describe('Linked trade', () => {
         result.bidder.jsProofData,
       )
       assert( Boolean(isValid2['0']), 'valid trade not verified' )
- */    
+    
     },
   }]
 

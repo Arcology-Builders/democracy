@@ -52,7 +52,7 @@ describe('ACE validateProofByHash', () => {
 
     // validates proof by hash
     // This is a view function, so no need for minedTx
-    const proofOutput = outputCoder.getProofOutput(cxResult.unlabeled.jsProofOutput, 0);
+    const proofOutput = outputCoder.getProofOutput(cxResult.unlabeled.jsProofOutputs, 0);
     LOGGER.info('proofOutputs', cxResult.unlabeled.jsProofOutput)
     LOGGER.info('proofOutput', proofOutput)
     const proofHash = outputCoder.hashProofOutput(proofOutput);
@@ -64,11 +64,17 @@ describe('ACE validateProofByHash', () => {
     const randomHash = '0x' + randombytes(32).toString('hex')
 
     const ace = await cxResult.deployed('ACE')
-    const validateResult = await cxResult.minedTx( ace.validateProof, [JOIN_SPLIT_PROOF, transfererAddress, proofData] )
+    const validateResult = await cxResult.minedTx( ace.validateProof,
+      [JOIN_SPLIT_PROOF, transfererAddress, proofData]
+    )
     LOGGER.info('validateResult')
-    const validateResult2 = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, cxResult.unlabeled.zkToken.address)
+    const validateResult2 = await ace.validateProofByHash(
+      JOIN_SPLIT_PROOF, proofHash, cxResult.unlabeled.zkToken.address
+    )
     LOGGER.info('validateResult2')
-    assert( Boolean(validateResult2['0']), `Cannot validate previous proof with hash ${proofHash} at token address ${cxResult.unlabeled.zkToken.address}` )
+    assert( Boolean(validateResult2['0']),
+      `Cannot validate previous proof with hash ${proofHash} at token address ${cxResult.unlabeled.zkToken.address}`
+    )
     
     // Expect this to fail, a random hash we have never seen before and is not even a real proof
     const validateResult3 = await ace.validateProofByHash(JOIN_SPLIT_PROOF, randomHash, cxResult.unlabeled.zkToken.address)

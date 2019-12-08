@@ -140,8 +140,6 @@ contract TradeValidator is IAZTEC {
                 _bidderProofOutput,
                 transferer
             );
-        //lastInputNoteHash = sellerInputNoteHash;
-        //lastOutputNoteHash = bidderOutputNoteHash;
         return (sellerInputNoteHash, bidderOutputNoteHash, bidderInputNoteHash, sellerOutputNoteHash);
     }
 
