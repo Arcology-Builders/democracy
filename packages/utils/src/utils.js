@@ -84,7 +84,7 @@ utils.deepEqual = (a,b) => {
     return utils.arraysEqual(a,b)
   if (Object.getPrototypeOf(a)===Object.prototype &&
       Object.getPrototypeOf(b)===Object.prototype) {
-	  return utils.objectsEqual(a,b)
+    return utils.objectsEqual(a,b)
   }
   if (a instanceof Map && b instanceof Map) {
     return utils.mapsEqual(a,b)
@@ -94,7 +94,7 @@ utils.deepEqual = (a,b) => {
   }
   if ((a instanceof ArrayBuffer || ArrayBuffer.isView(a)) &&
       (b instanceof ArrayBuffer || ArrayBuffer.isView(b))) {
-	  return utils.typedArraysEqual(a,b)
+    return utils.typedArraysEqual(a,b)
   }
   return a==b  // see note[1] -- IMPORTANT
 }

@@ -60,7 +60,7 @@ configs.parseLogLevels = (string) => {
   return (string) ? string.split(',').map((l) => l.toLowerCase() ) : string
 }
 
-const createDevEnv = (infuraProjectId) => {
+const createDevEnv = () => {
   return createEnv({
     'dbURL' : getEnvVar( 'DEVELOPMENT.DB_URL'  ) || 'http://localhost:7000',
     'ethURL': getEnvVar( 'DEVELOPMENT.ETH_URL' ) || 'http://localhost:8545',
@@ -79,7 +79,7 @@ const createDevEnv = (infuraProjectId) => {
 const ENVIRONMENTS = {
   'DEVELOPMENT': createDevEnv,
   'DEV'        : createDevEnv,
-  'TEST'       : (infuraProjectId) => {
+  'TEST'       : () => {
     return createEnv({
       'dbURL'  : getEnvVar( 'TEST.DB_URL'  ) || 'https://ganache.arcology.nyc:7001',
       'ethURL' : getEnvVar( 'TEST.ETH_URL' ) || 'https://ganache.arcology.nyc:8547',

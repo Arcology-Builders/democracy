@@ -3,7 +3,7 @@
 
 const { Map, List } = require('immutable')
 const assert = require('chai').assert
-const colors = require('colors')
+require('colors')
 
 const logger = []
 

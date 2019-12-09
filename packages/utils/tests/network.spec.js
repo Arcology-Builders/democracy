@@ -3,8 +3,6 @@ const { setEnvVars } = require('../src/config')
 const { getNetwork, getEndpointURL } = require('..')
 setEnvVars(process.env)
 
-const { List, Map } 
-             = require('immutable')
 const chai   = require('chai')
 const assert = chai.assert
 

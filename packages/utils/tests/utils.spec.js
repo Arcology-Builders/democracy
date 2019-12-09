@@ -30,7 +30,7 @@ describe('Utilities ', () => {
     const expected = fs.readFileSync('./tests/expected.txt').toString()
     const altered  = fs.readFileSync('./tests/altered.txt').toString()
     assert.equal( textsEqual(expected, altered), 5,
-                  `A difference was found on the indicated line` )
+      'A difference was found on the indicated line' )
   })
 
 })
