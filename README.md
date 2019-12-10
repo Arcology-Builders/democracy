@@ -1,7 +1,9 @@
 democracy
 =========
 
-Minimalist tools for running a distributed country, currently on Ethereum.
+Minimalist tools for coordinating decentralized and private computation, currently on Ethereum.
+
+Our first major integration is with the AZTEC Protocol, to enable trading of zero-knowledge assets.
 
 [![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js)
 [![CircleCI](https://circleci.com/gh/invisible-college/democracy.svg?style=svg)](https://circleci.com/gh/invisible-college/democracy)
@@ -24,11 +26,24 @@ Then in your modules
 const demo = require('democracy.js')
 ```
 
-## Get the Source Code to Play Around and Run Tests
+## Get the Source Code to Experiment and Run Tests
+
+You can perform all the following commands at a Unix terminal or in a [VS Code]() terminal.
 
 Clone our git repo locally
 ```
 git clone https://github.com:invisible-college/democracy
+```
+
+You'll need Node.js v11 or later and the Yarn package manager. Democracy.js is developed with `v11.14.0`.
+We recommend using the [Node Version Manager](https://github.com/nvm-sh/nvm#installation), which you can install for any Unix shell (including Mac OSX). `bash` is used in the example below, you can pipe the command and use the shell profile file for your
+favorite shell.
+
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+. ~/.bash_profile
+nvm install v11.14.0
+curl -o- -L https://yarnpkg.com/install.sh | bash
 ```
 
 We manage a monorepo of multiple packages with `lerna`.
