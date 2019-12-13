@@ -73,11 +73,11 @@ describe('from JS nested values', () => {
     const bKeys = Set(b.keys()) 
     const commonKeys = aKeys.intersect(bKeys)
 
-    assert( aKeys.equals(Set(['a', 'b', 'c'])), `aKeys not expected` )
-    assert( bKeys.equals(Set(['b', 'c'])), `bKeys not expected` )
-    assert( commonKeys.equals(Set(['b', 'c'])), `commonKeys not expected` )
-    assert( aKeys.subtract(commonKeys).equals(Set(['a'])), `aKeys minus commonKeys not expected` )
-    assert( bKeys.subtract(commonKeys).equals(Set([])), `bKeys minus commonKeys not expected` )
+    assert( aKeys.equals(Set(['a', 'b', 'c'])), 'aKeys not expected' )
+    assert( bKeys.equals(Set(['b', 'c'])), 'bKeys not expected' )
+    assert( commonKeys.equals(Set(['b', 'c'])), 'commonKeys not expected' )
+    assert( aKeys.subtract(commonKeys).equals(Set(['a'])), 'aKeys minus commonKeys not expected' )
+    assert( bKeys.subtract(commonKeys).equals(Set([])), 'bKeys minus commonKeys not expected' )
 
     const mergedMap0 = mergeNonLists(a,Map({}))
     LOGGER.debug('mergedMap0', mergedMap0)

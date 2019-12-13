@@ -60,8 +60,8 @@ utils.equal = (a,b) => {
  * @return {Map} a merged Immutable map that recursively merges all Maps and no Lists in a and b
  */
 utils.mergeNonLists = (a,b) => {
-  assert( Map.isMap(a), `a is not a Map` )
-  assert( Map.isMap(b), `b is not a Map` )
+  assert( Map.isMap(a), 'a is not a Map' )
+  assert( Map.isMap(b), 'b is not a Map' )
   const aKeys = Set(a.keys())
   const bKeys = Set(b.keys())
   const commonKeys = aKeys.intersect(bKeys)
