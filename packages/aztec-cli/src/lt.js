@@ -48,7 +48,7 @@ lts.ltInitialState = Map({
   bidExpireTimeSeconds  : Math.round(Date.now() / 1000) + 1000,
   testValueETH        : '0.2',
   testAccountIndex    : 0,
-  proxyContractName   : 'SwapProxy',
+  proxyContractName   : 'TradeValidator',
   proxySwapMethodName : 'linkedTransfer',
   sourcePathList      : ['../../node_modules/@aztec/protocol/contracts'],
   wallet,

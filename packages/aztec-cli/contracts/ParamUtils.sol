@@ -47,11 +47,14 @@ library ParamUtils {
      */
     function sliceBytes(
         bytes memory _bytes,
-        uint _start
+        uint _start,
+        uint _end
     ) public pure returns (bytes memory)
     {
-        require(_start <= _bytes.length, "Start offset should be less than length." );
-        uint _length = _bytes.length - _start;
+        require(_start < _end, "Start offset should be less than end offset.");
+        uint _length = _end - _start;
+
+        require(_end <= _bytes.length, "End offset should be less than bytes length." );
 
         bytes memory tempBytes;
 

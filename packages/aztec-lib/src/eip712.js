@@ -106,6 +106,7 @@ const signTypedDataTransform = createTransformFromMap({
     bidExpireTimeSeconds,
   }) => {
     const validator = await deployed('TradeValidator')
+    const tradeUtils = await deployed('TradeUtils')
     const paramUtils = await deployed('ParamUtils')
 
     const bidExpireBlockNumber  = await timeStampSecondsToBlockNumber(bidExpireTimeSeconds)
@@ -144,6 +145,7 @@ const signTypedDataTransform = createTransformFromMap({
       sigS,
       sigV,
       validator,
+      tradeUtils,
       paramUtils,
       finalHash       : finalHash.toString('hex'),
       messageHash     : messageHash.toString('hex'),
@@ -168,6 +170,7 @@ const signTypedDataTransform = createTransformFromMap({
   outputTypes: Map({
     'validator'             : TYPES.contractInstance,
     'paramUtils'            : TYPES.contractInstance,
+    'tradeUtils'            : TYPES.contractInstance,
     'sigR'                  : TYPES.keccak256Hash,
     'sigS'                  : TYPES.keccak256Hash,
     'sigV'                  : TYPES.integer,

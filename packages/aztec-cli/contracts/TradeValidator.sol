@@ -3,6 +3,8 @@ pragma solidity >=0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "./ParamUtils.sol";
+import "./TradeUtils.sol";
+import "./ZkAssetTradeable.sol";
 import "./libs/NoteUtils.sol";
 import "./ACE/ACE.sol";
 import "./interfaces/IAZTEC.sol";
@@ -23,10 +25,6 @@ contract TradeValidator is IAZTEC {
 
     string public constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
     bytes32 public constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
-
-    bytes public lastProofOutput;
-    bytes32 public lastInputNoteHash;
-    bytes32 public lastOutputNoteHash;
 
     constructor(uint256 _chainId, address _aceAddress) public {
         chainId = _chainId;
@@ -49,13 +47,6 @@ contract TradeValidator is IAZTEC {
         return ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _signer);
     }
 
-    function getProofOutput(
-        bytes memory _proofOutputs,
-        uint8 _index
-    ) public pure returns (bytes memory) {
-        return _proofOutputs.get(_index);
-    }
-
     function extractFirstProofOutput(
         bytes memory _proofData,
         address _transferer
@@ -71,39 +62,14 @@ contract TradeValidator is IAZTEC {
         return (inputNotes, outputNotes, owner, publicValue, proofHash);
     }
 
-    function extractProofOutput(
-        bytes memory _proofOutput
-    ) public pure returns (bytes memory _inputNotes, bytes memory _outputNotes, address _owner, int256 _publicValue) {
-        return _proofOutput.extractProofOutput();
-    }
-
-    function hashValidatedProof(
-        bytes memory _formattedProofOutput
-    ) public pure returns (bytes32) {
-        return keccak256(_formattedProofOutput);
-    }
-
-    function getNote(
-        bytes memory _notes,
-        uint8 _index
-    ) public pure returns (bytes memory) {
-        return _notes.get(_index);
-    }
-
-    function getLength(
-        bytes memory _proofOutputsOrNotes
-    ) public pure returns (uint256) {
-        return _proofOutputsOrNotes.getLength();
-    }
-
     function extractAndVerifyNoteHashes(
         bytes memory _proofOutput,
         address _transferer
     ) public view returns (bytes32, bytes32) {
 
-        bytes memory formattedProofOutput = ParamUtils.sliceBytes(_proofOutput, 32);
+        bytes memory formattedProofOutput = ParamUtils.sliceBytes(_proofOutput, 32, _proofOutput.length);
         bytes32 proofHash = keccak256(formattedProofOutput);
-        
+
         require( ace.validateProofByHash(
             JOIN_SPLIT_PROOF, proofHash, _transferer
             ), "proof output is invalid" );
@@ -204,15 +170,6 @@ contract TradeValidator is IAZTEC {
         );
     }
 
-    function recoverAddress(
-         bytes32 _hash,
-         bytes32 _sigR,
-         bytes32 _sigS,
-         uint8 _sigV
-    ) public pure returns (address) {
-        return ecrecover(_hash, _sigV, _sigR, _sigS);
-    }
-
     function verifyTrade(
         bytes memory _sellerParams,
         bytes memory _bidderParams,
@@ -228,7 +185,7 @@ contract TradeValidator is IAZTEC {
         );
 
         address bidderAddress = ParamUtils.getAddress(_bidderParams, 0);
-        return bidderAddress ==recoveredSigner;
+        return bidderAddress == recoveredSigner;
     }
 
     function extractAndRecover(
@@ -298,7 +255,7 @@ contract TradeValidator is IAZTEC {
             saleExpireBlockNumber,
             bidExpireBlockNumber
         ));
-    } 
+    }
 
     function hashTrade(
         bytes memory _bidderParams,
@@ -321,6 +278,63 @@ contract TradeValidator is IAZTEC {
                 _sellerOutputNoteHash
             )
         ));
-    } 
+    }
+
+    function verifyTradeFromProofOutputs(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutputs,
+        bytes memory _bidderProofOutputs
+    ) public view returns (bool) {
+        bytes memory sellerProofOutput = TradeUtils.getFirstProofOutput(_sellerProofOutputs);
+        bytes memory bidderProofOutput = TradeUtils.getFirstProofOutput(_bidderProofOutputs);
+
+        // First check and fail early if trade is not valid
+        return verifyTrade(
+            _sellerParams,
+            _bidderParams,
+            sellerProofOutput,
+            bidderProofOutput
+        );
+
+    }
+
+    function linkedTransfer(
+        bytes memory _sellerParams,
+        bytes memory _bidderParams,
+        bytes memory _sellerProofOutputs,
+        bytes memory _bidderProofOutputs,
+        bytes memory _sellerSignatures,
+        bytes memory _bidderSignatures,
+        bytes memory _sellerProofData,
+        bytes memory _bidderProofData
+    ) public {
+
+        bool isValid = verifyTradeFromProofOutputs(
+            _sellerParams,
+            _bidderParams,
+            _sellerProofOutputs,
+            _bidderProofOutputs
+        );
+        require( isValid, "Invalid trade signature for bidder." );
+
+        address transferer = ParamUtils.getAddress(_sellerParams, 72);
+        address sellerTokenAddress = ParamUtils.getAddress(_sellerParams, 20);
+        address bidderTokenAddress = ParamUtils.getAddress(_bidderParams, 20);
+        ZkAssetTradeable sellerToken = ZkAssetTradeable(sellerTokenAddress);
+        ZkAssetTradeable bidderToken = ZkAssetTradeable(bidderTokenAddress);
+        sellerToken.confidentialTrade(
+            _sellerProofOutputs,
+            _sellerSignatures,
+            _sellerProofData,
+            transferer
+        );
+        bidderToken.confidentialTrade(
+            _bidderProofOutputs,
+            _bidderSignatures,
+            _bidderProofData,
+            transferer
+        );
+    }
 
 }

@@ -53,6 +53,17 @@ describe('Linked trade', () => {
       }))
       const sellerNoteHash = sellerResult.get('minteeNoteHash')
 
+      // Minting a second set of notes for testing confidentialTransfer
+      const sellerResult2 = await mint(Map({
+        tradeSymbol     : SELLER_TRADE_SYMBOL,
+        minteeAddress   : parsed['TEST_ADDRESS_1'],
+        minteePublicKey : parsed['TEST_PUBLIC_KEY_1'],
+        minteeAmount    : new BN(22),
+        unlockSeconds   : 200,
+        testAccountIndex : 1,
+      }))
+      const sellerNoteHash2 = sellerResult2.get('minteeNoteHash')
+
       const bidderResult = await mint(Map({
         tradeSymbol     : BIDDER_TRADE_SYMBOL,
         minteeAddress   : parsed['TEST_ADDRESS_2'],
@@ -83,8 +94,51 @@ describe('Linked trade', () => {
       setInitialState( initialState, ltPipeline )
     },
   }, {
+    desc: 'One-sided confidentialTransfer',
+    func: async () => {
+
+      const result = (await partialPipeline(11)).toJS()
+
+      assert.equal( result.seller.transfererAddress, result.tv.address,
+        'Seller transferer address was not the TradeValidator contract.'
+      )
+      assert.equal( result.bidder.transfererAddress, result.tv.address,
+        'Bidder transferer address was not the TradeValidator contract.'
+      )
+
+      const sellerTransferParams = [
+        result.seller.zkToken.address,
+        result.seller.jsProofData,
+        result.seller.jsSignatures,
+      ]
+      LOGGER.info('Seller Transfer Params', sellerTransferParams)
+
+      try {
+        await result.minedTx( result.proxy.oneSidedTransfer,
+          sellerTransferParams,
+        )
+      } catch(e) {
+        // We should get here, b/c we signed our join-split proofs with a
+        // transferer address of the SwapProxy contract supposeedly,
+        // but here we are sending confidentialTransfer from deployerAddress
+        LOGGER.info('One-sided seller confidentialTransfer via ZkAssetTradeable')
+      }
+
+      try {
+        await result.minedTx( result.seller.zkToken.confidentialTransfer,
+          sellerTransferParams.slice(1),
+        )
+        LOGGER.info('We should never get here.')
+      } catch(e) {
+        // We should get here, b/c we signed our join-split proofs with a
+        // transferer address of the SwapProxy contract supposeedly,
+        // but here we are sending confidentialTransfer from deployerAddress
+      }
+    },
+  }, {
     desc: 'EIP712 signing',
     func: async () => {
+
       const result = (await partialPipeline(11)).toJS()
       
 			assert.equal( result.sigR.length, 64, `${result.sigR} not a 32-byte hash` )
@@ -152,7 +206,7 @@ describe('Linked trade', () => {
       //assert.equal( parseInt(sellerProofOutput.slice(0, 0x40), 16), 0,
       //  `Sliced prefix sellerProofOutput was not all zeroes` )
       const recoveredSellerProofHash
-        = await result.validator.hashValidatedProof(
+        = await result.tradeUtils.hashValidatedProof(
           sellerFormattedProofOutput,
         );
       const sellerProofHash = outputCoder.hashProofOutput(sellerProofOutput);
@@ -178,17 +232,17 @@ describe('Linked trade', () => {
         `seller proof hash associated with transferer/sender, not token address`
       )
 
-      const sellerProofComponents = await result.validator.extractProofOutput(
+      const sellerProofComponents = await result.tradeUtils.extractProofOutput(
         sellerFormattedProofOutput
       )
       LOGGER.info('Seller Proof Components', sellerProofComponents)
       
       const formattedInputNotes  = `0x${sellerProofComponents['_inputNotes'].slice(0x40)}`
       const formattedOutputNotes = `0x${sellerProofComponents['_outputNotes'].slice(0x40)}`
-      const inputLength          = await result.validator.getLength(
+      const inputLength          = await result.tradeUtils.getLength(
         sellerProofComponents['_inputNotes']
       )
-      const outputLength         = await result.validator.getLength(
+      const outputLength         = await result.tradeUtils.getLength(
         sellerProofComponents['_outputNotes']
       )
       LOGGER.info('Seller Notes Length', inputLength, outputLength)
@@ -411,7 +465,7 @@ describe('Linked trade', () => {
 			const finalHash = await result.validator.hashTrade( ...hashMessageArgs )
 			assert.equal( result.finalHash, finalHash['0'].slice(2), `Mismatched finalHash` )
 
-      const recoveredAddress = await result.validator.recoverAddress(
+      const recoveredAddress = await result.tradeUtils.recoverAddress(
         finalHash['0'],
         '0x'+result.sigR,
         '0x'+result.sigS,
@@ -470,6 +524,8 @@ describe('Linked trade', () => {
       return {
         sellerEncodedParams,
         bidderEncodedParams,
+        sellerProofOutput,
+        bidderProofOutput,
       }
 
     }
@@ -507,13 +563,13 @@ describe('Linked trade', () => {
         '0x' + bidderProofOutput,
       )
       assert( Boolean(isValid['0']), 'valid trade not verified' )
+/*
 
       // Check tradeValidator address within SwapProxy
       const tv = await result.proxy.tv()
       assert.equal( toChecksumAddress( tv['0'] ), result.validator.address,
         'TradeValidator address incorrect within SwapProxy'
       )
-/*
       const isValid2 = await result.validator.verifyTrade( 
         fuzz(sellerEncodedParams, 14),
         fuzz(bidderEncodedParams, 14),
@@ -522,9 +578,7 @@ describe('Linked trade', () => {
       )
       assert.notOk( Boolean(isValid2['0']), 'invalid trade was verified' )
       */
-      LOGGER.info('Seller Proof Outputs', result.seller.jsProofOutputs )
-      LOGGER.info('Bidder Proof Outputs', result.bidder.jsProofOutputs )
-
+/*
       const recoveredAddress2 = await result.proxy.extractAndRecover(
         sellerEncodedParams,
         bidderEncodedParams,
@@ -535,10 +589,15 @@ describe('Linked trade', () => {
         sellerProofOutput, bidderProofOutput
       )
 
+      const sellerProofOutput3 = await result.proxy.getFirstProofOutput(
+        result.seller.jsProofOutputs
+      )
+      assert.equal( sellerProofOutput3['0'], result.seller.jsProofOutput,
+        'seller proof output from proxy contract mismatch' )
+
       const sellerProofOutput2 = outputCoder.getProofOutput(result.seller.jsProofOutputs, 0)
-      
-      assert.equal( '0x' + sellerProofOutput2, result.seller.jsProofOutput,
-        'seller proof output mismatch' )
+      assert.equal( '0x' + sellerProofOutput2, '0x' + sellerProofOutput,
+        'seller proof output from EIP712 transform mismatch' )
 
       assert.equal( toChecksumAddress(recoveredAddress2['0']), result.bidder.address,
         'invalid trade proof from params' )
@@ -548,8 +607,18 @@ describe('Linked trade', () => {
         result.seller.jsProofOutput,
         result.bidder.jsProofOutput,
       )
-      assert( Boolean(isValid2['0']), 'valid trade not verified' )
+      LOGGER.info(' verifyTrade succeeded.', isValid2 )
+      assert( Boolean(isValid2['0']), 'valid trade not verified from proof output (single)' )
+      */
 
+      const isValid3 = await result.validator.verifyTradeFromProofOutputs( 
+        sellerEncodedParams,
+        bidderEncodedParams,
+        result.seller.jsProofOutputs,
+        result.bidder.jsProofOutputs,
+      )
+      LOGGER.info(' verifyTradeFromProofOutputs succeeded.', isValid3 )
+      assert( Boolean(isValid3['0']), 'valid trade not verified from proof outputs' )
 
       return {
         sellerEncodedParams,
@@ -558,23 +627,93 @@ describe('Linked trade', () => {
 
     },
   }, {
+    desc: 'ZkAssetMintable confidentialTransfer',
+    func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
+      /*
+      
+      const result = (await partialPipeline(12)).toJS()
+      
+      const bidderTransferParams = [
+        result.bidder.jsProofData,
+        result.bidder.jsSignatures,
+      ]
+      LOGGER.info('Bidder Transfer Params', bidderTransferParams)
+
+      await result.minedTx( result.bidder.zkToken.confidentialTransfer,
+        bidderTransferParams,
+      )
+      LOGGER.info('One-sided bidder confidentialTransfer via ZkAssetTradeable')
+
+      const sellerTransferParams = [
+        result.seller.jsProofData,
+        result.seller.jsSignatures,
+      ]
+      LOGGER.info('Seller Transfer Params', sellerTransferParams)
+
+      await result.minedTx( result.seller.zkToken.confidentialTransfer,
+        sellerTransferParams,
+      )
+      LOGGER.info('One-sided seller confidentialTransfer via ZkAssetTradeable')
+
+      // If this succeeds, it is Seller essentially giving away their side of the trade
+      // we'll need to mint notes for two trades, so that we can test
+      // linkedTransfer below with the second set of notes.
+      await result.minedTx( result.seller.zkToken.confidentialTrade,
+        [
+          result.seller.jsProofOutputs,
+          result.seller.jsSignatures,
+          result.seller.jsProofData,
+          result.seller.transfererAddress,
+        ],
+      )
+      LOGGER.info('One-sided seller confidentialTrade via ZkAssetTradeable')
+
+       * Next step: enable this, and do a more conventional ZkAssetMintable.confidentialTransfer
+       *
+      const zkToken = await result.deployed(
+        'ZkAssetMintable', { deployID: `deployAAA` }
+      )
+      */
+      return {
+        sellerEncodedParams,
+        bidderEncodedParams,
+      }
+    },
+  }, {
     desc: 'linkedTransfer',
     func: async ({ sellerEncodedParams, bidderEncodedParams }) => {
 
-      const result = (await partialPipeline(13)).toJS()
+      const result = (await partialPipeline(12)).toJS()
 
-      const isValid2 = await result.proxy.linkedTransfer( 
-        sellerEncodedParams,
-        bidderEncodedParams,
-        result.seller.jsProofOutputs,
-        result.bidder.jsProofOutputs,
-        result.seller.jsSignatures,
-        result.bidder.jsSignatures,
-        result.seller.jsProofData,
-        result.bidder.jsProofData,
-      )
-      assert( Boolean(isValid2['0']), 'valid trade not verified' )
-    
+      LOGGER.info('Seller Proof Outputs', result.seller.jsProofOutputs )
+      LOGGER.info('Bidder Proof Outputs', result.bidder.jsProofOutputs )
+
+      const sellerInputNoteParams = [
+        result.seller.zkToken.address, result.seller.jsSenderNote.noteHash
+      ]
+      LOGGER.info('Seller Input Note Params', sellerInputNoteParams)
+
+      const sellerInputNoteStatus = await result.ace.getNote( ...sellerInputNoteParams )
+      LOGGER.info('Seller Input Note Status', sellerInputNoteStatus)
+
+      try {
+        const txReceipt = await result.minedTx(
+          result.validator.linkedTransfer,
+          [
+            sellerEncodedParams,
+            bidderEncodedParams,
+            result.seller.jsProofOutputs,
+            result.bidder.jsProofOutputs,
+            result.seller.jsSignatures,
+            result.bidder.jsSignatures,
+            result.seller.jsProofData,
+            result.bidder.jsProofData,
+          ],
+        )
+      } catch(e) {
+        LOGGER.info('Trying to linkedTransfer a second time fails as expected.');
+      //assert( Boolean(isValid2['0']), 'valid trade not verified' )
+      } 
     },
   }]
 

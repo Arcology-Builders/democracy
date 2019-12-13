@@ -4,19 +4,10 @@
 const { Map } = require('immutable')
 const { AZTEC_TYPES: TYPES } = require('demo-aztec-lib')
 const { Logger } = require('demo-utils')
+const { assert } = require('chai')
 
 const { toChecksumAddress } = require('ethereumjs-util')
 const LOGGER = new Logger('departSP')
-
-const {
-  constants,
-  proofs: {
-    JOIN_SPLIT_PROOF,
-    MINT_PROOF,
-    BILATERAL_SWAP_PROOF,
-    DIVIDEND_PROOF,
-    PRIVATE_RANGE_PROOF,
-  } } = require('@aztec/dev-utils')
 
 depart(Map({
   departName : Map({
@@ -47,31 +38,44 @@ depart(Map({
 async ({deployed, compile, link, minedTx, chainId }) => {
   assert( chainId, `No chainId passed to departure. You should fix this in demo-depart.` )
   const ACE = await deployed( 'ACE' )
+  
   const pu = await deployed( 'ParamUtils' )
+  LOGGER.info( 'ParamUtils', pu.address )
+
+  await compile( 'TradeUtils', 'TradeUtils.sol' )
+  await link( 'TradeUtils', 'link', Map({
+    'ParamUtils' : 'deploy',
+  }) )
+  const tu = await deployed( 'TradeUtils' )
+  LOGGER.info( 'TradeUtils', tu.address )
+
+  // SwapProxy for one-sided and two-sided unlinked tr
+  await compile( 'SwapProxy', 'SwapProxy.sol' )
+  await link( 'SwapProxy', 'link', Map({
+    'ParamUtils' : 'deploy',
+    'TradeUtils' : 'deploy',
+  }) )
+  await deployed( 'SwapProxy',
+    {
+      ctorArgList: new Map({
+        _aceAddress : ACE.address,
+      }),
+    }
+  )
+
+  // TradeValidator for linked trades
   await compile( 'TradeValidator', 'TradeValidator.sol' )
   await link( 'TradeValidator', 'link', Map({
     'ParamUtils'     : 'deploy',
-  }) )
-  const tv = await deployed( 'TradeValidator',
-    { ctorArgList: new Map({ _chainId: chainId, _aceAddress: ACE.address }) })
-
-  LOGGER.info( 'TradeValidator', tv.address )
-  LOGGER.info( 'ParamUtils', pu.address )
-  await compile( 'SwapProxy', 'SwapProxy.sol' )
-  await link( 'SwapProxy', 'link', Map({
-    'ParamUtils'     : 'deploy',
-    'TradeValidator' : 'deploy',
-  }) )
-  const sp = await deployed( 'SwapProxy',
-    { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }),
-    })
-
-  const tvAddress = toChecksumAddress( await sp.tv()['0'] )
-  if (tvAddress !== tv.address) {
-    const sp = await deployed( 'SwapProxy',
-      { ctorArgList: new Map({ _aceAddress: ACE.address, _tvAddress: tv.address }),
-        force: true,
-      })
+    'TradeUtils'     : 'deploy',
+  }))
+  await deployed( 'TradeValidator',
+    {
+      ctorArgList: new Map({
+        _chainId    : chainId,
+        _aceAddress : ACE.address,
+      }),
     }
+  )
 
 })

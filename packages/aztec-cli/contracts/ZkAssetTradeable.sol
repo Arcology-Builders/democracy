@@ -1,25 +1,19 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-import "./ZkAsset.sol";
-import "./ACE/ACE.sol";
-import "./ERC20/ERC20Mintable.sol";
-import "./interfaces/IAZTEC.sol";
-import "./libs/LibEIP712.sol";
-import "./libs/ProofUtils.sol";
-import "./ZkAssetMintable.sol";
 import "./ParamUtils.sol";
+import "./TradeUtils.sol";
+import "./ERC1724/ZkAssetMintable.sol";
 
 /**
  * @title ZkAssetTradeable
  * @author Paul Pham
- * @dev A contract defining the standard interface and behaviours of a confidential tradeable asset. 
+ * @dev A contract defining the standard interface and behaviours of a confidential tradeable asset.
  * Inherits from ZkAssetMintable, only overrides confidentialTransfer
  * Copyright Democracy.js 2019. All rights reserved.
 **/
 
 contract ZkAssetTradeable is ZkAssetMintable {
+
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
     address public owner;
 
@@ -68,8 +62,12 @@ contract ZkAssetTradeable is ZkAssetMintable {
         address _transferer
     ) public {
 
-        bytes memory proofOutput = _proofOutputs.get(0); 
-        bytes memory formattedProofOutput = ParamUtils.sliceBytes(proofOutput, 32);
+        bytes memory proofOutput = TradeUtils.getProofOutput(_proofOutputs, 0);
+        bytes memory formattedProofOutput = ParamUtils.sliceBytes(
+            proofOutput,
+            32,
+            proofOutput.length
+        );
         bytes32 proofHash = keccak256(formattedProofOutput);
         
         require( ace.validateProofByHash(
