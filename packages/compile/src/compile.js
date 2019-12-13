@@ -253,6 +253,7 @@ compiles.Compiler = class {
     // Open contracts installed by npm -E zeppelin-solidity
     // Open contracts from democracy
    
+    assert( !source.startsWith(' '), `Source filename ${source} should not begin with a space.` )
     const flattener = new Flattener() 
     const { requestedInputs, findImports }
       = this.getRequestedInputsFromDisk(source, flattener)
