@@ -1,7 +1,7 @@
 {
   "name": "demo-aztec-cli",
   "type": "module",
-  "version": "0.4.11-alpha.0",
+  "version": "0.4.11-alpha.1",
   "description": "Democracy + AZTEC: issuing and trading zero-knowledge assets",
   "main": "index.js",
   "license": "MIT",
