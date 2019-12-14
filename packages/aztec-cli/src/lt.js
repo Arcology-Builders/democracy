@@ -54,7 +54,7 @@ lts.ltInitialState = Map({
   wallet,
 })
 
-const ltTvAddressTransform = createTransformFromMap({
+lts.ltTvAddressTransform = createTransformFromMap({
   func: async ({
     deployed,
   }) => {
@@ -76,7 +76,7 @@ const ltTvAddressTransform = createTransformFromMap({
   }),
 })
 
-const ltPrepareTransform = (() => {
+lts.ltPrepareTransform = (() => {
 
   const eachInputType = makeMapType(Map({
     address           : TYPES.ethereumAddress,
@@ -173,11 +173,11 @@ lts.ltEarlyLabeledTransforms =  [
 
 lts.ltPipeline = constructPtTransformOrderedMap([
   ...lts.ltEarlyLabeledTransforms,
-  [ 'tvAddress', ltTvAddressTransform  ],
+  [ 'tvAddress', lts.ltTvAddressTransform  ],
   [ 'ptPrep'   , ptPrepareTransform    ],
 ], [
   [ 'eip712'   , signTypedDataTransform ],
-  [ 'ltPrep'   , ltPrepareTransform     ],
+  [ 'ltPrep'   , lts.ltPrepareTransform     ],
   [ 'swap'     , swapTransform          ],
 ])
 
