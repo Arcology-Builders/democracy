@@ -1,6 +1,6 @@
-<img src="./images/logo-purple.svg" width="25px" alt="Democracy.js Purple Pipe Logo" style="float: left; position: relative;" align="right">
-<img src="./images/logo-blue.svg" width="25px" alt="Democracy.js Blue Pipe Logo" style="float: left; position: relative;" align="right">
-<img src="./images/logo-gold.svg" width="25px" alt="Democracy.js Gold Pipe Logo" style="float: left; position: relative;" align="right">
+<img src="./images/logo-purple.svg" width="25px" alt="Democracy.js Purple Pipe Logo"  align="right">
+<img src="./images/logo-blue.svg" width="25px" alt="Democracy.js Blue Pipe Logo"  align="right">
+<img src="./images/logo-gold.svg" width="25px" alt="Democracy.js Gold Pipe Logo" align="right">
 
 democracy
 =========
