@@ -1,3 +1,7 @@
+<img src="./images/logo-purple.svg" width="100px" alt="Democracy.js Purple Pipe Logo" style="float: left; position: relative;">
+<img src="./images/logo-blue.svg" width="100px" alt="Democracy.js Blue Pipe Logo" style="float: left; position: relative;">
+<img src="./images/logo-gold.svg" width="100px" alt="Democracy.js Gold Pipe Logo" style="float: left; position: relative;">
+
 democracy
 =========
 
