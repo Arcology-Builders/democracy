@@ -1,0 +1,37 @@
+{
+  "name": "demo-term",
+  "version": "0.4.9",
+  "description": "Console for Democracy, a distributed country",
+  "keywords": [
+    "ethereum",
+    "democracy",
+    "console"
+  ],
+  "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/console#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "directories": [
+    "bin"
+  ],
+  "bin": {
+    "demo": "./bin/demo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "exit 0"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "demo-depart": "^0.4.9"
+  },
+  "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
+}

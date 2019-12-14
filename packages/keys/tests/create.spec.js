@@ -53,26 +53,39 @@ describe('Remote account created from private key', () => {
   })
 
   it('can spend money sent to it', async () => {
-    await wallet.payTest({
-      eth         : eth,
-      weiValue    : toWei('0.01', 'ether'),
-      fromAddress : testAccounts[1],
-      toAddress   : result.address,
-      label       : 'Test -> new account',
-    })
+
+    try {
+      await wallet.payTest({
+        eth         : eth,
+        weiValue    : toWei('0.01', 'ether'),
+        fromAddress : testAccounts[1],
+        toAddress   : result.address,
+        label       : 'Test -> new account',
+      })
+    } catch(e) {
+      LOGGER.error(e.message)
+      assert(false, 'cannot spend from test account to new remote wallet')
+    }
+
     const bal = await eth.getBalance(result.address)
     assert( bal.eq(new BN(toWei('0.01', 'ether'))),
       `Balance not 0.01 ETH, instead ${bal.toString()}`)
     const { signerEth } = await wallet.prepareSignerEth({
       address: result.address, password: result.password })
-    await wallet.pay({
-      eth         : signerEth,
-      payAll      : true,
-      overage     : '3350000',
-      fromAddress : result.address,
-      toAddress   : testAccounts[1],
-      label       : 'New account -> test account',
-    })
+
+    try {
+      await wallet.pay({
+        eth         : signerEth,
+        payAll      : true,
+        overage     : '3350000',
+        fromAddress : result.address,
+        toAddress   : testAccounts[1],
+        label       : 'New account -> test account',
+      })
+    } catch(e) {
+      LOGGER.error(e.message)
+      assert(false, 'cannot spend back from new remote wallet to test account')
+    }
   }) 
 
   after(() => {

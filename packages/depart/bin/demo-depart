@@ -3,31 +3,54 @@
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
 
-const { Map }   = require('immutable')
-const fs = require('fs')
-const path = require('path')
+const { Map }    = require('immutable')
+const fs         = require('fs')
+const path       = require('path')
+const { assert } = require('chai')
 const { wallet } = require('demo-keys')
-const { getConfig, Logger } = require('demo-utils')
-const { runTransforms, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
-const { departTransform, argListTransform } = require('demo-depart')
-const { createTransform } = require('demo-state')
-const LOGGER = new Logger('demo-depart')
+const { getConfig, Logger }
+                 = require('demo-utils')
+const {
+  runTransforms, deployerTransform, TYPES, assembleCallablePipeline,
+  createTransform,
+}                = require('demo-transform')
+const { departTransform, argListTransform }
+                 = require('demo-depart')
 
-let departOptions
+const LOGGER     = new Logger('demo-depart')
+
+let departOptionsMap
 let departCallback
-const depart = (options, callback) => {
-  departOptions = options
-  departCallback = callback
+let departCalled = false
+
+const validateTypesValuesMap = (obj) => {
+  assert( Map.isMap(obj),
+         `optionsMap should be an Immutable Map of { 'type', 'value' }` )
+  assert( obj.reduce((s,v,k) => {
+    const type   = v.get('type')
+    const passes = type(v.get('value'))
+    assert( passes,
+           `Arg ${v.get('value')} with name ${k} does not have type ${type.typeName}` )
+    return Boolean(s || passes)
+  }, true), `optionsMap has inconsistent types.` )
+}
+
+const depart = (optionsMap, callback) => {
+  validateTypesValuesMap(optionsMap)
+  departOptionsMap  = optionsMap
+  departCallback    = callback
+  departCalled      = true
 }
 
 const m0 = argListTransform
 
+// Default values to satisfy the standard plugins, can be overridden in departure file
 const initialState = Map({
   'departFileName'   : 'depart.js', // --departFileName
   'testValueETH'     : '0.1'      ,
   'testAccountIndex' : 0          ,
-  'unlockSeconds'    : 30,
-  'sourcePathList'   : [],
+  'unlockSeconds'    : 30         ,
+  'sourcePathList'   : []         ,
 })
 
 // Insert this custom mixin to read in a departure file and save its name
@@ -36,46 +59,68 @@ const m1 = createTransform({
   func: async ({ departFileName }) => {
     LOGGER.info(`Depart filename ${departFileName}`)
     const departFile = fs.readFileSync(path.join(process.cwd(), departFileName)).toString()
+    // We ignore any return value in the departFile
     eval(departFile)
 
     return Map({
-      departFile : departFile,
-      ...departOptions,
+      departFile    : departFile,
     })
   },
   inputTypes: Map({
-    departFileName: TYPES.string,
+    departFileName : TYPES.string,
   }),
   outputTypes: Map({
-    departFile: TYPES.string,
-  }),
+    departFile     : TYPES.string,
+  })
 })
 
 const m2 = deployerTransform
 
 const m3 = departTransform
 
-const departFunc = createTransform({
-  func: async function({
-    bm, compile, link, deploy, deployed, minedTx, deployerEth, deployerAddress, departFile
-  }) {
-    const result = await departCallback({...arguments[0]})
-    wallet.shutdownSync()
-    return new Map({ 'result': result })
-  },
-  inputTypes: Map({
-    compile: TYPES['function'],
-    link: TYPES['function'],
-    deploy: TYPES['function'],
-    deployed: TYPES['function'],
-    minedTx: TYPES['function'],
-    deployerEth: TYPES.ethereumSigner,
-    deployerAddress: TYPES.ethereumAddress,
-    departFile: TYPES.string,
-  }),
-  outputTypes: Map({
-    result: TYPES.any,
-  })
+const inputTypes = Map({
+  chainId         : TYPES.string,
+  compile         : TYPES['function'],
+  link            : TYPES['function'],
+  deploy          : TYPES['function'],
+  deployed        : TYPES['function'],
+  minedTx         : TYPES['function'],
+  deployerEth     : TYPES.ethereumSigner,
+  deployerAddress : TYPES.ethereumAddress,
+  departFile      : TYPES.string,
 })
 
-runTransforms( [ m0, m1, m2, m3, departFunc ], initialState )
+const inputArgs = inputTypes.keys()
+
+const placeHolderTransform = (placeHolderTypesValues) => createTransform({
+  func: async ({ }) => {
+    const valuesMap = placeHolderTypesValues.map((v,k) => v.get('value'))
+    return valuesMap
+  },
+  inputTypes: Map({}),
+  outputTypes: placeHolderTypesValues.map((v,k) => v.get('type')),
+})
+
+const callablePipeline1 = assembleCallablePipeline( [m0, m1] )
+const pipeTail = callablePipeline1.pipeline
+callablePipeline1( initialState ).then((prevState) => {
+
+  const depart = createTransform({
+    func: async function({ ...inputArgs }) {
+      const result = await departCallback({...arguments[0]})
+      wallet.shutdownSync()
+      return new Map({ 'result': result })
+    },
+    inputTypes: inputTypes.mergeDeep(departOptionsMap.map((v,k) => v.get('type'))),
+    outputTypes: Map({
+      result: TYPES.any,
+    })
+  })
+
+  // TODO: Improve this way of joining two pipelines, and injecting departOptionsMap
+  const prevTypesValuesMap = callablePipeline1.pipeline.mergedOutputTypes.map((v,k) => Map({ type: v, value: prevState.get(k) }))
+  validateTypesValuesMap(prevTypesValuesMap)
+  const mp = placeHolderTransform(prevTypesValuesMap.mergeDeep(departOptionsMap))
+  const callablePipeline2 = assembleCallablePipeline( [ mp, m2, m3, depart ] ) 
+  return callablePipeline2(Map({}))
+})

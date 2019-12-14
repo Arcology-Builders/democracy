@@ -1,0 +1,30 @@
+{
+  "name": "demo-tests",
+  "version": "0.4.9",
+  "description": "Testing helpers and utilities for Democracy",
+  "keywords": [
+    "democracy.js",
+    "ethereum",
+    "javascript",
+    "mocha",
+    "testing"
+  ],
+  "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/test#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "files": [
+    "src",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  }
+}

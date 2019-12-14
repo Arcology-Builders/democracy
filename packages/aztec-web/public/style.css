@@ -1,0 +1,94 @@
+.body {
+  font-family: "Exo";
+}
+
+.token {
+  font-family: "Exo";
+  font-size: 24px;
+  width: 400px;
+  background-color: lightgray;
+  padding: 5px;
+  margin: 5px;
+}
+
+.contactAddress {
+  width: 300px;
+  float: left;
+  position: relative;
+}
+
+.contactPublicKey {
+  width: 800px;
+  float: left;
+  position: relative;
+}
+
+.contactRow::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.contact {
+  font-family: "Exo";
+  font-size: 11px;
+}
+
+.contactSelected {
+  background-color: cadetblue;
+}
+
+.tokenType {
+  font-size: 10px;
+}
+
+.note {
+  width: 100px;
+  height: 20px;
+  margin: 5px;
+}
+
+.noteSelected {
+  border: 1px solid #859900;
+}
+
+.noteDetail {
+  position: fixed;
+  float: right;
+  height: 100%;
+}
+
+.tokenAddress {
+  background-color: skyblue;
+  padding: 5px;
+  margin: 5px;
+  border-width: 0px;
+  width: 150px;
+}
+
+.loginRow::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.login {
+  font-family: "Exo";
+  font-size: 11px;
+}
+
+.loginAddress {
+  width: 300px;
+  float: left;
+  position: relative;
+}
+
+.loginBalance {
+  width: 300px;
+  float: left;
+  position: relative;
+}
+
+.loginSelected {
+  border: 1px solid #859900;
+}

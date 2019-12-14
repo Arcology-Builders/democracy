@@ -2,7 +2,7 @@ const { assert } = require('chai')
 const { Map } = require('immutable')
 const { isAccount } = require('demo-keys')
 const { Logger } = require('demo-utils')
-const { DEMO_TYPES: TYPES } = require('demo-transform')
+const { TYPES } = require('demo-transform')
 const LOGGER = new Logger('depart/deploy.spec')
 const { deployerTransform, createArgListTransform, runTransforms } = require('demo-transform')
 

@@ -1,6 +1,6 @@
 {
   "name": "demo-keys",
-  "version": "0.3.7",
+  "version": "0.4.9",
   "description": "Key management for Democracy, a minimalist framework for distributed countries",
   "directories": {
     "tests": "tests"
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "chai-as-promised": "7.1.1",
-    "demo-client": "^0.3.7",
-    "demo-utils": "^0.3.7",
+    "demo-client": "^0.4.9",
+    "demo-utils": "^0.4.9",
     "ethjs": "0.4.0",
     "ethjs-provider-signer": "0.1.4",
     "ethjs-signer": "0.1.1",
@@ -21,9 +21,7 @@
     "web3-utils": "1.0.0-beta.48"
   },
   "devDependencies": {
-    "demo-tools": "0.3.3-alpha.0",
-    "webpack": "4.29.5",
-    "webpack-dev-server": "3.1.14"
+    "demo-tools": "^0.4.4"
   },
   "scripts": {
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
@@ -50,5 +48,5 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "homepage": "https://github.com/invisible-college/democracy#readme",
-  "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
+  "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
 }

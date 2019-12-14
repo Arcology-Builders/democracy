@@ -1,10 +1,10 @@
-const { runTransforms } = require('demo-transform')
-const { createTransform } = require('demo-state')
+'use strict'
 const { Map } = require('immutable')
 const chai = require('chai')
 chai.use(require('chai-as-promised'))
-
 const expect = chai.expect
+
+const { runTransforms, createTransform } = require('demo-transform')
 
 describe('Pipeline errors', () => {
 
