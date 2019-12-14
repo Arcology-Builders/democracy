@@ -1,6 +1,6 @@
 {
   "name": "demo-transform",
-  "version": "0.4.9",
+  "version": "0.4.10-alpha.0",
   "description": "Transform pipeline for a distributed country on Ethereum",
   "directories": {
     "tests": "tests"
