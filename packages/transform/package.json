@@ -20,6 +20,7 @@
     "demo-tools": "^0.4.4"
   },
   "scripts": {
+    "prepare": "yarn build",
     "init": "yarn build",
     "clean": "rimraf src/*.js *.js tests/*.js",
     "watch": "tsc --build . --watch",
