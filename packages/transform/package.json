@@ -13,7 +13,8 @@
     "@types/chai-as-promised": "^7.1.2",
     "@types/mocha": "^5.2.7",
     "@types/prop-types": "^15.7.3",
-    "demo-utils": "^0.4.9"
+    "demo-utils": "^0.4.9",
+    "eslint-config-typescript": "^3.0.0"
   },
   "devDependencies": {
     "demo-tools": "^0.4.4"
@@ -25,7 +26,7 @@
     "build": "tsc --build .",
     "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
     "lint": "exit 0",
-    "lint:fix": "eslint --fix -c ../../.eslintrc.json *.js tests/*.js src/*.js",
+    "lint:fix": "eslint --ext .ts src tests index.ts --fix",
     "cov": ". ../../.covenv; ../../node_modules/nyc/bin/nyc.js --reporter=lcov --reporter=text-summary yarn test && ../../node_modules/nyc/bin/nyc.js reporter --reporter=text-lcov | npx coveralls"
   },
   "repository": {
