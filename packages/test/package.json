@@ -1,6 +1,6 @@
 {
   "name": "demo-tests",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Testing helpers and utilities for Democracy",
   "keywords": [
     "democracy.js",
