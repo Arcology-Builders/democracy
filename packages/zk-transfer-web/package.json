@@ -21,7 +21,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "react:test": "react-scripts test",
+    "test": "echo 're-enable when you have jest tests' && exit 0",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
