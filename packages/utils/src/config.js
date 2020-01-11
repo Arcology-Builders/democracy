@@ -46,7 +46,7 @@ const checkEnv = (config, vars=[]) => {
                            && window[v])) {
       return
     } else { 
-      LOGGER.errorAndThrow(`Environment variable ${v} needed but not defined.`)
+      console.error(`Environment variable ${v} needed but not defined.`)
     }
   })
   return config
@@ -155,16 +155,16 @@ const getEnvVar = (varName) => {
  */
 configs.getConfig = (debugPrint) => {
   const env = getEnvVar('NODE_ENV').toUpperCase()
-  debugPrint && LOGGER.debug(`NODE_ENV=${env}`)
+  debugPrint && console.log(`NODE_ENV=${env}`)
   let config = lazyEval(env)
   if (config) {
     return config
   } else {
-    debugPrint && LOGGER.debug('NODE_ENV not defined, using TEST')
+    debugPrint && console.warn('NODE_ENV not defined, using TEST')
     return lazyEval('TEST')
   }
 }
 
-const LOGGER = new Logger('config', [ 'warn', 'error' ], configs.getConfig)
+configs.LOGGER = new Logger('config', [ 'warn', 'error' ], configs.getConfig)
 
 module.exports = configs
