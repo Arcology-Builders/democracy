@@ -33,9 +33,14 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.7.0",
     "@babel/runtime-corejs2": "^7.4.3",
     "demo-tools": "^0.3.3-alpha.0",
-    "demo-utils": "^0.3.7"
+    "babel-loader": "^8.0.6",
+    "demo-utils": "^0.4.9",
+    "web3": "^1.2.4",
+    "webpack": "^4.41.5",
+    "webpack-dev-server": "^3.10.1"
   },
   "devDependencies": {
     "webpack": "4.29.4",
