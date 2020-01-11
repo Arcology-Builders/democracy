@@ -1,6 +1,7 @@
 import React from 'react';
+import { shortenAddress } from '../helpers/account';
 
-const Header = () => {
+const Header = ({ thisAddress }: { thisAddress: string }) => {
     return (
         <header className="bg-white w-100 flex justify-between items-center shadow p-5">
             <div className="user-info flex items-center flex-1" style={{left: 0}}>
@@ -17,7 +18,11 @@ const Header = () => {
                         </li>
                         <li className="flex items-center">
                             <img src="/assets/logo-ether.png" className="icons" alt="ether"/>
-                            <span>0x291F1ic810…2BgSdifB7</span>
+                            <a href="https://rinkeby.etherscan.io" 
+                                rel="noopener noreferrer"
+                                target="_blank">
+                                { shortenAddress(thisAddress) }
+                            </a>
                         </li>
                         <li className="flex items-center">
                             <span className="bg-green icons"></span>
