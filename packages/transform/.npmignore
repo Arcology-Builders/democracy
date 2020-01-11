@@ -1,1 +1,6 @@
 *.ts
+tsconfig*.json
+db
+publish.sh
+tests
+*.log

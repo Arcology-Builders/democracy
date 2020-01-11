@@ -5551,6 +5551,11 @@ eslint-config-react-app@^5.0.0:
   dependencies:
     confusing-browser-globals "^1.0.9"
 
+eslint-config-typescript@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-typescript/-/eslint-config-typescript-3.0.0.tgz#13e0627f8c5aa8d58b5a01eeddd0a726a259c4b5"
+  integrity sha512-CwC2cQ29OLE1OUw0k+Twpc6wpCdenG8rrErl89sWrzmMpWfkulyeQS1HJhhjU0B3Tb4k41zdei4LtX26x5m60Q==
+
 eslint-import-resolver-node@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.2.tgz#58f15fb839b8d0576ca980413476aab2472db66a"
