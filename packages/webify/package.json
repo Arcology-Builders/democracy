@@ -7,6 +7,8 @@
   "scripts": {
     "start:dev": "NODE_ENV=DEVELOPMENT webpack-dev-server --open --mode development --env.NODE_ENV=DEVELOPMENT",
     "start:test": "NODE_ENV=TEST webpack-dev-server --open --mode production --env.NODE_ENV=TEST",
+    "start:rinkeby": "NODE_ENV=TEST webpack-dev-server --open --mode production --env.NODE_ENV=RINKEBY",
+    "start:mainnet": "NODE_ENV=TEST webpack-dev-server --open --mode production --env.NODE_ENV=MAINNET",
     "build": "./build.sh",
     "sizes": "webpack-bundle-size-analyzer logs/webpack.detailed.log 2>&1 | tee logs/webpack.size.log",
     "clean": "rimraf -f dist"
