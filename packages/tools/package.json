@@ -1,6 +1,6 @@
 {
   "name": "demo-tools",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Dev dependencies for other Democracy packages, not publishable",
   "keywords": [
     "devtools",

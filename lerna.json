@@ -7,5 +7,5 @@
     "--no-optional"
   ],
   "useWorkspaces": true,
-  "version": "0.4.11-alpha.1"
+  "version": "0.5.0"
 }

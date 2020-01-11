@@ -1,6 +1,6 @@
 {
   "name": "demo-webify",
-  "version": "0.4.11-alpha.0",
+  "version": "0.5.0",
   "description": "Generic tools to webify a distributed country",
   "keywords": "democracy ethereum webpack",
   "author": "Paul Pham",
@@ -18,16 +18,16 @@
   "private": true,
   "dependencies": {
     "@aztec/secp256k1": "^1.0.1",
-    "demo-client": "^0.4.9",
-    "demo-contract": "^0.4.9",
-    "demo-depart": "^0.4.11-alpha.0",
-    "demo-keys": "^0.4.9",
-    "demo-utils": "^0.4.9",
-    "democracy.js": "^0.4.11-alpha.0"
+    "demo-client": "^0.5.0",
+    "demo-contract": "^0.5.0",
+    "demo-depart": "^0.5.0",
+    "demo-keys": "^0.5.0",
+    "demo-utils": "^0.5.0",
+    "democracy.js": "^0.5.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
-    "demo-tools": "^0.4.4",
+    "demo-tools": "^0.5.0",
     "webpack": "4.29.4"
   },
   "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
