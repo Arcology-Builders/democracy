@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict'
-const { Logger, fromJS, toJS, getNetwork, getConfig } = require('demo-utils')
+const { Logger, fromJS, toJS, getNetwork } = require('demo-utils')
 const { Linker } = require('demo-contract')
 const LOGGER = new Logger('link.bin')
 
@@ -16,6 +16,8 @@ const main = async({contractName, linkId}) => {
   const result = await l.link(contractName, linkId)
   LOGGER.info(result)
 }
+
+LOGGER.info('hello')
 
 if (require.main === module) {
   LOGGER.info(process.argv)

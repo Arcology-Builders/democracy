@@ -2,16 +2,17 @@
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
 
-const { Map }   = require('immutable')
-const fs = require('fs')
-const path = require('path')
+const { Map }    = require('immutable')
+const fs         = require('fs')
+const path       = require('path')
 const { wallet } = require('demo-keys')
 const { getConfig, Logger } = require('demo-utils')
-const { runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
+const {
+  runTransforms, createArgListTransform, deployerTransform, TYPES, createTransform
+}                = require('demo-transform')
 const { departTransform } = require('./departure')
-const LOGGER = new Logger('depart/top')
-const assert = require('chai').assert
+const LOGGER     = new Logger('depart/top')
+const assert     = require('chai').assert
 
 let departInputState = null
 let departCallback = null
@@ -112,9 +113,9 @@ departs.top = async (inputState, createCompiler) => {
  *   in a departure. If empty, defaults to departs.createEmptyCompiler
  */
 departs.begin = async (inputState) => {
-  const initalState = Map({
+  const initialState = Map({
     'departFileName'   : 'depart.js', // can be override on command-line --departFileName
-    'testValueEth'     : '0.1'      ,
+    'testValueETH'     : '0.1'      ,
     'testAccountIndex' : 0          ,
     'unlockSeconds'    : 30,
     'sourcePathList'   : [],
@@ -122,7 +123,7 @@ departs.begin = async (inputState) => {
   return (await runTransforms(
     [
       departs.argListTransform,
-      m1, m2, m3, 
+      m1, m2, 
       m4, departs.callbackTransform
     ],
     initialState,

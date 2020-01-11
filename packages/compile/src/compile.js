@@ -253,6 +253,7 @@ compiles.Compiler = class {
     // Open contracts installed by npm -E zeppelin-solidity
     // Open contracts from democracy
    
+    assert( !source.startsWith(' '), `Source filename ${source} should not begin with a space.` )
     const flattener = new Flattener() 
     const { requestedInputs, findImports }
       = this.getRequestedInputsFromDisk(source, flattener)
@@ -282,8 +283,13 @@ compiles.Compiler = class {
     const solc = require('solc')
     const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
     if (outputs.errors) {
-      LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
-      throw new Error(JSON.stringify(outputs.errors))
+      const showStopper = outputs.errors.reduce((s, v) => (v['type'] === 'Warning') ? s : true, false)
+      if (showStopper) {
+        LOGGER.error('ERRORS', JSON.stringify(outputs.errors))
+        throw new Error(JSON.stringify(outputs.errors))
+      } else {
+        LOGGER.warn('WARNINGS', JSON.stringify(outputs.errors))
+      }
     }
     assert.ok(outputs.contracts, `Expected compile output for requested sources`)
     

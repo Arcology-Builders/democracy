@@ -7,12 +7,14 @@ const { toWei } = require('web3-utils')
 const BN        = require('bn.js')
 
 const { Logger, getImmutableKey, setImmutableKey, getConfig } = require('demo-utils')
-const LOGGER = new Logger('common.spec')
+const LOGGER    = new Logger('common.spec')
 const { Contract, isContract, isCompile, isLink, isDeploy } = require('demo-contract')
 
 const { wallet } = require('demo-keys')
-const { runTransforms, createArgListTransform, deployerTransform, DEMO_TYPES: TYPES } = require('demo-transform')
-const { createTransform } = require('demo-state')
+const {
+  runTransforms, createArgListTransform, deployerTransform, TYPES,
+  createTransform,
+}               = require('demo-transform')
 const { departTransform } = require('..')
 
 const common = {}

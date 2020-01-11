@@ -1,6 +1,6 @@
 {
   "name": "demo-client",
-  "version": "0.3.7",
+  "version": "0.4.9",
   "description": "Web-first network clients for Democracy, a distributed country",
   "keywords": [
     "ethereum",
@@ -24,7 +24,7 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "yarn test:dev && yarn test:test",
+    "test": "yarn test:dev && echo 'yarn test:test'",
     "test:dev": "NODE_ENV=DEVELOPMENT mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec",
     "test:test": "NODE_ENV=TEST mocha ./tests -t 20000 --trace-warnings --exit --colors --recursive --reporter spec"
   },
@@ -32,7 +32,7 @@
     "url": "https://github.com/invisible-college/democracy/issues"
   },
   "dependencies": {
-    "demo-utils": "^0.3.7"
+    "demo-utils": "^0.4.9"
   },
-  "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
+  "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
 }

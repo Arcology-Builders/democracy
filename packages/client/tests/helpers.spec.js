@@ -9,7 +9,7 @@ describe( 'client helper', () => {
   let outputter
 
   before( async () => {
-    inout = await createInOut({ autoConfig: true})
+    inout = await createInOut({ autoConfig: true })
     inputter = inout.inputter
     outputter = inout.outputter
     // Reset it so we can see the change

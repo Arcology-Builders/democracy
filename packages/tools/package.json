@@ -1,6 +1,6 @@
 {
   "name": "demo-tools",
-  "version": "0.3.3-alpha.0",
+  "version": "0.4.4",
   "description": "Dev dependencies for other Democracy packages, not publishable",
   "keywords": [
     "devtools",
@@ -29,6 +29,7 @@
   "dependencies": {
     "chai": "4.2.0",
     "coveralls": "^3.0.4",
+    "rimraf": "^3.0.0",
     "typography": "^0.16.19",
     "typography-theme-irving": "^0.16.19"
   },
@@ -49,8 +50,8 @@
     "react": "16.8.2",
     "react-dom": "16.8.2",
     "taffydb": "^2.7.3",
-    "webpack": "4.29.4",
-    "webpack-cli": "3.2.1",
-    "webpack-dev-server": "3.1.14"
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
   }
 }

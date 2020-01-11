@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+const { begin } = require('demo-depart')
+const { Map } = require('immutable')
+const { parsed } = require('dotenv').config()
+const { createTransform } = require('demo-state')
+const { runTransforms, TYPES } = require('demo-transform')
+
+const input = process.stdin
+input.setEncoding('utf-8')
+
+const doTheThing = async () => {
+  let state = await begin(Map({
+    deployerAddress:  parsed['DEPLOYER_ADDRESS'] ,
+    deployerPassword: parsed['DEPLOYER_PASSWORD'],
+    sourcePathList: ['../../node_modules/openzeppelin-solidity/contracts'],
+  }))
+
+  console.log("Welcome to Democracy Console")
+  process.stdout.write('> ')
+
+  input.on('data', async (data) => {
+    if (data === 'exit\n') { process.exit() }
+    try {
+      const transform = createTransform({
+        func: async ({ deployed, minedTx, result }) => {
+          return Map({
+            result: eval(data)
+          })
+        },
+        inputTypes: Map({
+          deployed: TYPES['function'],
+          minedTx: TYPES['function'],
+          result: TYPES.any,
+        }),
+        outputTypes: Map({
+          result: TYPES.any,
+        }),
+      })
+      state = await runTransforms( [transform], state )
+      const result = (state.get('result').__proto__ === Promise.prototype) ?
+        await state.get('result') : state.get('result')
+      console.log(result)
+    } catch(e) {
+      console.error(e)
+    }
+    process.stdout.write('> ')
+  })
+}
+
+doTheThing()

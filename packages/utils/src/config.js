@@ -40,7 +40,7 @@ const createEnv = ({ ethURL, dbURL, shhURL, gl, gp, db, lo, ll, da, dp }) => {
   }
 }
 
-const checkEnv = (config, vars) => {
+const checkEnv = (config, vars=[]) => {
   vars.forEach((v) => {
     if (process.env[v] || (typeof window != 'undefined' && window.document
                            && window[v])) {

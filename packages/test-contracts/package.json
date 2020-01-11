@@ -1,6 +1,6 @@
 {
   "name": "demo-test-contracts",
-  "version": "0.2.7-alpha.7",
+  "version": "0.4.2-alpha.1",
   "description": "Test contracts for Democracy, a distributed country framework",
   "keywords": [
     "democracy",
@@ -33,5 +33,5 @@
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"
   },
-  "gitHead": "01e8c8245aa3b485b2db293e851dc7ab76d98c6d"
+  "gitHead": "9d69b44230dedbc83369754a50321d3138f9301a"
 }
