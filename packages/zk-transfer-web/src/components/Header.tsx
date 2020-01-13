@@ -1,7 +1,10 @@
 import React from 'react';
-import { shortenAddress } from '../helpers/account';
 
-const Header = ({ thisAddress }: { thisAddress: string }) => {
+type HeaderProps = {
+    thisAddress: string;
+}
+
+const Header = ({ thisAddress }: HeaderProps) => {
     return (
         <header className="bg-white w-100 flex justify-between items-center shadow p-5">
             <div className="user-info flex items-center flex-1" style={{left: 0}}>
@@ -21,7 +24,7 @@ const Header = ({ thisAddress }: { thisAddress: string }) => {
                             <a href="https://rinkeby.etherscan.io" 
                                 rel="noopener noreferrer"
                                 target="_blank">
-                                { shortenAddress(thisAddress) }
+                                { thisAddress }
                             </a>
                         </li>
                         <li className="flex items-center">

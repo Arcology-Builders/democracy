@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 
 import Header from "../components/Header";
 import Card from "../components/Card";
@@ -54,15 +54,12 @@ const MakeTransaction = () => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
+
   const demo: any = useContext(Democracy);
-  console.log('The demo before context:', demo);
-  useEffect(() => {
-    console.log('Demo context:', demo);
-  })
 
   return (
     <>
-      <Header thisAddress={demo.thisAddress || '#'} />
+      <Header thisAddress={demo.thisAddress || 'No Ethereum address found.'} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>

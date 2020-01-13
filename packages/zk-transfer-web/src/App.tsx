@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import _ from 'lodash';
 
 // @ts-ignore
 // import { Provider, useSelector, useDispatch } from "react-redux";
@@ -13,7 +14,15 @@ type AppProp = {
 };
 
 function App({ demo } : AppProp) {
-  // await api.init(demo);
+  const [chainId, setDemoChain] = useState(demo.chainId);
+
+  useEffect(() => {
+    if (_.isUndefined(chainId))
+      demo.clientInit()
+        // .then(() => { console.log(chainId) })
+        .then(() => setDemoChain(demo.chainId));
+  });
+
   return (
     <Democracy.Provider value={demo}>
       <div className="App">
