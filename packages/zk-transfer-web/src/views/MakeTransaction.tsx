@@ -59,7 +59,7 @@ const MakeTransaction = () => {
 
   return (
     <>
-      <Header thisAddress={demo.thisAddress || 'No Ethereum address found.'} />
+      <Header thisAddress={demo.thisAddress} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>

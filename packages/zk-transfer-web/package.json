@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@types/jest": "^24.0.15",
-    "@types/lodash": "^4.14.149",
     "@types/react": "^16.8.21",
     "@types/react-dom": "^16.8.4",
     "lodash": "^4.17.15",
@@ -20,7 +19,7 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "build": "react-scripts build",
     "react:test": "react-scripts test",
     "test": "echo 're-enable when you have jest tests' && exit 0",

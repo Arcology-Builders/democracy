@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import _ from 'lodash';
 
 // @ts-ignore
 // import { Provider, useSelector, useDispatch } from "react-redux";
@@ -17,10 +16,10 @@ function App({ demo } : AppProp) {
   const [chainId, setDemoChain] = useState(demo.chainId);
 
   useEffect(() => {
-    if (_.isUndefined(chainId))
+    if (!chainId) {
       demo.clientInit()
-        // .then(() => { console.log(chainId) })
         .then(() => setDemoChain(demo.chainId));
+    }
   });
 
   return (
