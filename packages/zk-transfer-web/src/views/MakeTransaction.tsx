@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import Header from "../components/Header";
 import Card from "../components/Card";
@@ -6,6 +6,8 @@ import TokenInput, { CircularText, TokenGroup } from "../components/Token";
 import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
+import Democracy from "../components/context/Democracy";
+
 
 type User = {
   name: string;
@@ -53,9 +55,11 @@ const MakeTransaction = () => {
     }, 3000);
   };
 
+  const demo: any = useContext(Democracy);
+
   return (
     <>
-      <Header />
+      <Header thisAddress={demo.thisAddress} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>

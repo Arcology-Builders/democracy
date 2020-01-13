@@ -46,7 +46,7 @@ const TokenInput = (props: TokenPropType) => {
         <span className="px-1 text-base">{props.secondValue}</span>
       ) : (
         <button
-          className="appearance-none"
+          className="appearance-none focus:bg-gray-200 focus:outline-none"
           onClick={() => {
             setEditMode(!editMode);
             props.onSend();
