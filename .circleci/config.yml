@@ -4,8 +4,9 @@ jobs:
     docker:
       - image: cryptogoth/node-circle-test:663bbd5
     steps:
-      #- run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files | xargs tar -c | tar -xv -C /root/project --exclude "d*" --exclude "logs"
-      - checkout
+      #- run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files
+      - run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files | xargs tar -c | tar -xv -C /root/project
+      #- checkout
       - run: pwd && ls
       #- restore_cache:
       #  keys:

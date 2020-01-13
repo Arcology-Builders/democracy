@@ -2,14 +2,13 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link href="https://fonts.googleapis.com/css?family=Exo|Vollkorn" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
-      window.NODE_ENV = 'TEST'
+      window["RINKEBY.DB_URL"] = "https://ganache.arcology.nyc:7001"
+      window.INFURA_PROJECT_ID = "590812d0023e4798aba2a764c477f504"
+      window.NODE_ENV = 'RINKEBY'
     </script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/aztec.js@0.9.1/dist/bundle.web.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@invisible-college/keythereum@1.1.3/dist/keythereum-1.0.4.min.js"></script>
-    <!--
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/demo-webify@0.3.2-alpha.3/dist/democracy.0.3.2_alpha.3.min.js"></script>
-    -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/demo-webify@0.3.4-alpha.2/dist/democracy.0.3.4_alpha.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/demo-webify@0.5.1-alpha.0/dist/democracy.0.5.1_alpha.0.min.js"></script>
 </head>
 <body>
  <!-- 
@@ -24,18 +23,7 @@
   </div>
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', async () => {
-      await demo.initFS({})
-      await demo.init({ unlockSeconds: 100000 }) // keep unlocked as long as we cache password
-		  await demo.prepareCachedWallet({})
-      await demo.prepareErasePassword({
-        erasePasswordSeconds: 100000, // 100,000 seconds is 27.77 hours
-        erasePasswordCallback: () => { console.log("Erasing password") },
-      })
-      await demo.prepareUpdateWhileCached({
-        updateSeconds: 10,
-        updateCallback: (secondsLeft) => { console.log(`${secondsLeft} seconds left`) },
-      })
-      await api.init(demo)
+      await demo.clientInit()
     })
   </script>
 </body>

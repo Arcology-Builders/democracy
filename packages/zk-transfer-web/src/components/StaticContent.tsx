@@ -52,7 +52,7 @@ const StaticContent = () => {
               src="/assets/ethereum-democracy.png"
               alt="ethereum-democracy"
             />
-            <img src="/assets/RealBlocks -logo.png" alt="RealBlocks-logo" />
+            <img src="/assets/realblocks-logo.png" alt="RealBlocks logo" />
           </div>
           <img src="/assets/aztec-logo.png" alt="aztec-logo" className="py-2" />
         </div>
