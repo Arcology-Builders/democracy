@@ -22,11 +22,7 @@
     "demo-rest": "^0.5.1-alpha.0",
     "demo-transform": "^0.5.1-alpha.0",
     "eslint-utils": "1.4.2",
-    "express": "^4.17.1",
-    "openzeppelin-solidity": "2.2.0",
-    "react": "16.9.0",
-    "react-dom": "16.9.0",
-    "react-scripts": "3.1.0"
+    "openzeppelin-solidity": "2.2.0"
   },
   "publishConfig": {
     "access": "public"
@@ -34,9 +30,7 @@
   "devDependencies": {
     "chai": "4.2.0",
     "demo-tests": "^0.5.0",
-    "dotenv": "7.0.0",
-    "pm2": "3.5.1",
-    "webpack-cli": "3.3.5"
+    "dotenv": "7.0.0"
   },
   "scripts": {
     "depart:dev": "NODE_ENV=DEVELOPMENT yarn run demo-depart",
