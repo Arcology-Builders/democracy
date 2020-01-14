@@ -79,16 +79,17 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
   
   // Parameters for an AZTEC participant
   const subStateInputTypes = Map({
-    senderAddress      : TYPES.ethereumAddress,
-    senderPublicKey    : TYPES.aztecPublicKey,
-    senderPassword     : TYPES.string,
-    senderNoteHash     : TYPES.aztecNoteHash,
-    zkTokenAddress     : TYPES.ethereumAddress,
-    receiverAddress    : TYPES.ethereumAddress,
-    receiverPublicKey  : TYPES.aztecPublicKey,
-    transfererAddress  : TYPES.ethereumAddress,
-    transferAmount     : TYPES.bn.opt,
-    transferAll        : TYPES.boolean.opt,
+    senderAddress       : TYPES.ethereumAddress,
+    senderPublicKey     : TYPES.aztecPublicKey,
+    senderPassword      : TYPES.string,
+    senderNoteHash      : TYPES.aztecNoteHash,
+    zkTokenAddress      : TYPES.ethereumAddress,
+    receiverAddress     : TYPES.ethereumAddress,
+    receiverPublicKey   : TYPES.aztecPublicKey,
+    receiverPrivateNote : TYPES.aztecPrivateNote.opt,
+    transfererAddress   : TYPES.ethereumAddress,
+    transferAmount      : TYPES.bn.opt,
+    transferAll         : TYPES.boolean.opt,
   })
  
   const commonTypes = Map({
@@ -141,6 +142,7 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
       zkTokenAddress,
       receiverAddress,
       receiverPublicKey,
+      receiverPrivateNote,
       transfererAddress,
       transferAmount,
       transferAll,
@@ -158,12 +160,6 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
       senderAccount.get('privatePrefixed') : senderAccount.privatePrefixed
     const sender        = secp256k1.accountFromPrivateKey(privatePrefixed)
     
-    assert( transferAmount || transferAll,
-      `Either transferAmount or transferAll must be specified`
-    )
-
-    LOGGER.debug('Transfer Amount', transferAmount)
-    LOGGER.debug('Transfer All'   , transferAll)
     LOGGER.debug('SUBSTATE'       , subStateLabel)
 
     const buildWriteKey = ({ ownerAddress, noteHash }) => {
@@ -191,11 +187,19 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
 
     let transferValue
     if (transferAll) {
+      LOGGER.debug('Transfer All'   , transferAll)
+      assert.notOk( receiverPrivateNote, 'Cannot specify both transferAll and receiverPrivateNote' )
       transferValue = senderNoteValue
     } else if (Number.isInteger(parseInt(transferAmount))) {
+      LOGGER.debug('Transfer Amount', transferAmount)
+      assert.notOk( receiverPrivateNote, 'Cannot specify both transferValue and receiverPrivateNote' )
       transferValue = new BN(transferAmount)
+    } else if (receiverPrivateNote) {
+      LOGGER.debug('Receiver Private Note', receiverPrivateNote)
+      const receiverValue = parseInt(receiverPrivateNote.k, 16)
+      transferValue = new BN(receiverValue)
     } else {
-      throw new Error(`Invalid transfer amount ${transferAmount}`) 
+      throw new Error(`Invalid transfer amount ${transferAmount} and no receiverPrivateNote`) 
     }
 
     assert( transferValue.lte(senderNoteValue),
@@ -215,7 +219,13 @@ cxFuncs.createCxPrepareTransform = (subStateLabel='unlabeled') => {
     LOGGER.debug('Change Note Hash' , changeNote.noteHash)
 
     // Receiving information
-    const receiverNote = await aztec.note.create(receiverPublicKey, transferValue)
+    const receiverNote = (receiverPrivateNote) ?
+      await (async () => {
+        const newNote = await aztec.note.fromViewKey(receiverPrivateNote.viewingKey)
+        newNote.owner = receiverAddress
+        return newNote
+      })() :
+      await aztec.note.create(receiverPublicKey, transferValue)
     const receiverPublicNote = await exportAztecPublicNote(receiverNote)
     receiverPublicNote.a = receiverNote.a
     const receiverKey  = buildWriteKey({

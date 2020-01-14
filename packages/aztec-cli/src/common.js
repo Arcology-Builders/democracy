@@ -48,10 +48,11 @@ commons.doMintAmount = async ({
 commons.doCxAmount = async ({
   amount,
   senderNoteHash,
-  transferAll      = true,
+  transferAll,
   senderIndex      = 1,
   tradeSymbol      = 'AAA',
   testAccountIndex = 3,
+  receiverPrivateNote,
 }) => {
   const senderAddress   = parsed[`TEST_ADDRESS_${senderIndex}`   ]
   const senderPassword  = parsed[`TEST_PASSWORD_${senderIndex}`  ]
@@ -63,11 +64,12 @@ commons.doCxAmount = async ({
       senderAddress,
       senderPassword,
       senderPublicKey,
-      receiverAddress   : parsed['TEST_ADDRESS_1'],
-      receiverPublicKey : parsed['TEST_PUBLIC_KEY_1'],
-      senderNoteHash    : senderNoteHash,
-      transferAmount    : new BN(amount),
-      transferAll       : transferAll,
+      receiverAddress     : parsed['TEST_ADDRESS_1'],
+      receiverPublicKey   : parsed['TEST_PUBLIC_KEY_1'],
+      receiverPrivateNote,
+      senderNoteHash      : senderNoteHash,
+      transferAmount      : amount ? new BN(amount) : undefined,
+      transferAll         : transferAll || !receiverPrivateNote,
     }),
     unlockSeconds       : 500,
     testAccountIndex,
