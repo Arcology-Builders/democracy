@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import usernameGenerator from "docker-names";
 
 import Header from "../components/Header";
 import Card from "../components/Card";
@@ -29,10 +30,30 @@ const MakeTransaction = () => {
     ["MKR", "#AF005E", 500, 500]
   ];
 
+  const generateUsername = () => {
+    const regex = /(\w+)_(\w+)/gi;
+    const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
+    const replaceFn = (tokn: any, $1: any, $2: any) => capitalize($1) + " " + capitalize($2);
+    return usernameGenerator.getRandomName().replace(regex, replaceFn);
+  }
+
+  const demo: any = useContext(Democracy);
+  let username: any = '';
+
+  if (demo.chainId) {
+    username = localStorage.getItem(`demo/${demo.chainId}/thisScreenName`);
+
+    if (!username) {
+      username = generateUsername();
+      localStorage.setItem(`demo/${demo.chainId}/thisScreenName`, username);
+    }
+  }
+
   const [state, setState]: [any, Function] = useState({
     stage: 1,
     current: null,
-    sending: false
+    sending: false,
+    username: username
   });
 
   const stage = (s_: number) => () => setState({ ...state, stage: s_ });
@@ -55,11 +76,9 @@ const MakeTransaction = () => {
     }, 3000);
   };
 
-  const demo: any = useContext(Democracy);
-
   return (
     <>
-      <Header thisAddress={demo.thisAddress} />
+      <Header thisAddress={demo.thisAddress} username={username} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>
