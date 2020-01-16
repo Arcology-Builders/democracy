@@ -8,12 +8,12 @@
   "dependencies": {
     "@cryptogoth/react-npm-boilerplate": "^1.0.2",
     "demo-aztec-lib": "^0.5.1",
-    "demo-tools": "^0.5.0",
     "react": "16.7.0-alpha.1",
     "react-cache": "2.0.0-alpha.1",
     "react-dom": "16.7.0-alpha.1"
   },
   "devDependencies": {
+    "demo-tools": "^0.5.0",
     "babel-cli": "^6.6.4",
     "babel-core": "^6.7.4",
     "babel-plugin-transform-es2015-modules-umd": "^6.6.5",
