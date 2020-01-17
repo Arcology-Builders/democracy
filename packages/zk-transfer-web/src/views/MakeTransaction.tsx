@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import usernameGenerator from "docker-names";
 
 import Header from "../components/Header";
 import Card from "../components/Card";
@@ -20,7 +19,7 @@ const users: User[] = [
   { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
 ];
 
-const MakeTransaction = () => {
+const MakeTransaction = ({ screenName }: any) => {
   const fakePairs: [string, string, number, number][] = [
     ["RBT", "#AF1500", 200, 200],
     ["AAAA", "#AF9E00", 300, 400],
@@ -30,55 +29,37 @@ const MakeTransaction = () => {
     ["MKR", "#AF005E", 500, 500]
   ];
 
-  const generateUsername = () => {
-    const regex = /(\w+)_(\w+)/gi;
-    const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
-    const replaceFn = (tokn: any, $1: any, $2: any) => capitalize($1) + " " + capitalize($2);
-    return usernameGenerator.getRandomName().replace(regex, replaceFn);
-  }
-
-  const demo: any = useContext(Democracy);
-  let username: any = '';
-
-  if (demo.chainId) {
-    username = localStorage.getItem(`demo/${demo.chainId}/thisScreenName`);
-
-    if (!username) {
-      username = generateUsername();
-      localStorage.setItem(`demo/${demo.chainId}/thisScreenName`, username);
-    }
-  }
-
   const [state, setState]: [any, Function] = useState({
     stage: 1,
     current: null,
-    sending: false,
-    username: username
+    sending: false
   });
-
+  
   const stage = (s_: number) => () => setState({ ...state, stage: s_ });
-
+  
   const isStage = (s_: number) => state.stage === s_;
-
+  
   const fade = (s_: number) => isStage(s_) || "opacity-25";
-
+  
   const allowEdit = (current: string | null) => () => {
     // console.log('changing to the ' + current);
     setState({ ...state, current: current });
   };
-
+  
   const sentTo = (user: User) => () => {
     console.log("Sending to " + user.name);
     setState({ ...state, sending: true });
-
+    
     setTimeout(() => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-
+  
+  const demo: any = useContext(Democracy);
+  
   return (
     <>
-      <Header thisAddress={demo.thisAddress} username={username} />
+      <Header thisAddress={demo.thisAddress} screenName={screenName} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>

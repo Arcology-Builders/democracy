@@ -2,10 +2,10 @@ import React from 'react';
 
 type HeaderProps = {
     thisAddress: string;
-    username: string;
+    screenName: string;
 }
 
-const Header = ({ thisAddress, username }: HeaderProps) => {
+const Header = ({ thisAddress, screenName }: HeaderProps) => {
     return (
       <header className="bg-white w-100 flex justify-between items-center shadow p-5">
         <div className="user-info flex items-center flex-1" style={{ left: 0 }}>
@@ -17,7 +17,7 @@ const Header = ({ thisAddress, username }: HeaderProps) => {
               <li className="flex items-center">
                 <img src="/assets/retweet.png" alt="" className="icons" />
                 <p className="color2">
-                  { username } &nbsp;
+                  { screenName } &nbsp;
                   <span
                     className="color3 text-xs cursor-pointer hover:underline"
                     onClick={() => {}}
