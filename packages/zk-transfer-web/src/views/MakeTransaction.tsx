@@ -19,7 +19,7 @@ const users: User[] = [
   { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
 ];
 
-const MakeTransaction = () => {
+const MakeTransaction = ({ screenName }: any) => {
   const fakePairs: [string, string, number, number][] = [
     ["RBT", "#AF1500", 200, 200],
     ["AAAA", "#AF9E00", 300, 400],
@@ -34,32 +34,32 @@ const MakeTransaction = () => {
     current: null,
     sending: false
   });
-
+  
   const stage = (s_: number) => () => setState({ ...state, stage: s_ });
-
+  
   const isStage = (s_: number) => state.stage === s_;
-
+  
   const fade = (s_: number) => isStage(s_) || "opacity-25";
-
+  
   const allowEdit = (current: string | null) => () => {
     // console.log('changing to the ' + current);
     setState({ ...state, current: current });
   };
-
+  
   const sentTo = (user: User) => () => {
     console.log("Sending to " + user.name);
     setState({ ...state, sending: true });
-
+    
     setTimeout(() => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-
+  
   const demo: any = useContext(Democracy);
-
+  
   return (
     <>
-      <Header thisAddress={demo.thisAddress} />
+      <Header thisAddress={demo.thisAddress} screenName={screenName} />
       <div className="container lg:w-2/3 flex mx-auto justify-around mt-10">
         <div className="flex-1 max-w-md">
           <Card active={isStage(1)}>
