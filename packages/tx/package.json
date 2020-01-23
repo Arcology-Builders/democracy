@@ -10,7 +10,7 @@
   "author": "Paul Pham <paul@invisible.college>",
   "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/tx#readme",
   "license": "MIT",
-  "main": "src/tx.js",
+  "main": "index.js",
   "directories": {
     "src": "src",
     "test": "tests"
@@ -26,7 +26,8 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000"
+    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test:rinkeby": "NODE_ENV=RINKEBY mocha ./tests.rinkeby --trace-warnings --exit --colors --recursive --reporter spec -t 25000"
   },
   "bugs": {
     "url": "https://github.com/invisible-college/democracy/issues"

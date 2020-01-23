@@ -122,9 +122,11 @@ departs.begin = async (inputState) => {
   }).merge(inputState)
   return (await runTransforms(
     [
-      departs.argListTransform,
-      m1, m2, 
-      m4, departs.callbackTransform
+      [ 'argList', departs.argListTransform],
+      [ 'readFile', m1],
+      [ 'deployer', m2], 
+      [ 'depart', m4],
+      [ 'callBack', departs.callbackTransform ],
     ],
     initialState,
  ))

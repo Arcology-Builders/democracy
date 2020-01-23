@@ -5,6 +5,7 @@ const { toJS, fromJS, getConfig, getNetwork } = utils
 const { BuildsManager, Linker, isLink, Deployer, isDeploy, isCompile, isContract,
   createBM, Contract }
   = require('demo-contract')
+const { untilTxMined } = require('demo-tx')
 const { Compiler } = require('demo-compile')
 const { RemoteDB } = require('demo-client')
 const { TYPES, createTransformFromMap } = require('demo-transform')
@@ -34,9 +35,6 @@ const departs = {}
 departs.departTransform = createTransformFromMap({
   func: async ({ chainId, deployerEth, deployerAddress, departName, autoConfig,
       sourcePathList, compileFlatten, compileOutputFull }) => {
-    assert( chainId, `chainId not in input state.` )
-    assert( deployerEth, `deployerEth not in input state.` )
-    assert( deployerAddress, `deployerAddress not in input state.` )
 
     const bm = await createBM({
       sourcePathList: sourcePathList,
@@ -121,7 +119,8 @@ departs.departTransform = createTransformFromMap({
      */
       const _options = Map({ from: deployerAddress, gas: getConfig()['GAS_LIMIT'] })
         .merge(options).toJS()
-      return await deployerEth.getTransactionReceipt( await method(...argList, _options) )
+      const txHash = await method(...argList, _options)
+      return await untilTxMined({ txHash, eth: deployerEth })
     }
 
     const getCompiles = () => {

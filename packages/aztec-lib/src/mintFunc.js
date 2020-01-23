@@ -99,8 +99,8 @@ const mintFunc = async ({
   })
 
   // Do the minting
-  LOGGER.debug('Setting proofs')
-  await minedTx( token.setProofs, [1, -1] )
+  //LOGGER.debug('Setting proofs')
+  //await minedTx( token.setProofs, [1, -1] )
   LOGGER.debug('Confidentially minting ')
   const mintedTxHash = await minedTx( token.confidentialMint, [MINT_PROOF, mintProofData] )
 

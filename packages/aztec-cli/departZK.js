@@ -29,7 +29,7 @@ depart(Map({
   }),
   unlockSeconds    : Map({
     type: TYPES.integer,
-    value: 60,
+    value: 100,
   }),
   canConvert       : Map({
     type: TYPES.boolean,

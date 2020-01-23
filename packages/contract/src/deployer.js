@@ -136,11 +136,14 @@ deploys.Deployer = class {
       from: this.address,
       data: txData,
     })
-    const deployPromise = tx.sendSignedTx({
-      rawTx: rawTx, signerEth: this.eth
-    }).then((txHash) => this.eth.getTransactionReceipt(txHash))
 
-    const minedContract = await deployPromise.then((receipt) => { return receipt })
+    LOGGER.debug('signerEth', this.eth)
+    const txHash = await tx.sendSignedTx({
+      rawTx: rawTx, signerEth: this.eth
+    })
+    LOGGER.debug('txHash', txHash)
+    const minedContract = await tx.untilTxMined({ txHash, eth: this.eth })
+
     LOGGER.debug('MINED', minedContract)
     const instance = Contract.at(minedContract.contractAddress)
 

@@ -1,4 +1,9 @@
 version: 2
+notify:
+  webhooks:
+    # A list of hook hashes, containing the url field
+    # gitter hook
+    - url: https://webhooks.gitter.im/e/51aad069a98b3e35c6d2
 jobs:
   build:
     docker:

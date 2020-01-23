@@ -3,7 +3,7 @@
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
 
-const { Map }    = require('immutable')
+const { Map, OrderedMap } = require('immutable')
 const fs         = require('fs')
 const path       = require('path')
 const { assert } = require('chai')
@@ -121,6 +121,11 @@ callablePipeline1( initialState ).then((prevState) => {
   const prevTypesValuesMap = callablePipeline1.pipeline.mergedOutputTypes.map((v,k) => Map({ type: v, value: prevState.get(k) }))
   validateTypesValuesMap(prevTypesValuesMap)
   const mp = placeHolderTransform(prevTypesValuesMap.mergeDeep(departOptionsMap))
-  const callablePipeline2 = assembleCallablePipeline( [ mp, m2, m3, depart ] ) 
+  const callablePipeline2 = assembleCallablePipeline( OrderedMap([
+    [ 'mp'    , mp     ],
+    [ 'm2'    , m2     ],
+    [ 'm3'    , m3     ],
+    [ 'depart', depart ],
+  ]) ) 
   return callablePipeline2(Map({}))
 })
