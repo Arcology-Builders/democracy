@@ -1,6 +1,6 @@
 {
   "name": "demo-depart",
-  "version": "0.5.1-alpha.0",
+  "version": "0.5.2",
   "description": "Orchestrated compiles, links, and deploys for an Ethereum distributed country",
   "keywords": [
     "ethereum",
@@ -43,9 +43,9 @@
   },
   "dependencies": {
     "demo-client": "^0.5.1-alpha.0",
-    "demo-compile": "^0.5.1-alpha.0",
-    "demo-contract": "^0.5.1-alpha.0",
-    "demo-transform": "^0.5.1-alpha.0",
+    "demo-compile": "^0.5.2",
+    "demo-contract": "^0.5.2",
+    "demo-transform": "^0.5.2",
     "demo-utils": "^0.5.1-alpha.0",
     "immutable": "4.0.0-rc.12"
   },

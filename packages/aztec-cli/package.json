@@ -1,7 +1,7 @@
 {
   "name": "demo-aztec-cli",
   "type": "module",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Democracy + AZTEC: issuing and trading zero-knowledge assets",
   "main": "index.js",
   "license": "MIT",
@@ -18,9 +18,9 @@
     "@aztec/protocol": "0.8.1",
     "@aztec/secp256k1": "1.0.1",
     "aztec.js": "0.9.1",
-    "demo-aztec-lib": "^0.5.1",
+    "demo-aztec-lib": "^0.5.2",
     "demo-rest": "^0.5.1-alpha.0",
-    "demo-transform": "^0.5.1-alpha.0",
+    "demo-transform": "^0.5.2",
     "eslint-utils": "1.4.2",
     "openzeppelin-solidity": "2.2.0"
   },
