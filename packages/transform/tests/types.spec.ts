@@ -1,12 +1,13 @@
 'use strict'
 
 import { assert } from 'chai'
-import { TYPES } from '../src/types'
+import { TYPES, isHexPrefixed } from '../src/types'
 
 describe('Democracy types', () => {
 
   const prefixedKeccakHash =
     '0x09a33449c7526a56e658aff99a93a4dd8bf0788aeba88ba65cd94f35e1b4af19'
+
   it('checks floatString type', async () => {
 
     const result = TYPES.floatString('0.1')
@@ -24,6 +25,8 @@ describe('Democracy types', () => {
   })
 
   it('checks hex string correctly', async () => {
+
+    assert(TYPES.hexPrefixed(''), 'empty string should not be valid hexPrefixed')
 
     assert.notOk(
  TYPES.hexPrefixed('0x123')['error'],
@@ -44,6 +47,16 @@ describe('Democracy types', () => {
  result['error'],
       `A prefixed keccak hash doesn't pass with error ${result}`
     )
+
+  })
+
+  it('checks ethereumTxHash', async () => {
+
+    const result2 = isHexPrefixed('', 66)
+    assert( result2['error'], `Empty string is not a valid hex prefixed ${result2}`)
+
+    const result = TYPES.ethereumTxHash('')
+    assert( result['error'], 'Empty string is not an ethereum txHash')
 
   })
 

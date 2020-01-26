@@ -29,7 +29,7 @@
     "build": "yarn build:test",
     "build:test": "NODE_ENV=TEST react-scripts build",
     "build:dev": "NODE_ENV=DEVELOPMENT react-scripts build",
-    "test": "react-scripts test",
+    "test": "echo 'change to `react-scripts test` when you have tests' && exit 0",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

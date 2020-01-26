@@ -3,14 +3,20 @@ import { List, Map } from 'immutable'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Note } from './note'
-import { mintFunc, cxPrepareFuncMixin, cxTransferFunc, cxFinishFuncMixin }
+import { constructCxPipeline, constructMintPipeline }
   from 'demo-aztec-lib'
+import { runTransforms } from 'demo-transform'
 
-// Static singleton members that we want to declare once and re-use
-// multiple times within the React component, but that don't strictly belong
-// props or state.
-const cxPrepare = cxPrepareFuncMixin()
-const cxFinish = cxFinishFuncMixin()
+const cxPipeline = constructCxPipeline()
+const mintPipeline = constructMintPipeline()
+
+const cx = async (state) => {
+  return await runTransforms( cxPipeline, state )
+}
+
+const mint = async (state) => {
+  return await runTransforms( mintPipeline, state )
+}
 
 export class Token extends React.Component {
   
@@ -98,10 +104,10 @@ export class Token extends React.Component {
           onClick={async () => {
             const recipient = this.props.getRecipient()
             console.log('recipient', recipient.toJS())
-            await mintFunc(Map({
+            await mint(Map({
               bm              : this.props.bm,
               chainId         : this.props.chainId,
-              signerEth       : this.props.signerEth,
+              deployerEth     : this.props.signerEth,
               deployed        : this.props.deployed,
               minedTx         : this.props.minedTx,
               deployerAddress : this.props.getThisAddress(),
@@ -109,7 +115,7 @@ export class Token extends React.Component {
               tradeSymbol     : this.props.name,
               minteeAddress   : recipient.get('address'),
               minteePublicKey : recipient.get('publicKey'),
-              minteeAmount    : Number(this.state.amount),
+              minteeAmount    : new BN(this.state.amount),
               mintFromZero    : false,
             }))
           }}
@@ -149,14 +155,10 @@ export class Token extends React.Component {
               transferFunc      : async (token, proofData, signatures) => {
                   return await this.props.minedTx( token.confidentialTransfer, [proofData, signatures ] )
               },
-              transferAmount    : Number(this.state.amount),
+              transferAmount    : new BN(this.state.amount),
               wallet            : this.props.wallet,
             })
-            const outState1 = await cxPrepare(argMap)
-            const inState1 = argMap.merge(outState1)
-            const outState2 = await cxTransferFunc(inState1)
-            const inState2 = inState1.merge(outState2)
-            const outState3 = await cxFinish(inState2)
+            await cx(argMap)
           }}
           >
           Confidential Transfer

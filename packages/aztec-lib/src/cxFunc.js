@@ -1,7 +1,7 @@
 // Confidential transfer of an amount from a sender to a receiver with change back.
 'use strict'
 const BN        = require('bn.js')
-const { Map }   = require('immutable')
+const { Map, OrderedMap } = require('immutable')
 const util      = require('ethereumjs-util')
 const { soliditySHA3 } = require('ethereumjs-abi')
 const assert    = require('chai').assert
@@ -19,6 +19,7 @@ const { isAccount }
 const { createTransformFromMap, makeMapType } = require('demo-transform')
 const { checkPublicKey, AZTEC_TYPES: TYPES,
   exportAztecPrivateNote, exportAztecPublicNote } = require('./utils')
+const { createSignerTransform, createPublicKeyTransform, } = require('./transforms')
 
 const LOGGER    = new Logger('cxFunc')
 
@@ -379,5 +380,56 @@ cxFuncs.createCxFinishTransform = (subStateLabel='unlabeled') => createTransform
 		}), 'cxFinishOutputsMapType'),
 	}),
 })
+
+// Set the transfer function for a direct (non-proxy) confidential transfer
+cxFuncs.createCxTransferParams = (subStateLabel='unlabeled') => createTransformFromMap({
+  func: async ({ minedTx, deployerAddress }) => {
+    return Map({
+      [subStateLabel]: Map({
+        transfererAddress : deployerAddress,
+        transferFunc      : async (token, proofData, signatures) => {
+          return await minedTx( token.confidentialTransfer, [proofData, signatures] )
+        }
+      }),
+    })
+  },
+  inputTypes: Map({
+    minedTx         : TYPES['function'],
+    deployerAddress : TYPES.ethereumAddress,
+  }),
+  outputTypes: Map({
+    [subStateLabel] : makeMapType(Map({
+      transfererAddress : TYPES.ethereumAddress,
+      transferFunc      : TYPES['function'],
+    }), 'cxTransferParamsMapType'),
+  })
+})
+
+cxFuncs.cxTransferParams = cxFuncs.createCxTransferParams()
+
+cxFuncs.cxPrepare        = cxFuncs.createCxPrepareTransform()
+cxFuncs.cxTransfer       = cxFuncs.createCxTransferTransform()
+cxFuncs.cxFinish         = cxFuncs.createCxFinishTransform()
+
+cxFuncs.cxTokenContracts = cxFuncs.createCxTokenContractsTransform()
+
+cxFuncs.signerTransform    = createSignerTransform()
+cxFuncs.publicKeyTransform = createPublicKeyTransform()
+
+cxFuncs.constructValidatePipeline = (earlyTransforms = OrderedMap()) => 
+  earlyTransforms.merge(OrderedMap([
+    ['signer'           , cxFuncs.signerTransform       ],
+    ['publicKey'        , cxFuncs.publicKeyTransform    ],
+    ['cxTransferParams' , cxFuncs.cxTransferParams      ],
+    ['cxJsContract'     , cxFuncs.cxJsContractTransform ],
+    ['cxTokenContracts' , cxFuncs.cxTokenContracts      ],
+    ['cxPrepare'        , cxFuncs.cxPrepare             ],
+]))
+
+cxFuncs.constructCxPipeline = (earlyTransforms) =>
+    cxFuncs.constructValidatePipeline(earlyTransforms).merge(OrderedMap([
+          [ 'cxTransfer' , cxFuncs.cxTransfer ],
+          [ 'cxFinish'   , cxFuncs.cxFinish   ],
+        ]))
 
 module.exports = cxFuncs

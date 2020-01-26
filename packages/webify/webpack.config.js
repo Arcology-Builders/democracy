@@ -14,12 +14,6 @@ module.exports = (env, argv) => {
   const bundleName = `democracy.${version}${min}`
   const entry = {}
   
-  /*
-  entry[bundleName] = [
-       './src/index.js',
-       path.resolve(__dirname, '../../node_modules/browserfs/dist/browserfs.min.js'),
-     ]
-    */
   entry[bundleName] = [
        './exports/api.js',
   ]

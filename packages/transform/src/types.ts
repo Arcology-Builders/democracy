@@ -130,8 +130,6 @@ const BOOLEAN_CHECKERS: Imm.Map<string,BooleanArgCheckerFunc> = Imm.Map({
   ),
   'float'           : (arg: any) => typeof(parseFloat(arg)) === 'number',
   'function'        : (arg: any) => (typeof(arg) === 'function'),
-  'keccak256Hash'   : (arg: any) => isHexPrefixed(arg, 66, false), 
-  'ethereumTxHash'  : (arg: any) => isHexPrefixed(arg, 66),
   'ethereumAddress' : (arg: any) => isValidChecksumAddress(arg),
   'ethereumSigner'  : (arg: any) => Boolean(arg && arg['net_version']),
   'contract'        : contractCheckerFunc,
@@ -167,7 +165,17 @@ export const makeCheckerFunc =
 
 export const TYPES_MAP: Imm.Map<string,ArgChecker>
   = BOOLEAN_CHECKERS.map(makeCheckerFuncFromBoolean).
-  merge({'hexPrefixed' : makeCheckerFunc((arg: any) => isHexPrefixed(arg), 'hexPrefixed') })
+  merge({
+    'hexPrefixed'    : makeCheckerFunc(
+      (arg: any) => isHexPrefixed(arg), 'hexPrefixed'
+    ),
+    'keccak256Hash'  : makeCheckerFunc(
+      (arg: any) => isHexPrefixed(arg, 66, false), 'keccak256Hash'
+    ), 
+    'ethereumTxHash' : makeCheckerFunc(
+      (arg: any) => isHexPrefixed(arg, 66, true), 'ethereumTxHash'
+    ),
+  })
 
 export const TYPES: { [key: string] : ArgChecker } = TYPES_MAP.toJSON()
 

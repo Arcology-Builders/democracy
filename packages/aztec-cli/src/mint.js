@@ -10,7 +10,7 @@ const {
 }                = require('demo-transform')
 const { getConfig, fromJS } = require('demo-utils')
 
-const { mintTransform, AZTEC_TYPES: TYPES }
+const { constructMintPipeline, AZTEC_TYPES: TYPES }
                  = require('demo-aztec-lib')
 
 const m0 = createArgListTransform(Map({
@@ -39,19 +39,16 @@ const initialState = Map({
   sourcePathList   : ['../../node_modules/@aztec/protocol/contracts'],
 })
 
-const mint = async (state) => {
-  const result = await runTransforms(
-    OrderedMap([
-      ['m0', m0],
-      ['m1', m1],
-      ['m2', m2],
-      ['mintTransform', mintTransform],
-    ]),
-    initialState.mergeDeep(state)
-  )
-  return result
+const mints = {}
+
+mints.mintPipeline = constructMintPipeline(OrderedMap([
+  [ 'mintArgs'   , m0],
+  [ 'mintDeploy' , m1],
+  [ 'mintDepart' , m2],
+]))
+
+mints.mint = async (state) => {
+  return await runTransforms( mints.mintPipeline, initialState.merge(state) )
 }
 
-module.exports = {
-  mint,
-}
+module.exports = mints

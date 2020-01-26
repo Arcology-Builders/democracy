@@ -63,7 +63,6 @@ const { isValidAddress } = require('ethereumjs-util')
 api.utils         = require('demo-utils')
 api.LOGGER        = new api.utils.Logger('demo')
 api.get           = api.utils.getImmutableKey
-api.get           = api.utils.getImmutableKey
 api.set           = api.utils.setImmutableKey
 api.config        = api.utils.getConfig()
 api.eth           = api.utils.getNetwork()

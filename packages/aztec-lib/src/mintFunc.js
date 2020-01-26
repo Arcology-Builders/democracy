@@ -1,5 +1,5 @@
-const BN         = require('bn.js')
-const { Map }    = require('immutable')
+const BN = require('bn.js')
+const { Map, OrderedMap } = require('immutable')
 const aztec      = require('aztec.js')
 const secp256k1  = require('@aztec/secp256k1') 
 const { constants, proofs: { MINT_PROOF} }
@@ -11,17 +11,19 @@ dotenv.config()
 const { createTransformFromMap } = require('demo-transform')
 const { AZTEC_TYPES: TYPES } = require('./utils')
 
-const { fromJS, Logger }
-                 = require('demo-utils')
-const { wallet, isAccount }
-                 = require('demo-keys')
+const { fromJS, Logger } = require('demo-utils')
+const { wallet, isAccount } = require('demo-keys')
+const { untilTxMined } = require('demo-tx')
 
 const assert     = require('chai').assert
 const util       = require('ethereumjs-util')
 const LOGGER     = new Logger('mintFunc')
 
+const mintFuncs = {}
+
 const mintFunc = async ({
     bm,
+    deployerEth,
     chainId,
     deployed,
     minedTx,
@@ -102,7 +104,9 @@ const mintFunc = async ({
   //LOGGER.debug('Setting proofs')
   //await minedTx( token.setProofs, [1, -1] )
   LOGGER.debug('Confidentially minting ')
-  const mintedTxHash = await minedTx( token.confidentialMint, [MINT_PROOF, mintProofData] )
+  const mintedTxReceipt = await minedTx( token.confidentialMint, [MINT_PROOF, mintProofData] )
+  assert.notOk( TYPES.ethereumTxHash(mintedTxReceipt.transactionHash)['error'],
+    `txHash type-check had an error when returned from minedTx` )
 
   // Save the minted total notes
   LOGGER.debug('New minted total note hash', newTotalNote.noteHash)
@@ -124,18 +128,19 @@ const mintFunc = async ({
 
   return Map({
     minteeNoteHash : minteeNote.noteHash,
-    mintedTxHash   : mintedTxHash.transactionHash,
+    mintedTxHash   : mintedTxReceipt.transactionHash,
     mintedFromZero,
   })
 }
 
-const mintTransform = createTransformFromMap({
+mintFuncs.mintTransform = createTransformFromMap({
   func: mintFunc,
   inputTypes: Map({
     bm              : TYPES.bm,
     chainId         : TYPES.string,
     deployed        : TYPES['function'],
     minedTx         : TYPES['function'],
+    deployerEth     : TYPES.ethereumSigner,
     deployerAddress : TYPES.ethereumAddress,
     tradeSymbol     : TYPES.string,
     minteeAddress   : TYPES.ethereumAddress,
@@ -150,6 +155,9 @@ const mintTransform = createTransformFromMap({
   }),
 })
 
-module.exports = {
-  mintTransform,
-}
+mintFuncs.constructMintPipeline = (earlyTransforms = OrderedMap()) =>
+	earlyTransforms.merge(OrderedMap([
+    ['mint', mintFuncs.mintTransform],
+  ]))
+
+module.exports = mintFuncs
