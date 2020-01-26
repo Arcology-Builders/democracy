@@ -7,6 +7,7 @@ import { Token } from './token'
 import { AddressBook } from './addressBook'
 import { assert } from 'chai'
 import { toJS, fromJS } from 'demo-utils'
+import { untilTxMined } from 'demo-tx'
 const { getAztecPublicKey, deployed } = require('demo-aztec-lib')
 
 const Fetcher = unstable_createResource(
@@ -124,9 +125,8 @@ export const AssetBook = class extends Component {
       // associated signer.
       const signerEth = this.props.wallet.signersMap[this.state.address]
       console.log('deployerEth.address', JSON.stringify(_options))
-      return await signerEth.getTransactionReceipt(
-        await method(...argList, _options)
-      )
+      const txHash = await method(...argList, _options)
+      return untilTxMined({ txHash, eth: signerEth })
     }
 
     const tokenClass = this.props.tokenClass ? this.props.tokenClass : Token

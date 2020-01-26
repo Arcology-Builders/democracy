@@ -6,6 +6,20 @@ const BN            = require('bn.js')
 const { parsed }    = require('dotenv').config()
 const { wallet }    = require('demo-keys')
 const { getConfig } = require('demo-utils')
+const { AZTEC_TYPES : TYPES } = require('demo-aztec-lib')
+
+const minteeAddress = process.argv[4]
+const minteePublicKey = process.argv[5]
+console.log(`Address   : ${minteeAddress}`)
+console.log(`Public Key: ${minteePublicKey}`)
+
+const useMintee = !TYPES.ethereumAddress(minteeAddress)['error'] && !TYPES.aztecPublicKey(minteePublicKey)['error']
+console.log(`isAddress ${TYPES.ethereumAddress(minteeAddress)['error']}`)
+console.log(`isPassword ${TYPES.aztecPublicKey(minteePublicKey)['error']}`)
+
+if (useMintee) {
+  console.log('Detected mintee')
+}
 
 const testIndex     = process.argv[4] || 1
 const deployerIndex = Number(process.argv[5]) || 0
@@ -18,8 +32,8 @@ const deployerPassword = deployerIndex > 0 ?
 
 mint(Map({
   tradeSymbol      : process.argv[2] || 'AAA',
-  minteeAddress    : parsed[`TEST_ADDRESS_${testIndex}`],
-  minteePublicKey  : parsed[`TEST_PUBLIC_KEY_${testIndex}`],
+  minteeAddress    : useMintee ? minteeAddress : parsed[`TEST_ADDRESS_${testIndex}`],
+  minteePublicKey  : useMintee ? minteePublicKey : parsed[`TEST_PUBLIC_KEY_${testIndex}`],
   deployerAddress  : deployerAddress,
   deployerPassword : deployerPassword,
   minteeAmount     : new BN(process.argv[3]) || new BN(0),

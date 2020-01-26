@@ -34,7 +34,7 @@ api.init = async (demo) => {
 
   const securities = api.deploys.filter((val, name) => name.match(/deploy[A-Z][A-Z][A-Z]/))
   api.erc20Tokens  = securities.filter((val, name) => name.match(/ERC20/))
-  api.zkTokens     = securities.filter((val, name) => name.match(/ZkAssetMintable/))
+  api.zkTokens     = securities.filter((val, name) => name.match(/ZkAssetTradeable/))
 
   api.thisAddressNotes = new Map((await Promise.all(List(api.zkTokens.map(
     async (val, name) =>

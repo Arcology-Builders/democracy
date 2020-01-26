@@ -123,6 +123,7 @@ const mintFunc = async ({
     zkNoteHash : minteeNote.noteHash,
     viewingKey : minteeNoteViewKey,
   }))
+  LOGGER.debug('new mintee note key', baseKey)
   LOGGER.debug('Mintee note created', minteeNoteCreated)
   LOGGER.info(`Successfully deposited ${minteeAmount} to mintee`)
 
