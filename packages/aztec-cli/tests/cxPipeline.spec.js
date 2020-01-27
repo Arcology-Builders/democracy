@@ -2,7 +2,7 @@
 
 const { assert } = require('chai')
 const { List } = require('immutable')
-const { constructCxPipeline } = require('../src/cx')
+const { constructCxPipeline } = require('demo-aztec-lib')
 const { assembleCallablePipeline } = require('demo-transform')
 
 describe('Confidential transfer pipeline', () => {
