@@ -170,7 +170,7 @@ export const TYPES_MAP: Imm.Map<string,ArgChecker>
       (arg: any) => isHexPrefixed(arg), 'hexPrefixed'
     ),
     'keccak256Hash'  : makeCheckerFunc(
-      (arg: any) => isHexPrefixed(arg, 66, false), 'keccak256Hash'
+      (arg: any) => isHexPrefixed(arg, 64, false), 'keccak256Hash'
     ), 
     'ethereumTxHash' : makeCheckerFunc(
       (arg: any) => isHexPrefixed(arg, 66, true), 'ethereumTxHash'

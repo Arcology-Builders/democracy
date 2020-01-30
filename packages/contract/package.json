@@ -27,7 +27,7 @@
     "url": "git+https://github.com/invisible-college/democracy.git"
   },
   "scripts": {
-    "test": "NODE_ENV=DEVELOPMENT mocha ./tests --trace-warnings --exit --colors --recursive --reporter spec -t 15000",
+    "test": "for file in tests/*.spec.js; do NODE_ENV=DEVELOPMENT mocha ${file} -t 150000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done",
     "doc": "documentation build src/** -f md -o docs/Contracts.md"
   },
   "bugs": {
