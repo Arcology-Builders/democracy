@@ -1,6 +1,7 @@
+require('@babel/polyfill')
 const Web3 = require('web3')
 // Our public whisper node at eth.arcology.nyc doesn't respond to hostname requests
-const web3 = new Web3('ws://eth.arcology.nyc:8546', {headers: {Origin: 'http://localhost:8080'}})
+const web3 = new Web3('ws://44.231.47.141:8546', {headers: {Origin: 'http://localhost:8080'}})
 
 const DEFAULT_PASSWORD = "default"
 
@@ -37,7 +38,10 @@ const ui = {
 }
 
 const init = async () => {
+  
+
   const keyId         = await web3.shh.newKeyPair()
+  console.log('bloo blap')
   const publicKey     = await web3.shh.getPublicKey(keyId)
   const channelSymKey = await web3.shh.generateSymKeyFromPassword(DEFAULT_PASSWORD) 
   const channelTopic  = "0x11223344"

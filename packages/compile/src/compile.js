@@ -37,7 +37,7 @@ const { Flattener } = require('./flattener')
  */
 compiles.Compiler = class {
   
-  constructor({sourcePathList, bm, flatten, outputFull}) {
+  constructor({sourcePathList, bm, flatten, outputFull, solc}) {
     // Add default paths and remove empty directories
     this.sourcePathSet = new Set(sourcePathList)
       .add(DEMO_SRC_PATH).add(compiles.ZEPPELIN_SRC_PATH).filter((d) => d)
@@ -47,6 +47,7 @@ compiles.Compiler = class {
     this.cm = bm || new ContractsManager(...arguments)
     this.flatten = flatten || false
     this.outputFull = outputFull || false
+    this.solc = solc
   }
 
   /**
@@ -280,7 +281,7 @@ compiles.Compiler = class {
       sources: toJS( sourcesToBuild ),
     }
 
-    const solc = require('solc')
+    const solc = this.solc || require('solc')
     const outputs = JSON.parse(solc.compile(JSON.stringify(inputs), findImports))
     if (outputs.errors) {
       const showStopper = outputs.errors.reduce((s, v) => (v['type'] === 'Warning') ? s : true, false)

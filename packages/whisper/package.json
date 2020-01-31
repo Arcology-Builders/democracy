@@ -38,7 +38,8 @@
     "babel-loader": "^8.0.6",
     "demo-tools": "^0.5.0",
     "demo-utils": "^0.5.1-alpha.0",
-    "web3": "^1.2.4"
+    "web3": "^1.2.4",
+    "webpack-cli": "^3.3.10"
   },
   "gitHead": "e6eb5b4ddb1a324c68d19be66a52b2c3f77adb6c"
 }

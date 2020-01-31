@@ -64,6 +64,10 @@ module.exports = (env, argv) => {
       template: "./src/index.html",
       filename: "./index.html"
     }),
+    new HtmlWebPackPlugin({
+      template: "./src/shh-signal.html",
+      filename: "./shh-signal.html"
+    }),
     new webpack.ProvidePlugin({
       BrowserFS: 'bfsGlobal',
       process: 'processGlobal',

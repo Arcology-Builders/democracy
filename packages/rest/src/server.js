@@ -4,6 +4,7 @@ const { setImmutableKey: set, getImmutableKey: get, isNetName, fromJS, Logger,
 	      = require('demo-utils')
 const { Map } = require('immutable')
 const utils = require('ethereumjs-util')
+const solc = require('solc')
 const http = require('http')
 const path = require('path')
 const LOGGER = new Logger('rest-server')
@@ -205,6 +206,21 @@ server.RESTServer = class {
       }
     })
 
+    /*
+    // Perform a remote compile and cache the result
+    _router.route('/compile/:version').post((req, res) => {
+      const version = req.params.version
+      LOGGER.debug('req.body', req.body)
+      solc.loadRemoteVersion(version, (err, solc) => {
+        if (err) {
+          LOGGER.error(`Error getting solc version ${version}`, err)
+        } else {
+          const c = new Compiler({ solc })
+          c.compile(
+        }
+      })
+    })
+*/
     // Return all compiles
     _router.route('/compiles').get((req, res) => {
       const compiles = get(`/${COMPILES_DIR}`, new Map({}))
