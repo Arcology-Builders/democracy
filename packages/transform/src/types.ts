@@ -169,6 +169,9 @@ export const TYPES_MAP: Imm.Map<string,ArgChecker>
     'hexPrefixed'    : makeCheckerFunc(
       (arg: any) => isHexPrefixed(arg), 'hexPrefixed'
     ),
+    'keccak256Prefixed'  : makeCheckerFunc(
+      (arg: any) => isHexPrefixed(arg, 66, true), 'keccak256Hash'
+    ), 
     'keccak256Hash'  : makeCheckerFunc(
       (arg: any) => isHexPrefixed(arg, 64, false), 'keccak256Hash'
     ), 

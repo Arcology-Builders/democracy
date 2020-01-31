@@ -52,6 +52,11 @@ describe('Democracy types', () => {
       `unprefixed keccak hash should have error but doesn't`
     )
 
+    const result3 = TYPES.keccak256Prefixed(prefixedKeccakHash)
+    assert.notOk( result3['error'],
+      `A prefixed keccak hash should pass with no error but ${result3['error']}`
+    )
+
   })
 
   it('checks ethereumTxHash', async () => {
