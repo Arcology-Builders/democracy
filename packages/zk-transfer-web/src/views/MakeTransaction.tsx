@@ -19,11 +19,11 @@ const users: User[] = [
   { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
 ];
 
-const MakeTransaction = ({ screenName }: any) => {
+const MakeTransaction = ({ screenName, tokens, notes }: any) => {
   const fakePairs: [string, string, number, number][] = [
-    ["RBT", "#AF1500", 200, 200],
-    ["AAAA", "#AF9E00", 300, 400],
-    ["BMT", "#00AF5B", 500, 300],
+    // ["RBT", "#AF1500", 200, 200],
+    // ["AAAA", "#AF9E00", 300, 400],
+    // ["BMT", "#00AF5B", 500, 300],
     ["GNO", "#0066AF", 100, 100],
     ["DAI", "#4D00AF", 200, 200],
     ["MKR", "#AF005E", 500, 500]
@@ -70,18 +70,19 @@ const MakeTransaction = ({ screenName }: any) => {
                 Standard erc20s or private erc1724s
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
-                {fakePairs.splice(0, 3).map(([label, color, a, b], index) => (
-                  <TokenInput
-                    key={index}
-                    firstValue={a}
-                    secondValue={b}
-                    canEdit={label === state.current}
-                    allowEdit={allowEdit(label)}
+                {!tokens.size && <Preloader />}
+                {[...tokens.entries()].map(([deployName, address], idx) => {
+                  return (<TokenInput
+                    key={idx}
+                    firstValue={200}
+                    secondValue={400}
+                    canEdit={deployName === state.current}
+                    allowEdit={allowEdit(deployName)}
                     onSend={stage(2)}
-                  >
-                    <CircularText color={color} label={label} />
-                  </TokenInput>
-                ))}
+                    >
+                    <CircularText color={"#AF9E00"} label={deployName} />
+                  </TokenInput>)
+                })}
               </TokenGroup>
               <TokenGroup name="Standard Tokens - ERC20">
                 {fakePairs.map(([label, color, a, b], index) => (
