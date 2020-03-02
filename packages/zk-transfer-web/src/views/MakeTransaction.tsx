@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-
+import { getColor } from '../util';
 import Header from "../components/Header";
 import Card from "../components/Card";
 import TokenInput, { CircularText, TokenGroup } from "../components/Token";
@@ -80,7 +80,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
                     allowEdit={allowEdit(deployName)}
                     onSend={stage(2)}
                     >
-                    <CircularText color={"#AF9E00"} label={deployName} />
+                    <CircularText color={getColor(deployName)} label={deployName} />
                   </TokenInput>)
                 })}
               </TokenGroup>

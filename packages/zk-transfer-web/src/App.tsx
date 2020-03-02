@@ -46,7 +46,7 @@ function App({ demo } : AppProp) {
             ZKTokens.set(shortTokenName, deployAddress);
           });
           console.info('ZkTokens', ZKTokens)
-          console.info('ZkNotes', ZKNotes)
+          console.info('ZkNotes', Object.fromEntries(ZKNotes.entries()))
           console.groupEnd();
           const screenName = getScreenName(demo.chainId);
 
