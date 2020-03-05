@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { getColor } from '../util';
 import Header from "../components/Header";
 import Card from "../components/Card";
-import TokenInput, { CircularText, TokenGroup } from "../components/Token";
+import TokenInput, { Skeleton, CircularText, TokenGroup } from "../components/Token";
 import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
@@ -70,7 +70,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
                 Standard erc20s or private erc1724s
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
-                {!tokens.size && <Preloader />}
+                {!tokens.size && Array(3).fill(0).map(e => <Skeleton />)}
                 {[...tokens.entries()].map(([deployName, notes], idx) => {
                   return (<TokenInput
                     key={idx}

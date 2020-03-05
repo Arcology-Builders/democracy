@@ -41,8 +41,8 @@ const TokenInput = (props: TokenPropType) => {
     canEdit((a: any) => {
       if (a) a.current.focus();
     })(input);
-    if (props.notes && !fetched) {
-       console.count(props.name);
+    if (!fetched && props.notes) {
+       console.log('Fetching balances for ', props.name);
        fetchValue(props.notes)
         .then(values => setDigit(values.reduce(getSum, 0)));
      } else {
@@ -87,6 +87,13 @@ const TokenInput = (props: TokenPropType) => {
     </div>
   );
 };
+
+export const Skeleton = () => {
+  return <div className="flex my-1 items-center">
+    <div className="w-10 h-10 rounded-full flex-shrink-0 zk-preload bg-gray-200"></div>
+    <div className="w-3/5 rounded-lg ml-4 h-6 zk-preload bg-gray-200"></div>
+  </div>
+}
 
 TokenInput.defaultProps = {
   canEdit: false
