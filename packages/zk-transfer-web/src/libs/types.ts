@@ -58,3 +58,5 @@ export interface NoteValue {
   metaData: string; // Hex(68)
   noteHash: string; // Hex(66)
 }
+
+export declare function BMInputter(address: string): Promise<Note>;

@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from "react";
-
-// @ts-ignore
-// import { Provider, useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import Homepage from './views/Home';
@@ -30,8 +27,6 @@ function App({ demo } : AppProp) {
         .then(async () => {
           console.groupCollapsed('Client Initialized');
           const api = await makeApi(demo);
-          //@ts-ignore
-          window.api = api; window.demo = demo;
           api.zkTokens.mapEntries(([tokenName, token]) => {
             const shortTokenName = getZkTokenName(tokenName);
             const tokenAddress: string = token.get("deployAddress");
@@ -42,7 +37,6 @@ function App({ demo } : AppProp) {
 
             state.ZKToken.set(shortTokenName, notes);
           });
-          console.info(state.ZKToken);
           console.groupEnd();
           console.info("Fetch Tokens and Notes");
           const screenName = getScreenName(demo.chainId);
@@ -65,8 +59,7 @@ function App({ demo } : AppProp) {
           <Router>
             <Switch>
               <Route exact path="/" render={() => 
-                <MakeTransaction 
-                  // @ts-ignore
+                <MakeTransaction
                   tokens={state.ZKToken}
                   screenName={state.screenName} />} />
               <Route exact path="/home" component={Homepage} />

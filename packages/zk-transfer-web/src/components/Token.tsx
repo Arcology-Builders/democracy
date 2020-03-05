@@ -1,10 +1,8 @@
-// @ts-ignore
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import arrowLeft from "../assets/arrow-left.svg";
-// @ts-ignore
 import { note } from "aztec.js"; 
-import { NoteList, NoteValue } from "../libs/types";
 import { getSum } from "../util";
+import { NoteList, NoteValue } from "../libs/types";
+import arrowLeft from "../assets/arrow-left.svg";
 
 type TokenPropType = {
   name: string;
@@ -17,7 +15,7 @@ type TokenPropType = {
   allowEdit?: Function;
 };
 
-const fetchValue = (notes: NoteList) => {
+const fetchValue = (notes: NoteList): Promise<NoteValue[]> => {
   const getNoteValue = function (e: any) {
     return note.fromViewKey(e.get("viewingKey"))
   };
@@ -88,13 +86,6 @@ const TokenInput = (props: TokenPropType) => {
   );
 };
 
-export const Skeleton = () => {
-  return <div className="flex my-1 items-center">
-    <div className="w-10 h-10 rounded-full flex-shrink-0 zk-preload bg-gray-200"></div>
-    <div className="w-3/5 rounded-lg ml-4 h-6 zk-preload bg-gray-200"></div>
-  </div>
-}
-
 TokenInput.defaultProps = {
   canEdit: false
 };
@@ -163,6 +154,15 @@ export const TokenCard = (props: any) => {
       <div className="px-2">
         {props.children}
       </div>
+    </div>
+  );
+};
+
+export const Skeleton = () => {
+  return (
+    <div className="flex my-1 items-center">
+      <div className="w-10 h-10 rounded-full flex-shrink-0 zk-preload bg-gray-200"></div>
+      <div className="w-3/5 rounded-lg ml-4 h-6 zk-preload bg-gray-200"></div>
     </div>
   );
 };

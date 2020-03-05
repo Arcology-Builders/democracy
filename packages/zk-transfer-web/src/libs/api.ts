@@ -1,6 +1,6 @@
 //@ts-ignore
 import { getNetwork } from "demo-utils";
-import { Token, TokenList, NoteList } from "./types";
+import { Token, TokenList, Note, NoteList, KeyValuePair } from "./types";
 
 const eth: any = getNetwork();
 
@@ -21,7 +21,7 @@ type apiObject = {
 // as these are a separate instance imported by webpack build
 // within demo-aztec, as opposed to the one in the democracy bundle.
 export const makeApi = async (demo: any): Promise<apiObject> => {
-  const { Map, List } = demo.immutable;
+  const { Map } = demo.immutable;
   const account = demo.secp256k1.accountFromPrivateKey(
     demo.keys.wallet.getAccountSync(demo.thisAddress).get("privatePrefixed")
   );
@@ -43,27 +43,12 @@ export const makeApi = async (demo: any): Promise<apiObject> => {
   const erc20Tokens = fetchSecurity(/ERC20/);
   const zkTokens = fetchSecurity(/ZkAssetTradeable/);
 
-  const thisAddressNotes = new Map(
-    (
-      await Promise.all(
-        List(
-          zkTokens
-            .map(
-              async val =>
-                new Promise(resolve => {
-                  const address = val.get("deployAddress");
-                  bm.inputter(
-                    `zkNotes/${chainId}/${demo.thisAddress}/${address}`
-                  )
-                    .then((val: any) => resolve([address, val]))
-                    .catch(() => resolve([address, Map({})]));
-                })
-            )
-            .values()
-        ).toJS()
-      )
-    ).values()
-  );
+  const fetcher = (address: string): Promise<Note> =>
+    bm.inputter(`zkNotes/${chainId}/${demo.thisAddress}/${address}`);
+
+  const defaultNote = Map({});
+  const pendingNotes = fetchNotes(fetcher, zkTokens, defaultNote);
+  const thisAddressNotes = Map(await Promise.all(pendingNotes));
 
   return {
     bm,
@@ -77,3 +62,21 @@ export const makeApi = async (demo: any): Promise<apiObject> => {
     thisAddressNotes
   };
 };
+
+function fetchNotes(
+  fetch: any,
+  zkTokens: TokenList<Token>,
+  defaultType: Map<string, string>
+): Promise<KeyValuePair<Note>>[] {
+  return zkTokens
+    .map(
+      async token =>
+        new Promise(resolve => {
+          const address = token.get("deployAddress");
+          fetch(address)
+            .then((val: Note) => resolve([address, val]))
+            .catch(() => resolve([address, defaultType]));
+        })
+    )
+    .values();
+}

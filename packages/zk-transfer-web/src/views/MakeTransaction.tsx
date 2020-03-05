@@ -70,7 +70,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
                 Standard erc20s or private erc1724s
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
-                {!tokens.size && Array(3).fill(0).map(e => <Skeleton />)}
+                {!tokens.size && Array(3).fill(0).map((e, idx) => <Skeleton key={idx} />)}
                 {[...tokens.entries()].map(([deployName, notes], idx) => {
                   return (<TokenInput
                     key={idx}
