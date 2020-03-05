@@ -1,5 +1,6 @@
-import screenNameGenerator from "docker-names";
 import { keccak } from "ethereumjs-util";
+import screenNameGenerator from "docker-names";
+
 export const setScreenName = (screenName: string, chainId: string) =>
   localStorage.setItem(`demo/${chainId}/thisScreenName`, screenName);
 
@@ -15,8 +16,8 @@ export const generateScreenName = () => {
   return screenNameGenerator.getRandomName().replace(regex, replaceFn);
 };
 
-export const getZkTokenName = (token: string) => {
-  const result = /ZkAssetTradeable-deploy(.+)/.exec(token);
+export const getZkTokenName = (token: string | number) => {
+  const result = /ZkAssetTradeable-deploy(.+)/.exec(String(token));
   if (result) {
     return result[1];
   }
@@ -36,3 +37,8 @@ export const getColor = (value: string) => {
   const byte = Number(keccak(value)[0]);
   return solarizedColors[byte % solarizedColors.length];
 };
+
+// for .reduce fn
+export function getSum(sum: any, note: any): any {
+  return sum + parseInt(note.k.toString());
+}

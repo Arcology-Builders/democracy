@@ -54,7 +54,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-  
+  console.info("Rendering Tokens:", tokens);
   const demo: any = useContext(Democracy);
   
   return (
@@ -71,11 +71,11 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
                 {!tokens.size && <Preloader />}
-                {[...tokens.entries()].map(([deployName, address], idx) => {
+                {[...tokens.entries()].map(([deployName, notes], idx) => {
                   return (<TokenInput
                     key={idx}
-                    firstValue={200}
-                    secondValue={400}
+                    name={deployName}
+                    notes={notes}
                     canEdit={deployName === state.current}
                     allowEdit={allowEdit(deployName)}
                     onSend={stage(2)}
@@ -88,8 +88,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
                 {fakePairs.map(([label, color, a, b], index) => (
                   <TokenInput
                     key={index}
-                    firstValue={a}
-                    secondValue={b}
+                    name={label}
                     canEdit={label === state.current}
                     allowEdit={allowEdit(label)}
                     onSend={stage(2)}

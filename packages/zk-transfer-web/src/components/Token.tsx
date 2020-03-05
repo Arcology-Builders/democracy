@@ -1,31 +1,55 @@
 // @ts-ignore
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import arrowLeft from "../assets/arrow-left.svg";
+// @ts-ignore
+import { note } from "aztec.js"; 
+import { NoteList, NoteValue } from "../libs/types";
+import { getSum } from "../util";
 
 type TokenPropType = {
-  firstValue: number;
-  secondValue: number;
+  name: string;
+  firstValue?: number;
+  secondValue?: number;
   children: any;
   canEdit?: boolean;
+  notes?: NoteList;
   onSend: Function;
   allowEdit?: Function;
 };
 
-const TokenInput = (props: TokenPropType) => {
-  const editMode = props.canEdit;
-  const [digit, setDigit] = useState(props.firstValue);
-  const input = useRef(null);
+const fetchValue = (notes: NoteList) => {
+  const getNoteValue = function (e: any) {
+    return note.fromViewKey(e.get("viewingKey"))
+  };
+  const pendingValues: NoteValue[] = notes.map(getNoteValue);
+  return Promise.all(Array.from(pendingValues));
+}
 
-  const setEditMode = (a?: boolean) => props.allowEdit && props.allowEdit();
-  const canEdit = (cb: Function) => (...args: any[]) =>
-    props.canEdit && cb(...args);
+const TokenInput = (props: TokenPropType) => {
+  const input = useRef(null);
+  const editMode = props.canEdit;
+  const [digit, setDigit] = useState(0);
+  const [fetched, setFetched] = useState(false);
+
+  const setEditMode = useCallback((newEditStatus?: boolean) => {
+    props.allowEdit && props.allowEdit(newEditStatus)
+  }, [props]);
+  const canEdit = useCallback((cb: Function) => (...args: any[]) =>
+    props.canEdit && cb(...args), [props.canEdit]);
 
   useEffect(() => {
     canEdit((a: any) => {
-      // console.log('The input at first', a);
       if (a) a.current.focus();
     })(input);
-  });
+    if (props.notes && !fetched) {
+       console.count(props.name);
+       fetchValue(props.notes)
+        .then(values => setDigit(values.reduce(getSum, 0)));
+     } else {
+       setDigit(0);
+       setFetched(true);
+     }
+  }, [canEdit, digit, fetched, props.name, props.notes]);
 
   return (
     <div
@@ -43,7 +67,7 @@ const TokenInput = (props: TokenPropType) => {
       />
       <div className="h-5 flex-shrink-0 bg-gray-400 border mx-1"></div>
       {!editMode ? (
-        <span className="px-1 text-base">{props.secondValue}</span>
+        <span className="px-1 text-base">{digit || 0}</span>
       ) : (
         <button
           className="appearance-none focus:bg-gray-200 focus:outline-none"
@@ -136,4 +160,4 @@ export const TokenCard = (props: any) => {
   );
 };
 
-export default TokenInput;
+export default React.memo(TokenInput);

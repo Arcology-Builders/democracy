@@ -9,19 +9,17 @@ import MakeTransaction from './views/MakeTransaction';
 import Democracy from './components/context/Democracy';
 import { getScreenName, setScreenName, generateScreenName, getZkTokenName } from "./util";
 import { makeApi } from "./libs/api";
+import { Note } from "./libs/types";
 
 type AppProp = {
   demo: any
 };
 
-type TokenMap = [string, Map<string, Object>];
-
-const ZKNotes = new Map();
-const ZKTokens = new Map();
 function App({ demo } : AppProp) {
   const [state, setState] = useState({
     chainId: demo.chainId,
-    screenName: '',
+    screenName: "",
+    ZKToken: new Map(),
   });
 
   useEffect(() => {
@@ -30,24 +28,23 @@ function App({ demo } : AppProp) {
     if (!chainId) {
       demo.clientInit()
         .then(async () => {
-          console.group('Client Initialized');
+          console.groupCollapsed('Client Initialized');
           const api = await makeApi(demo);
           //@ts-ignore
           window.api = api; window.demo = demo;
-          api.thisAddressNotes
-            .mapEntries(([address, map]: TokenMap, k:string) => {
-              // not getting any notes here!
-              const getHashNotes = (v: any) => v.get('zkNoteHash');
-              ZKNotes.set(address, api.thisAddressNotes.get(address).map(getHashNotes));
-            });
-          api.zkTokens.forEach((v, tokenName) => {
+          api.zkTokens.mapEntries(([tokenName, token]) => {
             const shortTokenName = getZkTokenName(tokenName);
-            const deployAddress = v.get('deployAddress');
-            ZKTokens.set(shortTokenName, deployAddress);
+            const tokenAddress: string = token.get("deployAddress");
+            const getHashNotes = (v: Note) => v;
+            const notes = api.thisAddressNotes
+              .get(tokenAddress)
+              .map(getHashNotes);
+
+            state.ZKToken.set(shortTokenName, notes);
           });
-          console.info('ZkTokens', ZKTokens)
-          console.info('ZkNotes', Object.fromEntries(ZKNotes.entries()))
+          console.info(state.ZKToken);
           console.groupEnd();
+          console.info("Fetch Tokens and Notes");
           const screenName = getScreenName(demo.chainId);
 
           if (!screenName) {
@@ -69,8 +66,8 @@ function App({ demo } : AppProp) {
             <Switch>
               <Route exact path="/" render={() => 
                 <MakeTransaction 
-                  tokens={ZKTokens}
-                  notes={ZKNotes}
+                  // @ts-ignore
+                  tokens={state.ZKToken}
                   screenName={state.screenName} />} />
               <Route exact path="/home" component={Homepage} />
             </Switch>
