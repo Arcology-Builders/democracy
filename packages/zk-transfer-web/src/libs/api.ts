@@ -1,10 +1,18 @@
+import { Map, List } from "immutable";
 //@ts-ignore
 import { getNetwork } from "demo-utils";
-import { Token, TokenList, Note, NoteList, KeyValuePair } from "./types";
+import {
+  TokenMap,
+  Token,
+  TokenAddress,
+  TokenNotesPair,
+  Note,
+  NoteList
+} from "./types";
 
 const eth: any = getNetwork();
 
-type apiObject = {
+type ApiProps = {
   bm: any;
   ace: any;
   demo: any;
@@ -12,16 +20,15 @@ type apiObject = {
   demoAztec: any;
   chainId: string;
   erc20Tokens: any;
-  thisAddressNotes: NoteList;
-  zkTokens: TokenList<Token>;
+  zkTokens: Map<TokenAddress, Token>;
+  thisAddressNotes: Map<TokenAddress, NoteList>;
 };
 
 // Use the demo parameter as it's been previously initialized
 // Don't initialize the imported members above directly
 // as these are a separate instance imported by webpack build
 // within demo-aztec, as opposed to the one in the democracy bundle.
-export const makeApi = async (demo: any): Promise<apiObject> => {
-  const { Map } = demo.immutable;
+export const makeApi = async (demo: any): Promise<ApiProps> => {
   const account = demo.secp256k1.accountFromPrivateKey(
     demo.keys.wallet.getAccountSync(demo.thisAddress).get("privatePrefixed")
   );
@@ -31,14 +38,14 @@ export const makeApi = async (demo: any): Promise<apiObject> => {
   const demoAztec = window.aztec;
   const chainId = await eth.net_version();
   const bm = await demo.contract.createBM({ chainId, autoConfig: true });
-  const deploys: TokenList<Token> = await bm.getDeploys();
+  const deploys: TokenMap = await bm.getDeploys();
   const ace = (await demo.contract.createContract("ACE")).getInstance();
 
-  const filterToken = (list: TokenList<Token>) => (regex: RegExp) => {
+  const filterToken = (list: TokenMap) => (regex: RegExp) => {
     return list.filter((_, name) => name.match(regex));
   };
 
-  const securities = filterToken(deploys)(/deploy[A-Z][A-Z][A-Z]/);
+  const securities = filterToken(deploys)(/deploy[A-Z]{3}/);
   const fetchSecurity = filterToken(securities);
   const erc20Tokens = fetchSecurity(/ERC20/);
   const zkTokens = fetchSecurity(/ZkAssetTradeable/);
@@ -46,9 +53,8 @@ export const makeApi = async (demo: any): Promise<apiObject> => {
   const fetcher = (address: string): Promise<Note> =>
     bm.inputter(`zkNotes/${chainId}/${demo.thisAddress}/${address}`);
 
-  const defaultNote = Map({});
-  const pendingNotes = fetchNotes(fetcher, zkTokens, defaultNote);
-  const thisAddressNotes = Map(await Promise.all(pendingNotes));
+  const pendingNotes = fetchNotes(fetcher, zkTokens);
+  const tokenAndNotes = await Promise.all(pendingNotes);
 
   return {
     bm,
@@ -59,24 +65,18 @@ export const makeApi = async (demo: any): Promise<apiObject> => {
     chainId,
     zkTokens,
     erc20Tokens,
-    thisAddressNotes
+    thisAddressNotes: Map(tokenAndNotes)
   };
 };
 
-function fetchNotes(
-  fetch: any,
-  zkTokens: TokenList<Token>,
-  defaultType: Map<string, string>
-): Promise<KeyValuePair<Note>>[] {
-  return zkTokens
-    .map(
-      async token =>
-        new Promise(resolve => {
-          const address = token.get("deployAddress");
-          fetch(address)
-            .then((val: Note) => resolve([address, val]))
-            .catch(() => resolve([address, defaultType]));
-        })
-    )
-    .values();
+function fetchNotes(fetch: any, zkTokens: TokenMap) {
+  const getTokenNote = (token: Token): Promise<TokenNotesPair> =>
+    new Promise(resolve => {
+      const address = token.get("deployAddress");
+      fetch(address)
+        .then((val: NoteList) => resolve([address, val]))
+        .catch(() => resolve([address, List([])]));
+    });
+
+  return zkTokens.map(getTokenNote).values();
 }

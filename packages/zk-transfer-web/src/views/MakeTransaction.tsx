@@ -7,7 +7,8 @@ import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
 import Democracy from "../components/context/Democracy";
-
+import { TokenNotesMap } from "../libs/types";
+import { List } from 'immutable';
 
 type User = {
   name: string;
@@ -19,7 +20,12 @@ const users: User[] = [
   { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
 ];
 
-const MakeTransaction = ({ screenName, tokens, notes }: any) => {
+type TransactionProps = {
+  screenName: string;
+  tokens: TokenNotesMap;
+}
+
+const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
   const fakePairs: [string, string, number, number][] = [
     // ["RBT", "#AF1500", 200, 200],
     // ["AAAA", "#AF9E00", 300, 400],
@@ -54,7 +60,7 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-  console.info("Rendering Tokens:", tokens);
+  // console.info("Rendering Tokens:", tokens);
   const demo: any = useContext(Democracy);
   
   return (
@@ -71,16 +77,16 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
                 {!tokens.size && Array(3).fill(0).map((e, idx) => <Skeleton key={idx} />)}
-                {[...tokens.entries()].map(([deployName, notes], idx) => {
+                {List(tokens.entries()).map(([tradeSymbol,notes], idx) => {
                   return (<TokenInput
                     key={idx}
-                    name={deployName}
+                    tradeSymbol={tradeSymbol}
                     notes={notes}
-                    canEdit={deployName === state.current}
-                    allowEdit={allowEdit(deployName)}
+                    canEdit={tradeSymbol === state.current}
+                    allowEdit={allowEdit(tradeSymbol)}
                     onSend={stage(2)}
                     >
-                    <CircularText color={getColor(deployName)} label={deployName} />
+                    <CircularText color={getColor(tradeSymbol)} label={tradeSymbol} />
                   </TokenInput>)
                 })}
               </TokenGroup>
@@ -88,8 +94,9 @@ const MakeTransaction = ({ screenName, tokens, notes }: any) => {
                 {fakePairs.map(([label, color, a, b], index) => (
                   <TokenInput
                     key={index}
-                    name={label}
+                    tradeSymbol={label}
                     canEdit={label === state.current}
+                    notes={List([])}
                     allowEdit={allowEdit(label)}
                     onSend={stage(2)}
                   >

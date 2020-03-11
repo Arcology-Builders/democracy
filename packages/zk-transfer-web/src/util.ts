@@ -17,11 +17,12 @@ export const generateScreenName = () => {
 };
 
 export const getZkTokenName = (token: string | number) => {
-  const result = /ZkAssetTradeable-deploy(.+)/.exec(String(token));
-  if (result) {
-    return result[1];
+  const result = /ZkAssetTradeable-deploy(.+)/i.exec(String(token));
+  if (result == null || result.length === 1) {
+    throw Error("Couldn't retreive token name");
   }
-  throw Error("Couldn't retreive token name");
+  
+  return result[1];
 };
 
 const solarizedColors = [
@@ -37,8 +38,3 @@ export const getColor = (value: string) => {
   const byte = Number(keccak(value)[0]);
   return solarizedColors[byte % solarizedColors.length];
 };
-
-// for .reduce fn
-export function getSum(sum: any, note: any): any {
-  return sum + parseInt(note.k.toString());
-}

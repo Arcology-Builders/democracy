@@ -1,4 +1,4 @@
-export type ERCToken = Map<any, any>;
+import { Map, List } from "immutable";
 
 export interface Note extends Map<string, any> {
   _id: string;
@@ -13,12 +13,18 @@ export interface Note extends Map<string, any> {
   zkNoteHash: string; // Hex(66)
 }
 
+/** Hex(42) */
+export type TokenAddress = string;
+
+/** Char(3) - Char(4) eg. AAA */
+export type TradeSymbol = string;
+
 export interface ZkToken extends Map<string, any> {
   code: string; // Hex(30480)
   name: string; // "ZKAssetTradable"
   type: string; // "deploy"
   chainId: string; // Ethereum Network Id
-  deployAddress: string; // Hex(42)
+  deployAddress: TokenAddress;
   deployDate: string; // Human readable date format
   deployId: string; // deployABC
   deployTime: number; // 15795271511
@@ -27,27 +33,17 @@ export interface ZkToken extends Map<string, any> {
   abi: []; // Some constants
 }
 
-export type Token = ZkToken | ERCToken;
+export interface ERC20Token extends ZkToken {}
 
-export interface TokenList<T> extends ArrayLike<T> {
-  values(): Object;
-  map<U>(f: (first: T, key: string) => U): any;
-  forEach<U>(f: (first: T, key: string) => U): void;
-  filter<U>(f: (first: T, key: string) => U): TokenList<T>;
-  mapEntries<U>(f: (entry: KeyValuePair<T>, key: string) => U): TokenList<T>;
-}
+export type Token = ZkToken | ERC20Token;
 
-export type KeyValuePair<L> = [string, L];
+export type NoteList = List<Note>;
 
-export interface NoteList extends TokenList<Note> {
-  get(address: string): NoteList;
-  filter<U>(f: (first: Note, key: string) => U): NoteList;
-  mapEntries<U>(f: (first: KeyValuePair<Note>, key: string) => U): NoteList;
-}
+export type TokenMap = Map<TokenAddress, Token>;
 
-export interface BN {
-  add(address: string): Number;
-}
+export type TokenNotesPair = [TokenAddress, NoteList];
+
+export type TokenNotesMap = Map<TokenAddress, NoteList>;
 
 export interface NoteValue {
   owner: string;
