@@ -39,11 +39,11 @@ export type Token = ZkToken | ERC20Token;
 
 export type NoteList = List<Note>;
 
-export type TokenMap = Map<TokenAddress, Token>;
+export type TokenDeploys = Map<TokenAddress, Token>;
 
-export type TokenNotesPair = [TokenAddress, NoteList];
+export type TokenAddressToNoteList = [TokenAddress, NoteList];
 
-export type TokenNotesMap = Map<TokenAddress, NoteList>;
+export type TokenAddressToNotesMap = Map<TokenAddress, NoteList>;
 
 export interface NoteValue {
   owner: string;

@@ -7,7 +7,7 @@ import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
 import Democracy from "../components/context/Democracy";
-import { TokenNotesMap } from "../libs/types";
+import { TokenAddressToNotesMap } from "../libs/types";
 import { List } from 'immutable';
 
 type User = {
@@ -22,7 +22,7 @@ const users: User[] = [
 
 type TransactionProps = {
   screenName: string;
-  tokens: TokenNotesMap;
+  tokens: TokenAddressToNotesMap;
 }
 
 const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {

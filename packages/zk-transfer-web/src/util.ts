@@ -16,8 +16,8 @@ export const generateScreenName = () => {
   return screenNameGenerator.getRandomName().replace(regex, replaceFn);
 };
 
-export const getZkTokenName = (token: string | number) => {
-  const result = /ZkAssetTradeable-deploy(.+)/i.exec(String(token));
+export const getZKTradeSymbol = (tokenDeployName: string | number) => {
+  const result = /ZkAssetTradeable-deploy(.+)/i.exec(String(tokenDeployName));
   if (result == null || result.length === 1) {
     throw Error("Couldn't retreive token name");
   }

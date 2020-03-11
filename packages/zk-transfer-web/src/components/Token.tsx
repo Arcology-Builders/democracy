@@ -14,7 +14,7 @@ type TokenPropType = {
   allowEdit?: Function;
 };
 
-const useNotes = (notes: NoteList): [number, (Error | null)] => {
+const useNotes = (notes: NoteList): { balance: number, error: (Error | null) } => {
   const [balance, setBalance] = useState(0);
   const [error, setError] = useState(null);
 
@@ -43,13 +43,13 @@ const useNotes = (notes: NoteList): [number, (Error | null)] => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notes]);
 
-  return [ balance, error ];
+  return { balance, error }
 }
 
 const TokenInput = (props: TokenPropType) => {
   const input = useRef(null);
   const editMode = props.canEdit;
-  const [ balance ] = useNotes(props.notes);
+  const { balance } = useNotes(props.notes);
 
   const setEditMode = useCallback((newEditStatus?: boolean) => {
     props.allowEdit && props.allowEdit(newEditStatus)

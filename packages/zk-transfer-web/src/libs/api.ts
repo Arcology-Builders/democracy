@@ -2,10 +2,10 @@ import { Map, List } from "immutable";
 //@ts-ignore
 import { getNetwork } from "demo-utils";
 import {
-  TokenMap,
+  TokenDeploys,
   Token,
   TokenAddress,
-  TokenNotesPair,
+  TokenAddressToNoteList,
   Note,
   NoteList
 } from "./types";
@@ -38,10 +38,10 @@ export const makeApi = async (demo: any): Promise<ApiProps> => {
   const demoAztec = window.aztec;
   const chainId = await eth.net_version();
   const bm = await demo.contract.createBM({ chainId, autoConfig: true });
-  const deploys: TokenMap = await bm.getDeploys();
+  const deploys: TokenDeploys = await bm.getDeploys();
   const ace = (await demo.contract.createContract("ACE")).getInstance();
 
-  const filterToken = (list: TokenMap) => (regex: RegExp) => {
+  const filterToken = (list: TokenDeploys) => (regex: RegExp) => {
     return list.filter((_, name) => name.match(regex));
   };
 
@@ -69,8 +69,8 @@ export const makeApi = async (demo: any): Promise<ApiProps> => {
   };
 };
 
-function fetchNotes(fetch: any, zkTokens: TokenMap) {
-  const getTokenNote = (token: Token): Promise<TokenNotesPair> =>
+function fetchNotes(fetch: any, zkTokens: TokenDeploys) {
+  const getTokenNote = (token: Token): Promise<TokenAddressToNoteList> =>
     new Promise(resolve => {
       const address = token.get("deployAddress");
       fetch(address)
