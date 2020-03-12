@@ -1,13 +1,14 @@
 import React, { useState, useContext } from "react";
-
+import { getColor } from '../util';
 import Header from "../components/Header";
 import Card from "../components/Card";
-import TokenInput, { CircularText, TokenGroup } from "../components/Token";
+import TokenInput, { Skeleton, CircularText, TokenGroup } from "../components/Token";
 import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
 import Democracy from "../components/context/Democracy";
-
+import { TokenAddressToNotesMap } from "../libs/types";
+import { List } from 'immutable';
 
 type User = {
   name: string;
@@ -19,11 +20,16 @@ const users: User[] = [
   { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
 ];
 
-const MakeTransaction = ({ screenName }: any) => {
+type TransactionProps = {
+  screenName: string;
+  tokens: TokenAddressToNotesMap;
+}
+
+const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
   const fakePairs: [string, string, number, number][] = [
-    ["RBT", "#AF1500", 200, 200],
-    ["AAAA", "#AF9E00", 300, 400],
-    ["BMT", "#00AF5B", 500, 300],
+    // ["RBT", "#AF1500", 200, 200],
+    // ["AAAA", "#AF9E00", 300, 400],
+    // ["BMT", "#00AF5B", 500, 300],
     ["GNO", "#0066AF", 100, 100],
     ["DAI", "#4D00AF", 200, 200],
     ["MKR", "#AF005E", 500, 500]
@@ -54,7 +60,7 @@ const MakeTransaction = ({ screenName }: any) => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-  
+  // console.info("Rendering Tokens:", tokens);
   const demo: any = useContext(Democracy);
   
   return (
@@ -70,26 +76,27 @@ const MakeTransaction = ({ screenName }: any) => {
                 Standard erc20s or private erc1724s
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
-                {fakePairs.splice(0, 3).map(([label, color, a, b], index) => (
-                  <TokenInput
-                    key={index}
-                    firstValue={a}
-                    secondValue={b}
-                    canEdit={label === state.current}
-                    allowEdit={allowEdit(label)}
+                {!tokens.size && Array(3).fill(0).map((e, idx) => <Skeleton key={idx} />)}
+                {List(tokens.entries()).map(([tradeSymbol,notes], idx) => {
+                  return (<TokenInput
+                    key={idx}
+                    tradeSymbol={tradeSymbol}
+                    notes={notes}
+                    canEdit={tradeSymbol === state.current}
+                    allowEdit={allowEdit(tradeSymbol)}
                     onSend={stage(2)}
-                  >
-                    <CircularText color={color} label={label} />
-                  </TokenInput>
-                ))}
+                    >
+                    <CircularText color={getColor(tradeSymbol)} label={tradeSymbol} />
+                  </TokenInput>)
+                })}
               </TokenGroup>
               <TokenGroup name="Standard Tokens - ERC20">
                 {fakePairs.map(([label, color, a, b], index) => (
                   <TokenInput
                     key={index}
-                    firstValue={a}
-                    secondValue={b}
+                    tradeSymbol={label}
                     canEdit={label === state.current}
+                    notes={List([])}
                     allowEdit={allowEdit(label)}
                     onSend={stage(2)}
                   >
