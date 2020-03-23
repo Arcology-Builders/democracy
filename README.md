@@ -7,13 +7,15 @@ democracy
 
 Minimalist tools for coordinating decentralized and private computation, currently on Ethereum.
 
+[Create a Democracy wallet now](https://zk-transfer.netlify.com)
+
 Our first major integration is with the AZTEC Protocol, to enable trading of zero-knowledge assets.
 
 [![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js)
 [![CircleCI](https://circleci.com/gh/invisible-college/democracy.svg?style=svg)](https://circleci.com/gh/invisible-college/democracy)
 [![Gitter](https://badges.gitter.im/invisible-college/democracy.svg)](https://gitter.im/invisible-college/democracy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-[API Documentation](https://invisible-college.github.io/democracy/)
+[API Documentation](https://democracy.js.org/jsdocs/index.html)
 
 You can include the top-level npm package `democracy.js` or just include the sub-packages you need.
 
@@ -109,11 +111,6 @@ Here are ways you can participate
 * Download the source code, send us suggestions, improvements, tests, documentations, via pull requests
 * Use us in your next Ethereum (or eventually, Secure Scuttlebutt) project!
   * The best way to decide what you want in a framework is to try building with it
-* If you're in NYC, drop by our [Arcology](http://arcology.nyc) and pair program with us
-* Meet and chat with us on our community slack at http://invisible-slack.herokuapp.com
-  * (Please read and agree to our community guidelines, which our friendly bot Greedo will give to you upon joining).
+* Meet and chat with us on [Gitter](https://gitter.im/invisible-college/democracy).
 
-While we aim to be stable, featureful, and useful, we are primarily a platform for
-cooperation and mob programming.
-
-We are an adventure of the [Invisible College](http://invisible.college).
+We are a project of the [Invisible College](http://invisible.college).
