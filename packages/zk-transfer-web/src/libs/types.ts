@@ -1,5 +1,20 @@
 import { Map, List } from "immutable";
 
+export type AddressPasswordHash = { address: string; password: string };
+
+export type Demo = {
+  bm: any;
+  chainId: string;
+  thisAddress: string; // Hex(42)
+  thisSignerEth: any;
+  thisPublicKey: string; // Hex(132)
+  keys: {
+    wallet: {
+      prepareSignerEth(data: AddressPasswordHash): Promise<any>;
+    };
+  };
+};
+
 export interface Note extends Map<string, any> {
   _id: string;
   type: string;

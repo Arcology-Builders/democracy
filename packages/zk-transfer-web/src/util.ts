@@ -7,6 +7,9 @@ export const setScreenName = (screenName: string, chainId: string) =>
 export const getScreenName = (chainId: string) =>
   localStorage.getItem(`demo/${chainId}/thisScreenName`);
 
+export const getPassword = (chainId: string) =>
+  localStorage.getItem(`demo/${chainId}/thisPassword`);
+
 export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 export const generateScreenName = () => {
@@ -21,7 +24,7 @@ export const getZKTradeSymbol = (tokenDeployName: string | number) => {
   if (result == null || result.length === 1) {
     throw Error("Couldn't retreive token name");
   }
-  
+
   return result[1];
 };
 

@@ -12,6 +12,7 @@ import {
 } from "./util";
 import { makeApi } from "./libs/api";
 import { Note, TokenAddress } from "./libs/types";
+import { makeMint } from "./libs/txHelpers";
 
 type AppProp = {
   demo: any;
@@ -28,15 +29,20 @@ function App({ demo }: AppProp) {
     if (!state.chainId)
       demo.clientInit().then(async () => {
         console.groupCollapsed("Client Initialized");
-        const { zkTokens, thisAddressNotes } = await makeApi(demo);
+        const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
         const tradeSymbolToNotes = zkTokens.mapEntries(([tokenName, token]) => {
           const tradeSymbol = getZKTradeSymbol(tokenName);
           const tokenAddress: TokenAddress = token.get("deployAddress");
           const getHashNotes = (v: Note) => v;
           const notes = thisAddressNotes.get(tokenAddress)?.map(getHashNotes);
+          
+          makeMint(demo)({ bm, tradeSymbol: 'AAA', amount: 5 })
+            .catch((err) => {
+              console.log('Minting failed:', err)
+            })
 
           return [tradeSymbol, notes];
-        });
+        })
 
         console.info("Fetched Tokens and Notes");
 
