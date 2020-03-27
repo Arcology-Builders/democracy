@@ -1,16 +1,34 @@
 import { Map, List } from "immutable";
 
-export type AddressPasswordHash = { address: string; password: string };
+export type BM = any;
+
+type Password = string;
+
+export type SignerEth = {};
+
+export type EthAddress = string;
+
+type SignerMap = {
+  [key: string]: SignerEth;
+};
 
 export type Demo = {
-  bm: any;
+  bm: BM;
   chainId: string;
-  thisAddress: string; // Hex(42)
-  thisSignerEth: any;
+  thisAddress: EthAddress; // Hex(42)
+  thisSignerEth: SignerEth;
   thisPublicKey: string; // Hex(132)
   keys: {
     wallet: {
-      prepareSignerEth(data: AddressPasswordHash): Promise<any>;
+      signersMap: SignerMap;
+      prepareSignerEth(data: {
+        address: EthAddress;
+        password: Password;
+      }): Promise<{
+        address: EthAddress;
+        password: Password;
+        signerEth: SignerEth;
+      }>;
     };
   };
 };

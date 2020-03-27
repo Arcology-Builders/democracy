@@ -30,20 +30,23 @@ function App({ demo }: AppProp) {
       demo.clientInit().then(async () => {
         console.groupCollapsed("Client Initialized");
         const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
+
+        // Auto-Mint
+        console.info('Auto-Minting')
+        makeMint(demo, { bm, tradeSymbol: 'AAA', amount: 2 })
+        .then((payload) => { console.info("Minting Success:", payload)})
+        .catch((err) => console.info('Minting failed: ', err.message))
+
+        // Get tradeSymbolsAndNotes
+        console.info("Fetching Tokens and Notes");
         const tradeSymbolToNotes = zkTokens.mapEntries(([tokenName, token]) => {
           const tradeSymbol = getZKTradeSymbol(tokenName);
           const tokenAddress: TokenAddress = token.get("deployAddress");
           const getHashNotes = (v: Note) => v;
           const notes = thisAddressNotes.get(tokenAddress)?.map(getHashNotes);
-          
-          makeMint(demo)({ bm, tradeSymbol: 'AAA', amount: 5 })
-            .catch((err) => {
-              console.log('Minting failed:', err)
-            })
 
           return [tradeSymbol, notes];
         })
-
         console.info("Fetched Tokens and Notes");
 
         let screenName = getScreenName(demo.chainId);
