@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import BN from 'bn.js';
 import { Map } from "immutable";
 import Homepage from "./views/Home";
 import MakeTransaction from "./views/MakeTransaction";
@@ -12,7 +13,7 @@ import {
 } from "./util";
 import { makeApi } from "./libs/api";
 import { Note, TokenAddress } from "./libs/types";
-import { makeMint } from "./libs/txHelpers";
+import { doMint } from "./libs/txHelpers";
 
 type AppProp = {
   demo: any;
@@ -33,9 +34,12 @@ function App({ demo }: AppProp) {
 
         // Auto-Mint
         console.info('Auto-Minting')
-        makeMint(demo, { bm, tradeSymbol: 'AAA', amount: 2 })
-        .then((payload) => { console.info("Minting Success:", payload)})
-        .catch((err) => console.info('Minting failed: ', err.message))
+        doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
+          .then(() => console.info("Minting Success:"))
+          .catch(err => {
+            console.info('Minting failed: ', err.message) 
+            console.error(err)
+          })
 
         // Get tradeSymbolsAndNotes
         console.info("Fetching Tokens and Notes");

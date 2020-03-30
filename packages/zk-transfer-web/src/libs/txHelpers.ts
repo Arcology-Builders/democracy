@@ -2,22 +2,18 @@ import BN from "bn.js";
 import { Map } from "immutable";
 import { Demo, EthAddress, BM, SignerEth } from "./types";
 import { untilTxMined } from "demo-tx";
-import { runTransforms } from "demo-transform";
-import { deployed, constructMintPipeline } from "demo-aztec-lib";
+import { deployed, mintFunc } from "demo-aztec-lib";
 import { RINKEBY_ADMIN_ADDRESS, RINKEBY_ADMIN_PASSWORD } from "./constants";
 
-const mintPipeline = constructMintPipeline();
-
-export const mint = async (state: any) => {
-  return await runTransforms(mintPipeline, state);
-};
-
-type makeMintOptions = { bm: BM; tradeSymbol: string; amount: number };
-export const makeMint = async (
-  demo: Demo,
-  { bm, tradeSymbol, amount }: makeMintOptions
-): Promise<void> => {
+type doMintOptions = { demo: Demo; bm: BM; tradeSymbol: string; amount: BN };
+export const doMint = async ({
+  demo,
+  bm,
+  tradeSymbol,
+  amount
+}: doMintOptions): Promise<void> => {
   console.info("Beginning Mint Process:");
+  console.info("Mint Function", deployed);
   const { signerEth } = await demo.keys.wallet.prepareSignerEth({
     address: RINKEBY_ADMIN_ADDRESS,
     password: RINKEBY_ADMIN_PASSWORD
@@ -29,7 +25,7 @@ export const makeMint = async (
     mintFromZero: false,
     chainId: demo.chainId,
     deployerEth: signerEth,
-    minteeAmount: new BN(amount),
+    minteeAmount: amount,
     minteeAddress: demo.thisAddress,
     minteePublicKey: demo.thisPublicKey,
     deployerAddress: RINKEBY_ADMIN_ADDRESS,
@@ -38,7 +34,7 @@ export const makeMint = async (
     minedTx: minedTxFunc({ demo, fromAddress: RINKEBY_ADMIN_ADDRESS })
   });
 
-  await mint(params);
+  await mintFunc(params.toJS());
 };
 
 type deployFuncProp = {
@@ -47,7 +43,7 @@ type deployFuncProp = {
 };
 
 const deployedFunc = ({ bm, signerEth }: deployFuncProp) => {
-  return async (contractName: any, options: any) => {
+  return async (contractName: string, options: { deployId: string }) => {
     return await deployed({
       bm,
       options,
@@ -67,7 +63,7 @@ const minedTxFunc = ({ demo, fromAddress }: minedTxProps) => {
   // associated signer.
   return async (method: any, argList: any, options: any): Promise<any> => {
     const signerEth = demo.keys.wallet.signersMap[fromAddress];
-    const _options = Map({ from: fromAddress, gas: "6700000" })
+    const _options = Map({ from: fromAddress, gas: demo.config["GAS_LIMIT"] })
       .merge(options)
       .toJS();
     const txHash = await method(...argList, _options);

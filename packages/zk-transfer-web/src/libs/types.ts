@@ -15,6 +15,7 @@ type SignerMap = {
 export type Demo = {
   bm: BM;
   chainId: string;
+  config: { [key: string]: any };
   thisAddress: EthAddress; // Hex(42)
   thisSignerEth: SignerEth;
   thisPublicKey: string; // Hex(132)
