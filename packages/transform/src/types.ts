@@ -45,8 +45,13 @@ export const makeCheckerFromBoolean = (
   booleanChecker : BooleanArgCheckerFunc,
   typeName       : string,
 ): ArgCheckerFunc => {
-  return (arg: any) => booleanChecker(arg) ?
-    {} : {error: `Arg ${arg} did not have type ${typeName}`}
+  return (arg: any) => {
+    const argString = (typeof(arg) === 'object') ?
+      `object with keys ${JSON.stringify(Imm.List(Imm.Map(arg).keys()).toJS())}` :
+      JSON.stringify(arg)
+    return booleanChecker(arg) ?
+      {} : {error: `Arg ${argString} did not have type ${typeName}`}
+  }
 }
 
 export const makeRequired = (checkerFunc: ArgCheckerFunc, typeName: string): ArgType => {

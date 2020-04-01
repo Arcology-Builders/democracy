@@ -21,7 +21,7 @@ export const getZKTradeSymbol = (tokenDeployName: string | number) => {
   if (result == null || result.length === 1) {
     throw Error("Couldn't retreive token name");
   }
-  
+
   return result[1];
 };
 
