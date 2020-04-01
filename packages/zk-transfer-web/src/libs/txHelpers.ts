@@ -13,7 +13,6 @@ export const doMint = async ({
   amount
 }: doMintOptions): Promise<void> => {
   console.info("Beginning Mint Process:");
-  console.info("Mint Function", deployed);
   const { signerEth } = await demo.keys.wallet.prepareSignerEth({
     address: RINKEBY_ADMIN_ADDRESS,
     password: RINKEBY_ADMIN_PASSWORD
