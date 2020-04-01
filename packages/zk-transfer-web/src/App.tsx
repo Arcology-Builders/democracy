@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import BN from 'bn.js';
 import { Map } from "immutable";
 import Homepage from "./views/Home";
 import MakeTransaction from "./views/MakeTransaction";
@@ -12,6 +13,7 @@ import {
 } from "./util";
 import { makeApi } from "./libs/api";
 import { Note, TokenAddress } from "./libs/types";
+import { doMint } from "./libs/txHelpers";
 
 type AppProp = {
   demo: any;
@@ -28,7 +30,19 @@ function App({ demo }: AppProp) {
     if (!state.chainId)
       demo.clientInit().then(async () => {
         console.groupCollapsed("Client Initialized");
-        const { zkTokens, thisAddressNotes } = await makeApi(demo);
+        const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
+
+        // Auto-Mint
+        console.info('Auto-Minting')
+        doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
+          .then(() => console.info("Minting Success:"))
+          .catch(err => {
+            console.info('Minting failed: ', err.message) 
+            console.error(err)
+          })
+
+        // Get tradeSymbolsAndNotes
+        console.info("Fetching Tokens and Notes");
         const tradeSymbolToNotes = zkTokens.mapEntries(([tokenName, token]) => {
           const tradeSymbol = getZKTradeSymbol(tokenName);
           const tokenAddress: TokenAddress = token.get("deployAddress");
@@ -36,8 +50,7 @@ function App({ demo }: AppProp) {
           const notes = thisAddressNotes.get(tokenAddress)?.map(getHashNotes);
 
           return [tradeSymbol, notes];
-        });
-
+        })
         console.info("Fetched Tokens and Notes");
 
         let screenName = getScreenName(demo.chainId);

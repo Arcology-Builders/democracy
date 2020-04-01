@@ -60,7 +60,6 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-  // console.info("Rendering Tokens:", tokens);
   const demo: any = useContext(Democracy);
   
   return (

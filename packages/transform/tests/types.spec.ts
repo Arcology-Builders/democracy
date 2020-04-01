@@ -2,11 +2,28 @@
 
 import { assert } from 'chai'
 import { TYPES, isHexPrefixed } from '../src/types'
+const { wallet } = require('demo-keys')
 
 describe('Democracy types', () => {
 
   const prefixedKeccakHash =
     '0x09a33449c7526a56e658aff99a93a4dd8bf0788aeba88ba65cd94f35e1b4af19'
+
+  it('check that objects are stringified to their keys', async () => {
+    await wallet.init({ autoConfig: true })
+    const w = await wallet.prepareSignerEth({})
+    const result = TYPES.ethereumSigner(w)
+    assert.equal(
+      result['error'], 'Arg object with keys ["address","password","signerEth"] did not have type ethereumSigner',
+      'Return value of prepareSignerEth needs to be destructured.'
+    )
+    const { signerEth } = w
+    const result2 = TYPES.ethereumSigner(signerEth)
+    assert.notOk(
+      result2['error'],
+      'Destructured signerEth should now be a valid ethereumSigner'
+    )
+  })
 
   it('checks floatString type', async () => {
 

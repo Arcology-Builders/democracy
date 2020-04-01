@@ -161,4 +161,6 @@ mintFuncs.constructMintPipeline = (earlyTransforms = OrderedMap()) =>
     ['mint', mintFuncs.mintTransform],
   ]))
 
+mintFuncs.mintFunc = mintFunc
+
 module.exports = mintFuncs
