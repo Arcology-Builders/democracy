@@ -102,8 +102,8 @@ const placeHolderTransform = (placeHolderTypesValues) => createTransform({
 })
 
 const callablePipeline1 = assembleCallablePipeline( OrderedMap([
-  [m0, 'depart0'],
-  [m1, 'depart1'],
+  ['depart0', m0],
+  ['depart1', m1],
 ]) )
 const pipeTail = callablePipeline1.pipeline
 callablePipeline1( initialState ).then((prevState) => {
