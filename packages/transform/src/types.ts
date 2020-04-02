@@ -46,7 +46,9 @@ export const makeCheckerFromBoolean = (
   typeName       : string,
 ): ArgCheckerFunc => {
   return (arg: any) => {
-    const argString = (typeof(arg) === 'object') ?
+    const argString = (
+      (typeof(arg) === 'object') && (!Array.isArray(arg)) && (arg !== null)
+    ) ?
       `object with keys ${JSON.stringify(Imm.List(Imm.Map(arg).keys()).toJS())}` :
       JSON.stringify(arg)
     return booleanChecker(arg) ?

@@ -9,6 +9,7 @@ const { assert } = require('chai')
 const { toChecksumAddress } = require('ethereumjs-util')
 const LOGGER = new Logger('departSP')
 
+
 depart(Map({
   departName : Map({
     type  : TYPES.string,
@@ -32,7 +33,11 @@ depart(Map({
   }),
   sourcePathList: Map({
     type: TYPES.array,
-    value: ['../../node_modules/@aztec/protocol/contracts', '../lib/contracts', 'contracts'],
+    value: [
+      '../../node_modules/@aztec/protocol/contracts',
+      '../lib/contracts',
+      'contracts',
+    ]
   }),
 }),
 async ({deployed, compile, link, minedTx, chainId }) => {

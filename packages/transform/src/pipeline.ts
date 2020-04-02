@@ -118,6 +118,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
   const traverseList = pipeline.traverseList  
   const callable = async (initialState: Args) => {
     let inState: Args = initialState
+    let pipeSize: Number = traverseList.size
     for (let pipe of traverseList.toJS()) {
        const i: Number = traverseList.indexOf(pipe)
        const outState = await pipe.lastCallables.reduce(async (s: Args,v:CallableTransform,k:number,a:Immutable.List<CallableTransform>) => {
@@ -126,7 +127,7 @@ export const createPipeline = (pipeline: Pipeline): CallablePipeline => {
            const prevState = await s
            return mergeNonLists( prevState, out )
          } catch(e) {
-           throw new Error(`Transform run error in pipe ${i} (indexed from 0) named ${pipe.name}.\n${e.message}`)
+           throw new Error(`Transform run error in pipe ${i} of ${pipeSize} (indexed from 0) named ${pipe.name}.\n${e.message}`)
          }
        }, inState) // start all siblings to merge from same state
       // then later siblings in the line override earlier sibs
