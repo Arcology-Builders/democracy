@@ -57,6 +57,7 @@ You can build and test them all at once.
 ```
 cd democracy
 lerna bootstrap
+lerna run init
 lerna run test
 ```
 
