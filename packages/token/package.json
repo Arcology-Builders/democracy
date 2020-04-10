@@ -1,0 +1,35 @@
+{
+  "name": "demo-token",
+  "version": "0.5.2",
+  "description": "Ethereum token provenance",
+  "keywords": [
+    "democracy",
+    "ethereum",
+    "token",
+    "erc20"
+  ],
+  "author": "Paul Pham <148553+cryptogoth@users.noreply.github.com>",
+  "homepage": "https://github.com/invisible-college/democracy/tree/master/packages/token-provenance#readme",
+  "license": "MIT",
+  "main": "lib/token-provenance.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/invisible-college/democracy.git"
+  },
+  "scripts": {
+    "test": "for file in tests/*.spec.js; do NODE_ENV=MAINNET mocha ${file} -t 150000 --trace-warnings --exit --colors --recursive --reporter spec || exit 1; done"
+  },
+  "bugs": {
+    "url": "https://github.com/invisible-college/democracy/issues"
+  },
+  "dependencies": {
+    "demo-utils": "^0.5.1-alpha.0"
+  }
+}
