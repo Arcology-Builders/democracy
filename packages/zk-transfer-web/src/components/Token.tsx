@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { note } from "aztec.js"; 
+import { note } from "aztec.js";
 import { NoteList, NoteValue } from "../libs/types";
 import arrowLeft from "../assets/arrow-left.svg";
 
@@ -8,91 +8,86 @@ type TokenPropType = {
   firstValue?: number;
   secondValue?: number;
   children: any;
-  canEdit?: boolean;
+  lock: boolean;
   notes: NoteList;
   onSend: Function;
-  allowEdit?: Function;
+  allowEdit: Function;
 };
 
-const useNotes = (notes: NoteList): { balance: number, error: (Error | null) } => {
+const useNotes = (
+  notes: NoteList
+): { balance: number; error: Error | null } => {
   const [balance, setBalance] = useState(0);
   const [error, setError] = useState(null);
 
   const fetchValue = useCallback((notes: NoteList): Promise<NoteValue[]> => {
     const getNoteValue = function (e: any) {
-      return note.fromViewKey(e.get("viewingKey"))
+      return note.fromViewKey(e.get("viewingKey"));
     };
     const pendingValues: any = notes.map(getNoteValue);
     //@ts-ignore
     return Promise.all(Array.from(pendingValues));
   }, []);
-  
+
   const fetchNotes = async (notes: NoteList) => {
-      //  console.log('Fetching balances for ', props.tradeSymbol);
-      try {
-        const values = await fetchValue(notes)
-         const amount = values.reduce((s, v) => s + parseInt(v.k), 0)
-         setBalance(amount);
-      } catch (err) {
-        setError(err);
-      }
-  }
+    //  console.log('Fetching balances for ', props.tradeSymbol);
+    try {
+      const values = await fetchValue(notes);
+      const amount = values.reduce((s, v) => s + parseInt(v.k), 0);
+      setBalance(amount);
+    } catch (err) {
+      setError(err);
+    }
+  };
 
   useEffect(() => {
     fetchNotes(notes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notes]);
 
-  return { balance, error }
-}
+  return { balance, error };
+};
+
+// Greater than
+const gt = (a: number, b: number) => a > b;
 
 const TokenInput = (props: TokenPropType) => {
   const input = useRef(null);
-  const editMode = props.canEdit;
+  const locked = props.lock;
+  const [txAmount, setTxAmount] = useState(0);
   const { balance } = useNotes(props.notes);
 
-  const setEditMode = useCallback((newEditStatus?: boolean) => {
-    props.allowEdit && props.allowEdit(newEditStatus)
-  }, [props]);
-  const canEdit = useCallback((cb: Function) => (...args: any[]) =>
-    props.canEdit && cb(...args), [props.canEdit]);
+  React.useEffect(() => {
+    setTxAmount(balance);
+  }, [balance]);
 
-  useEffect(() => {
-    canEdit((a: any) => {
-      if (a) a.current.focus();
-    })(input);
-  }, [canEdit]);
+  const unlock = () => props.allowEdit();
 
   return (
-    <div
-      className="token flex items-center py-1"
-      onMouseEnter={() => setEditMode()}
-    >
+    <div className="token flex items-center py-1" onMouseEnter={unlock}>
       {props.children}
       <input
         ref={input}
-        value={balance}
-        disabled={!props.canEdit}
-        onChange={canEdit((e: any) => {})}
-        onFocus={canEdit(() => setEditMode(!editMode))}
+        value={txAmount}
+        disabled={locked}
+        onChange={(evt) => setTxAmount(parseInt(evt.target.value) || 0)}
         className="appearance-none text-base w-12 text-right rounded border"
       />
       <div className="h-5 flex-shrink-0 bg-gray-400 border mx-1"></div>
-      {!editMode ? (
+      {locked ? (
         <span className="px-1 text-base">{balance}</span>
       ) : (
         <button
           className="appearance-none focus:bg-gray-200 focus:outline-none"
-          onClick={() => {
-            setEditMode(!editMode);
-            props.onSend();
-          }}
+          disabled={gt(txAmount, balance)}
+          onClick={() => props.onSend(unlock())}
         >
-          <img
-            src={arrowLeft}
-            className="ml-4"
-            alt="send"
-            style={{ width: 15, height: 15 }}
+          <ArrowRight
+            style={{
+              color: gt(txAmount, balance) ? "#B0B0B0" : "blue",
+              width: 15,
+              height: 15,
+            }}
           />
         </button>
       )}
@@ -100,8 +95,34 @@ const TokenInput = (props: TokenPropType) => {
   );
 };
 
+export const ArrowRight = (props: { style: any }) => {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={props.style}
+    >
+      <path
+        d="M1 6H11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 1L11 6L6 11"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 TokenInput.defaultProps = {
-  canEdit: false
+  lock: true,
 };
 
 type CTProps = {
@@ -111,9 +132,9 @@ type CTProps = {
 };
 
 export const CircularText = ({ color, label, fill }: CTProps) => {
-  const variant = fill 
-    ? ({ backgroundColor: color, color: 'white', border: 'none' })
-    : ({ color: color, borderColor: color });
+  const variant = fill
+    ? { backgroundColor: color, color: "white", border: "none" }
+    : { color: color, borderColor: color };
 
   return (
     <span
@@ -123,8 +144,8 @@ export const CircularText = ({ color, label, fill }: CTProps) => {
         ...variant,
         width: 40,
         height: 40,
-        flex: '0 0 40px',
-        lineHeight: 1.5
+        flex: "0 0 40px",
+        lineHeight: 1.5,
       }}
     >
       {label}
@@ -133,13 +154,13 @@ export const CircularText = ({ color, label, fill }: CTProps) => {
 };
 
 CircularText.defaultProps = {
-  fill: false
-}
+  fill: false,
+};
 
 export const TokenGroup = (props: any) => {
   return (
     <div className="private-token-cont mt-8">
-      <p className="text-sm mb-2">{props.tradeSymbol}</p>
+      <p className="text-sm mb-2">{props.name}</p>
       <div className="token-cont">{props.children}</div>
     </div>
   );
@@ -149,15 +170,22 @@ export const TokenInput2 = (props: any) => {
   return (
     <div className="zk-token-input flex justify-between items-center rounded-lg p-2 my-4">
       <div className="flex-1">
-        <CircularText label={props.tradeSymbol} fill={true} color={props.color} />
+        <CircularText
+          label={props.tradeSymbol}
+          fill={true}
+          color={props.color}
+        />
       </div>
-      <input type="text" className="appearance-none self-stretch border-none px-3 w-32 py-1 bg-gray-100 rounded-lg" />
+      <input
+        type="text"
+        className="appearance-none self-stretch border-none px-3 w-32 py-1 bg-gray-100 rounded-lg"
+      />
       <span className="color5 flex-1 py-1 inline-block px-4">
-        { props.value }
+        {props.value}
       </span>
     </div>
-  )
-}
+  );
+};
 
 export const TokenCard = (props: any) => {
   return (
@@ -165,9 +193,7 @@ export const TokenCard = (props: any) => {
       <div className="zk-token-cont text-sm py-2">
         <p>{props.caption}</p>
       </div>
-      <div className="px-2">
-        {props.children}
-      </div>
+      <div className="px-2">{props.children}</div>
     </div>
   );
 };

@@ -47,10 +47,10 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
   
   const fade = (s_: number) => isStage(s_) || "opacity-25";
   
-  const allowEdit = (current: string | null) => () => {
-    // console.log('changing to the ' + current);
-    setState({ ...state, current: current });
-  };
+  const allowEdit = React.useCallback((tradeSymbol: string) => () => {
+    console.log("callling...")
+    setState({ ...state, current: tradeSymbol });
+  }, [state])
   
   const sentTo = (user: User) => () => {
     console.log("Sending to " + user.name);
@@ -81,7 +81,7 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
                     key={idx}
                     tradeSymbol={tradeSymbol}
                     notes={notes}
-                    canEdit={tradeSymbol === state.current}
+                    lock={tradeSymbol !== state.current}
                     allowEdit={allowEdit(tradeSymbol)}
                     onSend={stage(2)}
                     >
@@ -94,7 +94,7 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
                   <TokenInput
                     key={index}
                     tradeSymbol={label}
-                    canEdit={label === state.current}
+                    lock={label !== state.current}
                     notes={List([])}
                     allowEdit={allowEdit(label)}
                     onSend={stage(2)}
