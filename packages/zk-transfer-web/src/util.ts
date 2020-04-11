@@ -7,6 +7,9 @@ export const setScreenName = (screenName: string, chainId: string) =>
 export const getScreenName = (chainId: string) =>
   localStorage.getItem(`demo/${chainId}/thisScreenName`);
 
+export const getPassword = (chainId: string) =>
+  localStorage.getItem(`demo/${chainId}/thisPassword`);
+
 export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 export const generateScreenName = () => {
@@ -31,7 +34,7 @@ const solarizedColors = [
   "#00AF5B", // green
   "#0066AF", // cadetblue
   "#4D00AF", // purple
-  "#AF005E" // jazzberry
+  "#AF005E", // jazzberry
 ];
 
 export const getColor = (value: string) => {

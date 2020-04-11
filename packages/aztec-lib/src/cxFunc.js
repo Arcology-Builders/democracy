@@ -16,7 +16,7 @@ const { fromJS, toJS, Logger, getConfig }
                 = require('demo-utils')
 const { isAccount }
                 = require('demo-keys')
-const { createTransformFromMap, makeMapType } = require('demo-transform')
+const { createTransformFromMap, makeMapType, runTransforms } = require('demo-transform')
 const { checkPublicKey, AZTEC_TYPES: TYPES,
   exportAztecPrivateNote, exportAztecPublicNote } = require('./utils')
 const { createSignerTransform, createPublicKeyTransform, } = require('./transforms')
@@ -431,5 +431,8 @@ cxFuncs.constructCxPipeline = (earlyTransforms) =>
           [ 'cxTransfer' , cxFuncs.cxTransfer ],
           [ 'cxFinish'   , cxFuncs.cxFinish   ],
         ]))
+
+cxFuncs.cx = async (state) => 
+  await runTransforms( cxFuncs.constructCxPipeline(), state )
 
 module.exports = cxFuncs

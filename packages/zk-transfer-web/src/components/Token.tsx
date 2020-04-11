@@ -1,7 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { note } from "aztec.js";
 import { NoteList, NoteValue } from "../libs/types";
-import arrowLeft from "../assets/arrow-left.svg";
+
+export type StageProps = {
+  noteHash: any;
+  amount: number;
+  tradeSymbol: string;
+};
 
 type TokenPropType = {
   tradeSymbol: string; // AAA | BBB | ABC
@@ -10,8 +15,8 @@ type TokenPropType = {
   children: any;
   lock: boolean;
   notes: NoteList;
-  onSend: Function;
   allowEdit: Function;
+  onSend(a: StageProps): void;
 };
 
 const useNotes = (
@@ -80,7 +85,14 @@ const TokenInput = (props: TokenPropType) => {
         <button
           className="appearance-none focus:bg-gray-200 focus:outline-none"
           disabled={gt(txAmount, balance)}
-          onClick={() => props.onSend(unlock())}
+          onClick={() => {
+            unlock();
+            props.onSend({
+              tradeSymbol: props.tradeSymbol,
+              amount: txAmount,
+              noteHash: props.notes,
+            });
+          }}
         >
           <ArrowRight
             style={{
