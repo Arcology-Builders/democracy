@@ -106,6 +106,19 @@ const ENVIRONMENTS = {
     'da'    : getEnvVar( 'RINKEBY.DEPLOYER_ADDRESS'  ),
     'dp'    : getEnvVar( 'RINKEBY.DEPLOYER_PASSWORD' ),
   }), ['INFURA_PROJECT_ID']) },
+  'GOERLI'    : (infuraProjectId) => { return checkEnv(createEnv({
+    'dbURL'  : getEnvVar( 'GOERLI.DB_URL'  ) || 'https://goerli.arcology.nyc:8547',
+    'ethURL' : getEnvVar( 'GOERLI.ETH_URL' ) || `https://goerli.infura.io/v3/${infuraProjectId}`,
+    'shhURL' : getEnvVar( 'GOERLI.SHH_URL' ) || SHH_IP,
+    'gp'     : 5,
+    'gl'     : '670000',
+    'db'     : 'goerli',
+    'lo'     : getEnvVar( 'GOERLI.LOG_OUT' ),
+    'll'     : configs.parseLogLevels(getEnvVar( 'GOERLI.LOG_LEVELS' )) ||
+               [ 'warn', 'error' ],
+    'da'    : getEnvVar( 'GOERLI.DEPLOYER_ADDRESS'  ),
+    'dp'    : getEnvVar( 'GOERLI.DEPLOYER_PASSWORD' ),
+  }), ['INFURA_PROJECT_ID']) },
   'MAINNET'    : (infuraProjectId) => { return checkEnv(createEnv({
     'dbURL'  : getEnvVar( 'MAINNET.DB_URL'  ) || 'https://mainnet.arcology.nyc:8545',
     'ethURL' : getEnvVar( 'MAINNET.ETH_URL' ) || `https://mainnet.infura.io/v3/${infuraProjectId}`,
