@@ -47,9 +47,10 @@ favorite shell.
 
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-. ~/.bash_profile
+. ~/.nvm/nvm.sh
 nvm install v11.14.0
 curl -o- -L https://yarnpkg.com/install.sh | bash
+yarn global add lerna
 ```
 
 We manage a monorepo of multiple packages with `lerna`.
@@ -57,6 +58,7 @@ You can build and test them all at once.
 ```
 cd democracy
 lerna bootstrap
+lerna run init
 lerna run test
 ```
 
