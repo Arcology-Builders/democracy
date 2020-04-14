@@ -14,7 +14,7 @@
 require("babel-core/register")
 require('@babel/polyfill')
 
-const BrowserFS = require('browserfs')
+//const BrowserFS = require('browserfs')
 const api = {}
 
 /**
@@ -33,6 +33,7 @@ const api = {}
  */
 api.initFS = (listingHTTP) => {
   console.log(JSON.stringify(listingHTTP))
+  /*
   BrowserFS.FileSystem.LocalStorage.Create(function(e, lsfs) {
     BrowserFS.FileSystem.InMemory.Create(function(e, inMemory) {
       BrowserFS.FileSystem.XmlHttpRequest.Create({
@@ -50,6 +51,7 @@ api.initFS = (listingHTTP) => {
       })
     })
   })
+*/
 }
 
 require('dotenv').config()
@@ -77,10 +79,18 @@ api.keys          = require('demo-keys')
 api.tx            = require('demo-tx')
 api.transform     = require('demo-transform')
 api.immutable     = require('immutable')
-api.chai          = require('chai')
+//api.chai          = require('chai')
 api.secp256k1     = require('@aztec/secp256k1')
 api.toWei         = toWei
-api.assert        = api.chai.assert
+
+const assert = (val, desc) => {
+  if (!val) { throw new Error(desc) }
+}
+assert.equal = (actual, expected, desc) => {
+  if (actual !== expected) { throw new Error(desc) }
+}
+
+api.assert        = assert
 
 const { prepareSignerEth } = api.keys.wallet
 const { Map } = api.immutable

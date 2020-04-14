@@ -41,7 +41,7 @@ module.exports = (env, argv) => {
   },
   entry: entry,
   externals: {
-    keythereum: "keythereum"
+    keythereum: "keythereum",
   },
   output: {
     filename: '[name].js',
