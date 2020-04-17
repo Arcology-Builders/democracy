@@ -1,14 +1,24 @@
 import React, { useState, useContext } from "react";
-import { getColor } from '../util';
+import { getColor } from "../util";
+import {
+  FAKE_RECEIVER_ADDRESS,
+  FAKE_RECEIVER_PUBLIC_KEY,
+} from "../libs/constants";
 import Header from "../components/Header";
 import Card from "../components/Card";
-import TokenInput, { Skeleton, CircularText, TokenGroup } from "../components/Token";
+import TokenInput, {
+  Skeleton,
+  CircularText,
+  TokenGroup,
+  StageProps,
+} from "../components/Token";
 import UserList from "../components/UserList";
 import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
 import Democracy from "../components/context/Democracy";
 import { TokenAddressToNotesMap } from "../libs/types";
-import { List } from 'immutable';
+import { Map, List } from "immutable";
+import { doCX } from "../libs/txHelpers";
 
 type User = {
   name: string;
@@ -17,51 +27,63 @@ type User = {
 
 const users: User[] = [
   { name: "Online Bot", image: "/assets/bot.png" },
-  { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" }
+  { name: "Vitalik Buterin", image: "/assets/unicorn-avatar.png" },
 ];
 
 type TransactionProps = {
   screenName: string;
   tokens: TokenAddressToNotesMap;
-}
+};
 
 const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
+  const demo: any = useContext(Democracy);
   const fakePairs: [string, string, number, number][] = [
     // ["RBT", "#AF1500", 200, 200],
     // ["AAAA", "#AF9E00", 300, 400],
     // ["BMT", "#00AF5B", 500, 300],
     ["GNO", "#0066AF", 100, 100],
     ["DAI", "#4D00AF", 200, 200],
-    ["MKR", "#AF005E", 500, 500]
+    ["MKR", "#AF005E", 500, 500],
   ];
 
   const [state, setState]: [any, Function] = useState({
     stage: 1,
     current: null,
-    sending: false
+    sending: false,
   });
-  
-  const stage = (s_: number) => () => setState({ ...state, stage: s_ });
-  
-  const isStage = (s_: number) => state.stage === s_;
-  
-  const fade = (s_: number) => isStage(s_) || "opacity-25";
-  
-  const allowEdit = (current: string | null) => () => {
-    // console.log('changing to the ' + current);
-    setState({ ...state, current: current });
+
+  const stage = (s_: number) => (txData: StageProps) => {
+    setState({ ...state, stage: s_, txData });
   };
-  
+
+  const isStage = (s_: number) => state.stage === s_;
+
+  const fade = (s_: number) => isStage(s_) || "opacity-25";
+
+  const allowEdit = React.useCallback(
+    (tradeSymbol: string) => () => {
+      console.log("callling...");
+      setState({ ...state, current: tradeSymbol });
+    },
+    [state]
+  );
+
+  const makeCX = doCX(demo);
   const sentTo = (user: User) => () => {
     console.log("Sending to " + user.name);
     setState({ ...state, sending: true });
-    
+    makeCX({
+      recipient: Map({
+        address: FAKE_RECEIVER_ADDRESS,
+        publicKey: FAKE_RECEIVER_PUBLIC_KEY,
+      }),
+      ...state.txData,
+    });
     setTimeout(() => {
       setState({ ...state, sending: false, stage: 1 });
     }, 3000);
   };
-  const demo: any = useContext(Democracy);
-  
+
   return (
     <>
       <Header thisAddress={demo.thisAddress} screenName={screenName} />
@@ -75,18 +97,26 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
                 Standard erc20s or private erc1724s
               </p>
               <TokenGroup name="Private ZK Tokens - ERC1724">
-                {!tokens.size && Array(3).fill(0).map((e, idx) => <Skeleton key={idx} />)}
-                {List(tokens.entries()).map(([tradeSymbol,notes], idx) => {
-                  return (<TokenInput
-                    key={idx}
-                    tradeSymbol={tradeSymbol}
-                    notes={notes}
-                    canEdit={tradeSymbol === state.current}
-                    allowEdit={allowEdit(tradeSymbol)}
-                    onSend={stage(2)}
+                {!tokens.size &&
+                  Array(3)
+                    .fill(0)
+                    .map((e, idx) => <Skeleton key={idx} />)}
+                {List(tokens.entries()).map(([tradeSymbol, notes], idx) => {
+                  return (
+                    <TokenInput
+                      key={idx}
+                      tradeSymbol={tradeSymbol}
+                      notes={notes}
+                      lock={tradeSymbol !== state.current}
+                      allowEdit={allowEdit(tradeSymbol)}
+                      onSend={stage(2)}
                     >
-                    <CircularText color={getColor(tradeSymbol)} label={tradeSymbol} />
-                  </TokenInput>)
+                      <CircularText
+                        color={getColor(tradeSymbol)}
+                        label={tradeSymbol}
+                      />
+                    </TokenInput>
+                  );
                 })}
               </TokenGroup>
               <TokenGroup name="Standard Tokens - ERC20">
@@ -94,7 +124,7 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
                   <TokenInput
                     key={index}
                     tradeSymbol={label}
-                    canEdit={label === state.current}
+                    lock={label !== state.current}
                     notes={List([])}
                     allowEdit={allowEdit(label)}
                     onSend={stage(2)}

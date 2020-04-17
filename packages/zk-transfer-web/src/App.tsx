@@ -34,12 +34,12 @@ function App({ demo }: AppProp) {
 
         // Auto-Mint
         console.info('Auto-Minting')
-        doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
-          .then(() => console.info("Minting Success:"))
-          .catch(err => {
-            console.info('Minting failed: ', err.message) 
-            console.error(err)
-          })
+        // doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
+        //   .then(() => console.info("Minting Success:"))
+        //   .catch(err => {
+        //     console.info('Minting failed: ', err.message) 
+        //     console.error(err)
+        //   })
 
         // Get tradeSymbolsAndNotes
         console.info("Fetching Tokens and Notes");
