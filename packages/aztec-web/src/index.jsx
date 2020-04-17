@@ -25,12 +25,12 @@ api.init = async (demo) => {
 
   const account = demo.secp256k1.accountFromPrivateKey(demo.keys.wallet.getAccountSync(demo.thisAddress).get('privatePrefixed'))
   demo.thisPublicKey = account.publicKey
-  api.demo    = demo
-  api.demoAztec   = demoAztec
-  api.chainId = await eth.net_version()
-  api.bm      = await demo.contract.createBM({chainId: api.chainId, autoConfig: true})
-  api.deploys = await api.bm.getDeploys()
-  api.ace     = (await demo.contract.createContract('ACE')).getInstance()
+  api.demo      = demo
+  api.demoAztec = demoAztec
+  api.chainId   = await eth.net_version()
+  api.bm        = await demo.contract.createBM({chainId: api.chainId, autoConfig: true})
+  api.deploys   = await api.bm.getDeploys()
+  api.ace       = (await demo.contract.createContract('ACE')).getInstance()
 
   const securities = api.deploys.filter((val, name) => name.match(/deploy[A-Z][A-Z][A-Z]/))
   api.erc20Tokens  = securities.filter((val, name) => name.match(/ERC20/))
@@ -46,6 +46,7 @@ api.init = async (demo) => {
       })
   ).values()).toJS())).values())
                                                                                              
+  console.log('thisAddress', localStorage.getItem(`demo/${demo.chainId}/thisAddress`))
   console.log('thisAddressNotes', toJS( api.thisAddressNotes ))
   const contracts = {}
 

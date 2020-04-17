@@ -124,8 +124,11 @@ contracts.Contract = class {
  * @return an ethjs instance that can be used to call methods on the deployed contract
  */
 contracts.getInstance = (eth, deploy) => {
-  assert(isNetwork(eth), 'First parameter is not an Ethereum network.')
-  assert(isDeploy(deploy), 'Second parameter is not a deploy output.')
+  assert(isNetwork(eth),
+    `First parameter is not an Ethereum network.`)
+  assert(isDeploy(deploy),
+    `Second parameter is not a deploy output, ` +
+    `instead ${JSON.stringify(deploy)}`)
   const abiJS = deploy.get('abi').toJS()
   const Contract = eth.contract(abiJS, deploy.get('code'))
   return Contract.at(deploy.get('deployAddress'))

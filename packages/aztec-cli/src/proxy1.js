@@ -4,19 +4,24 @@ const { Map }   = require('immutable')
 
 const assert    = require('chai').assert
 
-const { run, argListMixin, deployerMixin, departMixin }
+const { departTransform }
                 = require('demo-depart')
+const {
+  createArgListTransform, deployerTransform, runTransforms,
+} = require('demo-transform')
+
 const { fromJS, Logger, getConfig }
                 = require('demo-utils')
 const { wallet, isAccount }
                 = require('demo-keys')
-const { cxPrepareFuncMixin, cxTransferFunc, cxFinishFuncMixin } = require('./cxFunc')
-const { getAztecPublicKey } = require('./utils')
-const { signerMixin, publicKeyMixin } = require('./mixins')
+const {
+  cxPrepare, cxTransfer, cxFinish, getAztecPublicKey,
+  createSignerTransform, createPublicKeyTransform,
+} = require('demo-aztec-lib')
 
 const LOGGER    = new Logger('proxy1Cx')
 
-const m0 = argListMixin(Map({
+const m0 = createArgListTransform(Map({
   unlockSeconds     : 80,
   senderAddress     : '',
   senderPassword    : '',
@@ -30,10 +35,10 @@ const m0 = argListMixin(Map({
   tradeSymbol       : 'III',
   sourcePathList    : ['../../node_modules/@aztec/protocol/contracts'],
 }))
-const m1 = deployerMixin()
-const m2 = departMixin()
-const m3 = signerMixin()
-const m4 = publicKeyMixin()
+const m1 = deployerTransform
+const m2 = departTransform
+const m3 = createSignerTransform()
+const m4 = createPublicKeyTransform()
 
 // Set the transfer function for a direct (non-proxy) confidential transfer
 const m5 = async (state) => {
@@ -56,12 +61,19 @@ const ms = (state) => {
   }   
 }
 
-const cxPrepare = cxPrepareFuncMixin()
-const cxFinish = cxFinishFuncMixin()
-
 const proxy1Cx = async (state) => {
-  return await run( cxFinish,
-    [ m0, ms(state), m1, m2, m3, m4, m5, cxPrepare, cxTransferFunc ] ) 
+  return await runTransforms( OrderedMap([
+    [ m0        , 'm0'         ],
+    [ ms(state) , 'ms'         ],
+    [ m1        , 'deployer'   ],
+    [ m2        , 'depart'     ],
+    [ m3        , 'signer'     ],
+    [ m4        , 'publicKey'  ],
+    [ m5        , 'proxy1'     ],
+    [ cxPrepare , 'cxPrepare'  ],
+    [ cxTransfer, 'cxTransfer' ],
+    [ cxFinish  , 'cxFinish'   ],
+    ] ) )
 }
 
 module.exports = {

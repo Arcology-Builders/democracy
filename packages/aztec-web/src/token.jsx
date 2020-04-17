@@ -144,18 +144,20 @@ export class Token extends React.Component {
               minedTx           : this.props.minedTx,
               deployerAddress   : this.props.getThisAddress(),
               deployerPassword  : this.props.getThisPassword(),
-              tradeSymbol       : this.props.name,
-              senderAddress     : this.props.getThisAddress(),
-              senderPublicKey   : this.props.getThisPublicKey(),
-              senderPassword    : this.props.getThisPassword(),
-              senderNoteHash    : this.state.selectedNoteHash,
-              receiverAddress   : recipient.get('address'),
-              receiverPublicKey : recipient.get('publicKey'),
+              unlabeled         : Map({
+                senderAddress     : this.props.getThisAddress(),
+                senderPublicKey   : this.props.getThisPublicKey(),
+                senderPassword    : this.props.getThisPassword(),
+                senderNoteHash    : this.state.selectedNoteHash,
+                receiverAddress   : recipient.get('address'),
+                receiverPublicKey : recipient.get('publicKey'),
+                transferAmount    : new BN(this.state.amount),
+                tradeSymbol       : this.props.name,
+              }),
               transfererAddress : this.props.getThisAddress(),
               transferFunc      : async (token, proofData, signatures) => {
                   return await this.props.minedTx( token.confidentialTransfer, [proofData, signatures ] )
               },
-              transferAmount    : new BN(this.state.amount),
               wallet            : this.props.wallet,
             })
             await cx(argMap)

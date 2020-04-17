@@ -31,7 +31,7 @@ depart(Map({
   }),
   unlockSeconds : Map({
     type: TYPES.integer,
-    value: 50,
+    value: 500,
   }),
   sourcePathList: Map({
     type: TYPES.array,
@@ -45,6 +45,7 @@ async ({deployed, minedTx}) => {
   const js = await deployed( 'JoinSplit' )
   const pr = await deployed( 'PrivateRange' )
   const dc = await deployed( 'DividendComputation' )
+  LOGGER.debug( 'All validators deployed.' )
 
   await minedTx( ACE.setCommonReferenceString, [constants.CRS] )
   LOGGER.debug( 'Set common reference string' )

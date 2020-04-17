@@ -35,6 +35,7 @@ const mintFunc = async ({
     mintFromZero,
   }) => {
 
+  LOGGER.info('Before TestERC20 '           , tradeSymbol)
   const erc20Token = await deployed( 'TestERC20', { deployID: `deploy${tradeSymbol}` } )
   console.log('ERC20 Token Address ', erc20Token.address)
   const token = await deployed( 'ZkAssetTradeable', { deployID: `deploy${tradeSymbol}` } )
