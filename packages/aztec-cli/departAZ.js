@@ -43,6 +43,7 @@ async ({deployed, minedTx}) => {
   const as = await deployed( 'AdjustSupply' )
   const bs = await deployed( 'BilateralSwap' )
   const js = await deployed( 'JoinSplit' )
+  const jsi = await deployed( 'JoinSplitInterface' )
   const pr = await deployed( 'PrivateRange' )
   const dc = await deployed( 'DividendComputation' )
   LOGGER.debug( 'All validators deployed.' )
