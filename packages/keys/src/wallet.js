@@ -19,6 +19,7 @@ const keys = require('./keys')
 const { toWei, fromWei } = require('ethjs-unit')
 const { isValidAddress, toChecksumAddress } = require('ethereumjs-util')
 const { createInOut } = require('demo-client')
+const { untilTxMined } = require('demo-tx')
 
 const wallet = {}
 
@@ -313,11 +314,18 @@ wallet.shutdownSync = () => {
  * @param overage {String} optional, the amount of fees to withhold if `payAll` is true)
  * @param label {String} optional, a debug label to log for this transaction
  */
-wallet.pay = async ({payAll, weiValue, fromAddress, toAddress, overage, label}) => {
+wallet.pay = async ({signerEth, payAll, weiValue, fromAddress, toAddress, overage, label}) => {
   const checksumAddress = toChecksumAddress(fromAddress)
-  const signer = wallet.signersMap[checksumAddress]
-  if (!signer) { throw new Error(`No signer created for address ${fromAddress}`) }
-  return wallet.payTest({eth: signer, fromAddress: fromAddress, payAll: payAll, toAddress: toAddress, weiValue: weiValue, overage: overage, label: label}) 
+  if (!signerEth) { throw new Error(`No signer created for address ${fromAddress}`) }
+  return wallet.payTest({
+    eth: signerEth,
+    fromAddress,
+    payAll,
+    toAddress,
+    weiValue,
+    overage,
+    label
+  }) 
 }
 
 /**
@@ -333,6 +341,7 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
   LOGGER.debug('LABEL', label)
   let gasLimit = new BN(getConfig()['GAS_LIMIT'])
   const gasPrice = new BN(getConfig()['GAS_PRICE'])
+  LOGGER.debug('Gas Price: ', gasPrice.toString())
   const _overage = (overage) ? overage : wallet.OVERAGE_100_ETH
   if (payAll) {
     LOGGER.debug('OVERAGE', fromWei(_overage, 'ether'))
@@ -350,7 +359,7 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
   }
   const _eth = (eth) ? eth : wallet.eth
   LOGGER.debug(`Sending wei value is ${fromWei(weiValue, 'ether')} ETH`)
-  return _eth.sendTransaction({
+  const txHash = await _eth.sendTransaction({
     value    : weiValue,
     data     : '0x',
     from     : fromAddress,
@@ -359,6 +368,7 @@ wallet.payTest = async ({eth, weiValue, fromAddress, toAddress, payAll, overage,
     gasPrice : gasPrice,
     nonce    : await wallet.eth.getTransactionCount(fromAddress),
   })
+  return await untilTxMined({ txHash, eth: _eth })
 }
 
 wallet.fromWei = fromWei
