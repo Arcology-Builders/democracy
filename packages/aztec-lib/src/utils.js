@@ -2,7 +2,8 @@
 
 const { toJS, fromJS } = require('demo-utils')
 const { isAccount }    = require('demo-keys')
-const { Contract }     = require('demo-contract')
+const { Contract, isDeploy }
+                       = require('demo-contract')
 const { TYPES, makeRequired, makeOptional, isHexPrefixed }
                        = require('demo-transform')
 
@@ -108,6 +109,7 @@ utils.deployed = async ({ contractName, options={}, bm, signerEth }) => {
   const replacedContract = (abi) ?
     deployedContract.set( 'abi', fromJS( abi ) ) : deployedContract 
   console.log('Deployer Address', signerEth.address)
+  assert(isDeploy(replacedContract), `Replaced contract is not deployed for ${contractName}`)
   const contract = new Contract({
     deployerEth: signerEth, deploy: replacedContract })
   return await contract.getInstance()
