@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import BN from 'bn.js';
+import BN from "bn.js";
 import { Map } from "immutable";
 import Homepage from "./views/Home";
 import MakeTransaction from "./views/MakeTransaction";
@@ -9,7 +9,7 @@ import {
   getScreenName,
   setScreenName,
   generateScreenName,
-  getZKTradeSymbol
+  getZKTradeSymbol,
 } from "./util";
 import { makeApi } from "./libs/api";
 import { Note, TokenAddress } from "./libs/types";
@@ -23,7 +23,7 @@ function App({ demo }: AppProp) {
   const [state, setState]: [any, any] = useState({
     chainId: null,
     screenName: "",
-    ZKTokens: Map()
+    ZKTokens: Map(),
   });
 
   useEffect(() => {
@@ -31,13 +31,14 @@ function App({ demo }: AppProp) {
       demo.clientInit().then(async () => {
         console.groupCollapsed("Client Initialized");
         const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
+        demo.bm = bm;
 
         // Auto-Mint
-        console.info('Auto-Minting')
+        console.info("Auto-Minting");
         // doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
         //   .then(() => console.info("Minting Success:"))
         //   .catch(err => {
-        //     console.info('Minting failed: ', err.message) 
+        //     console.info('Minting failed: ', err.message)
         //     console.error(err)
         //   })
 
@@ -50,7 +51,7 @@ function App({ demo }: AppProp) {
           const notes = thisAddressNotes.get(tokenAddress)?.map(getHashNotes);
 
           return [tradeSymbol, notes];
-        })
+        });
         console.info("Fetched Tokens and Notes");
 
         let screenName = getScreenName(demo.chainId);
@@ -64,7 +65,7 @@ function App({ demo }: AppProp) {
           ...state,
           ZKTokens: tradeSymbolToNotes,
           chainId: demo.chainId,
-          screenName
+          screenName,
         });
         console.groupEnd();
       });

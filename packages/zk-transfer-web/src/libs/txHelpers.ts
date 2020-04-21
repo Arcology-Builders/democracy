@@ -92,9 +92,12 @@ export const doCX = (demo: Demo) => async ({
   console.log("recipient", recipient.toJS());
   console.info({ tradeSymbol, amount, noteHash });
 
+  const receiverAddress = recipient.get("address");
+  const receiverPublicKey = recipient.get("publicKey");
   const thisPassword = getPassword(demo.chainId);
   const minedTx = minedTxFunc({ demo, fromAddress: demo.thisAddress });
 
+  if (!demo.bm) throw Error("No BM found");
   if (!thisPassword)
     throw Error("Transfer Failed: No password given for chain " + demo.chainId);
 
@@ -110,9 +113,19 @@ export const doCX = (demo: Demo) => async ({
     senderAddress: demo.thisAddress,
     senderPublicKey: demo.thisPublicKey,
     senderPassword: thisPassword,
+    unlabeled: Map({
+      tradeSymbol,
+      receiverAddress,
+      receiverPublicKey,
+      senderAddress: demo.thisAddress,
+      senderPublicKey: demo.thisPublicKey,
+      senderPassword: thisPassword,
+      senderNoteHash: noteHash,
+      transferAmount: new BN(amount),
+    }),
     senderNoteHash: noteHash,
-    receiverAddress: recipient.get("address"),
-    receiverPublicKey: recipient.get("publicKey"),
+    receiverAddress,
+    receiverPublicKey,
     transfererAddress: demo.thisAddress,
     transferFunc: async (token: any, proofData: any, signatures: any) => {
       return await minedTx(
