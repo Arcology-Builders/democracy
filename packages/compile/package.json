@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "demo-contract": "^0.5.3",
+    "demo-transform": "^0.5.3",
     "demo-utils": "^0.5.3",
     "ethereumjs-util": "6.1.0",
     "immutable": "4.0.0-rc.12",

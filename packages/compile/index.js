@@ -9,8 +9,10 @@
  */
 const comp = require('./src/compile.js')
 const flat = require('./src/flattener.js')
+const tran = require('./src/transform.js')
 
 module.exports = {
   ...comp,
   ...flat,
+  ...tran,
 }

@@ -1,7 +1,7 @@
 'use strict'
 const fs            = require('fs')
 const path          = require('path')
-const { Map, List } = require('immutable')
+const { Map, List, OrderedMap } = require('immutable')
 const assert        = require('chai').assert
 const { toWei }     = require('web3-utils')
 
@@ -9,6 +9,7 @@ const utils         = require('demo-utils')
 const { DB_DIR, COMPILES_DIR, LINKS_DIR, DEPLOYS_DIR, getNetwork, immEqual, Logger }
                     = utils
 const LOGGER        = new Logger('depart.spec')
+const { compileTransform } = require('demo-compile')
 const { isContract, isCompile, isLink, isDeploy }
                     = require('demo-contract')
 const { getImmutableKey, setImmutableKey, fromJS }
@@ -18,7 +19,7 @@ const { wallet }    = require('demo-keys')
 const { runTransforms, createArgListTransform, deployerTransform,
   TYPES, createTransform
 }                   = require('demo-transform')
-const { departTransform }
+const { departTransform, ixTransform }
                     = require('..')
 
 describe( 'Departures', () => {
@@ -83,7 +84,14 @@ describe( 'Departures', () => {
       })
     })
 
-    finalState = (await runTransforms( [ m0, m1, m2, departFunc ],
+    finalState = (await runTransforms( OrderedMap([
+      ['argList', m0              ],
+      ['deploy' , m1              ],
+      ['compile', compileTransform],
+      ['depart' , m2              ],
+      ['ix'     , ixTransform     ],
+      ['main'   , departFunc      ],
+    ]),
 			Map({
 				unlockSeconds   : 60,
 				testValueETH    : '0.1',

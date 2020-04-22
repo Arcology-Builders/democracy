@@ -147,6 +147,7 @@ contracts.getInstance = (eth, deploy) => {
  */
 contracts.createContract = async (contractName, deployID) => {
   if (!contracts.initialized) { throw new Error('Call contracts.initialize() first') }
+  if (!contracts.bm) { throw new Error('No build manager available to contracts.') }
   const _deployID = deployID || 'deploy'
   const deploy = await contracts.bm.getDeploy(`${contractName}-${_deployID}`)
   assert( isDeploy(deploy), `No valid deploy found for ${contractName}-${_deployID}` )

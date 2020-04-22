@@ -19,6 +19,5 @@ depart(Map({
   const txReceipt = await minedTx( relink.outward, [new BN(2223)] )
   const a = (await relink.a())['0']
   assert( a.eq(new BN(2223)), `Returned public member is not the one we set.` ) 
- 
   return 22
 })

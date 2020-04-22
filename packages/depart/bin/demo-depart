@@ -2,7 +2,6 @@
 'use strict'
 
 // Democracy Depart command-line tool: orchestrated deploys to the chain
-
 const { Map, OrderedMap } = require('immutable')
 const fs         = require('fs')
 const path       = require('path')
@@ -14,10 +13,14 @@ const {
   runTransforms, deployerTransform, TYPES, assembleCallablePipeline,
   createTransform,
 }                = require('demo-transform')
-const { departTransform, argListTransform }
+const { ixTransform, departTransform, argListTransform }
                  = require('demo-depart')
+const { compileTransform } = require('demo-compile')
 
-const LOGGER     = new Logger('demo-depart')
+const LOGGER = new Logger('demo-depart')
+
+assert(ixTransform, 'ixTransform')
+assert(compileTransform, 'compileTransform')
 
 let departOptionsMap
 let departCallback
@@ -74,9 +77,6 @@ const m1 = createTransform({
   })
 })
 
-const m2 = deployerTransform
-
-const m3 = departTransform
 
 const inputTypes = Map({
   chainId         : TYPES.string,
@@ -125,10 +125,12 @@ callablePipeline1( initialState ).then((prevState) => {
   validateTypesValuesMap(prevTypesValuesMap)
   const mp = placeHolderTransform(prevTypesValuesMap.mergeDeep(departOptionsMap))
   const callablePipeline2 = assembleCallablePipeline( OrderedMap([
-    [ 'mp'    , mp     ],
-    [ 'm2'    , m2     ],
-    [ 'm3'    , m3     ],
-    [ 'depart', depart ],
+    [ 'mp'      , mp               ],
+    [ 'deployer', deployerTransform],
+    [ 'compile' , compileTransform ],
+    [ 'depart'  , departTransform  ],
+    [ 'ix'      , ixTransform      ],
+    [ 'main'    , depart           ],
   ]) ) 
   return callablePipeline2(Map({}))
 })
