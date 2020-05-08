@@ -13,6 +13,7 @@ import {
 const eth: any = getNetwork();
 
 type ApiProps = {
+  ws: any;
   bm: any;
   ace: any;
   demo: any;
@@ -32,6 +33,8 @@ export const makeApi = async (demo: any): Promise<ApiProps> => {
   const account = demo.secp256k1.accountFromPrivateKey(
     demo.keys.wallet.getAccountSync(demo.thisAddress).get("privatePrefixed")
   );
+
+  const ws = new WebSocket('ws://capetown.arcology.nyc:8546')
 
   demo.thisPublicKey = account.publicKey;
   // @ts-ignore
@@ -57,6 +60,7 @@ export const makeApi = async (demo: any): Promise<ApiProps> => {
   const tokenAndNotes = await Promise.all(pendingNotes);
 
   return {
+    ws,
     bm,
     ace,
     demo,

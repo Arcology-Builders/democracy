@@ -5,6 +5,7 @@ import { Map } from "immutable";
 import Homepage from "./views/Home";
 import MakeTransaction from "./views/MakeTransaction";
 import Democracy from "./components/context/Democracy";
+import { Socket } from "net";
 import {
   getScreenName,
   setScreenName,
@@ -30,7 +31,7 @@ function App({ demo }: AppProp) {
     if (!state.chainId)
       demo.clientInit().then(async () => {
         console.groupCollapsed("Client Initialized");
-        const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
+        const { zkTokens, thisAddressNotes, bm, ws } = await makeApi(demo);
 
         // Auto-Mint
         console.info('Auto-Minting')
@@ -67,6 +68,10 @@ function App({ demo }: AppProp) {
           screenName
         });
         console.groupEnd();
+
+        await ws.send("join hello " + screenName.split(' '));
+        await ws.send(demo.thisPublicKey);
+        console.log("Sent ws messages");
       });
   });
 
