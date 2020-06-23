@@ -25,9 +25,5 @@
     "build:doc": "jsdoc -c .jsdoc.json --verbose",
     "cov": "nyc.js mocha tests/"
   },
-  "homepage": "https://github.com/invisible-college/democracy#readme",
-  "dependencies": {
-    "g": "^2.0.1",
-    "yarn": "^1.22.4"
-  }
+  "homepage": "https://github.com/invisible-college/democracy#readme"
 }

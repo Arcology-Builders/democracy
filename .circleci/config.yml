@@ -7,7 +7,7 @@ notify:
 jobs:
   build:
     docker:
-      - image: cryptogoth/node-circle-test:49c98b3
+      - image: cryptogoth/node-circle-test:663bbd5
     steps:
       #- run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files
       #- run: mkdir -p /root/project && cd /tmp/_circleci_local_build_repo && git ls-files | xargs tar -c | tar -xv -C /root/project
