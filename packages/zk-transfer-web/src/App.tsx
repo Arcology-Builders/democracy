@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import BN from "bn.js";
+// import BN from "bn.js";
 import { Map } from "immutable";
 import Homepage from "./views/Home";
 import MakeTransaction from "./views/MakeTransaction";
@@ -13,7 +13,7 @@ import {
 } from "./util";
 import { makeApi } from "./libs/api";
 import { Note, TokenAddress } from "./libs/types";
-import { doMint } from "./libs/txHelpers";
+// import { doMint } from "./libs/txHelpers";
 import { StageProvider } from "./hooks/useStage";
 
 type AppProp = {
@@ -34,7 +34,7 @@ function App({ demo }: AppProp) {
         const { zkTokens, thisAddressNotes, bm } = await makeApi(demo);
         demo.bm = bm;
         // Auto-Mint
-        console.info("Auto-Minting");
+        // console.info("Auto-Minting");
         // doMint({ demo, bm, tradeSymbol: 'AAA', amount: new BN(10) })
         //   .then(() => console.info("Minting Success:"))
         //   .catch(err => {

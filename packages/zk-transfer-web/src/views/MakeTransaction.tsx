@@ -1,6 +1,6 @@
 import React from "react";
 
-import Header from "../components/Header";
+// import Header from "../components/Header";
 import Card from "../components/Card";
 import Recipient from "../components/ZKRecipient";
 import TransactionLog from "../components/TransactionLog";

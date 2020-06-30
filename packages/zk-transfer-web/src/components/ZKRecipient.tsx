@@ -1,5 +1,4 @@
 import React from "react";
-import sendIcon from "../assets/send-icon.svg";
 import { ArrowButton } from "./Buttons";
 
 type Props = {
