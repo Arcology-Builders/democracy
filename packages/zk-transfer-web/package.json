@@ -17,14 +17,17 @@
     "react-scripts": "^3.3.0",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
+    "tailwindcss": "^1.4.6",
     "typescript": "^3.5.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
     "react:test": "react-scripts test",
     "test": "echo 're-enable when you have jest tests' && exit 0",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:css": "postcss src/styles/tailwind.css -o src/styles/app.css",
+    "watch:css": "postcss src/styles/tailwind.css -o src/styles/app.css -w",
+    "build": "npm run build:css && react-scripts build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -43,6 +46,8 @@
   },
   "devDependencies": {
     "@types/react-redux": "^7.1.1",
-    "@types/react-router-dom": "^4.3.4"
+    "@types/react-router-dom": "^4.3.4",
+    "autoprefixer": "^9.8.4",
+    "postcss-cli": "^7.1.1"
   }
 }

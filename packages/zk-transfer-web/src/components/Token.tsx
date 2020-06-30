@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { note } from "aztec.js";
+import { ArrowButton } from "./Buttons";
 import { NoteList, NoteValue } from "../libs/types";
 
 export type StageProps = {
@@ -56,7 +57,7 @@ const useNotes = (
 // Greater than
 const gt = (a: number, b: number) => a > b;
 
-const TokenInput = (props: TokenPropType) => {
+export const TokenInput = (props: TokenPropType) => {
   const input = useRef(null);
   const locked = props.lock;
   const [txAmount, setTxAmount] = useState(0);
@@ -67,69 +68,33 @@ const TokenInput = (props: TokenPropType) => {
   }, [balance]);
 
   const unlock = () => props.allowEdit();
+  // gt(txAmount, balance)
 
   return (
-    <div className="token flex items-center py-1" onMouseEnter={unlock}>
+    <div className="token flex w-full items-center py-1" onMouseEnter={unlock}>
       {props.children}
-      <input
-        ref={input}
-        value={txAmount}
-        disabled={locked}
-        onChange={(evt) => setTxAmount(parseInt(evt.target.value) || 0)}
-        className="appearance-none text-base w-12 text-right rounded border"
-      />
-      <div className="h-5 flex-shrink-0 bg-gray-400 border mx-1"></div>
-      {locked ? (
-        <span className="px-1 text-base">{balance}</span>
-      ) : (
-        <button
-          className="appearance-none focus:bg-gray-200 focus:outline-none"
+      <div className="flex relative items-center flex-1">
+        <input
+          ref={input}
+          value={txAmount}
+          disabled={locked}
+          onChange={(evt) => setTxAmount(parseInt(evt.target.value) || 0)}
+          className="flex-1 appearance-none text-base px-3 py-2 border-2 border-solid border-gray-200 focus:border-black"
+        />
+        <ArrowButton
+          className="mr-2 absolute right-0 "
           disabled={gt(txAmount, balance)}
           onClick={() => {
-            unlock();
+            // unlock();
             props.onSend({
               tradeSymbol: props.tradeSymbol,
               amount: txAmount,
               noteHash: props.notes,
             });
           }}
-        >
-          <ArrowRight
-            style={{
-              color: gt(txAmount, balance) ? "#B0B0B0" : "blue",
-              width: 15,
-              height: 15,
-            }}
-          />
-        </button>
-      )}
+        />
+      </div>
     </div>
-  );
-};
-
-export const ArrowRight = (props: { style: any }) => {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={props.style}
-    >
-      <path
-        d="M1 6H11"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6 1L11 6L6 11"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 };
 
@@ -169,15 +134,6 @@ CircularText.defaultProps = {
   fill: false,
 };
 
-export const TokenGroup = (props: any) => {
-  return (
-    <div className="private-token-cont mt-8">
-      <p className="text-sm mb-2">{props.name}</p>
-      <div className="token-cont">{props.children}</div>
-    </div>
-  );
-};
-
 export const TokenInput2 = (props: any) => {
   return (
     <div className="zk-token-input flex justify-between items-center rounded-lg p-2 my-4">
@@ -206,15 +162,6 @@ export const TokenCard = (props: any) => {
         <p>{props.caption}</p>
       </div>
       <div className="px-2">{props.children}</div>
-    </div>
-  );
-};
-
-export const Skeleton = () => {
-  return (
-    <div className="flex my-1 items-center">
-      <div className="w-10 h-10 rounded-full flex-shrink-0 zk-preload bg-gray-200"></div>
-      <div className="w-3/5 rounded-lg ml-4 h-6 zk-preload bg-gray-200"></div>
     </div>
   );
 };
