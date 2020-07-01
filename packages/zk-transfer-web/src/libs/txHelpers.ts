@@ -1,8 +1,9 @@
 import BN from "bn.js";
 import { Map } from "immutable";
-import { Demo, EthAddress, BM, SignerEth } from "./types";
 import { untilTxMined } from "demo-tx";
-import { deployed, mintFunc } from "demo-aztec-lib";
+import { getPassword } from "../util";
+import { Demo, EthAddress, BM, SignerEth } from "./types";
+import { deployed, mintFunc, cx } from "demo-aztec-lib";
 import { RINKEBY_ADMIN_ADDRESS, RINKEBY_ADMIN_PASSWORD } from "./constants";
 
 type doMintOptions = { demo: Demo; bm: BM; tradeSymbol: string; amount: BN };
@@ -10,12 +11,12 @@ export const doMint = async ({
   demo,
   bm,
   tradeSymbol,
-  amount
+  amount,
 }: doMintOptions): Promise<void> => {
   console.info("Beginning Mint Process:");
   const { signerEth } = await demo.keys.wallet.prepareSignerEth({
     address: RINKEBY_ADMIN_ADDRESS,
-    password: RINKEBY_ADMIN_PASSWORD
+    password: RINKEBY_ADMIN_PASSWORD,
   });
 
   const params = Map({
@@ -30,7 +31,7 @@ export const doMint = async ({
     deployerAddress: RINKEBY_ADMIN_ADDRESS,
     deployerPassword: RINKEBY_ADMIN_PASSWORD,
     deployed: deployedFunc({ bm, signerEth }),
-    minedTx: minedTxFunc({ demo, fromAddress: RINKEBY_ADMIN_ADDRESS })
+    minedTx: minedTxFunc({ demo, fromAddress: RINKEBY_ADMIN_ADDRESS }),
   });
 
   await mintFunc(params.toJS());
@@ -47,7 +48,7 @@ const deployedFunc = ({ bm, signerEth }: deployFuncProp) => {
       bm,
       options,
       signerEth,
-      contractName
+      contractName,
     });
   };
 };
@@ -74,4 +75,68 @@ const minedTxFunc = ({ demo, fromAddress }: minedTxProps) => {
 
     return untilTxMined({ txHash, eth: signerEth });
   };
+};
+type doCXProps = {
+  recipient: any;
+  tradeSymbol: string;
+  amount: number;
+  noteHash: any;
+};
+
+export const doCX = (demo: Demo) => async ({
+  recipient,
+  tradeSymbol,
+  amount,
+  noteHash,
+}: doCXProps) => {
+  console.log("recipient", recipient.toJS());
+  console.info({ tradeSymbol, amount, noteHash });
+
+  const receiverAddress = recipient.get("address");
+  const receiverPublicKey = recipient.get("publicKey");
+  const thisPassword = getPassword(demo.chainId);
+  const minedTx = minedTxFunc({ demo, fromAddress: demo.thisAddress });
+
+  if (!demo.bm) throw Error("No BM found");
+  if (!thisPassword)
+    throw Error("Transfer Failed: No password given for chain " + demo.chainId);
+
+  const argMap = Map({
+    tradeSymbol,
+    bm: demo.bm,
+    chainId: demo.chainId,
+    signerEth: demo.thisSignerEth,
+    deployed: deployedFunc({ bm: demo.bm, signerEth: demo.thisSignerEth }),
+    minedTx: minedTxFunc({ demo, fromAddress: demo.thisAddress }),
+    deployerAddress: demo.thisAddress,
+    deployerPassword: thisPassword,
+    senderAddress: demo.thisAddress,
+    senderPublicKey: demo.thisPublicKey,
+    senderPassword: thisPassword,
+    unlabeled: Map({
+      tradeSymbol,
+      receiverAddress,
+      receiverPublicKey,
+      senderAddress: demo.thisAddress,
+      senderPublicKey: demo.thisPublicKey,
+      senderPassword: thisPassword,
+      senderNoteHash: noteHash,
+      transferAmount: new BN(amount),
+    }),
+    senderNoteHash: noteHash,
+    receiverAddress,
+    receiverPublicKey,
+    transfererAddress: demo.thisAddress,
+    transferFunc: async (token: any, proofData: any, signatures: any) => {
+      return await minedTx(
+        token.confidentialTransfer,
+        [proofData, signatures],
+        {}
+      );
+    },
+    transferAmount: new BN(amount),
+    wallet: demo.keys.wallet,
+  });
+
+  return await cx(argMap);
 };

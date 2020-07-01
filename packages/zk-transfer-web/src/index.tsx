@@ -1,17 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./styles/app.css";
-import "./styles/tailwind.min.css";
 import App from "./App";
-import Offline from './components/Offline';
+import Offline from "./components/Offline";
 import * as serviceWorker from "./serviceWorker";
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const { demo } : any = window;
+document.addEventListener("DOMContentLoaded", async () => {
+  const { demo }: any = window;
 
-    const Component = (demo) ? <App demo={demo} /> : <Offline />;
+  const Component = demo ? <App demo={demo} /> : <Offline />;
 
-    ReactDOM.render(Component, document.getElementById("root"));        
+  ReactDOM.render(Component, document.getElementById("root"));
 });
 
 // If you want your app to work offline and load faster, you can change

@@ -32,7 +32,7 @@ describe( 'Departures', () => {
         // The old way: compiling, linking, deploying, getting a contract instance
         await compile( 'Relink', 'Relink.sol' )
         const lout = await link( 'Relink', 'link' )
-        const dout = await deploy( 'Relink', 'link', 'deploy', new Map({}), true )
+        const dout = await deploy( 'Relink', 'link', 'deploy', new Map({}) )
         const contract = new Contract({ deployerEth: deployerEth, deploy: dout })
         await contract.getInstance().outward(new BN(1234),
                                              { from: deployerAddress,
@@ -43,7 +43,7 @@ describe( 'Departures', () => {
 
         await compile( 'Relink', 'Relink.sol' )
         const lout2 = await link( 'Relink', 'link' )
-        const dout2 = await deploy( 'Relink', 'link', 'deploy', new Map({}), true )
+        const dout2 = await deploy( 'Relink', 'link', 'deploy', new Map({}) )
         assert.notOk( immEqual(lout, lout2), 'Links should be different before and after' )
         assert.notOk( immEqual(dout, dout2) )
         

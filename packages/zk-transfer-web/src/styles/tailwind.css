@@ -1,0 +1,394 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+body {
+  background-color: #fbf6f6;
+}
+
+.text-gray {
+  color: #828282;
+}
+
+input {
+  border-radius: 12px;
+  outline: none;
+}
+
+input:disabled {
+  background-color: transparent;
+}
+
+.user-list:hover .user-item {
+  opacity: 0.25;
+}
+
+.user-list:hover .user-item:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.bg-green {
+  background-color: #32eb44;
+}
+
+.acc-info .icons {
+  border-radius: 50%;
+  width: 10px;
+  margin-right: 0.5rem;
+  height: 10px;
+  flex: 0 0 10px;
+  object-fit: cover;
+}
+
+.acc-info .icons.icon-lg {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+
+.preloader {
+  width: 20px;
+  height: 20px;
+  transform-origin: center center;
+  animation: rotate 2s forwards infinite running linear;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+::-webkit-input-placeholder {
+  color: #000000 !important;
+}
+
+:-ms-input-placeholder {
+  color: #000000 !important;
+}
+
+::-ms-input-placeholder {
+  color: #000000 !important;
+}
+
+::placeholder {
+  color: #000000 !important;
+}
+
+.color2 {
+  color: #393939;
+}
+
+.color3 {
+  color: #828282;
+}
+
+.color4 {
+  color: #af1500;
+  border-color: #af1500;
+}
+
+.color5 {
+  color: #3c4b64;
+}
+
+.color6 {
+  color: #61cc50;
+}
+
+.color7 {
+  color: #e76e54;
+}
+
+/* -------------------------------------SEND CRYPTO PAGE STYLES-------------------------- */
+.send-crypto-container {
+  min-height: calc(100vh - 116px);
+}
+
+.info-container div h2 {
+  line-height: 3;
+  font-size: 24px;
+}
+
+.info-container div p {
+  font-size: 14px;
+}
+
+.body .send-crypto-container {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (300px) [auto-fit];
+  grid-template-columns: repeat(auto-fit, 300px);
+  grid-gap: 3rem;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.body .send-crypto-container .choose-token-container,
+.body .send-crypto-container .choose-recipient-container {
+  height: 450px;
+}
+
+.token span {
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 26px;
+  flex: 0 0 26px;
+}
+
+footer .logo-cont {
+  width: 150px;
+}
+
+.name {
+  width: 70%;
+  overflow-x: hidden;
+}
+
+/* ---------------------------------------DASHBOARD STYLES------------------------------ */
+.db-header {
+  margin-bottom: 2rem;
+}
+
+.db-header .db-logo-div {
+  background: url("/assets/header-Background.png");
+  background-size: cover;
+  max-height: calc(50vh);
+}
+
+.db-header .db-logo-div::before {
+  content: "";
+  position: absolute;
+  height: 25vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: url("/assets/overlay-waves.png") no-repeat top center / 5000px
+    200px contain;
+}
+
+.db-header .db-logo-div .crypt-image {
+  flex: 0 1 40%;
+  height: 50vh;
+  background: url("/assets/crypto-prism.png") no-repeat bottom right / contain;
+}
+
+.db-header .db-connection-bar {
+  mix-blend-mode: normal;
+  box-shadow: 0px 4px 16px #7db6e5;
+  background: linear-gradient(181.78deg, #80e3fd 2.22%, #264b83 97.93%);
+}
+
+.db-header .db-connection-bar .db-name-cont {
+  background: linear-gradient(
+    90.2deg,
+    rgba(126, 223, 250, 0.76) 6.3%,
+    rgba(87, 158, 198, 0.76) 95.56%
+  );
+  border-radius: 20px;
+}
+
+.db-header .db-connection-bar .db-name-cont .connected {
+  width: 13px;
+  height: 13px;
+  border-radius: 100%;
+  background-color: #7ef192;
+}
+
+.transfer-text-header {
+  color: #9ca7ff;
+  font-size: 1.5rem;
+}
+
+.line-span {
+  width: 70px;
+  height: 1px;
+  text-align: right;
+  background-color: #ff7d00;
+}
+
+.az-blocks-logo-cont {
+  margin-top: -10px;
+}
+
+.az-blocks-logo-cont img {
+  width: 100px;
+  height: 100px;
+}
+
+.ether-head-logo {
+  width: 150px;
+}
+
+.main-container {
+  height: auto;
+  display: grid;
+  grid-gap: 15px;
+  align-items: flex-start;
+  justify-content: space-around;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 320px));
+}
+
+.main-container .holders {
+  align-self: stretch;
+}
+
+.your-wallet-cont .wallet-logo-cont {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  border-radius: 100%;
+  justify-content: center;
+  background-color: #3c4b64;
+  box-shadow: 0px 4px 12px rgba(63, 105, 174, 0.5);
+}
+
+.your-wallet-cont .wallet-name-cont {
+  width: 100%;
+}
+
+.your-wallet-cont .wallet-name-cont p {
+  color: #3c4b64;
+}
+
+.avatar-cont {
+  height: 220px;
+}
+
+.address-label {
+  position: relative;
+  font-family: Raleway, sans-serif;
+  border-bottom: 2px solid #8ffbfb;
+}
+
+.address-logo {
+  width: 20px;
+  height: 20px;
+  background-color: #e0ebff;
+}
+
+.address {
+  width: 100%;
+  overflow: hidden;
+}
+
+.zk-t-balance-cont {
+  overflow: hidden;
+}
+
+.zk-token-cont {
+  background-color: #e7ecfc;
+  border-radius: 0.8rem 0.8rem 0 0;
+}
+
+.zk-token-input {
+  box-shadow: 0 4px 26px rgba(0, 0, 0, 0.06);
+}
+
+.zk-token-cont p {
+  color: #757f8c;
+  text-indent: 10px;
+}
+
+.ro-online {
+  position: relative;
+  bottom: 10px;
+  right: 7px;
+}
+
+.star {
+  color: gold;
+}
+
+/* ------------ */
+.address-label.online {
+  border-bottom: 2px solid #ff7d00;
+}
+
+.address-label.offline {
+  border-bottom: 2px solid #828282;
+}
+
+.ro-online.offline {
+  background-color: #828282;
+}
+
+.ic-contact {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ic-contact .ic-avatar {
+  width: 37px;
+  height: 37px;
+  flex: 0 0 37px;
+  border-radius: 50%;
+}
+
+.bg-c-gray {
+  background-color: #fbfbfb;
+}
+
+.transaction-failed {
+  overflow-y: scroll;
+  height: 200px;
+}
+
+.transaction-failed .heading {
+  position: sticky;
+  top: 0;
+}
+
+.transaction-failed .log {
+  box-shadow: 0px 4px 26px rgba(0, 0, 0, 0.06);
+}
+
+.log .log-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log .icon {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+/** Animations **/
+@keyframes blink {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.zk-preload {
+  animation: blink 0.7s infinite running alternate ease-in-out 0s;
+  background-color: theme("colors._1");
+}
+
+.gradient-bg {
+  background: #f8f8f8 linear-gradient(180deg, #b280fc -8.39%, #292f6b 88.28%);
+}
+
+.log-item [role="link"] {
+  @apply transform -mr-16 duration-300 opacity-0 transition-all ease-out flex flex-no-wrap;
+}
+
+.log-item:hover [role="link"] {
+  @apply mr-0 opacity-100;
+}

@@ -23,12 +23,6 @@ describe('Democracy types', () => {
       result2['error'],
       'Destructured signerEth should now be a valid ethereumSigner'
     )
-
-    const result3 = TYPES.array([])
-    assert.notOk(
-      result3['error'],
-      "Type-checking on arrays doesn't try to stringify it as an object with keys",
-    )
   })
 
   it('checks floatString type', async () => {

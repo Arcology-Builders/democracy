@@ -109,7 +109,7 @@ deploys.Deployer = class {
       LOGGER.debug(`current input hash ${inputHash}`)
       if (deploy.get('inputHash') === inputHash) {
         if (fork) {
-          LOGGER.info(`Forking at time ${now.getTime()}`)
+          throw new Error('No forking allowed anymore. Who called you?')
         } else {
           LOGGER.info(`${deployName} has already been deployed`,
                       `on chain ID ${this.chainId} at address ${deploy.get('deployAddress')}`)

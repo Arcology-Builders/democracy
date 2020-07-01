@@ -90,3 +90,10 @@ export interface NoteValue {
 }
 
 export declare function BMInputter(address: string): Promise<Note>;
+
+export interface TransactionLog {
+  recipient: { avatar: string; name: string };
+  status: string | boolean;
+  amount: number;
+  etherscan: { link: string };
+}

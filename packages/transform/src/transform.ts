@@ -64,7 +64,7 @@ export const createTransform = (transform: Transform): CallableTransform => {
     try {
       inputArgs = checkExtractArgs(state, transform.inputTypes)
     } catch(e) {
-      throw new Error(`Input types mismatch given state ${state.toJS()} ` +
+      throw new Error(`Input types mismatch given state ${JSON.stringify(state.toJS())} ` +
         `and inputTypes ${transform.inputTypes.toJS()}:  ${e.message}`)
     }
 /*

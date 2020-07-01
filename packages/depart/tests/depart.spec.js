@@ -66,7 +66,7 @@ describe( 'Departures', () => {
         const rLink = await bm.getLink('DifferentSender-link')
         assert( immEqual(lout, rLink) )
         
-        const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}), true )
+        const dout = await deploy( 'DifferentSender', 'link', 'deploy', new Map({}) )
         const rDeploy = await bm.getDeploy('DifferentSender-deploy')
         assert( isDeploy(dout) )
         assert( immEqual(dout, rDeploy) )

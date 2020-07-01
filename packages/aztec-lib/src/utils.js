@@ -104,8 +104,7 @@ utils.deployed = async ({ contractName, options={}, bm, signerEth }) => {
   // Eventually replace this part with a proper call to deployer
   const deployName = `${contractName}-${_deployId}`
   console.log('Deploy Name', deployName)
-  const deployedContract =
-    await bm.getDeploy(deployName)
+  const deployedContract = await bm.getDeploy(deployName)
   const replacedContract = (abi) ?
     deployedContract.set( 'abi', fromJS( abi ) ) : deployedContract 
   console.log('Deployer Address', signerEth.address)

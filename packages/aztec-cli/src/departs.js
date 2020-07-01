@@ -45,7 +45,8 @@ funcs.departZkFunc = async function({
         _canAdjustSupply    : true,
         _canConvert         : (canConvert !== false),
       }),
-      deployID: `deploy${tradeSymbol}`
+      deployID: `deploy${tradeSymbol}`,
+      fork: false,
     }
   )
 

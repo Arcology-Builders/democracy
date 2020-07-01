@@ -105,6 +105,8 @@ departs.departTransform = createTransformFromMap({
         await deploy( contractName, 'link', _deployID, ctorArgList, force )
       const replacedContract = (abi) ?
         deployedContract.set( 'abi', fromJS(abi) ) : deployedContract 
+      LOGGER.debug('deployed ', contractName) 
+      assert(isDeploy(replacedContract), `No deployed/replaced contract for ${contractName}`)
       const contract = new Contract({ deployerEth: deployerEth, deploy: replacedContract })
       return await contract.getInstance()
     }

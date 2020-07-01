@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict'
 const assert = require('chai').assert
+const BN = require('bn.js')
 const { cx } = require('../src/cx')
 const { proxy1Cx } = require('../src/proxy1')
 const { Map } = require('immutable')
@@ -9,11 +10,11 @@ const { wallet } = require('demo-keys')
 
 const tradeSymbol       = process.argv[2]
 const senderNoteHash    = process.argv[3]
-const amount            = process.argv[4]
+const amount            = new BN(process.argv[4])
 const transfererIndex   = process.argv[5] || 4 
 const senderIndex       = process.argv[6] || 4 
 const receiverIndex     = process.argv[7] || 2 
-const transferAll       = process.argv[8]
+const transferAll       = Boolean(process.argv[8])
 const cxName            = process.argv[9] || 'cx'
 
 console.log(`tradeSymbol ${tradeSymbol}`)
@@ -33,17 +34,19 @@ if (!senderNoteHash || !tradeSymbol) { console.log( `Usage: ${process.argv.slice
 const _cx = (cxName === 'cx') ? cx : ((cxName === 'proxy1') ? proxy1Cx : null)
 
 _cx(Map({
-  tradeSymbol       : tradeSymbol,
-  senderAddress     : parsed[`TEST_ADDRESS_${senderIndex}`],
-  senderPassword    : parsed[`TEST_PASSWORD_${senderIndex}`],
-  senderPublicKey   : parsed[`TEST_PUBLIC_KEY_${senderIndex}`],
-  senderNoteHash    : senderNoteHash,
+  unlabeled : Map({
+    tradeSymbol       : tradeSymbol,
+    senderAddress     : parsed[`TEST_ADDRESS_${senderIndex}`],
+    senderPassword    : parsed[`TEST_PASSWORD_${senderIndex}`],
+    senderPublicKey   : parsed[`TEST_PUBLIC_KEY_${senderIndex}`],
+    senderNoteHash    : senderNoteHash,
+    receiverAddress   : parsed[`TEST_ADDRESS_${receiverIndex}`],
+    receiverPublicKey : parsed[`TEST_PUBLIC_KEY_${receiverIndex}`],
+    transferAmount    : amount,
+    transferAll       : transferAll,
+  }),
   deployerAddress   : parsed[`TEST_ADDRESS_${transfererIndex}`],
   deployerPassword  : parsed[`TEST_PASSWORD_${transfererIndex}`],
-  receiverAddress   : parsed[`TEST_ADDRESS_${receiverIndex}`],
-  receiverPublicKey : parsed[`TEST_PUBLIC_KEY_${receiverIndex}`],
-  transferAmount    : amount,
-  transferAll       : transferAll,
   testValueETH      : '0.15',
   testAccountIndex  : 9,
   unlockSeconds     : 35,

@@ -15,7 +15,8 @@ mined.untilTxMined = async ({ txHash, eth }) => {
     }
     try {
       receipt = await eth.getTransactionReceipt(txHash)
-      if (receipt === null) {
+      
+      if (receipt === null || receipt.status !== '0x1') {
         setTimeout(() => retryFunc(txHash, resolve, reject, retryCount+1), 1000)
       } else {
         resolve(receipt)
