@@ -22,7 +22,6 @@ type DemoCtxStateProps = {
   sending: boolean;
   screenName?: string;
   ZKTokens: Map<string, ZkToken>;
-  current: number;
   demo: Demo | null;
   transactions: TransactionLog[];
 };
@@ -30,12 +29,12 @@ type DemoCtxStateProps = {
 const initial_state: DemoCtxStateProps = {
 	demo: null,
 	sending: false,
-	current: 0,
 	recipients,
 	transactions,
 	screenName: "",
 	ZKTokens: Map(),
 }
+
 
 const DemoCtx = React.createContext(null);
 const storeCtx = React.createContext(initial_state);
@@ -46,6 +45,9 @@ const reducer = (state: DemoCtxStateProps, action: any) : DemoCtxStateProps => {
 		case "INITIALIZED":
 			return { ...state, ...action.payload }
 
+		case 'SENDING':
+			return { ...state, sending: action.payload }
+
 		case 'SET_DEMO':
 			return { ...state, demo: action.payload }
 	}
@@ -55,7 +57,6 @@ const reducer = (state: DemoCtxStateProps, action: any) : DemoCtxStateProps => {
 
 export const useDemo = () : {
 	sendTo: Function;
-	allowEdit: Function;
 } => {
   const dispatch = useDispatch();
   const { setStage } = useStage();
@@ -79,11 +80,7 @@ export const useDemo = () : {
     }, 3000);
   };
 
-  const allowEdit = (tradeSymbol: string) => () => {
-  	dispatch({ type: 'SENDING', payload: tradeSymbol })
-  }
-
-  return { sendTo, allowEdit };
+  return { sendTo };
 };
 
 export const useInitDemo = () => {

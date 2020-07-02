@@ -1,6 +1,6 @@
 import React from "react";
 
-// import Header from "../components/Header";
+import Header from "../components/Header";
 import Card from "../components/Card";
 import Recipient from "../components/ZKRecipient";
 import TransactionLog from "../components/TransactionLog";
@@ -10,13 +10,15 @@ import { TokenGroup } from "../components/TokenGroup";
 import Preloader from "../components/Preloader";
 import { TokenAddressToNotesMap } from "../libs/types";
 import { List } from "immutable";
-import { useDemo, useStore } from "../hooks/useDemo";
 import { useStage } from "../hooks/useStage";
+import { useDemo, useStore } from "../hooks/useDemo";
+import { useOnlyActive } from "../hooks/useOnlyActive";
 
 const MakeTransaction = () => {
-  const { ZKTokens: tokens, current, recipients, sending } = useStore();
+  const { sendTo } = useDemo();
   const { isStage, setStage } = useStage();
-  const { sendTo, allowEdit } = useDemo();
+  const { current, setCurrent, isCurrent } = useOnlyActive()
+  const { ZKTokens: tokens, recipients, sending } = useStore();
   const fakePairs: [string, string, number, number][] = [
     // ["RBT", "#AF1500", 200, 200],
     // ["AAAA", "#AF9E00", 300, 400],
@@ -28,6 +30,7 @@ const MakeTransaction = () => {
 
   return (
     <main className="flex flex-col justify-center gradient-bg min-h-screen">
+      <Header />
       <figure className="flex flex-col justify-center items-center">
         <span
           className="w-12 h-12 bg-primary block"
@@ -50,8 +53,8 @@ const MakeTransaction = () => {
             <TokenGroup
               name="Private ZK Tokens - ERC1724"
               tokenList={List(tokens.entries())}
-              locked={(tradeSymbol: any) => tradeSymbol !== current}
-              allowEdit={allowEdit}
+              locked={(key: string) => !isCurrent(key)}
+              allowEdit={(e: string) => () => setCurrent(e)}
               onSend={() => setStage(2)}
             />
 
@@ -59,8 +62,8 @@ const MakeTransaction = () => {
               name="Standard Tokens - ERC20"
               tokenList={List(fakePairs)}
               notes={List([])}
-              locked={(tradeSymbol: any) => tradeSymbol !== current}
-              allowEdit={allowEdit}
+              locked={(key: string) => !isCurrent(key)}
+              allowEdit={(e: string) => () => setCurrent(e)}
               onSend={() => setStage(2)}
             />
           </Card>
