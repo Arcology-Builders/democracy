@@ -1,11 +1,10 @@
 import React from 'react';
+import { useStore } from '../hooks/useDemo'
 
-type HeaderProps = {
-    thisAddress: string;
-    screenName: string;
-}
-
-const Header = ({ thisAddress, screenName }: HeaderProps) => {
+const Header = () => {
+	const { demo, screenName } = useStore();
+	const thisAddress = demo?.thisAddress 
+	
     return (
       <header className="bg-white w-100 flex justify-between items-center shadow p-5">
         <div className="user-info flex items-center flex-1" style={{ left: 0 }}>

@@ -1,6 +1,6 @@
 import React from "react";
 import Card from "./Card";
-import { useDemo } from "../hooks/useDemo";
+import { useStore } from "../hooks/useDemo";
 import { useStage } from "../hooks/useStage";
 import { TransactionLog as LogType } from "../libs/types";
 import {
@@ -13,7 +13,7 @@ import {
 
 export const TransactionLog = (props: any) => {
   const { isStage } = useStage();
-  const { transactions } = useDemo();
+  const { transactions } = useStore();
 
   return (
     <Card

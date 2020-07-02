@@ -32,6 +32,7 @@ export type Demo = {
       }>;
     };
   };
+  clientInit(): Promise<void>;
 };
 
 export interface Note extends Map<string, any> {

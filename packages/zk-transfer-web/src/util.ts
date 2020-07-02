@@ -4,7 +4,7 @@ import screenNameGenerator from "docker-names";
 export const setScreenName = (screenName: string, chainId: string) =>
   localStorage.setItem(`demo/${chainId}/thisScreenName`, screenName);
 
-export const getScreenName = (chainId: string) =>
+export const getScreenName = (chainId: string) : (string | null) =>
   localStorage.getItem(`demo/${chainId}/thisScreenName`);
 
 export const getPassword = (chainId: string) =>
