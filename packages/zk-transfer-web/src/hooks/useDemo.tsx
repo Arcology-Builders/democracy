@@ -36,7 +36,6 @@ const initial_state: DemoCtxStateProps = {
 }
 
 
-const DemoCtx = React.createContext(null);
 const storeCtx = React.createContext(initial_state);
 const dispatchCtx = React.createContext((a: dispatchProp) => {});
 
@@ -117,7 +116,7 @@ export const useInitDemo = () => {
 		    console.groupEnd();
 		  }).catch((err: Error) => console.error('Initialization Failed.', err))
 		}
-	})
+	}, [demo, dispatch, getScreenNameOrCreateNew, initialized])
 }
 
 export const Provider = ({ value, children }: { children: any, value: DemoCtxStateProps }) => {
@@ -125,7 +124,7 @@ export const Provider = ({ value, children }: { children: any, value: DemoCtxSta
 
 	React.useEffect(() => {
 		dispatch({ type: 'SET_DEMO', payload: value })
-	}, [])
+	}, [value])
 
 	return (
 		<dispatchCtx.Provider value={dispatch}>

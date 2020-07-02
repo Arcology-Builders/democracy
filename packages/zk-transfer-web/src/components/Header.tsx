@@ -18,7 +18,7 @@ const Header = () => {
 			<img src="/assets/avatar.png" alt="avatar" className="w-10 h-10 mr-4"/>
             <ul className="flex color3 text-sm">
 				<li className="flex hidden items-center">
-					<img src="/assets/retweet.png" className="icons" />
+					<img src="/assets/retweet.png" alt="retweet" className="icons" />
 					<p className="color2">
 					  <span
 					    className="color3 text-xs cursor-pointer hover:underline"

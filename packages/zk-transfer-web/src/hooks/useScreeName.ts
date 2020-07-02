@@ -1,4 +1,3 @@
-import React from 'react'
 import { generateScreenName, getScreenName, setScreenName } from "../util";
 
 export const useScreenName = () => {

@@ -8,7 +8,6 @@ import TransactionLog from "../components/TransactionLog";
 import { TokenGroup } from "../components/TokenGroup";
 // import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
-import { TokenAddressToNotesMap } from "../libs/types";
 import { List } from "immutable";
 import { useStage } from "../hooks/useStage";
 import { useDemo, useStore } from "../hooks/useDemo";
@@ -17,7 +16,7 @@ import { useOnlyActive } from "../hooks/useOnlyActive";
 const MakeTransaction = () => {
   const { sendTo } = useDemo();
   const { isStage, setStage } = useStage();
-  const { current, setCurrent, isCurrent } = useOnlyActive()
+  const { setCurrent, isCurrent } = useOnlyActive()
   const { ZKTokens: tokens, recipients, sending } = useStore();
   const fakePairs: [string, string, number, number][] = [
     // ["RBT", "#AF1500", 200, 200],
