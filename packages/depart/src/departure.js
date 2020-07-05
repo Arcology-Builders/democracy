@@ -122,7 +122,9 @@ departs.departTransform = createTransformFromMap({
       const _options = Map({ from: deployerAddress, gas: getConfig()['GAS_LIMIT'] })
         .merge(options).toJS()
       const txHash = await method(...argList, _options)
-      return await untilTxMined({ txHash, eth: deployerEth })
+      const txResult =  await untilTxMined({ txHash, eth: deployerEth })
+      LOGGER.debug('Tx mined result', txResult)
+      return txResult
     }
 
     const getCompiles = () => {

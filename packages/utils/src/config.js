@@ -97,8 +97,8 @@ const ENVIRONMENTS = {
     'dbURL'  : getEnvVar( 'RINKEBY.DB_URL'  ) || 'https://rinkeby.arcology.nyc:8547',
     'ethURL' : getEnvVar( 'RINKEBY.ETH_URL' ) || `https://rinkeby.infura.io/v3/${infuraProjectId}`,
     'shhURL' : getEnvVar( 'RINKEBY.SHH_URL' ) || SHH_IP,
-    'gp'     : 5,
-    'gl'     : '670000',
+    'gp'     : getEnvVar( 'RINKEBY.GAS_PRICE') || 5,
+    'gl'     : getEnvVar( 'RINKEBY.GAS_LIMIT') || '670000',
     'db'     : 'rinkeby',
     'lo'     : getEnvVar( 'RINKEBY.LOG_OUT' ),
     'll'     : configs.parseLogLevels(getEnvVar( 'RINKEBY.LOG_LEVELS' )) ||
@@ -110,8 +110,8 @@ const ENVIRONMENTS = {
     'dbURL'  : getEnvVar( 'GOERLI.DB_URL'  ) || 'https://goerli.arcology.nyc:8547',
     'ethURL' : getEnvVar( 'GOERLI.ETH_URL' ) || `https://goerli.infura.io/v3/${infuraProjectId}`,
     'shhURL' : getEnvVar( 'GOERLI.SHH_URL' ) || SHH_IP,
-    'gp'     : 5,
-    'gl'     : '670000',
+    'gp'     : getEnvVar( 'GOERLI.GAS_PRICE') || 5,
+    'gl'     : getEnvVar( 'GOERLI.GAS_LIMIT') || '670000',
     'db'     : 'goerli',
     'lo'     : getEnvVar( 'GOERLI.LOG_OUT' ),
     'll'     : configs.parseLogLevels(getEnvVar( 'GOERLI.LOG_LEVELS' )) ||
@@ -123,8 +123,8 @@ const ENVIRONMENTS = {
     'dbURL'  : getEnvVar( 'MAINNET.DB_URL'  ) || 'https://mainnet.arcology.nyc:8545',
     'ethURL' : getEnvVar( 'MAINNET.ETH_URL' ) || `https://mainnet.infura.io/v3/${infuraProjectId}`,
     'shhURL' : getEnvVar( 'MAINNET.SHH_URL' ) || SHH_IP,
-    'gp'     : 5,
-    'gl'     : '670000',
+    'gp'     : getEnvVar( 'MAINNET.GAS_PRICE') || 5,
+    'gl'     : getEnvVar( 'MAINNET.GAS_LIMIT') || '670000',
     'db'     : 'mainnet',
     'lo'     : getEnvVar( 'MAINNET.LOG_OUT' ),
     'll'     : configs.parseLogLevels(getEnvVar( 'MAINNET.LOG_LEVELS' )) ||
