@@ -12,7 +12,7 @@ import * as Imm from 'immutable'
 // Currently returns an error string or empty argect
 // In the future, it could explicitly return a value or other information.
 export type Result = {error?: string}
-export type BooleanArgCheckerFunc = (arg: any) => Boolean
+type BooleanArgCheckerFunc = (arg: any) => boolean
 export type ArgCheckerFunc = (arg: any) => {error?: string}
 
 type ArgCheckerBase = {
@@ -116,7 +116,7 @@ export const isHexPrefixed = (arg: any, length?: number, prefixed: boolean=true)
   return Imm.List(arg.slice(2)).reduce(allHexChars, {})
 }
 
-const contractCheckerFunc = (arg: any) =>  
+const contractCheckerFunc: BooleanArgCheckerFunc = (arg: any) =>
   Boolean(arg && isDeploy(arg.deploy) && arg.deployerEth['prepareSignerEth'])
 
 const contractInstanceCheckerFunc = (arg: any) =>

@@ -24,7 +24,7 @@
   ],
   "include": [
     "./index.ts",
-    "src"
+    "src",
     "tests"
   ]
 }

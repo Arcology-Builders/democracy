@@ -23,7 +23,9 @@
   },
   "scripts": {
     "build:doc": "jsdoc -c .jsdoc.json --verbose",
-    "cov": "nyc.js mocha tests/"
+    "cov": "nyc.js mocha tests/",
+    "lint": "exit 0",
+    "lint:fix": "eslint --fix -c ../../.eslintrc.json *.js tests/*.js src/*.js"
   },
   "homepage": "https://github.com/invisible-college/democracy#readme"
 }
