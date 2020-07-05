@@ -316,10 +316,10 @@ wallet.shutdownSync = () => {
  */
 wallet.pay = async ({signerEth, payAll, weiValue, fromAddress, toAddress, overage, label}) => {
   const checksumAddress = toChecksumAddress(fromAddress)
-  if (!signerEth) { throw new Error(`No signer created for address ${fromAddress}`) }
+  if (!signerEth) { throw new Error(`No signer created for address ${checksumAddress}`) }
   return wallet.payTest({
     eth: signerEth,
-    fromAddress,
+    fromAddress: checksumAddress,
     payAll,
     toAddress,
     weiValue,
