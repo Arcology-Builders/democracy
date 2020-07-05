@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 'use strict'
-const { mint }      = require('../src/mint')
-const { Map }       = require('immutable')
-const BN            = require('bn.js')
-const { wallet }    = require('demo-keys')
-const { getConfig } = require('demo-utils')
-const { toWeit }    = require('web3-utils')
+const { mint }   = require('../src/mint')
+const { Map }    = require('immutable')
+const BN         = require('bn.js')
+const { wallet } = require('demo-keys')
+const { getConfig, getNetwork } = require('demo-utils')
+const { toWei }  = require('web3-utils')
 
 const { CommandLineClient } = require('darkchat')
 
@@ -25,6 +25,8 @@ class DarkBotClient extends CommandLineClient {
     this.client.connect(this.port, this.host, ()=>{
       console.log(`Client connected to: ${this.host}:${this.port}`)
     })
+
+    this.eth = await getNetwork()
 
     return new Promise((resolve, reject) => {
       this.client.on('connect', resolve);
@@ -61,9 +63,11 @@ c.addMessageListener(async (_data) => {
     const requestNum = this.requests
     this.requests += 1
     const tokens = data.msg.split(' ')
-    const balance = 
+    const payeeAddress = tokens[1]
+    const balance = new BN(await c.eth.getBalance(payeeAddress))
     const result = await topUpFromMessage({
-      payeeAddress    : tokens[1],
+      balance,
+      payeeAddress,
     })
     const { txHash } = result.toJS() 
     c.client.write(JSON.stringify({
@@ -100,8 +104,11 @@ const mintFromMessage = async ({
   return result
 }
 
+const PAY_AMOUNT = new BN(toWei('0.1', 'ether'))
+
 const topUpFromMessage = async ({
-  payeeAddress
+  payeeAddress,
+  balance,
 }) => {
   console.log(`Address   : ${minteeAddress}`)
   console.log(`Public Key: ${minteePublicKey}`)
@@ -109,9 +116,6 @@ const topUpFromMessage = async ({
   const config = getConfig()
   const deployerAddress = config['DEPLOYER_ADDRESS']
   const deployerPassword = config['DEPLOYER_PASSWORD']
-
-  const balance = new BN(await eth.getBalance(payeeAddress))
-  const limit = new BN(toWei('0.1', 'ether'))
 
   if (balance.lt(limit)) {
 
@@ -127,16 +131,19 @@ const topUpFromMessage = async ({
       minteePublicKey  : minteePublicKey,
       fromAddress  : deployerAddress,
       toAddress : payeeAddress,
-      payAmount : PAY_AMOUNT
+      payAmount : PAY_AMOUNT,
       deployerPassword : deployerPassword,
       minteeAmount     : mintAmount || new BN(0),
       mintFromZero     : mintFromZero,
     })
 
-  console.log('minteeNoteHash', result.get('minteeNoteHash'))
-  console.log('Minting complete.')
-  wallet.shutdownSync()
-  return result
+    console.log('minteeNoteHash', result.get('minteeNoteHash'))
+    console.log('Minting complete.')
+    wallet.shutdownSync()
+    return result
+  } else {
+    return Map({})
+  }
 }
 
 const main = async () => {
