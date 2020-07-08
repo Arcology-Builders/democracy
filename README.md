@@ -38,7 +38,7 @@ You can perform all the following commands at a Unix terminal or in a [VS Code](
 
 Clone our git repo locally
 ```
-git clone https://github.com:invisible-college/democracy
+git clone https://github.com/invisible-college/democracy
 ```
 
 You'll need Node.js v11 or later and the Yarn package manager. Democracy.js is developed with `v11.14.0`.
@@ -50,7 +50,22 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
 . ~/.nvm/nvm.sh
 nvm install v11.14.0
 curl -o- -L https://yarnpkg.com/install.sh | bash
+```
+
+Here the `yarn` script updated the path in your shell config file, probably `~/.bashrc`, with a line like
+```
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+```
+
+You can source it, or log out and log in again, and then find `yarn` in your path.
+```
+. ~/.bashrc
 yarn global add lerna
+```
+
+Also add `postcss` if you plan to build any of the React app projects.
+```
+yarn global add postcss
 ```
 
 We manage a monorepo of multiple packages with `lerna`.
