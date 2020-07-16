@@ -1,11 +1,4 @@
 import React from "react";
-// import { Map } from "immutable";
-import Democracy from "../components/context/Democracy";
-// import {
-//   FAKE_RECEIVER_ADDRESS,
-//   FAKE_RECEIVER_PUBLIC_KEY,
-// } from "../libs/constants";
-// import { doCX } from "../libs/txHelpers";
 import { useStage } from "./useStage";
 import { TransactionLog } from "../libs/types";
 
@@ -48,8 +41,7 @@ const transactions: TransactionLog[] = [
   },
 ];
 
-type Demo = {
-  demo: any;
+type Payload = {
   sendTo: Function;
   allowEdit: Function;
   recipients: User[];
@@ -60,9 +52,8 @@ type Demo = {
   transactions: TransactionLog[];
 };
 
-export const useDemo = (): Demo => {
+export const useTransaction = (): Payload => {
   const { setStage } = useStage();
-  const demo: any = React.useContext(Democracy);
 
   const [state, setState]: [any, Function] = React.useState({
     current: null,
@@ -97,5 +88,5 @@ export const useDemo = (): Demo => {
     [state]
   );
 
-  return { recipients, transactions, state, sendTo, allowEdit, demo };
+  return { recipients, transactions, state, sendTo, allowEdit };
 };

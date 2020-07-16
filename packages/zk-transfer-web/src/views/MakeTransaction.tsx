@@ -10,11 +10,12 @@ import { TokenGroup } from "../components/TokenGroup";
 import Preloader from "../components/Preloader";
 import { List } from "immutable";
 import { useStage } from "../hooks/useStage";
-import { useDemo, useStore } from "../hooks/useDemo";
 import { useOnlyActive } from "../hooks/useOnlyActive";
+import { useStore } from "../hooks/useDemo";
+import { useTransaction } from "../hooks/useTransaction";
 
 const MakeTransaction = () => {
-  const { sendTo } = useDemo();
+  const { sendTo } = useTransaction();
   const { isStage, setStage } = useStage();
   const { setCurrent, isCurrent } = useOnlyActive()
   const { ZKTokens: tokens, recipients, sending } = useStore();
