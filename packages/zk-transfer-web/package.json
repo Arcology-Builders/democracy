@@ -1,5 +1,5 @@
 {
-  "name": "zero-knowledge",
+  "name": "zk-transfer-web",
   "version": "0.5.3",
   "private": true,
   "dependencies": {
@@ -20,11 +20,11 @@
     "@types/jest": "24.0.15",
     "@types/react": "16.8.21",
     "@types/react-dom": "16.8.4",
-    "typescript": "3.5.2",
     "@types/react-redux": "7.1.1",
     "@types/react-router-dom": "4.3.4",
     "autoprefixer": "9.8.4",
-    "postcss-cli": "7.1.1"
+    "postcss-cli": "7.1.1",
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,7 +33,7 @@
     "eject": "react-scripts eject",
     "build:css": "postcss src/styles/tailwind.css -o src/styles/app.css",
     "watch:css": "postcss src/styles/tailwind.css -o src/styles/app.css -w",
-    "build": "npm run build:css && react-scripts build",
+    "build": "yarn run build:css && react-scripts build",
     "lint": "eslint --fix -c ../../.eslintrc.json .",
     "lint:fix": "eslint --fix -c ../../.eslintrc.json ."
   },
@@ -51,7 +51,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
   }
 }
