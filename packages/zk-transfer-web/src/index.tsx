@@ -3,12 +3,13 @@ import ReactDOM from "react-dom";
 import "./styles/app.css";
 import App from "./App";
 import Offline from "./components/Offline";
+import { Provider } from './hooks/useDemo';
 import * as serviceWorker from "./serviceWorker";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const { demo }: any = window;
 
-  const Component = demo ? <App demo={demo} /> : <Offline />;
+  const Component = demo ? <Provider value={demo}> <App /> </Provider>: <Offline />;
 
   ReactDOM.render(Component, document.getElementById("root"));
 });

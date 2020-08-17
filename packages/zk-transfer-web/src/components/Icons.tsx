@@ -125,9 +125,9 @@ export const TxFailedIcon = () => {
       <path
         d="M9 21L21 9M21 21L9 9"
         stroke="#FF9E9E"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

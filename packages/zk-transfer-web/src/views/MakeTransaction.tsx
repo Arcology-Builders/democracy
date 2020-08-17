@@ -1,6 +1,6 @@
 import React from "react";
 
-// import Header from "../components/Header";
+import Header from "../components/Header";
 import Card from "../components/Card";
 import Recipient from "../components/ZKRecipient";
 import TransactionLog from "../components/TransactionLog";
@@ -8,19 +8,17 @@ import TransactionLog from "../components/TransactionLog";
 import { TokenGroup } from "../components/TokenGroup";
 // import StaticContent from "../components/StaticContent";
 import Preloader from "../components/Preloader";
-import { TokenAddressToNotesMap } from "../libs/types";
 import { List } from "immutable";
-import { useDemo } from "../hooks/useDemo";
 import { useStage } from "../hooks/useStage";
+import { useOnlyActive } from "../hooks/useOnlyActive";
+import { useStore } from "../hooks/useDemo";
+import { useTransaction } from "../hooks/useTransaction";
 
-type TransactionProps = {
-  screenName: string;
-  tokens: TokenAddressToNotesMap;
-};
-
-const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
+const MakeTransaction = () => {
+  const { sendTo } = useTransaction();
   const { isStage, setStage } = useStage();
-  const { recipients, state, sendTo, allowEdit } = useDemo();
+  const { setCurrent, isCurrent } = useOnlyActive()
+  const { ZKTokens: tokens, recipients, sending } = useStore();
   const fakePairs: [string, string, number, number][] = [
     // ["RBT", "#AF1500", 200, 200],
     // ["AAAA", "#AF9E00", 300, 400],
@@ -32,6 +30,7 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
 
   return (
     <main className="flex flex-col justify-center gradient-bg min-h-screen">
+      <Header />
       <figure className="flex flex-col justify-center items-center">
         <span
           className="w-12 h-12 bg-primary block"
@@ -54,8 +53,8 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
             <TokenGroup
               name="Private ZK Tokens - ERC1724"
               tokenList={List(tokens.entries())}
-              locked={(tradeSymbol: any) => tradeSymbol !== state.current}
-              allowEdit={allowEdit}
+              locked={(key: string) => !isCurrent(key)}
+              allowEdit={(e: string) => () => setCurrent(e)}
               onSend={() => setStage(2)}
             />
 
@@ -63,8 +62,8 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
               name="Standard Tokens - ERC20"
               tokenList={List(fakePairs)}
               notes={List([])}
-              locked={(tradeSymbol: any) => tradeSymbol !== state.current}
-              allowEdit={allowEdit}
+              locked={(key: string) => !isCurrent(key)}
+              allowEdit={(e: string) => () => setCurrent(e)}
               onSend={() => setStage(2)}
             />
           </Card>
@@ -88,7 +87,7 @@ const MakeTransaction = ({ screenName, tokens }: TransactionProps) => {
               </div>
               <div
                 className={
-                  (state.sending ? "translate-y-0" : "translate-y-56") +
+                  (sending ? "translate-y-0" : "translate-y-56") +
                   ` flex items-center transition-all transform duration-1000 ease-out 
                     pt-4 pb-5 bg-_1 absolute bottom-0 left-0 right-0
                   `
