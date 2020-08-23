@@ -19,6 +19,13 @@ const client = sdk.createClient({
 })
 
 /*
+// Uncomment to print out all public rooms including their IDs
+client.publicRooms(function(err, data) {
+    console.log("Public Rooms: %s", JSON.stringify(data));
+  });
+*/
+
+/*
 // Uncomment this to find the access token if you've forgotten it
 const client = sdk.createClient("https://cryptogoth.arcology.nyc");
 client.login("m.login.password", {"user": "zk/0xd1e3E7825e0451EF12F9063Eb597ed2b62e543Ae", "password": "guest"}).then((response) => {
@@ -47,3 +54,20 @@ rooms.forEach(room => {
     console.log(room.roomId);
 });
 
+// @invisible-college/zk-transfer-web
+ROOM_ID="!qpyrmBDlPNgMcOdaYk:matrix.org"
+
+var content = {
+    "body": "Hello World",
+    "msgtype": "m.text"
+};
+
+const main = async () => {
+
+    await client.joinRoom(ROOM_ID)
+    console.log("Auto-joined channel #invisible-college/zk-transfer-web")
+    
+    await client.sendEvent(ROOM_ID, "m.room.message", content, "")
+}
+
+main()
