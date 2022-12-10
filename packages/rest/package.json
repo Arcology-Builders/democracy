@@ -41,7 +41,7 @@
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "demo-utils": "^0.5.3",
-    "express": "4.16.4",
+    "express": "4.17.3",
     "immutable": "4.0.0-rc.12",
     "solc": "^0.6.2"
   },
