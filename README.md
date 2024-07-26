@@ -7,8 +7,6 @@ democracy
 
 Minimalist tools for coordinating decentralized and private computation, currently on Ethereum.
 
-[Create a Democracy wallet now](https://zk-transfer.netlify.com)
-
 Our first major integration is with the AZTEC Protocol, to enable trading of zero-knowledge assets.
 
 [![npm version](https://badge.fury.io/js/democracy.js.svg)](https://badge.fury.io/js/democracy.js)
